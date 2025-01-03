@@ -16,54 +16,21 @@ import com.tencent.supersonic.chat.server.plugin.build.webservice.WebServiceQuer
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.JoinCondition;
 import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.AppModule;
-import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
-import com.tencent.supersonic.common.pojo.enums.StatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
-import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
-import com.tencent.supersonic.headless.api.pojo.Dimension;
-import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.api.pojo.Field;
-import com.tencent.supersonic.headless.api.pojo.FieldParam;
-import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MeasureParam;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByFieldParams;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
-import com.tencent.supersonic.headless.api.pojo.MetricParam;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
-import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
-import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
-import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
-import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.request.TermReq;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
+import com.tencent.supersonic.headless.api.pojo.request.*;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -86,15 +53,14 @@ public class S2VisitsDemo extends S2BaseDemo {
 
             // create metrics and dimensions
             DimensionResp departmentDimension = getDimension("department", userModel);
-            MetricResp metricUv = addMetric_uv(pvUvModel, departmentDimension);
             MetricResp metricPv = getMetric("pv", pvUvModel);
-            addMetric_pv_avg(metricPv, metricUv, departmentDimension, pvUvModel);
 
             DimensionResp pageDimension = getDimension("page", stayTimeModel);
             updateDimension(stayTimeModel, pageDimension);
             DimensionResp userDimension = getDimension("user_name", userModel);
             updateMetric(stayTimeModel, departmentDimension, userDimension);
             updateMetric_pv(pvUvModel, departmentDimension, userDimension, metricPv);
+            addMetric_uv(pvUvModel, departmentDimension);
 
             // create dict conf for dimensions
             enableDimensionValue(departmentDimension);
@@ -115,8 +81,8 @@ public class S2VisitsDemo extends S2BaseDemo {
             // create agent
             Integer agentId = addAgent(s2DataSet.getId());
             addSampleChats(agentId);
-            updateQueryScore(1);
-            updateQueryScore(4);
+            updateQueryScore(1L);
+            updateQueryScore(4L);
         } catch (Exception e) {
             log.error("Failed to add S2Visits demo data", e);
         }
@@ -341,10 +307,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setDescription("停留时长");
         metricReq.setClassifications(Collections.singletonList("核心指标"));
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
-        metricTypeParams.setExpr("s2_stay_time_statis_stay_hours");
-        List<MeasureParam> measures = new ArrayList<>();
-        MeasureParam measure = new MeasureParam("s2_stay_time_statis_stay_hours", "",
-                AggOperatorEnum.SUM.getOperator());
+        metricTypeParams.setExpr("stay_hours");
+        List<Measure> measures = new ArrayList<>();
+        Measure measure = new Measure("停留时长", "stay_hours", AggOperatorEnum.SUM.getOperator(), 0);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
@@ -363,10 +328,9 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setBizName("pv");
         metricReq.setDescription("一段时间内用户的访问次数");
         MetricDefineByMeasureParams metricTypeParams = new MetricDefineByMeasureParams();
-        metricTypeParams.setExpr("s2_pv_uv_statis_pv");
-        List<MeasureParam> measures = new ArrayList<>();
-        MeasureParam measure =
-                new MeasureParam("s2_pv_uv_statis_pv", "", AggOperatorEnum.SUM.getOperator());
+        metricTypeParams.setExpr("pv");
+        List<Measure> measures = new ArrayList<>();
+        Measure measure = new Measure("访问次数", "pv", AggOperatorEnum.SUM.getOperator(), 0);
         measures.add(measure);
         metricTypeParams.setMeasures(measures);
         metricReq.setMetricDefineByMeasureParams(metricTypeParams);
@@ -392,31 +356,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricTypeParams.setFields(fieldParams);
         metricReq.setMetricDefineByFieldParams(metricTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.FIELD);
-        metricReq.setRelateDimension(
-                getRelateDimension(Lists.newArrayList(departmentDimension.getId())));
-        return metricService.createMetric(metricReq, defaultUser);
-    }
-
-    private MetricResp addMetric_pv_avg(MetricResp metricPv, MetricResp metricUv,
-            DimensionResp departmentDimension, ModelResp pvModel) throws Exception {
-        MetricReq metricReq = new MetricReq();
-        metricReq.setModelId(pvModel.getId());
-        metricReq.setName("人均访问次数");
-        metricReq.setBizName("pv_avg");
-        metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
-        metricReq.setDescription("每个用户平均访问的次数");
-        metricReq.setClassifications(Collections.singletonList("核心指标"));
-        metricReq.setAlias("平均访问次数");
-        MetricDefineByMetricParams metricTypeParams = new MetricDefineByMetricParams();
-        metricTypeParams.setExpr("pv/uv");
-        List<MetricParam> metrics = new ArrayList<>();
-        MetricParam pv = new MetricParam(metricPv.getId(), metricPv.getBizName());
-        MetricParam uv = new MetricParam(metricUv.getId(), metricUv.getBizName());
-        metrics.add(pv);
-        metrics.add(uv);
-        metricTypeParams.setMetrics(metrics);
-        metricReq.setMetricDefineByMetricParams(metricTypeParams);
-        metricReq.setMetricDefineType(MetricDefineType.METRIC);
         metricReq.setRelateDimension(
                 getRelateDimension(Lists.newArrayList(departmentDimension.getId())));
         return metricService.createMetric(metricReq, defaultUser);

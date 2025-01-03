@@ -1,14 +1,8 @@
 package com.tencent.supersonic.headless.chat.corrector;
 
-import com.tencent.supersonic.common.jsqlparser.AggregateEnum;
-import com.tencent.supersonic.common.jsqlparser.FieldExpression;
-import com.tencent.supersonic.common.jsqlparser.SqlAsHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.jsqlparser.*;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -21,11 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /** Perform schema corrections on the Schema information in S2SQL. */
@@ -144,8 +134,6 @@ public class SchemaCorrector extends BaseSemanticCorrector {
 
         Set<String> removeFieldNames = whereExpressionList.stream()
                 .filter(fieldExpression -> StringUtils.isBlank(fieldExpression.getFunction()))
-                .filter(fieldExpression -> !TimeDimensionEnum
-                        .containsTimeDimension(fieldExpression.getFieldName()))
                 .filter(fieldExpression -> FilterOperatorEnum.EQUALS.getValue()
                         .equals(fieldExpression.getOperator()))
                 .filter(fieldExpression -> dimensions.contains(fieldExpression.getFieldName()))

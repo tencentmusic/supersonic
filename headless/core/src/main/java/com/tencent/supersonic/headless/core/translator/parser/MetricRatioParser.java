@@ -7,11 +7,11 @@ import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.pojo.StructQuery;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -60,8 +60,9 @@ public class MetricRatioParser implements QueryParser {
 
     @Override
     public void parse(QueryStatement queryStatement) throws Exception {
-        Database database = queryStatement.getOntology().getDatabase();
-        generateRatioSql(queryStatement, database.getType(), database.getVersion());
+        DatabaseResp database = queryStatement.getOntology().getDatabase();
+        generateRatioSql(queryStatement, queryStatement.getOntology().getDatabaseType(),
+                database.getVersion());
     }
 
     /** Ratio */

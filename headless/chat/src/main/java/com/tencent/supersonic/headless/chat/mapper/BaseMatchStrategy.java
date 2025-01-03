@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
-import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
@@ -9,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -17,13 +17,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Slf4j
 public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStrategy<T> {
 
     @Autowired
-    protected ThreadPoolConfig threadPoolConfig;
+    @Qualifier("mapExecutor")
+    private ThreadPoolExecutor executor;
 
     @Override
     public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
@@ -72,12 +74,16 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
 
     protected void executeTasks(List<Callable<Void>> tasks) {
         try {
-            threadPoolConfig.getMapExecutor().invokeAll(tasks);
-        } catch (InterruptedException e) {
+            executor.invokeAll(tasks);
+            for (Callable<Void> future : tasks) {
+                future.call();
+            }
+        } catch (Exception e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Task execution interrupted", e);
         }
     }
+
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {
         if (MapModeEnum.STRICT.equals(mapModeEnum)) {
             return 1.0d;

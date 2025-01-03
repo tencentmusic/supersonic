@@ -17,6 +17,8 @@ public class ChatMemoryFilter {
 
     private Integer agentId;
 
+    private Long queryId;
+
     private String question;
 
     private List<String> questions;

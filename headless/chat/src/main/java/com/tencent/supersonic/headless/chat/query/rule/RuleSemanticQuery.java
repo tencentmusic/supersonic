@@ -4,18 +4,8 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
-import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
-import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.query.BaseSemanticQuery;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -25,13 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.api.pojo.SchemaElementType.TERM;
@@ -233,8 +218,6 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
     protected void convertBizNameToName(DataSetSchema dataSetSchema,
             QueryStructReq queryStructReq) {
         Map<String, String> bizNameToName = dataSetSchema.getBizNameToName();
-        bizNameToName.putAll(TimeDimensionEnum.getNameToNameMap());
-
         List<Order> orders = queryStructReq.getOrders();
         if (CollectionUtils.isNotEmpty(orders)) {
             for (Order order : orders) {

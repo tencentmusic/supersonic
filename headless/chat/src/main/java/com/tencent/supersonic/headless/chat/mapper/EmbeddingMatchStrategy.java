@@ -1,7 +1,6 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
 import com.tencent.supersonic.headless.chat.knowledge.MetaEmbeddingService;
@@ -38,12 +37,10 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
 
     @Autowired
     private MetaEmbeddingService metaEmbeddingService;
-    @Autowired
-    protected ThreadPoolConfig threadPoolConfig;
 
     @Override
     public List<EmbeddingResult> detectByBatch(ChatQueryContext chatQueryContext,
-                                               Set<Long> detectDataSetIds, Set<String> detectSegments) {
+            Set<Long> detectDataSetIds, Set<String> detectSegments) {
         Set<EmbeddingResult> results = ConcurrentHashMap.newKeySet();
         int embeddingMapperBatch = Integer
                 .valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
@@ -65,7 +62,7 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
     }
 
     private Callable<Void> createTask(ChatQueryContext chatQueryContext, Set<Long> detectDataSetIds,
-                                      List<String> queryTextsSub, Set<EmbeddingResult> results) {
+            List<String> queryTextsSub, Set<EmbeddingResult> results) {
         return () -> {
             List<EmbeddingResult> oneRoundResults =
                     detectByQueryTextsSub(detectDataSetIds, queryTextsSub, chatQueryContext);
@@ -77,7 +74,7 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
     }
 
     private List<EmbeddingResult> detectByQueryTextsSub(Set<Long> detectDataSetIds,
-                                                        List<String> queryTextsSub, ChatQueryContext chatQueryContext) {
+            List<String> queryTextsSub, ChatQueryContext chatQueryContext) {
         Map<Long, List<Long>> modelIdToDataSetIds = chatQueryContext.getModelIdToDataSetIds();
         double threshold =
                 Double.valueOf(mapperConfig.getParameterValue(EMBEDDING_MAPPER_THRESHOLD));

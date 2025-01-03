@@ -79,6 +79,7 @@ public class DataUtils {
         dateInfo.setPeriod(period);
         dateInfo.setStartDate(startDate);
         dateInfo.setEndDate(endDate);
+        dateInfo.setDateField("imp_date");
         return dateInfo;
     }
 

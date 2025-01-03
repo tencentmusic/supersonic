@@ -402,3 +402,7 @@ alter table s2_agent add column `viewer` varchar(1000) COLLATE utf8_unicode_ci D
 --20241201
 ALTER TABLE s2_query_stat_info RENAME COLUMN `user` TO `query_user`;
 ALTER TABLE s2_chat_context RENAME COLUMN `user` TO `query_user`;
+
+--20241226
+ALTER TABLE s2_chat_memory add column `query_id` BIGINT DEFAULT NULL;
+ALTER TABLE s2_query_stat_info RENAME COLUMN `sql` TO `query_sql`;

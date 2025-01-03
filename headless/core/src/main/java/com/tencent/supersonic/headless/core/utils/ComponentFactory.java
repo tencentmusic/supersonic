@@ -54,7 +54,7 @@ public class ComponentFactory {
         return queryAccelerators;
     }
 
-    public static List<QueryParser> getQueryParser() {
+    public static List<QueryParser> getQueryParsers() {
         if (queryParsers.isEmpty()) {
             initQueryParsers();
         }

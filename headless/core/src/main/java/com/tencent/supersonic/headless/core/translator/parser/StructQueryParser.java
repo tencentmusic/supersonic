@@ -4,11 +4,10 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.ColumnOrder;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.pojo.Database;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.pojo.StructQuery;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,8 +36,8 @@ public class StructQueryParser implements QueryParser {
                 sqlGenerateUtils.getSelect(structQuery), dsTable,
                 sqlGenerateUtils.getGroupBy(structQuery), sqlGenerateUtils.getOrderBy(structQuery),
                 sqlGenerateUtils.getLimit(structQuery));
-        Database database = queryStatement.getOntology().getDatabase();
-        if (!sqlGenerateUtils.isSupportWith(database.getType(), database.getVersion())) {
+        if (!sqlGenerateUtils.isSupportWith(queryStatement.getOntology().getDatabaseType(),
+                queryStatement.getOntology().getDatabaseVersion())) {
             sqlParam.setSupportWith(false);
             sql = String.format("select %s from %s t0 %s %s %s",
                     sqlGenerateUtils.getSelect(structQuery), dsTable,

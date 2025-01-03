@@ -8,6 +8,7 @@ body:
       value: |
         ## Ask a Question about SuperSonic
         Please provide a detailed description of your question or the clarification you seek regarding the SuperSonic project.
+
   - type: textarea
     id: describe-question
     attributes:
@@ -16,6 +17,7 @@ body:
       placeholder: "Type your question here..."
     validations:
       required: true
+
   - type: input
     id: organization
     attributes:

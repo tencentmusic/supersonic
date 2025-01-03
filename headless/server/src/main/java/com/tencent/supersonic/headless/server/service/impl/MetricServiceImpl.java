@@ -385,8 +385,8 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 return true;
             }
         } else if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
-            List<MeasureParam> measures = metricResp.getMetricDefineByMeasureParams().getMeasures();
-            List<String> fieldNameDepended = measures.stream().map(MeasureParam::getBizName)
+            List<Measure> measures = metricResp.getMetricDefineByMeasureParams().getMeasures();
+            List<String> fieldNameDepended = measures.stream().map(Measure::getBizName)
                     // measure bizName = model bizName_fieldName
                     .map(name -> name.replaceFirst(metricResp.getModelBizName() + "_", ""))
                     .collect(Collectors.toList());
@@ -679,12 +679,11 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         }
         // Measure define will get from first measure
         List<Measure> measures = modelResp.getModelDetail().getMeasures();
-        List<MeasureParam> measureParams =
-                metricResp.getMetricDefineByMeasureParams().getMeasures();
+        List<Measure> measureParams = metricResp.getMetricDefineByMeasureParams().getMeasures();
         if (CollectionUtils.isEmpty(measureParams)) {
             return "";
         }
-        MeasureParam firstMeasure = measureParams.get(0);
+        Measure firstMeasure = measureParams.get(0);
 
         for (Measure measure : measures) {
             if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
@@ -727,7 +726,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         QueryStructReq queryStructReq = new QueryStructReq();
         DateConf dateInfo = queryMetricReq.getDateInfo();
         if (Objects.nonNull(dateInfo) && dateInfo.isGroupByDate()) {
-            queryStructReq.getGroups().add(dateInfo.getGroupByTimeDimension());
+            queryStructReq.getGroups().add(dateInfo.getDateField());
         }
         if (!CollectionUtils.isEmpty(dimensionBizNames)) {
             queryStructReq.getGroups().addAll(dimensionBizNames);

@@ -1,10 +1,10 @@
 package com.tencent.supersonic.headless.core.translator.parser;
 
+import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.RuntimeOptions;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.SqlBuilder;
-import com.tencent.supersonic.headless.core.pojo.Ontology;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
