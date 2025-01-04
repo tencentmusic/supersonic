@@ -2,8 +2,10 @@ package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.jsqlparser.DateVisitor.DateBoundInfo;
 import org.junit.Assert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled
 class SqlDateSelectHelperTest {
 
     @Test

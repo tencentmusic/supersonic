@@ -65,4 +65,5 @@ public class SemanticSchemaResp {
         }
         return names;
     }
+
 }

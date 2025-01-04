@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.*;
@@ -30,6 +31,7 @@ import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import lombok.SneakyThrows;
@@ -52,6 +54,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final DataSetService dataSetService;
     private final SchemaService schemaService;
     private final SemanticTranslator semanticTranslator;
+    private final MetricDrillDownChecker metricDrillDownChecker;
     private final KnowledgeBaseService knowledgeBaseService;
     private final MetricService metricService;
     private final DimensionService dimensionService;
@@ -61,6 +64,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     public S2SemanticLayerService(StatUtils statUtils, QueryUtils queryUtils,
             SemanticSchemaManager semanticSchemaManager, DataSetService dataSetService,
             SchemaService schemaService, SemanticTranslator semanticTranslator,
+            MetricDrillDownChecker metricDrillDownChecker,
             KnowledgeBaseService knowledgeBaseService, MetricService metricService,
             DimensionService dimensionService) {
         this.statUtils = statUtils;
@@ -69,6 +73,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.dataSetService = dataSetService;
         this.schemaService = schemaService;
         this.semanticTranslator = semanticTranslator;
+        this.metricDrillDownChecker = metricDrillDownChecker;
         this.knowledgeBaseService = knowledgeBaseService;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -114,6 +119,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
             // 3 translate query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
             semanticTranslator.translate(queryStatement);
+
+            // Check whether the dimensions of the metric drill-down are correct temporarily,
+            // add the abstraction of a validator later.
+            metricDrillDownChecker.checkQuery(queryStatement);
 
             // 4.execute query
             SemanticQueryResp queryResp = null;
@@ -198,6 +207,14 @@ public class S2SemanticLayerService implements SemanticLayerService {
         ModelResp modelResp = modelResps.get(0);
         String sql = String.format("select distinct %s from %s where 1=1", dimensionResp.getName(),
                 modelResp.getName());
+        List<Dimension> timeDims = modelResp.getTimeDimension();
+        if (CollectionUtils.isNotEmpty(timeDims)) {
+            sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
+                    queryDimValueReq.getDateInfo().getDateField(),
+                    queryDimValueReq.getDateInfo().getStartDate(),
+                    queryDimValueReq.getDateInfo().getDateField(),
+                    queryDimValueReq.getDateInfo().getEndDate());
+        }
         if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
             sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"
                     + queryDimValueReq.getValue() + "%'";
@@ -269,10 +286,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo())
                 && StringUtils.isNotBlank(semanticQueryReq.getSqlInfo().getQuerySQL())) {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
-            queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
-            queryStatement.setDataSetName(semanticQueryReq.getDataSetName());
             queryStatement.setIsTranslated(true);
         }
+        queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
+        queryStatement.setDataSetName(semanticQueryReq.getDataSetName());
         return queryStatement;
     }
 

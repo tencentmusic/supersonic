@@ -220,8 +220,9 @@ public class SqlUtils {
         }
 
         public SqlUtils build() {
-            DatabaseResp database = DatabaseResp.builder().name(this.name).type(this.type)
-                    .url(this.jdbcUrl).username(this.username).password(this.password).build();
+            DatabaseResp database = DatabaseResp.builder().name(this.name)
+                    .type(this.type.toUpperCase()).url(this.jdbcUrl).username(this.username)
+                    .password(this.password).build();
 
             SqlUtils sqlUtils = new SqlUtils(database);
             sqlUtils.jdbcDataSource = this.jdbcDataSource;

@@ -26,14 +26,14 @@ public class SchemaBuilder {
     public static final String MATERIALIZATION_SYS_FIELD_DATE = "C1";
     public static final String MATERIALIZATION_SYS_FIELD_DATA = "C2";
 
-    public static SqlValidatorScope getScope(S2CalciteSchema schema) throws Exception {
+    public static SqlValidatorScope getScope(S2CalciteSchema schema) {
         Map<String, RelDataType> nameToTypeMap = new HashMap<>();
         CalciteSchema rootSchema = CalciteSchema.createRootSchema(true, false);
         rootSchema.add(schema.getSchemaKey(), schema);
         Prepare.CatalogReader catalogReader = new CalciteCatalogReader(rootSchema,
                 Collections.singletonList(schema.getSchemaKey()), Configuration.typeFactory,
                 Configuration.config);
-        EngineType engineType = schema.getOntology().getDatabaseType();
+        EngineType engineType = EngineType.fromString(schema.getOntology().getDatabase().getType());
         S2SQLSqlValidatorImpl s2SQLSqlValidator =
                 new S2SQLSqlValidatorImpl(Configuration.operatorTable, catalogReader,
                         Configuration.typeFactory, Configuration.getValidatorConfig(engineType));

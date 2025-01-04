@@ -1,10 +1,11 @@
 package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
+import com.tencent.supersonic.headless.core.translator.parser.RuntimeOptions;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.calcite.schema.Schema;
@@ -29,15 +30,15 @@ public class S2CalciteSchema extends AbstractSchema {
         return this;
     }
 
-    public Map<String, DataModel> getDataModels() {
-        return ontology.getDataModelMap();
+    public Map<String, ModelResp> getDataModels() {
+        return ontology.getModelMap();
     }
 
-    public List<Metric> getMetrics() {
+    public List<MetricSchemaResp> getMetrics() {
         return ontology.getMetrics();
     }
 
-    public Map<String, List<Dimension>> getDimensions() {
+    public Map<String, List<DimSchemaResp>> getDimensions() {
         return ontology.getDimensionMap();
     }
 

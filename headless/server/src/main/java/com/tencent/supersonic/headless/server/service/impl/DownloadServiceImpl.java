@@ -240,7 +240,7 @@ public class DownloadServiceImpl implements DownloadService {
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setGroups(dimensionResps.stream().map(DimensionResp::getBizName)
                 .collect(Collectors.toList()));
-        queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
+        queryStructReq.getGroups().add(0, dateConf.getDateField());
         Aggregator aggregator = new Aggregator();
         aggregator.setColumn(metricResp.getBizName());
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
@@ -248,10 +248,6 @@ public class DownloadServiceImpl implements DownloadService {
         queryStructReq.setModelIds(modelIds);
         queryStructReq.setLimit(downloadLimit);
         return queryStructReq;
-    }
-
-    private String getTimeDimension(DateConf dateConf) {
-        return dateConf.getDateField();
     }
 
     private Map<String, List<MetricResp>> getMetricMap(List<MetricResp> metricResps) {

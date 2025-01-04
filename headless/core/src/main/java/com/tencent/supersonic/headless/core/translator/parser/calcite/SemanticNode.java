@@ -1,12 +1,10 @@
-package com.tencent.supersonic.headless.core.translator.parser.calcite.node;
+package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.calcite.SemanticSqlDialect;
 import com.tencent.supersonic.common.calcite.SqlDialectFactory;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.FilterToGroupScanRule;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
+import com.tencent.supersonic.headless.core.translator.parser.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.hep.HepPlanner;

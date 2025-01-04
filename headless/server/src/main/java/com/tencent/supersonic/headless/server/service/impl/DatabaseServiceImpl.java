@@ -190,7 +190,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     private SemanticQueryResp queryWithColumns(String sql, DatabaseResp database) {
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         SqlUtils sqlUtils = this.sqlUtils.init(database);
-        log.info("query SQL: {}", sql);
+        log.info("query SQL: {}", StringUtils.normalizeSpace(sql));
         sqlUtils.queryInternal(sql, queryResultWithColumns);
         return queryResultWithColumns;
     }

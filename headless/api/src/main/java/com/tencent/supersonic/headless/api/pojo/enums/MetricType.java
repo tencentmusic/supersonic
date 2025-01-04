@@ -18,11 +18,6 @@ public enum MetricType {
         return null;
     }
 
-    public static Boolean isDerived(String src) {
-        MetricType metricType = of(src);
-        return Objects.nonNull(metricType) && metricType.equals(DERIVED);
-    }
-
     public static Boolean isDerived(MetricDefineType metricDefineType,
             MetricDefineByMeasureParams typeParams) {
         if (MetricDefineType.METRIC.equals(metricDefineType)) {

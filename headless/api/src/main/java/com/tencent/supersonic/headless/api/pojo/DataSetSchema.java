@@ -89,12 +89,7 @@ public class DataSetSchema implements Serializable {
     }
 
     public SchemaElement getPartitionDimension() {
-        for (SchemaElement dimension : dimensions) {
-            if (dimension.isPartitionTime()) {
-                return dimension;
-            }
-        }
-        return null;
+        return dimensions.stream().filter(SchemaElement::isPartitionTime).findFirst().orElse(null);
     }
 
     public SchemaElement getPrimaryKey() {

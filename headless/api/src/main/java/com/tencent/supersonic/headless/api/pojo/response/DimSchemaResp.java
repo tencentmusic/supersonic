@@ -22,5 +22,4 @@ public class DimSchemaResp extends DimensionResp {
     public int hashCode() {
         return super.hashCode();
     }
-
 }
