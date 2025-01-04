@@ -66,7 +66,7 @@ public class QueryUtils {
 
     private void processColumn(QueryColumn column, Map<String, String> namePair,
             Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap) {
-        String nameEn = getName(column.getNameEn().toLowerCase());
+        String nameEn = getName(column.getNameEn());
         if (nameEn.contains(JOIN_UNDERLINE)) {
             nameEn = nameEn.split(JOIN_UNDERLINE)[1];
         }
