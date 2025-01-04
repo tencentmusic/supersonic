@@ -15,15 +15,12 @@ public class CoreComponentFactory extends ComponentFactory {
 
     private static List<SemanticModeller> semanticModellers = new ArrayList<>();
 
-    public static List<SemanticModeller> getSemanticModellers() {
-        if (semanticModellers.isEmpty()) {
-            initSemanticModellers();
-        }
-        return semanticModellers;
+    static {
+        init(SemanticModeller.class, semanticModellers);
     }
 
-    private static void initSemanticModellers() {
-        init(SemanticModeller.class, semanticModellers);
+    public static List<SemanticModeller> getSemanticModellers() {
+        return semanticModellers;
     }
 
 }

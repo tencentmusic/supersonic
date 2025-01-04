@@ -30,7 +30,6 @@ import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
 import lombok.SneakyThrows;
@@ -53,7 +52,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final DataSetService dataSetService;
     private final SchemaService schemaService;
     private final SemanticTranslator semanticTranslator;
-    private final MetricDrillDownChecker metricDrillDownChecker;
     private final KnowledgeBaseService knowledgeBaseService;
     private final MetricService metricService;
     private final DimensionService dimensionService;
@@ -63,7 +61,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
     public S2SemanticLayerService(StatUtils statUtils, QueryUtils queryUtils,
             SemanticSchemaManager semanticSchemaManager, DataSetService dataSetService,
             SchemaService schemaService, SemanticTranslator semanticTranslator,
-            MetricDrillDownChecker metricDrillDownChecker,
             KnowledgeBaseService knowledgeBaseService, MetricService metricService,
             DimensionService dimensionService) {
         this.statUtils = statUtils;
@@ -72,7 +69,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.dataSetService = dataSetService;
         this.schemaService = schemaService;
         this.semanticTranslator = semanticTranslator;
-        this.metricDrillDownChecker = metricDrillDownChecker;
         this.knowledgeBaseService = knowledgeBaseService;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
@@ -118,10 +114,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
             // 3 translate query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
             semanticTranslator.translate(queryStatement);
-
-            // Check whether the dimensions of the metric drill-down are correct temporarily,
-            // add the abstraction of a validator later.
-            metricDrillDownChecker.checkQuery(queryStatement);
 
             // 4.execute query
             SemanticQueryResp queryResp = null;
