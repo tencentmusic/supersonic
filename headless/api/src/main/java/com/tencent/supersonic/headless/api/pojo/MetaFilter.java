@@ -34,6 +34,8 @@ public class MetaFilter {
 
     private List<String> names;
 
+    private List<String> bizNames;
+
     private List<String> fieldsDepend;
 
     private Integer isTag;

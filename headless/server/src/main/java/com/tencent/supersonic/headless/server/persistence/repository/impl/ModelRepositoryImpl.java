@@ -54,6 +54,12 @@ public class ModelRepositoryImpl implements ModelRepository {
         if (!CollectionUtils.isEmpty(modelFilter.getModelIds())) {
             wrapper.lambda().in(ModelDO::getId, modelFilter.getModelIds());
         }
+        if (!CollectionUtils.isEmpty(modelFilter.getNames())) {
+            wrapper.lambda().in(ModelDO::getName, modelFilter.getNames());
+        }
+        if (!CollectionUtils.isEmpty(modelFilter.getBizNames())) {
+            wrapper.lambda().in(ModelDO::getBizName, modelFilter.getBizNames());
+        }
         if (modelFilter.getIncludesDetail() != null && !modelFilter.getIncludesDetail()) {
             wrapper.select(ModelDO.class, modelDO -> !modelDO.getColumn().equals("model_detail"));
         }
