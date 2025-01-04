@@ -14,6 +14,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
@@ -280,7 +281,9 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     private void fillCnt(List<DataSetSchemaResp> dataSetSchemaResps, List<ItemUseResp> statInfos) {
-
+        if (CollectionUtils.isEmpty(statInfos)) {
+            return;
+        }
         Map<String, ItemUseResp> typeIdAndStatPair = statInfos.stream()
                 .collect(Collectors.toMap(
                         itemUseInfo -> itemUseInfo.getType() + AT_SYMBOL + AT_SYMBOL
@@ -296,38 +299,39 @@ public class SchemaServiceImpl implements SchemaService {
     private void fillMetricCnt(DataSetSchemaResp dataSetSchemaResp,
             Map<String, ItemUseResp> typeIdAndStatPair) {
         List<MetricSchemaResp> metrics = dataSetSchemaResp.getMetrics();
-        if (CollectionUtils.isEmpty(dataSetSchemaResp.getMetrics())) {
+        if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-
-        if (!CollectionUtils.isEmpty(metrics)) {
-            metrics.stream().forEach(metric -> {
-                String key = TypeEnums.METRIC.name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
-                        + metric.getBizName();
-                if (typeIdAndStatPair.containsKey(key)) {
-                    metric.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
-                }
-            });
-        }
+        metrics.forEach(metric -> {
+            metric.setUseCnt(getItemCnt(metric, typeIdAndStatPair));
+        });
         dataSetSchemaResp.setMetrics(metrics);
     }
 
     private void fillDimCnt(DataSetSchemaResp dataSetSchemaResp,
             Map<String, ItemUseResp> typeIdAndStatPair) {
         List<DimSchemaResp> dimensions = dataSetSchemaResp.getDimensions();
-        if (CollectionUtils.isEmpty(dataSetSchemaResp.getDimensions())) {
+        if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        if (!CollectionUtils.isEmpty(dimensions)) {
-            dimensions.stream().forEach(dim -> {
-                String key = TypeEnums.DIMENSION.name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
-                        + dim.getBizName();
-                if (typeIdAndStatPair.containsKey(key)) {
-                    dim.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
-                }
-            });
-        }
+        dimensions.forEach(dim -> {
+            dim.setUseCnt(getItemCnt(dim, typeIdAndStatPair));
+        });
         dataSetSchemaResp.setDimensions(dimensions);
+    }
+
+    private Long getItemCnt(SchemaItem schemaItem, Map<String, ItemUseResp> typeIdAndStatPair) {
+        String bizNameKey = schemaItem.getTypeEnum().name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
+                + schemaItem.getBizName();
+        String nameKey = schemaItem.getTypeEnum().name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
+                + schemaItem.getName();
+        if (typeIdAndStatPair.containsKey(bizNameKey)) {
+            return typeIdAndStatPair.get(bizNameKey).getUseCnt();
+        }
+        if (typeIdAndStatPair.containsKey(nameKey)) {
+            return typeIdAndStatPair.get(nameKey).getUseCnt();
+        }
+        return 0L;
     }
 
     @Override
@@ -469,7 +473,7 @@ public class SchemaServiceImpl implements SchemaService {
         List<Long> dataSetIds = dataSetSchemaResps.stream().map(DataSetSchemaResp::getId)
                 .collect(Collectors.toList());
         ItemUseReq itemUseReq = new ItemUseReq();
-        itemUseReq.setModelIds(dataSetIds);
+        itemUseReq.setDataSetIds(dataSetIds);
 
         List<ItemUseResp> statInfos = getStatInfo(itemUseReq);
         log.debug("statInfos:{}", statInfos);
