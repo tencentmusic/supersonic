@@ -1,12 +1,16 @@
 package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class MetaFilter {
 
