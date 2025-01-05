@@ -111,4 +111,18 @@ public class TranslatorTest extends BaseTest {
         executeSql(explain.getQuerySQL());
     }
 
+    @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
+    public void testSql_subquery() throws Exception {
+        String sql = new String(
+                Files.readAllBytes(
+                        Paths.get(ClassLoader.getSystemResource("sql/testSubquery.sql").toURI())),
+                StandardCharsets.UTF_8);
+        SemanticTranslateResp explain = semanticLayerService
+                .translate(QueryReqBuilder.buildS2SQLReq(sql, dataSetId), User.getDefaultUser());
+        assertNotNull(explain);
+        assertNotNull(explain.getQuerySQL());
+        executeSql(explain.getQuerySQL());
+    }
+
 }

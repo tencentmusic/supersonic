@@ -347,6 +347,7 @@ public class SchemaServiceImpl implements SchemaService {
             DataSetSchemaResp dataSetSchemaResp =
                     fetchDataSetSchema(schemaFilterReq.getDataSetId());
             BeanUtils.copyProperties(dataSetSchemaResp, semanticSchemaResp);
+            semanticSchemaResp.setDataSetResp(dataSetSchemaResp);
             List<Long> modelIds = dataSetSchemaResp.getAllModels();
             MetaFilter metaFilter = new MetaFilter();
             metaFilter.setIds(modelIds);

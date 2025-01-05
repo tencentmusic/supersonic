@@ -627,7 +627,8 @@ public class SqlReplaceHelper {
         return expr;
     }
 
-    public static String replaceSqlByExpression(String sql, Map<String, String> replace) {
+    public static String replaceSqlByExpression(String tableName, String sql,
+            Map<String, String> replace) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         List<PlainSelect> plainSelectList = new ArrayList<>();
         if (selectStatement instanceof PlainSelect) {
@@ -636,9 +637,8 @@ public class SqlReplaceHelper {
                 selectStatement.getWithItemsList().forEach(withItem -> {
                     plainSelectList.add(withItem.getSelect().getPlainSelect());
                 });
-            } else {
-                plainSelectList.add((PlainSelect) selectStatement);
             }
+            plainSelectList.add((PlainSelect) selectStatement);
         } else if (selectStatement instanceof SetOperationList) {
             SetOperationList setOperationList = (SetOperationList) selectStatement;
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
@@ -672,9 +672,12 @@ public class SqlReplaceHelper {
 
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
         for (PlainSelect plainSelect : plainSelects) {
-            replacePlainSelectByExpr(plainSelect, replace);
-            if (SqlSelectHelper.hasAggregateFunction(plainSelect)) {
-                SqlSelectHelper.addMissingGroupby(plainSelect);
+            Table table = (Table) plainSelect.getFromItem();
+            if (table.getName().equals(tableName)) {
+                replacePlainSelectByExpr(plainSelect, replace);
+                if (SqlSelectHelper.hasAggregateFunction(plainSelect)) {
+                    SqlSelectHelper.addMissingGroupby(plainSelect);
+                }
             }
         }
         return selectStatement.toString();
