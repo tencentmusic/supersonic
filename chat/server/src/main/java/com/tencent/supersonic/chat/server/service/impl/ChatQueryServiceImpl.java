@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.pojo.enums.JsqlParserType;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
@@ -257,10 +258,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             DataSetSchema dataSetSchema) {
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
-
-        if (shouldCallReplaceFiltersTest(correctorSql)) {
+        JsqlParserType jsqlParserType = checkJsqlParserType(correctorSql);
+        if (jsqlParserType != JsqlParserType.COMMON) {
             log.info("校验sql结构存在子查询，使用replaceFiltersTest解析sql");
-            correctorSql = replaceFiltersTest(queryData, parseInfo, dataSetSchema);
+            correctorSql = replaceFiltersByJsqlParserType(queryData, parseInfo, dataSetSchema,jsqlParserType);
             return correctorSql;
         }
         log.info("校验sql结构不存在子查询，使用replaceFilters解析sql");
@@ -298,26 +299,35 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return correctorSql;
     }
 
-    private String replaceFiltersTest(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema) {
+    private String replaceFiltersByJsqlParserType(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
+            DataSetSchema dataSetSchema, JsqlParserType jsqlParserType) {
+
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
 
         Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
         PlainSelect plainSelect = (PlainSelect) selectStatement;
 
-        Select fromItemSelect = plainSelect.getFromItem(ParenthesedSelect.class).getSelect();
-        log.info("fromItemSelect is:{}", fromItemSelect);
-
-        List<Join> joins = plainSelect.getJoins();
-        FromItem fromItem = joins.get(0).getFromItem();
-        ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
-        Select JoinItemSelect = parenthesedSelect.getSelect();
-        log.info("JoinItemSelect is:{}", JoinItemSelect);
-
         ArrayList<Select> selectArrayList = new ArrayList<>();
-        selectArrayList.add(fromItemSelect);
-        selectArrayList.add(JoinItemSelect);
+        if (jsqlParserType == JsqlParserType.WITH){
+            List<WithItem> withItemsList = plainSelect.getWithItemsList();
+            selectArrayList.addAll(SqlSelectHelper.getWithItem(selectStatement));
+        }else {
+
+            Select fromItemSelect = plainSelect.getFromItem(ParenthesedSelect.class).getSelect();
+            log.info("fromItemSelect is:{}", fromItemSelect);
+
+            List<Join> joins = plainSelect.getJoins();
+            FromItem fromItem = joins.get(0).getFromItem();
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
+            Select JoinItemSelect = parenthesedSelect.getSelect();
+            log.info("JoinItemSelect is:{}", JoinItemSelect);
+
+
+            selectArrayList.add(fromItemSelect);
+            selectArrayList.add(JoinItemSelect);
+        }
+
         List<String> modifiedSubQueries = new ArrayList<>();
         selectArrayList.forEach(select -> {
             String selectSql = select.toString();
@@ -361,12 +371,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             modifiedSubQueries.add(selectSql);
         });
 
-        correctorSql = rebuildCorrectorSql(correctorSql, modifiedSubQueries);
+        correctorSql = rebuildCorrectorSql(correctorSql, modifiedSubQueries, jsqlParserType);
         log.info("correctorSql after replacing:{}", correctorSql);
         return correctorSql;
     }
 
-    private boolean shouldCallReplaceFiltersTest(String correctorSql) {
+    private JsqlParserType checkJsqlParserType(String correctorSql) {
         Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
         if (!(selectStatement instanceof PlainSelect)) {
             throw new IllegalArgumentException("修正S2SQL的结构有误！");
@@ -377,45 +387,83 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         FromItem fromItem = plainSelect.getFromItem();
         List<Join> joins = plainSelect.getJoins();
         Expression where = plainSelect.getWhere();
+        List<WithItem> withItemsList = plainSelect.getWithItemsList();
 
-        if (fromItem != null && joins != null && !joins.isEmpty() && where == null) {
-            log.info("fromItem和joins不为null，where为null，返回true。");
-            return true;
+        if (Objects.nonNull(withItemsList) && withItemsList.size() >= 2){
+            return JsqlParserType.WITH;
         }
-        return false;
+        if (withItemsList == null && fromItem != null && joins != null && !joins.isEmpty() && where == null) {
+            log.info("fromItem和joins不为null，where为null，返回true。");
+            return JsqlParserType.SELECT;
+        }
+        return JsqlParserType.COMMON;
     }
 
-    private String rebuildCorrectorSql(String correctorSql, List<String> modifiedSubQueries) {
+    private String rebuildCorrectorSql(String correctorSql, List<String> modifiedSubQueries, JsqlParserType jsqlParserType) {
         Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
         if (!(selectStatement instanceof PlainSelect)) {
             throw new IllegalArgumentException("修正S2SQL的结构有误！");
         }
 
-        PlainSelect plainSelect = (PlainSelect) selectStatement;
-
-        ParenthesedSelect fromItem = (ParenthesedSelect) plainSelect.getFromItem();
-        Select fromItemSelect = fromItem.getSelect();
-
-        String modifiedT1 = modifiedSubQueries.get(0);
-        Select modifiedFromItemSelect = SqlSelectHelper.getSelect(modifiedT1);
-        fromItem.setSelect(modifiedFromItemSelect);
-
-        List<Join> joins = plainSelect.getJoins();
-        if (joins == null || joins.isEmpty()) {
-            throw new IllegalArgumentException("No JOIN found in correctorSql");
+        if (jsqlParserType == JsqlParserType.WITH) {
+            // 针对 WITH 的 SQL 重建逻辑
+            log.info("Detected WITH clause in correctorSql, rebuilding WITH structure...");
+            rebuildWithClause(selectStatement, modifiedSubQueries);
+        } else {
+            // 普通 SELECT 的 SQL 重建逻辑
+            log.info("Detected standard SELECT structure, rebuilding...");
+            rebuildSelectClause(selectStatement, modifiedSubQueries);
         }
-
-        Join join = joins.get(0);
-        ParenthesedSelect joinFromItem = (ParenthesedSelect) join.getRightItem();
-
-        String modifiedT2 = modifiedSubQueries.get(1);
-        Select modifiedJoinItemSelect = SqlSelectHelper.getSelect(modifiedT2);
-        joinFromItem.setSelect(modifiedJoinItemSelect);
 
         String finalSql = selectStatement.toString();
         log.info("Rebuilt correctorSql: {}", finalSql);
 
         return finalSql;
+    }
+
+    private void rebuildWithClause(Select selectStatement, List<String> modifiedSubQueries) {
+        List<WithItem> withItemsList = selectStatement.getWithItemsList();
+        if (withItemsList == null || withItemsList.size() != modifiedSubQueries.size()) {
+            throw new IllegalArgumentException("WITH 子查询数量与修改后的子查询数量不匹配！");
+        }
+
+        for (int i = 0; i < withItemsList.size(); i++) {
+            WithItem withItem = withItemsList.get(i);
+            String modifiedSubQuery = modifiedSubQueries.get(i);
+
+            // 使用修改后的 SQL 替换 WITH 子查询
+            Select modifiedWithSelect = SqlSelectHelper.getSelect(modifiedSubQuery);
+            withItem.setSelect(modifiedWithSelect);
+        }
+    }
+    private void rebuildSelectClause(Select selectStatement, List<String> modifiedSubQueries) {
+        if (!(selectStatement instanceof PlainSelect)) {
+            throw new IllegalArgumentException("SELECT 结构有误，无法解析！");
+        }
+
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+
+        // 替换 FROM 子查询
+        if (modifiedSubQueries.size() < 1) {
+            throw new IllegalArgumentException("缺少 FROM 子查询！");
+        }
+        ParenthesedSelect fromItem = (ParenthesedSelect) plainSelect.getFromItem();
+        Select fromItemSelect = SqlSelectHelper.getSelect(modifiedSubQueries.get(0));
+        fromItem.setSelect(fromItemSelect);
+
+        // 替换 JOIN 子查询
+        List<Join> joins = plainSelect.getJoins();
+        if (joins != null && !joins.isEmpty()) {
+            for (int i = 0; i < joins.size(); i++) {
+                if (i + 1 >= modifiedSubQueries.size()) {
+                    throw new IllegalArgumentException("JOIN 子查询数量不足！");
+                }
+                Join join = joins.get(i);
+                ParenthesedSelect joinFromItem = (ParenthesedSelect) join.getRightItem();
+                Select joinItemSelect = SqlSelectHelper.getSelect(modifiedSubQueries.get(i + 1));
+                joinFromItem.setSelect(joinItemSelect);
+            }
+        }
     }
 
     private Map<String, String> extractDateRangeFromSql(String sql) {
