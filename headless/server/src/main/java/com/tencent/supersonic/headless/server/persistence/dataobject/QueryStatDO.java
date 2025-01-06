@@ -15,6 +15,7 @@ public class QueryStatDO {
     private String traceId;
     private Long modelId;
     private Long dataSetId;
+    @TableField("query_user")
     private String queryUser;
     private String createdAt;
     /** corresponding type, such as sql, struct, etc */
@@ -27,7 +28,8 @@ public class QueryStatDO {
     private String queryStructCmd;
     @TableField("struct_cmd_md5")
     private String queryStructCmdMd5;
-    private String querySql;
+    @TableField("query_sql")
+    private String sql;
     private String sqlMd5;
     private String queryEngine;
     // private Long startTime;

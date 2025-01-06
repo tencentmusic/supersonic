@@ -11,6 +11,14 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ThreadPoolConfig {
 
+    @Bean("eventExecutor")
+    public ThreadPoolExecutor getTaskEventExecutor() {
+        return new ThreadPoolExecutor(4, 8, 60 * 3, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(1024),
+                new ThreadFactoryBuilder().setNameFormat("supersonic-event-pool-").build(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
+    }
+
     @Bean("commonExecutor")
     public ThreadPoolExecutor getCommonExecutor() {
         return new ThreadPoolExecutor(8, 16, 60 * 3, TimeUnit.SECONDS,

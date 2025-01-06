@@ -30,10 +30,6 @@ public class DataSetResp extends SchemaItem {
 
     private QueryConfig queryConfig = new QueryConfig();
 
-    private List<TagItem> allMetrics = new ArrayList<>();
-
-    private List<TagItem> allDimensions = new ArrayList<>();
-
     public List<Long> metricIds() {
         return getDataSetModelConfigs().stream().map(DataSetModelConfig::getMetrics)
                 .flatMap(Collection::stream).collect(Collectors.toList());

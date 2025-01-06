@@ -6,7 +6,6 @@ import com.tencent.supersonic.headless.core.pojo.Materialization;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteTable;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteTable.Builder;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.SchemaBuilder;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.TimeRange;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.adapter.enumerable.EnumerableRules;
 import org.apache.calcite.config.CalciteConnectionConfigImpl;

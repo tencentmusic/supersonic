@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.RuntimeOptions;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
 import com.tencent.supersonic.headless.core.translator.parser.calcite.SqlBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-/** the calcite parse implements */
+/**
+ * This parser generates inner sql statement for the ontology query, which would be selected by the
+ * parsed sql query.
+ */
 @Component("OntologyQueryParser")
 @Slf4j
 public class OntologyQueryParser implements QueryParser {

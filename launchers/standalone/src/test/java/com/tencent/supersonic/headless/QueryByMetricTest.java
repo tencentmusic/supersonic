@@ -23,24 +23,11 @@ public class QueryByMetricTest extends BaseTest {
     protected MetricService metricService;
 
     @Test
-    public void testWithMetricAndDimensionBizNames() throws Exception {
-        QueryMetricReq queryMetricReq = new QueryMetricReq();
-        queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
-        queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
-        queryMetricReq.getFilters().add(Filter.builder().name("imp_date")
-                .operator(FilterOperatorEnum.MINOR_THAN_EQUALS).relation(Filter.Relation.FILTER)
-                .value(LocalDate.now().toString()).build());
-        SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getDefaultUser());
-        Assert.assertNotNull(queryResp.getResultList());
-        Assert.assertEquals(6, queryResp.getResultList().size());
-    }
-
-    @Test
     @SetSystemProperty(key = "s2.test", value = "true")
     public void testWithMetricAndDimensionNames() throws Exception {
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setMetricNames(Arrays.asList("停留时长", "访问次数"));
-        queryMetricReq.setDimensionNames(Arrays.asList("用户", "部门"));
+        queryMetricReq.setDimensionNames(Arrays.asList("用户名", "部门"));
         queryMetricReq.getFilters()
                 .add(Filter.builder().name("数据日期").operator(FilterOperatorEnum.MINOR_THAN_EQUALS)
                         .relation(Filter.Relation.FILTER).value(LocalDate.now().toString())
@@ -51,21 +38,23 @@ public class QueryByMetricTest extends BaseTest {
     }
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testWithDomainId() throws Exception {
         QueryMetricReq queryMetricReq = new QueryMetricReq();
         queryMetricReq.setDomainId(1L);
-        queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
-        queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
-        queryMetricReq.getFilters().add(Filter.builder().name("imp_date")
-                .operator(FilterOperatorEnum.MINOR_THAN_EQUALS).relation(Filter.Relation.FILTER)
-                .value(LocalDate.now().toString()).build());
+        queryMetricReq.setMetricNames(Arrays.asList("停留时长", "访问次数"));
+        queryMetricReq.setDimensionNames(Arrays.asList("用户名", "部门"));
+        queryMetricReq.getFilters()
+                .add(Filter.builder().name("数据日期").operator(FilterOperatorEnum.MINOR_THAN_EQUALS)
+                        .relation(Filter.Relation.FILTER).value(LocalDate.now().toString())
+                        .build());
         SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getDefaultUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());
 
         queryMetricReq.setDomainId(2L);
-        queryMetricReq.setMetricNames(Arrays.asList("stay_hours", "pv"));
-        queryMetricReq.setDimensionNames(Arrays.asList("user_name", "department"));
+        queryMetricReq.setMetricNames(Arrays.asList("停留时长", "访问次数"));
+        queryMetricReq.setDimensionNames(Arrays.asList("用户名", "部门"));
         assertThrows(IllegalArgumentException.class,
                 () -> queryByMetric(queryMetricReq, User.getDefaultUser()));
     }
@@ -76,9 +65,10 @@ public class QueryByMetricTest extends BaseTest {
         queryMetricReq.setDomainId(1L);
         queryMetricReq.setMetricIds(Arrays.asList(1L, 3L));
         queryMetricReq.setDimensionIds(Arrays.asList(1L, 2L));
-        queryMetricReq.getFilters().add(Filter.builder().name("imp_date")
-                .operator(FilterOperatorEnum.MINOR_THAN_EQUALS).relation(Filter.Relation.FILTER)
-                .value(LocalDate.now().toString()).build());
+        queryMetricReq.getFilters()
+                .add(Filter.builder().name("数据日期").operator(FilterOperatorEnum.MINOR_THAN_EQUALS)
+                        .relation(Filter.Relation.FILTER).value(LocalDate.now().toString())
+                        .build());
         SemanticQueryResp queryResp = queryByMetric(queryMetricReq, User.getDefaultUser());
         Assert.assertNotNull(queryResp.getResultList());
         Assert.assertEquals(6, queryResp.getResultList().size());

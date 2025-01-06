@@ -28,12 +28,13 @@ public class AllFieldMapper extends BaseMapper {
             schemaElements.addAll(entry.getValue().getDimensions());
             schemaElements.addAll(entry.getValue().getMetrics());
 
+            List<SchemaElementMatch> allMatches = Lists.newArrayList();
             for (SchemaElement schemaElement : schemaElements) {
-                chatQueryContext.getMapInfo().getMatchedElements(entry.getKey())
-                        .add(SchemaElementMatch.builder().word(schemaElement.getName())
-                                .element(schemaElement).detectWord(schemaElement.getName())
-                                .similarity(1.0).build());
+                allMatches.add(SchemaElementMatch.builder().word(schemaElement.getName())
+                        .element(schemaElement).detectWord(schemaElement.getName()).similarity(0.1)
+                        .build());
             }
+            chatQueryContext.getMapInfo().setMatchedElements(entry.getKey(), allMatches);
         }
     }
 
