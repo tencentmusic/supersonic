@@ -23,6 +23,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -30,6 +31,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,7 +51,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     private GeneralManageConfig generalManageConfig;
 
     @Autowired
-    private ThreadPoolConfig threadPoolConfig;
+    @Qualifier("chatExecutor")
+    private ThreadPoolExecutor executor;
 
     @Override
     public List<Agent> getAgents(User user, AuthType authType) {
@@ -120,7 +123,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
      * @param agent
      */
     private void executeAgentExamplesAsync(Agent agent) {
-        threadPoolConfig.getChatExecutor().execute(() -> doExecuteAgentExamples(agent));
+        executor.execute(() -> doExecuteAgentExamples(agent));
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {

@@ -7,9 +7,7 @@ import com.tencent.supersonic.common.pojo.Filter;
 import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
-import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
@@ -22,13 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -179,14 +171,7 @@ public class QueryReqBuilder {
         if (Objects.isNull(dateConf)) {
             return "";
         }
-        String dateField = TimeDimensionEnum.DAY.getName();
-        if (DatePeriodEnum.MONTH.equals(dateConf.getPeriod())) {
-            dateField = TimeDimensionEnum.MONTH.getName();
-        }
-        if (DatePeriodEnum.WEEK.equals(dateConf.getPeriod())) {
-            dateField = TimeDimensionEnum.WEEK.getName();
-        }
-        return dateField;
+        return dateConf.getDateField();
     }
 
     public static QueryStructReq buildStructRatioReq(SemanticParseInfo parseInfo,

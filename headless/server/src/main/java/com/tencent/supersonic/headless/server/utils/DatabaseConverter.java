@@ -1,11 +1,9 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -14,15 +12,8 @@ import java.util.Arrays;
 
 public class DatabaseConverter {
 
-    public static Database convert(DatabaseResp databaseResp) {
-        Database database = new Database();
-        BeanUtils.copyProperties(databaseResp, database);
-        database.setType(EngineType.fromString(databaseResp.getType().toUpperCase()));
-        return database;
-    }
-
-    public static Database convert(DatabaseReq databaseReq) {
-        Database database = new Database();
+    public static DatabaseResp convert(DatabaseReq databaseReq) {
+        DatabaseResp database = new DatabaseResp();
         BeanUtils.copyProperties(databaseReq, database);
         return database;
     }
@@ -69,8 +60,7 @@ public class DatabaseConverter {
         return databaseResp;
     }
 
-    public static ConnectInfo getConnectInfo(DatabaseResp databaseResp) {
-        Database database = convert(databaseResp);
+    public static ConnectInfo getConnectInfo(DatabaseResp database) {
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setUserName(database.getUsername());
         connectInfo.setPassword(database.passwordDecrypt());

@@ -13,6 +13,8 @@ public class ItemUseReq {
 
     private String startTime;
     private Long modelId;
+    private Long dataSetId;
+    private List<Long> dataSetIds;
     private List<Long> modelIds;
     private Boolean cacheEnable = true;
     private String metric;

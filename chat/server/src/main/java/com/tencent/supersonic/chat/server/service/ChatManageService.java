@@ -13,7 +13,6 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatParseDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ public interface ChatManageService {
 
     boolean updateChatName(Long chatId, String chatName, String userName);
 
-    boolean updateFeedback(Integer id, Integer score, String feedback);
+    boolean updateFeedback(Long id, Integer score, String feedback);
 
     boolean updateChatIsTop(Long chatId, int isTop);
 

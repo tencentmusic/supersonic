@@ -5,8 +5,8 @@ import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
+import com.tencent.supersonic.headless.core.pojo.*;
 import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
@@ -60,8 +60,8 @@ public class MetricRatioParser implements QueryParser {
 
     @Override
     public void parse(QueryStatement queryStatement) throws Exception {
-        Database database = queryStatement.getOntology().getDatabase();
-        generateRatioSql(queryStatement, database.getType(), database.getVersion());
+        Ontology ontology = queryStatement.getOntology();
+        generateRatioSql(queryStatement, ontology.getDatabaseType(), ontology.getDatabaseVersion());
     }
 
     /** Ratio */
@@ -88,8 +88,8 @@ public class MetricRatioParser implements QueryParser {
         boolean isOver = isOverRatio(structQuery);
         String sql = "";
 
-        SqlQuery dsParam = queryStatement.getSqlQuery();
-        dsParam.setTable(metricTableName);
+        SqlQuery sqlQuery = queryStatement.getSqlQuery();
+        sqlQuery.setTable(metricTableName);
         switch (engineTypeEnum) {
             case H2:
                 sql = new H2EngineSql().sql(structQuery, isOver, true, metricTableName);
@@ -98,19 +98,19 @@ public class MetricRatioParser implements QueryParser {
             case DORIS:
             case CLICKHOUSE:
                 if (!sqlGenerateUtils.isSupportWith(engineTypeEnum, version)) {
-                    dsParam.setSupportWith(false);
+                    sqlQuery.setSupportWith(false);
                 }
                 if (!engineTypeEnum.equals(engineTypeEnum.CLICKHOUSE)) {
-                    sql = new MysqlEngineSql().sql(structQuery, isOver, dsParam.isSupportWith(),
+                    sql = new MysqlEngineSql().sql(structQuery, isOver, sqlQuery.isSupportWith(),
                             metricTableName);
                 } else {
-                    sql = new CkEngineSql().sql(structQuery, isOver, dsParam.isSupportWith(),
+                    sql = new CkEngineSql().sql(structQuery, isOver, sqlQuery.isSupportWith(),
                             metricTableName);
                 }
                 break;
             default:
         }
-        dsParam.setSql(sql);
+        sqlQuery.setSql(sql);
     }
 
     public class H2EngineSql implements EngineSql {
@@ -345,15 +345,8 @@ public class MetricRatioParser implements QueryParser {
         return CollectionUtils.isEmpty(groups) ? aggStr : String.join(",", groups) + "," + aggStr;
     }
 
-    private String getGroupDimWithOutTime(StructQuery structQuery) {
-        String timeDim = getTimeDim(structQuery);
-        return structQuery.getGroups().stream().filter(f -> !f.equalsIgnoreCase(timeDim))
-                .collect(Collectors.joining(","));
-    }
-
     private static String getTimeDim(StructQuery structQuery) {
-        DateModeUtils dateModeUtils = ContextUtils.getContext().getBean(DateModeUtils.class);
-        return dateModeUtils.getSysDateCol(structQuery.getDateInfo());
+        return structQuery.getDateInfo().getDateField();
     }
 
     private static String getLimit(StructQuery structQuery) {
@@ -377,13 +370,6 @@ public class MetricRatioParser implements QueryParser {
             return alias + agg.getColumn();
         }
         return sqlGenerateUtils.getSelectField(agg);
-    }
-
-    private String getGroupBy(StructQuery structQuery) {
-        if (CollectionUtils.isEmpty(structQuery.getGroups())) {
-            return "";
-        }
-        return "group by " + String.join(",", structQuery.getGroups());
     }
 
     private static String getOrderBy(StructQuery structQuery) {

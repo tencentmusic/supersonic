@@ -7,21 +7,8 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.ColumnSchema;
-import com.tencent.supersonic.headless.api.pojo.Dimension;
-import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MeasureParam;
-import com.tencent.supersonic.headless.api.pojo.MetricDefineByMeasureParams;
-import com.tencent.supersonic.headless.api.pojo.ModelDetail;
-import com.tencent.supersonic.headless.api.pojo.ModelSchema;
-import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
-import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
-import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
-import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.ModelDefineType;
-import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.enums.*;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
 import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
@@ -34,19 +21,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        ModelDetail modelDetail = createModelDetail(modelReq);
+        // ModelDetail modelDetail = createModelDetail(modelReq);
+        ModelDetail modelDetail = modelReq.getModelDetail();
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
@@ -125,7 +108,7 @@ public class ModelConverter {
             dimensionReq.setSemanticType(SemanticType.CATEGORY.name());
         }
         dimensionReq.setModelId(modelDO.getId());
-        dimensionReq.setExpr(dim.getBizName());
+        dimensionReq.setExpr(dim.getExpr());
         dimensionReq.setType(dim.getType().name());
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
@@ -136,14 +119,12 @@ public class ModelConverter {
     public static MetricReq convert(Measure measure, ModelDO modelDO) {
         MetricReq metricReq = new MetricReq();
         metricReq.setName(measure.getName());
-        metricReq.setBizName(measure.getExpr());
+        metricReq.setBizName(measure.getBizName());
         metricReq.setDescription(measure.getName());
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
-        exprTypeParams.setExpr(measure.getBizName());
-        MeasureParam measureParam = new MeasureParam();
-        BeanMapper.mapper(measure, measureParam);
-        exprTypeParams.setMeasures(Lists.newArrayList(measureParam));
+        exprTypeParams.setExpr(measure.getExpr());
+        exprTypeParams.setMeasures(Lists.newArrayList(measure));
         metricReq.setMetricDefineByMeasureParams(exprTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         return metricReq;
@@ -183,11 +164,14 @@ public class ModelConverter {
                         getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getAgg().getOperator(), 1);
+                Measure measure = new Measure(columnSchema.getName(),
+                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                        columnSchema.getColumnName(), columnSchema.getAgg().getOperator(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
+                Dimension dim = new Dimension(columnSchema.getName(),
+                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                        columnSchema.getColumnName(),
                         DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);
             }

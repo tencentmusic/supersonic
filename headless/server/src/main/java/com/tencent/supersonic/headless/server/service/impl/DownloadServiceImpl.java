@@ -5,13 +5,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
@@ -35,21 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -257,7 +240,7 @@ public class DownloadServiceImpl implements DownloadService {
         QueryStructReq queryStructReq = new QueryStructReq();
         queryStructReq.setGroups(dimensionResps.stream().map(DimensionResp::getBizName)
                 .collect(Collectors.toList()));
-        queryStructReq.getGroups().add(0, getTimeDimension(dateConf));
+        queryStructReq.getGroups().add(0, dateConf.getDateField());
         Aggregator aggregator = new Aggregator();
         aggregator.setColumn(metricResp.getBizName());
         queryStructReq.setAggregators(Lists.newArrayList(aggregator));
@@ -265,16 +248,6 @@ public class DownloadServiceImpl implements DownloadService {
         queryStructReq.setModelIds(modelIds);
         queryStructReq.setLimit(downloadLimit);
         return queryStructReq;
-    }
-
-    private String getTimeDimension(DateConf dateConf) {
-        if (DatePeriodEnum.MONTH.equals(dateConf.getPeriod())) {
-            return TimeDimensionEnum.MONTH.getName();
-        } else if (DatePeriodEnum.WEEK.equals(dateConf.getPeriod())) {
-            return TimeDimensionEnum.WEEK.getName();
-        } else {
-            return TimeDimensionEnum.DAY.getName();
-        }
     }
 
     private Map<String, List<MetricResp>> getMetricMap(List<MetricResp> metricResps) {

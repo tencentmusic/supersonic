@@ -20,3 +20,4 @@ chm_db/
 __pycache__/
 /dict
 assembly/build/*-SNAPSHOT
+**/node_modules/

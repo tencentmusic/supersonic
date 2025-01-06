@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.server.persistence.mapper.StatMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.StatRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
@@ -82,7 +83,12 @@ public class StatRepositoryImpl implements StatRepository {
         if (Objects.nonNull(itemUseReq.getMetric())) {
             queryWrapper.lambda().like(QueryStatDO::getMetrics, itemUseReq.getMetric());
         }
-
+        if (Objects.nonNull(itemUseReq.getDataSetId())) {
+            queryWrapper.lambda().eq(QueryStatDO::getDataSetId, itemUseReq.getDataSetId());
+        }
+        if (CollectionUtils.isNotEmpty(itemUseReq.getDataSetIds())) {
+            queryWrapper.lambda().in(QueryStatDO::getDataSetId, itemUseReq.getDataSetIds());
+        }
         return statMapper.selectList(queryWrapper);
     }
 

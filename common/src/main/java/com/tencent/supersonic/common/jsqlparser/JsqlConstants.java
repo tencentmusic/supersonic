@@ -26,6 +26,7 @@ public class JsqlConstants {
     public static final String EQUAL_CONSTANT = " 1 = 1 ";
     public static final String IN_CONSTANT = " 1 in (1) ";
     public static final String LIKE_CONSTANT = "1 like 1";
+    public static final String BETWEEN_AND_CONSTANT = "1 between 2 and 3";
     public static final String IN = "IN";
     public static final Map<String, String> rightMap = Stream.of(
             new AbstractMap.SimpleEntry<>("<=", "<="), new AbstractMap.SimpleEntry<>("<", "<"),

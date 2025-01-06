@@ -8,7 +8,6 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.BeanMapper;
@@ -59,15 +58,12 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     private ApplicationEventPublisher eventPublisher;
 
-    private TagMetaService tagMetaService;
-
     private ChatLayerService chatLayerService;
 
     public MetricServiceImpl(MetricRepository metricRepository, ModelService modelService,
             AliasGenerateHelper aliasGenerateHelper, CollectService collectService,
             DataSetService dataSetService, ApplicationEventPublisher eventPublisher,
-            DimensionService dimensionService, TagMetaService tagMetaService,
-            @Lazy ChatLayerService chatLayerService) {
+            DimensionService dimensionService, @Lazy ChatLayerService chatLayerService) {
         this.metricRepository = metricRepository;
         this.modelService = modelService;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -75,7 +71,6 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         this.collectService = collectService;
         this.dataSetService = dataSetService;
         this.dimensionService = dimensionService;
-        this.tagMetaService = tagMetaService;
         this.chatLayerService = chatLayerService;
     }
 
@@ -385,8 +380,8 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 return true;
             }
         } else if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
-            List<MeasureParam> measures = metricResp.getMetricDefineByMeasureParams().getMeasures();
-            List<String> fieldNameDepended = measures.stream().map(MeasureParam::getBizName)
+            List<Measure> measures = metricResp.getMetricDefineByMeasureParams().getMeasures();
+            List<String> fieldNameDepended = measures.stream().map(Measure::getName)
                     // measure bizName = model bizName_fieldName
                     .map(name -> name.replaceFirst(metricResp.getModelBizName() + "_", ""))
                     .collect(Collectors.toList());
@@ -660,38 +655,23 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 && !metricResp.getDefaultAgg().isEmpty())) {
             return metricResp.getDefaultAgg();
         }
-        // FIELD define will get from expr
-        if (MetricDefineType.FIELD.equals(metricResp.getMetricDefineType())) {
-            return SqlSelectFunctionHelper.getFirstAggregateFunctions(metricResp.getExpr());
-        }
-        // METRIC define will get from first metric
-        if (MetricDefineType.METRIC.equals(metricResp.getMetricDefineType())) {
-            if (!CollectionUtils.isEmpty(metricResp.getMetricDefineByMetricParams().getMetrics())) {
-                MetricParam metricParam =
-                        metricResp.getMetricDefineByMetricParams().getMetrics().get(0);
-                MetricResp firstMetricResp =
-                        getMetric(modelResp.getDomainId(), metricParam.getBizName());
-                if (Objects.nonNull(firstMetricResp)) {
-                    return getDefaultAgg(firstMetricResp, modelResp);
-                }
-                return "";
-            }
-        }
         // Measure define will get from first measure
-        List<Measure> measures = modelResp.getModelDetail().getMeasures();
-        List<MeasureParam> measureParams =
-                metricResp.getMetricDefineByMeasureParams().getMeasures();
-        if (CollectionUtils.isEmpty(measureParams)) {
-            return "";
-        }
-        MeasureParam firstMeasure = measureParams.get(0);
+        if (MetricDefineType.MEASURE.equals(metricResp.getMetricDefineType())) {
+            List<Measure> measures = modelResp.getModelDetail().getMeasures();
+            List<Measure> measureParams = metricResp.getMetricDefineByMeasureParams().getMeasures();
+            if (CollectionUtils.isEmpty(measureParams)) {
+                return null;
+            }
+            Measure firstMeasure = measureParams.get(0);
 
-        for (Measure measure : measures) {
-            if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
-                return measure.getAgg();
+            for (Measure measure : measures) {
+                if (measure.getBizName().equalsIgnoreCase(firstMeasure.getBizName())) {
+                    return measure.getAgg();
+                }
             }
         }
-        return "";
+
+        return null;
     }
 
     @Override
@@ -717,31 +697,31 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
             queryMetricReq.setDateInfo(null);
         }
         // 4. set groups
-        List<String> dimensionBizNames = dimensionResps.stream()
+        List<String> dimensionNames = dimensionResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
                 .filter(entry -> queryMetricReq.getDimensionNames().contains(entry.getName())
                         || queryMetricReq.getDimensionNames().contains(entry.getBizName())
                         || queryMetricReq.getDimensionIds().contains(entry.getId()))
-                .map(SchemaItem::getBizName).collect(Collectors.toList());
+                .map(SchemaItem::getName).collect(Collectors.toList());
 
         QueryStructReq queryStructReq = new QueryStructReq();
         DateConf dateInfo = queryMetricReq.getDateInfo();
         if (Objects.nonNull(dateInfo) && dateInfo.isGroupByDate()) {
-            queryStructReq.getGroups().add(dateInfo.getGroupByTimeDimension());
+            queryStructReq.getGroups().add(dateInfo.getDateField());
         }
-        if (!CollectionUtils.isEmpty(dimensionBizNames)) {
-            queryStructReq.getGroups().addAll(dimensionBizNames);
+        if (!CollectionUtils.isEmpty(dimensionNames)) {
+            queryStructReq.getGroups().addAll(dimensionNames);
         }
         // 5. set aggregators
-        List<String> metricBizNames = metricResps.stream()
+        List<String> metricNames = metricResps.stream()
                 .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
-                .map(SchemaItem::getBizName).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(metricBizNames)) {
+                .map(SchemaItem::getName).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(metricNames)) {
             throw new IllegalArgumentException(
                     "Invalid input parameters, unable to obtain valid metrics");
         }
         List<Aggregator> aggregators = new ArrayList<>();
-        for (String metricBizName : metricBizNames) {
+        for (String metricBizName : metricNames) {
             Aggregator aggregator = new Aggregator();
             aggregator.setColumn(metricBizName);
             aggregators.add(aggregator);

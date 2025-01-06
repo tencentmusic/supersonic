@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.core.pojo;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +107,7 @@ public class JdbcDataSource {
         }
     }
 
-    public void removeDatasource(Database database) {
+    public void removeDatasource(DatabaseResp database) {
 
         String key = getDataSourceKey(database);
 
@@ -128,7 +129,7 @@ public class JdbcDataSource {
         }
     }
 
-    public DruidDataSource getDataSource(Database database) throws RuntimeException {
+    public DruidDataSource getDataSource(DatabaseResp database) throws RuntimeException {
 
         String name = database.getName();
         String jdbcUrl = database.getUrl();
@@ -239,7 +240,7 @@ public class JdbcDataSource {
         return druidDataSource;
     }
 
-    private String getDataSourceKey(Database database) {
+    private String getDataSourceKey(DatabaseResp database) {
         return JdbcDataSourceUtils.getKey(database.getName(), database.getUrl(),
                 database.getUsername(), database.passwordDecrypt(), "", false);
     }

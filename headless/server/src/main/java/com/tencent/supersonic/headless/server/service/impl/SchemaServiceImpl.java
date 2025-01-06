@@ -11,29 +11,12 @@ import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.SchemaType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
-import com.tencent.supersonic.headless.api.pojo.response.ItemResp;
-import com.tencent.supersonic.headless.api.pojo.response.ItemUseResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.TagResp;
-import com.tencent.supersonic.headless.api.pojo.response.TermResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.server.manager.DimensionYamlManager;
 import com.tencent.supersonic.headless.server.manager.MetricYamlManager;
 import com.tencent.supersonic.headless.server.manager.ModelYamlManager;
@@ -42,16 +25,7 @@ import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
 import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.DatabaseService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.SchemaService;
-import com.tencent.supersonic.headless.server.service.TagMetaService;
-import com.tencent.supersonic.headless.server.service.TermService;
+import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.utils.DataSetSchemaBuilder;
 import com.tencent.supersonic.headless.server.utils.DimensionConverter;
 import com.tencent.supersonic.headless.server.utils.MetricConverter;
@@ -63,14 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -96,7 +63,6 @@ public class SchemaServiceImpl implements SchemaService {
     private final DomainService domainService;
     private final DataSetService dataSetService;
     private final ModelRelaService modelRelaService;
-    private final TagMetaService tagService;
     private final TermService termService;
     private final DatabaseService databaseService;
 
@@ -105,8 +71,8 @@ public class SchemaServiceImpl implements SchemaService {
 
     public SchemaServiceImpl(ModelService modelService, DimensionService dimensionService,
             MetricService metricService, DomainService domainService, DataSetService dataSetService,
-            ModelRelaService modelRelaService, StatUtils statUtils, TagMetaService tagService,
-            TermService termService, DatabaseService databaseService) {
+            ModelRelaService modelRelaService, StatUtils statUtils, TermService termService,
+            DatabaseService databaseService) {
         this.modelService = modelService;
         this.dimensionService = dimensionService;
         this.metricService = metricService;
@@ -114,7 +80,6 @@ public class SchemaServiceImpl implements SchemaService {
         this.dataSetService = dataSetService;
         this.modelRelaService = modelRelaService;
         this.statUtils = statUtils;
-        this.tagService = tagService;
         this.termService = termService;
         this.databaseService = databaseService;
     }
@@ -280,7 +245,9 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     private void fillCnt(List<DataSetSchemaResp> dataSetSchemaResps, List<ItemUseResp> statInfos) {
-
+        if (CollectionUtils.isEmpty(statInfos)) {
+            return;
+        }
         Map<String, ItemUseResp> typeIdAndStatPair = statInfos.stream()
                 .collect(Collectors.toMap(
                         itemUseInfo -> itemUseInfo.getType() + AT_SYMBOL + AT_SYMBOL
@@ -296,38 +263,39 @@ public class SchemaServiceImpl implements SchemaService {
     private void fillMetricCnt(DataSetSchemaResp dataSetSchemaResp,
             Map<String, ItemUseResp> typeIdAndStatPair) {
         List<MetricSchemaResp> metrics = dataSetSchemaResp.getMetrics();
-        if (CollectionUtils.isEmpty(dataSetSchemaResp.getMetrics())) {
+        if (CollectionUtils.isEmpty(metrics)) {
             return;
         }
-
-        if (!CollectionUtils.isEmpty(metrics)) {
-            metrics.stream().forEach(metric -> {
-                String key = TypeEnums.METRIC.name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
-                        + metric.getBizName();
-                if (typeIdAndStatPair.containsKey(key)) {
-                    metric.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
-                }
-            });
-        }
+        metrics.forEach(metric -> {
+            metric.setUseCnt(getItemCnt(metric, typeIdAndStatPair));
+        });
         dataSetSchemaResp.setMetrics(metrics);
     }
 
     private void fillDimCnt(DataSetSchemaResp dataSetSchemaResp,
             Map<String, ItemUseResp> typeIdAndStatPair) {
         List<DimSchemaResp> dimensions = dataSetSchemaResp.getDimensions();
-        if (CollectionUtils.isEmpty(dataSetSchemaResp.getDimensions())) {
+        if (CollectionUtils.isEmpty(dimensions)) {
             return;
         }
-        if (!CollectionUtils.isEmpty(dimensions)) {
-            dimensions.stream().forEach(dim -> {
-                String key = TypeEnums.DIMENSION.name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
-                        + dim.getBizName();
-                if (typeIdAndStatPair.containsKey(key)) {
-                    dim.setUseCnt(typeIdAndStatPair.get(key).getUseCnt());
-                }
-            });
-        }
+        dimensions.forEach(dim -> {
+            dim.setUseCnt(getItemCnt(dim, typeIdAndStatPair));
+        });
         dataSetSchemaResp.setDimensions(dimensions);
+    }
+
+    private Long getItemCnt(SchemaItem schemaItem, Map<String, ItemUseResp> typeIdAndStatPair) {
+        String bizNameKey = schemaItem.getTypeEnum().name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
+                + schemaItem.getBizName();
+        String nameKey = schemaItem.getTypeEnum().name().toLowerCase() + AT_SYMBOL + AT_SYMBOL
+                + schemaItem.getName();
+        if (typeIdAndStatPair.containsKey(bizNameKey)) {
+            return typeIdAndStatPair.get(bizNameKey).getUseCnt();
+        }
+        if (typeIdAndStatPair.containsKey(nameKey)) {
+            return typeIdAndStatPair.get(nameKey).getUseCnt();
+        }
+        return 0L;
     }
 
     @Override
@@ -379,6 +347,7 @@ public class SchemaServiceImpl implements SchemaService {
             DataSetSchemaResp dataSetSchemaResp =
                     fetchDataSetSchema(schemaFilterReq.getDataSetId());
             BeanUtils.copyProperties(dataSetSchemaResp, semanticSchemaResp);
+            semanticSchemaResp.setDataSetResp(dataSetSchemaResp);
             List<Long> modelIds = dataSetSchemaResp.getAllModels();
             MetaFilter metaFilter = new MetaFilter();
             metaFilter.setIds(modelIds);
@@ -404,13 +373,7 @@ public class SchemaServiceImpl implements SchemaService {
                     modelSchemaResps.stream().map(this::convert).collect(Collectors.toList()));
             semanticSchemaResp.setSchemaType(SchemaType.MODEL);
         }
-        if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
-            // add tag info
-            TagFilter tagFilter = new TagFilter();
-            tagFilter.setModelIds(semanticSchemaResp.getModelIds());
-            List<TagResp> tagResps = tagService.getTags(tagFilter);
-            semanticSchemaResp.setTags(tagResps);
-        }
+
         if (!CollectionUtils.isEmpty(semanticSchemaResp.getModelIds())) {
             DatabaseResp databaseResp =
                     modelService.getDatabaseByModelId(semanticSchemaResp.getModelIds().get(0));
@@ -469,7 +432,7 @@ public class SchemaServiceImpl implements SchemaService {
         List<Long> dataSetIds = dataSetSchemaResps.stream().map(DataSetSchemaResp::getId)
                 .collect(Collectors.toList());
         ItemUseReq itemUseReq = new ItemUseReq();
-        itemUseReq.setModelIds(dataSetIds);
+        itemUseReq.setDataSetIds(dataSetIds);
 
         List<ItemUseResp> statInfos = getStatInfo(itemUseReq);
         log.debug("statInfos:{}", statInfos);

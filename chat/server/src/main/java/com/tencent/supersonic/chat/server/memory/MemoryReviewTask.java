@@ -3,11 +3,13 @@ package com.tencent.supersonic.chat.server.memory;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
@@ -123,7 +125,10 @@ public class MemoryReviewTask {
             if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
                 m.setStatus(MemoryStatus.ENABLED);
             }
-            memoryService.updateMemory(m);
+            ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder().id(m.getId())
+                    .status(m.getStatus()).llmReviewRet(m.getLlmReviewRet())
+                    .llmReviewCmt(m.getLlmReviewCmt()).build();
+            memoryService.updateMemory(memoryUpdateReq, User.getDefaultUser());
         }
     }
 }

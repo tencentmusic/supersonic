@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/** push down the time filter into group using the RuntimeOptions defined minMaxTime */
+/**
+ * push down the time filter into group using the RuntimeOptions defined minMaxTime
+ */
 public class FilterToGroupScanRule extends RelRule<Config> implements TransformationRule {
 
     public static FilterTableScanRule.Config DEFAULT =

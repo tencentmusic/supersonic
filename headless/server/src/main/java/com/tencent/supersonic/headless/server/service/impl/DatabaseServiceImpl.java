@@ -17,17 +17,12 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptor;
 import com.tencent.supersonic.headless.core.adaptor.db.DbAdaptorFactory;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.utils.JdbcDataSourceUtils;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
 import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DatabaseDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DatabaseDOMapper;
-import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
-import com.tencent.supersonic.headless.server.pojo.DbParameterFactory;
-import com.tencent.supersonic.headless.server.pojo.DbParametersBuilder;
-import com.tencent.supersonic.headless.server.pojo.DefaultParametersBuilder;
-import com.tencent.supersonic.headless.server.pojo.ModelFilter;
+import com.tencent.supersonic.headless.server.pojo.*;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
@@ -62,7 +57,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public boolean testConnect(DatabaseReq databaseReq, User user) {
-        Database database = DatabaseConverter.convert(databaseReq);
+        DatabaseResp database = DatabaseConverter.convert(databaseReq);
         return JdbcDataSourceUtils.testDatabase(database);
     }
 
@@ -169,7 +164,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public SemanticQueryResp executeSql(String sql, DatabaseResp databaseResp) {
-        return queryWithColumns(sql, DatabaseConverter.convert(databaseResp));
+        return queryWithColumns(sql, databaseResp);
     }
 
     @Override
@@ -204,10 +199,10 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         return result;
     }
 
-    private SemanticQueryResp queryWithColumns(String sql, Database database) {
+    private SemanticQueryResp queryWithColumns(String sql, DatabaseResp database) {
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         SqlUtils sqlUtils = this.sqlUtils.init(database);
-        log.info("query SQL: {}", sql);
+        log.info("query SQL: {}", StringUtils.normalizeSpace(sql));
         sqlUtils.queryInternal(sql, queryResultWithColumns);
         return queryResultWithColumns;
     }

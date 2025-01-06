@@ -2,13 +2,9 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +36,13 @@ public class QueryUtils {
     public void populateQueryColumns(SemanticQueryResp semanticQueryResp,
             SemanticSchemaResp semanticSchemaResp) {
         Map<String, MetricResp> metricRespMap = createMetricRespMap(semanticSchemaResp);
+        Map<String, DimensionResp> dimensionRespMap = createDimRespMap(semanticSchemaResp);
         Map<String, String> namePair = new HashMap<>();
         Map<String, String> nameTypePair = new HashMap<>();
         populateNamePairs(semanticSchemaResp, namePair, nameTypePair);
         List<QueryColumn> columns = semanticQueryResp.getColumns();
-        columns.forEach(column -> processColumn(column, namePair, nameTypePair, metricRespMap));
+        columns.forEach(column -> processColumn(column, namePair, nameTypePair, metricRespMap,
+                dimensionRespMap));
     }
 
     private Map<String, MetricResp> createMetricRespMap(SemanticSchemaResp semanticSchemaResp) {
@@ -53,12 +51,14 @@ public class QueryUtils {
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
     }
 
+    private Map<String, DimensionResp> createDimRespMap(SemanticSchemaResp semanticSchemaResp) {
+        List<DimSchemaResp> dimensions = semanticSchemaResp.getDimensions();
+        return dimensions.stream()
+                .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
+    }
+
     private void populateNamePairs(SemanticSchemaResp semanticSchemaResp,
             Map<String, String> namePair, Map<String, String> nameTypePair) {
-        for (TimeDimensionEnum timeDimensionEnum : TimeDimensionEnum.values()) {
-            namePair.put(timeDimensionEnum.getName(), "date");
-            nameTypePair.put(timeDimensionEnum.getName(), "DATE");
-        }
         semanticSchemaResp.getMetrics().forEach(metricDesc -> {
             namePair.put(metricDesc.getBizName(), metricDesc.getName());
             nameTypePair.put(metricDesc.getBizName(), SemanticType.NUMBER.name());
@@ -70,8 +70,9 @@ public class QueryUtils {
     }
 
     private void processColumn(QueryColumn column, Map<String, String> namePair,
-            Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap) {
-        String nameEn = getName(column.getNameEn().toLowerCase());
+            Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap,
+            Map<String, DimensionResp> dimensionRespMap) {
+        String nameEn = getName(column.getNameEn());
         if (nameEn.contains(JOIN_UNDERLINE)) {
             nameEn = nameEn.split(JOIN_UNDERLINE)[1];
         }
@@ -103,6 +104,10 @@ public class QueryUtils {
         if (metricRespMap.containsKey(nameEn)) {
             column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
             column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
+            column.setModelId(metricRespMap.get(nameEn).getModelId());
+        }
+        if (dimensionRespMap.containsKey(nameEn)) {
+            column.setModelId(dimensionRespMap.get(nameEn).getModelId());
         }
         // set name by NameEn
         if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getNameEn())) {

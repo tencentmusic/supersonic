@@ -20,12 +20,13 @@ import java.util.Objects;
  */
 @Slf4j
 public class EmbeddingMapper extends BaseMapper {
-    public void doMap(ChatQueryContext chatQueryContext) {
-        // Check if the map mode is LOOSE
-        if (!MapModeEnum.LOOSE.equals(chatQueryContext.getRequest().getMapModeEnum())) {
-            return;
-        }
 
+    @Override
+    public boolean accept(ChatQueryContext chatQueryContext) {
+        return MapModeEnum.LOOSE.equals(chatQueryContext.getRequest().getMapModeEnum());
+    }
+
+    public void doMap(ChatQueryContext chatQueryContext) {
         // 1. Query from embedding by queryText
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
         List<EmbeddingResult> matchResults = getMatches(chatQueryContext, matchStrategy);
@@ -62,4 +63,5 @@ public class EmbeddingMapper extends BaseMapper {
             addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
         }
     }
+
 }

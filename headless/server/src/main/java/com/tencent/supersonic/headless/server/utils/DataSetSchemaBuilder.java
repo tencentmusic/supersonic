@@ -2,17 +2,7 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.common.util.DateUtils;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.DimValueMap;
-import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
-import com.tencent.supersonic.headless.api.pojo.RelateDimension;
-import com.tencent.supersonic.headless.api.pojo.RelatedSchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaItem;
-import com.tencent.supersonic.headless.api.pojo.SchemaValueMap;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -21,11 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DataSetSchemaBuilder {
@@ -206,12 +192,6 @@ public class DataSetSchemaBuilder {
 
     private static void setDefaultTimeFormat(SchemaElement dimToAdd,
             DimensionTimeTypeParams dimensionTimeTypeParams, String timeFormat) {
-        if (null != dimensionTimeTypeParams && TimeDimensionEnum.DAY.name()
-                .equalsIgnoreCase(dimensionTimeTypeParams.getTimeGranularity())) {
-            dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT,
-                    DateUtils.DEFAULT_DATE_FORMAT);
-        } else {
-            dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
-        }
+        dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
     }
 }

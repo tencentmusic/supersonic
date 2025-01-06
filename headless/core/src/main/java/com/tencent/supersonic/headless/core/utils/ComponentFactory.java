@@ -29,7 +29,7 @@ public class ComponentFactory {
         initQueryOptimizer();
         initQueryExecutors();
         initQueryAccelerators();
-        initQueryParsers();
+        initQueryParser();
         initQueryCache();
     }
 
@@ -54,9 +54,9 @@ public class ComponentFactory {
         return queryAccelerators;
     }
 
-    public static List<QueryParser> getQueryParser() {
-        if (queryParsers.isEmpty()) {
-            initQueryParsers();
+    public static List<QueryParser> getQueryParsers() {
+        if (queryParsers == null) {
+            initQueryParser();
         }
         return queryParsers;
     }
@@ -82,14 +82,18 @@ public class ComponentFactory {
     }
 
     private static void initQueryExecutors() {
+        // queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor",
+        // JdbcExecutor.class));
         init(QueryExecutor.class, queryExecutors);
     }
 
     private static void initQueryAccelerators() {
+        // queryExecutors.add(ContextUtils.getContext().getBean("JdbcExecutor",
+        // JdbcExecutor.class));
         init(QueryAccelerator.class, queryAccelerators);
     }
 
-    private static void initQueryParsers() {
+    private static void initQueryParser() {
         init(QueryParser.class, queryParsers);
     }
 

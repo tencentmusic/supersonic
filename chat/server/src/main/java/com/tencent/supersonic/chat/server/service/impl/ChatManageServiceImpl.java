@@ -2,9 +2,9 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
-import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
-import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
-import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
+import com.tencent.supersonic.chat.api.pojo.request.*;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
@@ -15,11 +15,12 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
+import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
-import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class ChatManageServiceImpl implements ChatManageService {
     private ChatRepository chatRepository;
     @Autowired
     private ChatQueryRepository chatQueryRepository;
+    @Autowired
+    private MemoryService memoryService;
 
     @Override
     public Long addChat(User user, String chatName, Integer agentId) {
@@ -64,11 +67,28 @@ public class ChatManageServiceImpl implements ChatManageService {
     }
 
     @Override
-    public boolean updateFeedback(Integer id, Integer score, String feedback) {
+    public boolean updateFeedback(Long id, Integer score, String feedback) {
         QueryDO intelligentQueryDO = new QueryDO();
         intelligentQueryDO.setId(id);
+        intelligentQueryDO.setQuestionId(id);
         intelligentQueryDO.setScore(score);
         intelligentQueryDO.setFeedback(feedback);
+
+        // enable or disable memory based on user feedback
+        if (score >= 5 || score <= 1) {
+            ChatMemoryFilter memoryFilter = ChatMemoryFilter.builder().queryId(id).build();
+            List<ChatMemory> memories = memoryService.getMemories(memoryFilter);
+            memories.forEach(m -> {
+                MemoryStatus status = score >= 5 ? MemoryStatus.ENABLED : MemoryStatus.DISABLED;
+                MemoryReviewResult reviewResult =
+                        score >= 5 ? MemoryReviewResult.POSITIVE : MemoryReviewResult.NEGATIVE;
+                ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder().id(m.getId())
+                        .status(status).humanReviewRet(reviewResult)
+                        .humanReviewCmt("Reviewed as per user feedback").build();
+                memoryService.updateMemory(memoryUpdateReq, User.getDefaultUser());
+            });
+        }
+
         return chatRepository.updateFeedback(intelligentQueryDO);
     }
 
