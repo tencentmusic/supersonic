@@ -714,61 +714,61 @@ public class SqlSelectHelper {
         return table.getFullyQualifiedName();
     }
 
-    public static Set<String> getColumnFromExpr(String expr) {
+    public static Set<String> getFieldsFromExpr(String expr) {
         Expression expression = QueryExpressionReplaceVisitor.getExpression(expr);
         Set<String> columns = new HashSet<>();
         if (Objects.nonNull(expression)) {
-            getColumnFromExpr(expression, columns);
+            getFieldsFromExpr(expression, columns);
         }
         return columns;
     }
 
-    public static void getColumnFromExpr(Expression expression, Set<String> columns) {
+    public static void getFieldsFromExpr(Expression expression, Set<String> columns) {
         if (expression instanceof Column) {
             columns.add(((Column) expression).getColumnName());
         }
         if (expression instanceof Function) {
             ExpressionList<?> expressionList = ((Function) expression).getParameters();
             for (Expression expr : expressionList) {
-                getColumnFromExpr(expr, columns);
+                getFieldsFromExpr(expr, columns);
             }
         }
         if (expression instanceof CaseExpression) {
             CaseExpression expr = (CaseExpression) expression;
             if (Objects.nonNull(expr.getWhenClauses())) {
                 for (WhenClause whenClause : expr.getWhenClauses()) {
-                    getColumnFromExpr(whenClause.getWhenExpression(), columns);
-                    getColumnFromExpr(whenClause.getThenExpression(), columns);
+                    getFieldsFromExpr(whenClause.getWhenExpression(), columns);
+                    getFieldsFromExpr(whenClause.getThenExpression(), columns);
                 }
             }
             if (Objects.nonNull(expr.getElseExpression())) {
-                getColumnFromExpr(expr.getElseExpression(), columns);
+                getFieldsFromExpr(expr.getElseExpression(), columns);
             }
         }
         if (expression instanceof BinaryExpression) {
             BinaryExpression expr = (BinaryExpression) expression;
-            getColumnFromExpr(expr.getLeftExpression(), columns);
-            getColumnFromExpr(expr.getRightExpression(), columns);
+            getFieldsFromExpr(expr.getLeftExpression(), columns);
+            getFieldsFromExpr(expr.getRightExpression(), columns);
         }
         if (expression instanceof InExpression) {
             InExpression inExpression = (InExpression) expression;
-            getColumnFromExpr(inExpression.getLeftExpression(), columns);
+            getFieldsFromExpr(inExpression.getLeftExpression(), columns);
         }
         if (expression instanceof Between) {
             Between between = (Between) expression;
-            getColumnFromExpr(between.getLeftExpression(), columns);
+            getFieldsFromExpr(between.getLeftExpression(), columns);
         }
         if (expression instanceof IsBooleanExpression) {
             IsBooleanExpression isBooleanExpression = (IsBooleanExpression) expression;
-            getColumnFromExpr(isBooleanExpression.getLeftExpression(), columns);
+            getFieldsFromExpr(isBooleanExpression.getLeftExpression(), columns);
         }
         if (expression instanceof IsNullExpression) {
             IsNullExpression isNullExpression = (IsNullExpression) expression;
-            getColumnFromExpr(isNullExpression.getLeftExpression(), columns);
+            getFieldsFromExpr(isNullExpression.getLeftExpression(), columns);
         }
         if (expression instanceof Parenthesis) {
             Parenthesis expr = (Parenthesis) expression;
-            getColumnFromExpr(expr.getExpression(), columns);
+            getFieldsFromExpr(expr.getExpression(), columns);
         }
     }
 
@@ -949,4 +949,31 @@ public class SqlSelectHelper {
             }
         });
     }
+
+    public static void addMissingGroupby(PlainSelect plainSelect) {
+        if (Objects.nonNull(plainSelect.getGroupBy())
+                && !plainSelect.getGroupBy().getGroupByExpressionList().isEmpty()) {
+            return;
+        }
+        GroupByElement groupBy = new GroupByElement();
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            Expression expression = selectItem.getExpression();
+            if (expression instanceof Column) {
+                groupBy.addGroupByExpression(expression);
+            }
+        }
+        if (!groupBy.getGroupByExpressionList().isEmpty()) {
+            plainSelect.setGroupByElement(groupBy);
+        }
+    }
+
+    public static boolean hasAggregateFunction(PlainSelect plainSelect) {
+        List<SelectItem<?>> selectItems = plainSelect.getSelectItems();
+        FunctionVisitor visitor = new FunctionVisitor();
+        for (SelectItem selectItem : selectItems) {
+            selectItem.accept(visitor);
+        }
+        return !visitor.getFunctionNames().isEmpty();
+    }
+
 }

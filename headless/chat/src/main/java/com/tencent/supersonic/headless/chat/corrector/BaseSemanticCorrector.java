@@ -41,6 +41,7 @@ public abstract class BaseSemanticCorrector implements SemanticCorrector {
 
     protected Map<String, String> getFieldNameMap(ChatQueryContext chatQueryContext,
             Long dataSetId) {
+
         return getFieldNameMapFromDB(chatQueryContext, dataSetId);
     }
 

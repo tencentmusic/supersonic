@@ -29,10 +29,11 @@ public class ModelConverter {
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
         // ModelDetail modelDetail = createModelDetail(modelReq);
+        ModelDetail modelDetail = modelReq.getModelDetail();
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
-        modelDO.setModelDetail(JSONObject.toJSONString(modelReq.getModelDetail()));
+        modelDO.setModelDetail(JSONObject.toJSONString(modelDetail));
         modelDO.setDrillDownDimensions(JSONObject.toJSONString(modelReq.getDrillDownDimensions()));
         if (modelReq.getExt() != null) {
             modelDO.setExt(JSONObject.toJSONString(modelReq.getExt()));
@@ -123,9 +124,7 @@ public class ModelConverter {
         metricReq.setModelId(modelDO.getId());
         MetricDefineByMeasureParams exprTypeParams = new MetricDefineByMeasureParams();
         exprTypeParams.setExpr(measure.getExpr());
-        Measure measureParam = new Measure();
-        BeanMapper.mapper(measure, measureParam);
-        exprTypeParams.setMeasures(Lists.newArrayList(measureParam));
+        exprTypeParams.setMeasures(Lists.newArrayList(measure));
         metricReq.setMetricDefineByMeasureParams(exprTypeParams);
         metricReq.setMetricDefineType(MetricDefineType.MEASURE);
         return metricReq;
@@ -165,11 +164,14 @@ public class ModelConverter {
                         getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getAgg().getOperator(), 1);
+                Measure measure = new Measure(columnSchema.getName(),
+                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                        columnSchema.getColumnName(), columnSchema.getAgg().getOperator(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
+                Dimension dim = new Dimension(columnSchema.getName(),
+                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                        columnSchema.getColumnName(),
                         DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);
             }
@@ -264,14 +266,17 @@ public class ModelConverter {
 
     private static ModelDetail createModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
-        // List<Measure> measures = modelReq.getModelDetail().getMeasures();
-        // for (Measure measure : measures) {
-        // if (StringUtils.isBlank(measure.getBizName())) {
-        // continue;
-        // }
-        // measure.setExpr(measure.getBizName());
-        // measure.setBizName(String.format("%s_%", modelReq.getBizName(), measure.getExpr()));
-        // }
+        List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        if (measures == null) {
+            measures = Lists.newArrayList();
+        }
+        for (Measure measure : measures) {
+            if (StringUtils.isBlank(measure.getBizName())) {
+                continue;
+            }
+            measure.setExpr(measure.getBizName());
+            measure.setBizName(String.format("%s_%s", modelReq.getBizName(), measure.getExpr()));
+        }
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }

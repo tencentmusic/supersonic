@@ -26,17 +26,19 @@ com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
 
 ### headless-core SPIs
 
-com.tencent.supersonic.headless.core.translator.parser.QueryParser=\
-    com.tencent.supersonic.headless.core.translator.parser.DefaultDimValueParser,\
-    com.tencent.supersonic.headless.core.translator.parser.SqlVariableParser,\
-    com.tencent.supersonic.headless.core.translator.parser.SqlQueryParser,\
-    com.tencent.supersonic.headless.core.translator.parser.StructQueryParser,\
-    com.tencent.supersonic.headless.core.translator.parser.MetricRatioParser,\
-    com.tencent.supersonic.headless.core.translator.parser.OntologyQueryParser
-
 com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer=\
     com.tencent.supersonic.headless.core.translator.optimizer.DbDialectOptimizer,\
     com.tencent.supersonic.headless.core.translator.optimizer.ResultLimitOptimizer
+
+com.tencent.supersonic.headless.core.translator.parser.QueryParser=\
+    com.tencent.supersonic.headless.core.translator.parser.SqlVariableParser,\
+    com.tencent.supersonic.headless.core.translator.parser.StructQueryParser,\
+    com.tencent.supersonic.headless.core.translator.parser.SqlQueryParser,\
+    com.tencent.supersonic.headless.core.translator.parser.DefaultDimValueParser,\
+    com.tencent.supersonic.headless.core.translator.parser.DimExpressionParser,\
+    com.tencent.supersonic.headless.core.translator.parser.MetricExpressionParser,\
+    com.tencent.supersonic.headless.core.translator.parser.MetricRatioParser,\
+    com.tencent.supersonic.headless.core.translator.parser.OntologyQueryParser
 
 com.tencent.supersonic.headless.core.executor.QueryExecutor=\
     com.tencent.supersonic.headless.core.executor.JdbcExecutor

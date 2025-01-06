@@ -17,13 +17,11 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
-import com.tencent.supersonic.headless.server.service.TagMetaService;
 import com.xkzhangsan.time.utils.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -60,16 +58,13 @@ public class DictUtils {
     private final MetricService metricService;
     private final SemanticLayerService queryService;
     private final ModelService modelService;
-    private final TagMetaService tagMetaService;
 
     public DictUtils(DimensionService dimensionService, MetricService metricService,
-            SemanticLayerService queryService, ModelService modelService,
-            @Lazy TagMetaService tagMetaService) {
+            SemanticLayerService queryService, ModelService modelService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
         this.modelService = modelService;
-        this.tagMetaService = tagMetaService;
     }
 
     public String fetchDictFileName(DictItemResp dictItemResp) {
@@ -132,11 +127,6 @@ public class DictUtils {
             }
             dictItemResp.setModelId(dimension.getModelId());
             dictItemResp.setBizName(dimension.getBizName());
-        }
-        if (TypeEnums.TAG.equals(TypeEnums.valueOf(dictConfDO.getType()))) {
-            TagResp tagResp = tagMetaService.getTag(dictConfDO.getItemId(), User.getDefaultUser());
-            dictItemResp.setModelId(tagResp.getModelId());
-            dictItemResp.setBizName(tagResp.getBizName());
         }
 
         return dictItemResp;

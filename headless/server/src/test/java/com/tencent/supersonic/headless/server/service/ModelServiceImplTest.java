@@ -22,10 +22,10 @@ import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.mockito.Mockito.when;
 
@@ -77,10 +77,10 @@ class ModelServiceImplTest {
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
         ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
-        ThreadPoolExecutor threadPoolExecutor = Mockito.mock(ThreadPoolExecutor.class);
+        ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelRelaService, threadPoolExecutor);
+                modelRelaService, eventPublisher);
     }
 
     private ModelReq mockModelReq() {

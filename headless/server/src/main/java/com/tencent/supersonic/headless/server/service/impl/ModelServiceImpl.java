@@ -2,12 +2,15 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.pojo.DataEvent;
+import com.tencent.supersonic.common.pojo.DataItem;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
@@ -51,7 +54,7 @@ import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +72,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,13 +100,16 @@ public class ModelServiceImpl implements ModelService {
 
     private final ModelRelaService modelRelaService;
 
-    private final ThreadPoolExecutor executor;
+    private final ApplicationEventPublisher eventPublisher;
+
+    ExecutorService executor =
+            new ThreadPoolExecutor(0, 5, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
             DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
-            @Qualifier("commonExecutor") ThreadPoolExecutor executor) {
+            ApplicationEventPublisher eventPublisher) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -110,17 +119,18 @@ public class ModelServiceImpl implements ModelService {
         this.dataSetService = dataSetService;
         this.dateInfoRepository = dateInfoRepository;
         this.modelRelaService = modelRelaService;
-        this.executor = executor;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
     @Transactional
     public ModelResp createModel(ModelReq modelReq, User user) throws Exception {
-        // checkParams(modelReq);
+        checkParams(modelReq);
         ModelDO modelDO = ModelConverter.convert(modelReq, user);
         modelRepository.createModel(modelDO);
         batchCreateDimension(modelDO, user);
         batchCreateMetric(modelDO, user);
+        sendEvent(modelDO, EventType.ADD);
         return ModelConverter.convert(modelDO);
     }
 
@@ -140,13 +150,14 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        // checkParams(modelReq);
+        checkParams(modelReq);
         checkRelations(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
         modelRepository.updateModel(modelDO);
         batchCreateDimension(modelDO, user);
         batchCreateMetric(modelDO, user);
+        sendEvent(modelDO, EventType.UPDATE);
         return ModelConverter.convert(modelDO);
     }
 
@@ -607,4 +618,16 @@ public class ModelServiceImpl implements ModelService {
         }
         return false;
     }
+
+    private void sendEvent(ModelDO modelDO, EventType eventType) {
+        DataItem dataItem = getDataItem(modelDO);
+        eventPublisher.publishEvent(new DataEvent(this, Lists.newArrayList(dataItem), eventType));
+    }
+
+    private DataItem getDataItem(ModelDO modelDO) {
+        return DataItem.builder().id(modelDO.getId().toString()).name(modelDO.getName())
+                .bizName(modelDO.getBizName()).modelId(modelDO.getId().toString())
+                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.DIMENSION).build();
+    }
+
 }
