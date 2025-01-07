@@ -465,10 +465,11 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     }
 
     private boolean isChange(DimensionReq dimensionReq, DimensionResp dimensionResp) {
+        boolean isNameChange = !dimensionReq.getName().equals(dimensionResp.getName());
         boolean isExtChange = !new EqualsBuilder()
                 .append(dimensionReq.getExt(), dimensionResp.getExt()).isEquals();
         boolean isTypeParamChange =
                 !Objects.equals(dimensionReq.getTypeParams(), dimensionResp.getTypeParams());
-        return isExtChange || isTypeParamChange;
+        return isNameChange || isExtChange || isTypeParamChange;
     }
 }
