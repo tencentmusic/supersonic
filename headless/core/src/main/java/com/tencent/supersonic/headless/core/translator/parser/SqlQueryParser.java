@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.translator.parser;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
@@ -49,8 +50,12 @@ public class SqlQueryParser implements QueryParser {
         // check if there are fields not matched with any metric or dimension
         if (queryFields.size() > ontologyQuery.getMetrics().size()
                 + ontologyQuery.getDimensions().size()) {
-            queryStatement
-                    .setErrMsg("There are fields in the SQL not matched with any semantic column.");
+            List<String> semanticFields = Lists.newArrayList();
+            ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
+            ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
+            String errMsg = String.format("Querying columns[%s] not matched with semantic fields[%s].",
+                            queryFields, semanticFields);
+            queryStatement.setErrMsg(errMsg);
             queryStatement.setStatus(QueryState.INVALID);
             return;
         }
