@@ -40,7 +40,7 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
         ChatAppManager.register(APP_KEY_ERROR_MESSAGE,
                 ChatApp.builder().prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION).name("异常提示改写")
                         .appModule(AppModule.CHAT).description("通过大模型将异常信息改写为更友好和引导性的提示用语")
-                        .enable(false).build());
+                        .enable(true).build());
     }
 
     @Override
