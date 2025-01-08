@@ -15,7 +15,7 @@ public enum DataType {
     SQLSERVER("sqlserver", "sqlserver", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "\"", "\"",
             "\"", "\""),
 
-    H2("h2", "h2", "org.h2.Driver", "`", "`", "\"", "\""),
+    H2("H2", "h2", "org.h2.Driver", "`", "`", "\"", "\""),
 
     PHOENIX("phoenix", "hbase phoenix", "org.apache.phoenix.jdbc.PhoenixDriver", "", "", "\"",
             "\""),

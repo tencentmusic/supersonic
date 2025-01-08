@@ -423,8 +423,10 @@ public class SqlReplaceHelper {
             painSelect.accept(new SelectVisitorAdapter() {
                 @Override
                 public void visit(PlainSelect plainSelect) {
-                    plainSelect.getFromItem().accept(
-                            new TableNameReplaceVisitor(tableName, new HashSet<>(withNameList)));
+                    if (Objects.nonNull(plainSelect.getFromItem())) {
+                        plainSelect.getFromItem().accept(new TableNameReplaceVisitor(tableName,
+                                new HashSet<>(withNameList)));
+                    }
                 }
             });
             replaceJoins(painSelect, tableName, withNameList);
@@ -672,11 +674,13 @@ public class SqlReplaceHelper {
 
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
         for (PlainSelect plainSelect : plainSelects) {
-            Table table = (Table) plainSelect.getFromItem();
-            if (table.getName().equals(tableName)) {
-                replacePlainSelectByExpr(plainSelect, replace);
-                if (SqlSelectHelper.hasAggregateFunction(plainSelect)) {
-                    SqlSelectHelper.addMissingGroupby(plainSelect);
+            if (Objects.nonNull(plainSelect.getFromItem())) {
+                Table table = (Table) plainSelect.getFromItem();
+                if (table.getName().equals(tableName)) {
+                    replacePlainSelectByExpr(plainSelect, replace);
+                    if (SqlSelectHelper.hasAggregateFunction(plainSelect)) {
+                        SqlSelectHelper.addMissingGroupby(plainSelect);
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,7 @@ public class QueryStatement {
     private StructQuery structQuery;
     private SqlQuery sqlQuery;
     private OntologyQuery ontologyQuery;
-    private Integer status = 0;
+    private QueryState status = QueryState.SUCCESS;
     private Boolean isS2SQL = false;
     private Boolean enableOptimize = true;
     private Triple<String, String, String> minMaxTime;

@@ -10,6 +10,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
@@ -50,7 +51,7 @@ public class SqlQueryParser implements QueryParser {
                 + ontologyQuery.getDimensions().size()) {
             queryStatement
                     .setErrMsg("There are fields in the SQL not matched with any semantic column.");
-            queryStatement.setStatus(1);
+            queryStatement.setStatus(QueryState.INVALID);
             return;
         }
         queryStatement.setOntologyQuery(ontologyQuery);
