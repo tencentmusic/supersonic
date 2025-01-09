@@ -28,7 +28,5 @@ jobs:
       - name: Build and publish Docker image
         run: |
           VERSION=${{ github.event.inputs.version }}
-          chmod +x docker/docker-build.sh
-          chmod +x docker/docker-publish.sh
-          sh docker/docker-build.sh $VERSION
-          sh docker/docker-publish.sh $VERSION
+          chmod +x docker/docker-build-publish.sh
+          sh docker/docker-build-publish.sh $VERSION
