@@ -152,7 +152,7 @@ public class ChatWorkflowEngine {
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getCorrectedS2SQL()),
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getQuerySQL()));
             } catch (Exception e) {
-                log.warn("get sql info failed:{}", parseInfo, e);
+                log.warn("get sql info failed:{}", e);
                 errorMsg.add(String.format("S2SQL:%s %s", parseInfo.getSqlInfo().getParsedS2SQL(),
                         e.getMessage()));
             }
