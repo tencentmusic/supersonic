@@ -32,8 +32,7 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
     private static final String INSTRUCTION = ""
             + "#Role: You are a senior data engineer experienced in writing SQL."
             + "\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,"
-            + "please take a review and help correct it if necessary."
-            + "\n#Rules: "
+            + "please take a review and help correct it if necessary." + "\n#Rules: "
             + "1.ALWAYS specify time range using `>`,`<`,`>=`,`<=` operator."
             + "2.DO NOT calculate date range using functions."
             + "3.SQL columns and values must be mentioned in the `#Schema`."
@@ -77,7 +76,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
                 semanticParseInfo, chatApp.getPrompt(), exemplar);
         SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
         keyPipelineLog.info("LLMSqlCorrector modelReq:\n{} \nmodelResp:\n{}", prompt.text(), s2Sql);
-        if ("NEGATIVE".equalsIgnoreCase(s2Sql.getOpinion()) && StringUtils.isNotBlank(s2Sql.getSql())) {
+        if ("NEGATIVE".equalsIgnoreCase(s2Sql.getOpinion())
+                && StringUtils.isNotBlank(s2Sql.getSql())) {
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(s2Sql.getSql());
         }
     }

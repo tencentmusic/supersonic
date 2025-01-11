@@ -53,7 +53,8 @@ public class SqlQueryParser implements QueryParser {
             List<String> semanticFields = Lists.newArrayList();
             ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
             ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
-            String errMsg = String.format("Querying columns[%s] not matched with semantic fields[%s].",
+            String errMsg =
+                    String.format("Querying columns[%s] not matched with semantic fields[%s].",
                             queryFields, semanticFields);
             queryStatement.setErrMsg(errMsg);
             queryStatement.setStatus(QueryState.INVALID);

@@ -23,5 +23,5 @@ public abstract class SqlGenStrategy implements InitializingBean {
         return ModelProvider.getChatModel(modelConfig);
     }
 
-    abstract LLMResp generate(LLMReq llmReq);
+    public abstract LLMResp generate(LLMReq llmReq);
 }
