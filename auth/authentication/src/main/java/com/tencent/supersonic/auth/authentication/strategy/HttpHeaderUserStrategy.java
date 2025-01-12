@@ -4,6 +4,7 @@ import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.service.UserStrategy;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.util.S2ThreadContext;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,9 +17,11 @@ public class HttpHeaderUserStrategy implements UserStrategy {
 
     public static final String STRATEGY_NAME = "http";
     private final TokenService tokenService;
+    private final S2ThreadContext s2ThreadContext;
 
-    public HttpHeaderUserStrategy(TokenService tokenService) {
+    public HttpHeaderUserStrategy(TokenService tokenService, S2ThreadContext s2ThreadContext) {
         this.tokenService = tokenService;
+        this.s2ThreadContext = s2ThreadContext;
     }
 
     @Override
@@ -42,6 +45,10 @@ public class HttpHeaderUserStrategy implements UserStrategy {
     }
 
     public User getUser(HttpServletRequest request) {
+        User user = s2ThreadContext.get().getUser();
+        if (user != null) {
+            return user;
+        }
         final Optional<Claims> claimsOptional = tokenService.getClaims(request);
         return claimsOptional.map(this::getUser).orElse(User.getVisitUser());
     }
