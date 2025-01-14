@@ -96,11 +96,25 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
         Map<String, MetricResp> nameMap = metricResps.stream()
                 .collect(Collectors.toMap(MetricResp::getName, a -> a, (k1, k2) -> k1));
-        List<MetricReq> metricToInsert =
-                metricReqs.stream()
-                        .filter(metric -> !bizNameMap.containsKey(metric.getBizName())
-                                && !nameMap.containsKey(metric.getName()))
-                        .collect(Collectors.toList());
+        List<MetricReq> metricToInsert = Lists.newArrayList();
+        metricReqs.stream().forEach(metric -> {
+            if (!bizNameMap.containsKey(metric.getBizName())
+                    && !nameMap.containsKey(metric.getName())) {
+                metricToInsert.add(metric);
+            } else {
+                MetricResp metricRespByBizName = bizNameMap.get(metric.getBizName());
+                MetricResp metricRespByName = nameMap.get(metric.getName());
+                if (null != metricRespByBizName && isChange(metric, metricRespByBizName)) {
+                    metric.setId(metricRespByBizName.getId());
+                    this.updateMetric(metric, user);
+                } else {
+                    if (null != metricRespByName && isChange(metric, metricRespByName)) {
+                        metric.setId(metricRespByName.getId());
+                        this.updateMetric(metric, user);
+                    }
+                }
+            }
+        });
         if (CollectionUtils.isEmpty(metricToInsert)) {
             return;
         }
@@ -803,5 +817,10 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         List<ModelResp> modelResps = modelService
                 .getAllModelByDomainIds(Collections.singletonList(queryMetricReq.getDomainId()));
         return modelResps.stream().map(ModelResp::getId).collect(Collectors.toSet());
+    }
+
+    private boolean isChange(MetricReq metricReq, MetricResp metricResp) {
+        boolean isNameChange = !metricReq.getName().equals(metricResp.getName());
+        return isNameChange;
     }
 }

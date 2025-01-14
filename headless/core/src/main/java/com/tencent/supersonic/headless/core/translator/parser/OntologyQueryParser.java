@@ -32,7 +32,7 @@ public class OntologyQueryParser implements QueryParser {
                 .build();
         SqlBuilder sqlBuilder = new SqlBuilder(semanticSchema);
         String sql = sqlBuilder.buildOntologySql(queryStatement);
-        queryStatement.setSql(sql);
+        queryStatement.getOntologyQuery().setSql(sql);
     }
 
 }

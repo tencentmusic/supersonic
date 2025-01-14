@@ -33,9 +33,9 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
             + "#Role: You are a senior data engineer experienced in writing SQL."
             + "\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,"
             + "please take a review and help correct it if necessary." + "\n#Rules: "
-            + "\n1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),sql=(corrected sql if NEGATIVE; empty string if POSITIVE)`."
-            + "\n2.NO NEED to check date filters as the junior engineer seldom makes mistakes in this regard."
-            + "\n3.SQL columns and values must be mentioned in the `#Schema`."
+            + "1.ALWAYS specify time range using `>`,`<`,`>=`,`<=` operator."
+            + "2.DO NOT calculate date range using functions."
+            + "3.SQL columns and values must be mentioned in the `#Schema`."
             + "\n#Question:{{question}} #Schema:{{schema}} #InputSQL:{{sql}} #Response:";
 
     public LLMSqlCorrector() {
@@ -46,10 +46,10 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
     @Data
     @ToString
     static class SemanticSql {
-        @Description("positive or negative opinion about the sql")
+        @Description("either positive or negative")
         private String opinion;
 
-        @Description("corrected sql")
+        @Description("corrected sql if negative")
         private String sql;
     }
 
@@ -76,7 +76,8 @@ public class LLMSqlCorrector extends BaseSemanticCorrector {
                 semanticParseInfo, chatApp.getPrompt(), exemplar);
         SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
         keyPipelineLog.info("LLMSqlCorrector modelReq:\n{} \nmodelResp:\n{}", prompt.text(), s2Sql);
-        if ("NEGATIVE".equals(s2Sql.getOpinion()) && StringUtils.isNotBlank(s2Sql.getSql())) {
+        if ("NEGATIVE".equalsIgnoreCase(s2Sql.getOpinion())
+                && StringUtils.isNotBlank(s2Sql.getSql())) {
             semanticParseInfo.getSqlInfo().setCorrectedS2SQL(s2Sql.getSql());
         }
     }

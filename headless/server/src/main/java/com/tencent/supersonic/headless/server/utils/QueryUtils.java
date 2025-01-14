@@ -120,9 +120,11 @@ public class QueryUtils {
             return false;
         }
         return type.equalsIgnoreCase("int") || type.equalsIgnoreCase("bigint")
+                || type.equalsIgnoreCase("tinyint") || type.equalsIgnoreCase("smallint")
                 || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")
-                || type.equalsIgnoreCase("numeric") || type.toLowerCase().startsWith("decimal")
-                || type.toLowerCase().startsWith("uint") || type.toLowerCase().startsWith("int");
+                || type.equalsIgnoreCase("real") || type.equalsIgnoreCase("numeric")
+                || type.toLowerCase().startsWith("decimal") || type.toLowerCase().startsWith("uint")
+                || type.toLowerCase().startsWith("int");
     }
 
     private String getName(String nameEn) {

@@ -8,5 +8,5 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
  */
 public interface SemanticTranslator {
 
-    void translate(QueryStatement queryStatement);
+    void translate(QueryStatement queryStatement) throws Exception;
 }
