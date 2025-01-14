@@ -5,13 +5,13 @@ CREATE TABLE IF NOT EXISTS s2_user_department (
 );
 
 CREATE TABLE IF NOT EXISTS s2_pv_uv_statis (
-    imp_date varchar(200) NOT NULL,
+    imp_date DATE NOT NULL,
     user_name varchar(200) NOT NULL,
     page varchar(200) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS s2_stay_time_statis (
-    imp_date varchar(200) NOT NULL,
+    imp_date DATE NOT NULL,
     user_name varchar(200) NOT NULL,
     stay_hours double precision NOT NULL,
     page varchar(200) NOT NULL
