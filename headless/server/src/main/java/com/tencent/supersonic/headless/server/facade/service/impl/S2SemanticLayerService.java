@@ -423,7 +423,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
         List<QueryStatement> queryStatements = new ArrayList<>();
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
             QueryStatement queryStatement = buildStructQueryStatement(queryStructReq);
-            semanticTranslator.translate(queryStatement);
+            try {
+                semanticTranslator.translate(queryStatement);
+            } catch (Exception e) {
+                log.warn("Failed to translate for semantic query " + queryStructReq);
+            }
             queryStatements.add(queryStatement);
         }
         log.info("Union multiple query statements:{}", queryStatements);
