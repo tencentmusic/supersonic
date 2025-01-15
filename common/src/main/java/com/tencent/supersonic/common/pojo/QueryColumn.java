@@ -22,6 +22,7 @@ public class QueryColumn {
     public QueryColumn(String nameEn, String type) {
         this.type = type;
         this.nameEn = nameEn;
+        this.name = nameEn;
     }
 
     public QueryColumn(String name, String type, String nameEn) {
