@@ -2,18 +2,8 @@ package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
 import com.tencent.supersonic.common.calcite.Configuration;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
-import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.node.DataModelNode;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.node.SemanticNode;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.render.FilterRender;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.render.OutputRender;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.render.Renderer;
-import com.tencent.supersonic.headless.core.translator.parser.calcite.render.SourceRender;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Constants;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
 import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;

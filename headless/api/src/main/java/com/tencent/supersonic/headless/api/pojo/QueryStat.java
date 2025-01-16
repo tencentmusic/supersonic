@@ -17,7 +17,7 @@ public class QueryStat {
     private Long modelId;
 
     private Long dataSetId;
-    private String user;
+    private String queryUser;
     private String createdAt;
     /** corresponding type, such as sql, struct, etc */
     private String queryType;
@@ -28,7 +28,7 @@ public class QueryStat {
     private String querySqlCmdMd5;
     private String queryStructCmd;
     private String queryStructCmdMd5;
-    private String sql;
+    private String querySql;
     private String sqlMd5;
     private String queryEngine;
     private Long startTime;
@@ -95,8 +95,8 @@ public class QueryStat {
         return this;
     }
 
-    public QueryStat setUser(String user) {
-        this.user = user;
+    public QueryStat setUser(String queryUser) {
+        this.queryUser = queryUser;
         return this;
     }
 
@@ -115,8 +115,8 @@ public class QueryStat {
         return this;
     }
 
-    public QueryStat setSql(String sql) {
-        this.sql = sql;
+    public QueryStat setSql(String querySql) {
+        this.querySql = querySql;
         return this;
     }
 

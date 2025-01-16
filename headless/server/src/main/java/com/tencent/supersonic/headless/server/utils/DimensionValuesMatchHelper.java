@@ -3,10 +3,10 @@ package com.tencent.supersonic.headless.server.utils;
 import com.tencent.supersonic.common.pojo.DimValuesConstants;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DimensionMappingConfig;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
@@ -89,7 +89,7 @@ public class DimensionValuesMatchHelper {
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
         String sql = buildQuery(dimensionValuesAndId);
         log.info("executing SQL: {}", sql);
-        Database database = queryStatement.getOntology().getDatabase();
+        DatabaseResp database = queryStatement.getOntology().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         try {
             SqlUtils sqlUtil = sqlUtils.init(database);

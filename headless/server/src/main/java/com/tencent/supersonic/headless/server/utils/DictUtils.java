@@ -60,7 +60,7 @@ public class DictUtils {
     private final ModelService modelService;
 
     public DictUtils(DimensionService dimensionService, MetricService metricService,
-            SemanticLayerService queryService, ModelService modelService) {
+                     SemanticLayerService queryService, ModelService modelService) {
         this.dimensionService = dimensionService;
         this.metricService = metricService;
         this.queryService = queryService;
@@ -73,7 +73,7 @@ public class DictUtils {
     }
 
     public DictTaskDO generateDictTaskDO(DictItemResp dictItemResp, User user,
-            TaskStatusEnum status) {
+                                         TaskStatusEnum status) {
         DictTaskDO taskDO = new DictTaskDO();
         Date createAt = new Date();
         String name = dictItemResp.fetchDictFileName();
@@ -186,7 +186,7 @@ public class DictUtils {
     }
 
     private void constructDictLines(Map<String, Long> valueAndFrequencyPair, List<String> lines,
-            String nature) {
+                                    String nature) {
         if (CollectionUtils.isEmpty(valueAndFrequencyPair)) {
             return;
         }
@@ -200,7 +200,7 @@ public class DictUtils {
     }
 
     private void mergeMultivaluedValue(Map<String, Long> valueAndFrequencyPair, String dimValue,
-            Long metric) {
+                                       Long metric) {
         if (StringUtils.isEmpty(dimValue)) {
             return;
         }
@@ -360,7 +360,7 @@ public class DictUtils {
     }
 
     private void fillStructDateBetween(QueryStructReq queryStructReq, ModelResp model,
-            Integer itemValueDateStart, Integer itemValueDateEnd) {
+                                       Integer itemValueDateStart, Integer itemValueDateEnd) {
         if (Objects.nonNull(model)) {
             List<Dimension> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
@@ -423,8 +423,8 @@ public class DictUtils {
                 .format(DateTimeFormatter.ofPattern(format));
         String end = LocalDate.now().minusDays(itemValueDateEnd)
                 .format(DateTimeFormatter.ofPattern(format));
-        return String.format("( %s >= '%s' and %s <= '%s' )", dateConf.getDateField(), start,
-                dateConf.getDateField(), end);
+        return String.format("( %s >= '%s' and %s <= '%s' )", "sys_imp_date", start,
+                "sys_imp_date", end);
     }
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {

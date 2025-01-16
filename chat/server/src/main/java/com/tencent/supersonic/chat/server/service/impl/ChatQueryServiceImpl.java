@@ -310,7 +310,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ArrayList<Select> selectArrayList = new ArrayList<>();
         if (jsqlParserType == JsqlParserType.WITH){
-            List<WithItem> withItemsList = plainSelect.getWithItemsList();
             selectArrayList.addAll(SqlSelectHelper.getWithItem(selectStatement));
         }else {
 
@@ -393,7 +392,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             return JsqlParserType.WITH;
         }
         if (withItemsList == null && fromItem != null && joins != null && !joins.isEmpty() && where == null) {
-            log.info("fromItem和joins不为null，where为null，返回true。");
+            log.info("非with语句，fromItem和joins不为null，where为null，返回SELECT。");
             return JsqlParserType.SELECT;
         }
         return JsqlParserType.COMMON;
@@ -433,7 +432,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
             // 使用修改后的 SQL 替换 WITH 子查询
             Select modifiedWithSelect = SqlSelectHelper.getSelect(modifiedSubQuery);
-            withItem.setSelect(modifiedWithSelect);
+            Select withSelect = withItem.getSelect();
+            if (withSelect instanceof ParenthesedSelect) {
+                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withSelect;
+                parenthesedSelect.setSelect(modifiedWithSelect);
+            }
         }
     }
     private void rebuildSelectClause(Select selectStatement, List<String> modifiedSubQueries) {

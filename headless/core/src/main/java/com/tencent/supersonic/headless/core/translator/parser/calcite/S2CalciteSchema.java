@@ -2,14 +2,9 @@ package com.tencent.supersonic.headless.core.translator.parser.calcite;
 
 import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.DataModel;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Dimension;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Metric;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.core.pojo.JoinRelation;
-import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.translator.parser.RuntimeOptions;
 import lombok.Builder;
 import lombok.Data;
