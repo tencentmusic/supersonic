@@ -5,7 +5,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlDateSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -44,8 +43,7 @@ public class TimeCorrector extends BaseSemanticCorrector {
         DataSetSchema dataSetSchema =
                 chatQueryContext.getSemanticSchema().getDataSetSchemaMap().get(dataSetId);
         if (Objects.isNull(dataSetSchema) || Objects.isNull(dataSetSchema.getPartitionDimension())
-                || Objects.isNull(dataSetSchema.getPartitionDimension().getName())
-                || TimeDimensionEnum.containsZhTimeDimension(whereFields)) {
+                || Objects.isNull(dataSetSchema.getPartitionDimension().getName())) {
             return;
         }
         String partitionDimension = dataSetSchema.getPartitionDimension().getName();
@@ -75,7 +73,8 @@ public class TimeCorrector extends BaseSemanticCorrector {
 
     private void addLowerBoundDate(SemanticParseInfo semanticParseInfo) {
         String correctS2SQL = semanticParseInfo.getSqlInfo().getCorrectedS2SQL();
-        DateBoundInfo dateBoundInfo = SqlDateSelectHelper.getDateBoundInfo(correctS2SQL);
+        DateBoundInfo dateBoundInfo = SqlDateSelectHelper.getDateBoundInfo(correctS2SQL,
+                semanticParseInfo.getDateInfo().getDateField());
 
         if (dateBoundInfo != null && StringUtils.isBlank(dateBoundInfo.getLowerBound())
                 && StringUtils.isNotBlank(dateBoundInfo.getUpperBound())

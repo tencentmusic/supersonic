@@ -78,9 +78,9 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
 
     private String host;
     private Integer port;
-    private ExecutorService executorService;
     private Cache<ByteString, SemanticQueryReq> preparedStatementCache;
     private final String dataSetIdHeaderKey = "dataSetId";
+    private ExecutorService executorService;
     private final String nameHeaderKey = "name";
     private final String passwordHeaderKey = "password";
     private final Calendar defaultCalendar = JdbcToArrowUtils.getUtcCalendar();

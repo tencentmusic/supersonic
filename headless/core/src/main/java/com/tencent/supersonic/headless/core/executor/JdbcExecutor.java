@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.core.executor;
 
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.core.pojo.Database;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
@@ -38,14 +38,14 @@ public class JdbcExecutor implements QueryExecutor {
         SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
         String sql = StringUtils.normalizeSpace(queryStatement.getSql());
         log.info("executing SQL: {}", sql);
-        Database database = queryStatement.getOntology().getDatabase();
+        DatabaseResp database = queryStatement.getOntology().getDatabase();
         SemanticQueryResp queryResultWithColumns = new SemanticQueryResp();
         try {
             SqlUtils sqlUtil = sqlUtils.init(database);
             sqlUtil.queryInternal(queryStatement.getSql(), queryResultWithColumns);
             queryResultWithColumns.setSql(sql);
         } catch (Exception e) {
-            log.error("queryInternal error [{}]", StringUtils.normalizeSpace(e.toString()));
+            log.error("queryInternal with error [{}]", StringUtils.normalizeSpace(e.getMessage()));
             queryResultWithColumns.setErrorMsg(e.getMessage());
         }
         return queryResultWithColumns;

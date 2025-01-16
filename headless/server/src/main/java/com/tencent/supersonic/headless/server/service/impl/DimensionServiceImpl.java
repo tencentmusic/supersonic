@@ -62,22 +62,19 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     private DataSetService dataSetService;
 
-    private TagMetaService tagMetaService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository, ModelService modelService,
             AliasGenerateHelper aliasGenerateHelper, DatabaseService databaseService,
-            ModelRelaService modelRelaService, DataSetService dataSetService,
-            TagMetaService tagMetaService) {
+            ModelRelaService modelRelaService, DataSetService dataSetService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.aliasGenerateHelper = aliasGenerateHelper;
         this.databaseService = databaseService;
         this.modelRelaService = modelRelaService;
         this.dataSetService = dataSetService;
-        this.tagMetaService = tagMetaService;
     }
 
     @Override
@@ -468,10 +465,11 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     }
 
     private boolean isChange(DimensionReq dimensionReq, DimensionResp dimensionResp) {
+        boolean isNameChange = !dimensionReq.getName().equals(dimensionResp.getName());
         boolean isExtChange = !new EqualsBuilder()
                 .append(dimensionReq.getExt(), dimensionResp.getExt()).isEquals();
         boolean isTypeParamChange =
                 !Objects.equals(dimensionReq.getTypeParams(), dimensionResp.getTypeParams());
-        return isExtChange || isTypeParamChange;
+        return isNameChange || isExtChange || isTypeParamChange;
     }
 }

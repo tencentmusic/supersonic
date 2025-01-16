@@ -10,9 +10,12 @@ import org.springframework.stereotype.Component;
 public class ResultLimitOptimizer implements QueryOptimizer {
 
     @Override
+    public boolean accept(QueryStatement queryStatement) {
+        return !SqlSelectHelper.hasLimit(queryStatement.getSql());
+    }
+
+    @Override
     public void rewrite(QueryStatement queryStatement) {
-        if (!SqlSelectHelper.hasLimit(queryStatement.getSql())) {
-            queryStatement.setSql(queryStatement.getSql() + " limit " + queryStatement.getLimit());
-        }
+        queryStatement.setSql(queryStatement.getSql() + " limit " + queryStatement.getLimit());
     }
 }

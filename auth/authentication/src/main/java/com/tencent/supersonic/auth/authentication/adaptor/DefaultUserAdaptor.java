@@ -1,8 +1,5 @@
 package com.tencent.supersonic.auth.authentication.adaptor;
 
-import javax.servlet.http.HttpServletRequest;
-
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tencent.supersonic.auth.api.authentication.adaptor.UserAdaptor;
@@ -19,7 +16,7 @@ import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.common.util.HttpClientUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -122,19 +119,22 @@ public class DefaultUserAdaptor implements UserAdaptor {
 
     @Override
     public User loginByAnalysisCloud(HttpServletRequest request) {
-        if (!verifyParameters(request)){
-            throw new RuntimeException(AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED.getMessage());
+        if (!verifyParameters(request)) {
+            throw new RuntimeException(
+                    AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED.getMessage());
         }
         TokenService tokenService = ContextUtils.getBean(TokenService.class);
         String appKey = tokenService.getAppKey(request);
         UserDO userDO = getUser(request.getParameter("userName"));
-        //账号及分析云token校验通过，创建用户信息对象
-        UserWithPassword userWithPassword = UserWithPassword.get(userDO.getId(), userDO.getName(),
-                userDO.getDisplayName(), userDO.getEmail(), userDO.getPassword(),
-                userDO.getIsAdmin());
-        //用户信息对象以及appKey生成token
-        String generateToken = tokenService.generateToken(UserWithPassword.convert(userWithPassword), appKey);
-        User user = User.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(), userDO.getEmail(), userDO.getIsAdmin());
+        // 账号及分析云token校验通过，创建用户信息对象
+        UserWithPassword userWithPassword =
+                UserWithPassword.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
+                        userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
+        // 用户信息对象以及appKey生成token
+        String generateToken =
+                tokenService.generateToken(UserWithPassword.convert(userWithPassword), appKey);
+        User user = User.get(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
+                userDO.getEmail(), userDO.getIsAdmin());
         user.setToken(generateToken);
         return user;
     }

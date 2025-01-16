@@ -22,6 +22,7 @@ import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +77,10 @@ class ModelServiceImplTest {
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
         DataSetService viewService = Mockito.mock(DataSetService.class);
         ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
+        ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelRelaService);
+                modelRelaService, eventPublisher);
     }
 
     private ModelReq mockModelReq() {

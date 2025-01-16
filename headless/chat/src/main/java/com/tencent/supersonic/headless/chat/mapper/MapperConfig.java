@@ -35,11 +35,11 @@ public class MapperConfig extends ParameterConfig {
                     "维度值相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_TEXT_SIZE =
-            new Parameter("s2.mapper.embedding.word.size", "4", "用于向量召回文本长度",
+            new Parameter("s2.mapper.embedding.word.size", "3", "用于向量召回文本长度",
                     "为提高向量召回效率, 按指定长度进行向量语义召回", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_TEXT_STEP =
-            new Parameter("s2.mapper.embedding.word.step", "3", "向量召回文本每步长度",
+            new Parameter("s2.mapper.embedding.word.step", "2", "向量召回文本每步长度",
                     "为提高向量召回效率, 按指定每步长度进行召回", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_BATCH =
@@ -51,7 +51,7 @@ public class MapperConfig extends ParameterConfig {
                     "每个文本进行向量语义召回的文本结果个数", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_THRESHOLD =
-            new Parameter("s2.mapper.embedding.threshold", "0.98", "向量召回相似度阈值", "相似度小于该阈值的则舍弃",
+            new Parameter("s2.mapper.embedding.threshold", "0.9", "向量召回相似度阈值", "相似度小于该阈值的则舍弃",
                     "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_ROUND_NUMBER =

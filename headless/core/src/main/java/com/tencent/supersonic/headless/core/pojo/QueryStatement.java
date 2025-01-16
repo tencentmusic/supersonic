@@ -1,8 +1,7 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.Ontology;
-import com.tencent.supersonic.headless.core.translator.parser.s2sql.OntologyQueryParam;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -11,17 +10,18 @@ import org.apache.commons.lang3.tuple.Triple;
 public class QueryStatement {
 
     private Long dataSetId;
+    private String dataSetName;
     private String sql;
     private String errMsg;
-    private StructQueryParam structQueryParam;
-    private SqlQueryParam sqlQueryParam;
-    private OntologyQueryParam ontologyQueryParam;
-    private Integer status = 0;
+    private StructQuery structQuery;
+    private SqlQuery sqlQuery;
+    private OntologyQuery ontologyQuery;
+    private QueryState status = QueryState.SUCCESS;
     private Boolean isS2SQL = false;
     private Boolean enableOptimize = true;
     private Triple<String, String, String> minMaxTime;
     private Ontology ontology;
-    private SemanticSchemaResp semanticSchemaResp;
+    private SemanticSchemaResp semanticSchema;
     private Integer limit = 1000;
     private Boolean isTranslated = false;
 

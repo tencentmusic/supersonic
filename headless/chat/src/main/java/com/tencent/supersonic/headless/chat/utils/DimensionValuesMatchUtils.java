@@ -9,14 +9,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 public class DimensionValuesMatchUtils {
 
     @Autowired
     private DimensionMappingConfig dimensionMappingConfig;
+
     public void processDimensions(Map<SchemaElementType, List<String>> elementTypeToNatureMap,
-                                         ChatQueryContext chatQueryContext) {
+            ChatQueryContext chatQueryContext) {
         Set<Long> dataSetIds = chatQueryContext.getRequest().getDataSetIds();
         if (!dataSetIds.contains(dimensionMappingConfig.getDataSet())) {
             return;
@@ -30,22 +32,21 @@ public class DimensionValuesMatchUtils {
             return;
         }
 
-        List<Map.Entry<String, String>> dimensionValusAndIdMap = generateDimensionValusAndIdMap(elementTypeToNatureMap);
+        List<Map.Entry<String, String>> dimensionValusAndIdMap =
+                generateDimensionValusAndIdMap(elementTypeToNatureMap);
         storeToChatQueryContext(chatQueryContext, dimensionValusAndIdMap);
     }
 
-    private Set<String> extractDimensionIds(Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
-        return elementTypeToNatureMap.values().stream()
-                .flatMap(List::stream)
-                .map(value -> {
-                    String[] parts = value.split("_");
-                    return parts.length == 3 ? parts[2] : null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+    private Set<String> extractDimensionIds(
+            Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
+        return elementTypeToNatureMap.values().stream().flatMap(List::stream).map(value -> {
+            String[] parts = value.split("_");
+            return parts.length == 3 ? parts[2] : null;
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
-    private void storeToChatQueryContext(ChatQueryContext chatQueryContext, List<Map.Entry<String, String>> dimensionValusAndIdMap) {
+    private void storeToChatQueryContext(ChatQueryContext chatQueryContext,
+            List<Map.Entry<String, String>> dimensionValusAndIdMap) {
         chatQueryContext.setIsTip(true);
         chatQueryContext.setSchemaValusByTerm(dimensionValusAndIdMap);
     }
@@ -62,7 +63,8 @@ public class DimensionValuesMatchUtils {
         boolean hasPid4 = dimensionIds.contains(dimPid4);
 
         // 条件判断，仅有1级时返回true
-        if (dimensionIds.stream().filter(dimPid1::equals).count() == 1 && !hasPid2 && !hasPid3 && !hasPid4) {
+        if (dimensionIds.stream().filter(dimPid1::equals).count() == 1 && !hasPid2 && !hasPid3
+                && !hasPid4) {
             return true;
         }
 
@@ -77,11 +79,11 @@ public class DimensionValuesMatchUtils {
         }
         return false;
     }
-    private List<Map.Entry<String, String>> generateDimensionValusAndIdMap(Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
-        return elementTypeToNatureMap.values().stream()
-                .flatMap(List::stream)
-                .map(value -> value.split("_"))
-                .filter(parts -> parts.length >= 3)
+
+    private List<Map.Entry<String, String>> generateDimensionValusAndIdMap(
+            Map<SchemaElementType, List<String>> elementTypeToNatureMap) {
+        return elementTypeToNatureMap.values().stream().flatMap(List::stream)
+                .map(value -> value.split("_")).filter(parts -> parts.length >= 3)
                 .map(parts -> new AbstractMap.SimpleEntry<>(parts[2], parts[0]))
                 .collect(Collectors.toList());
     }

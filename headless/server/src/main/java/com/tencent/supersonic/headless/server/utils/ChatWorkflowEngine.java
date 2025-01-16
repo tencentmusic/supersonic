@@ -37,6 +37,7 @@ public class ChatWorkflowEngine {
 
     @Autowired
     private DimensionValuesMatchHelper dimensionValuesMatchHelper;
+
     public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
             ParseResp parseResult) {
         queryCtx.setChatWorkflowState(initialState);
@@ -44,7 +45,7 @@ public class ChatWorkflowEngine {
             switch (queryCtx.getChatWorkflowState()) {
                 case MAPPING:
                     performMapping(queryCtx);
-                    if (queryCtx.getIsTip()){
+                    if (queryCtx.getIsTip()) {
                         dimensionValuesMatchHelper.dimensionValuesStoreToCache(queryCtx);
                     }
                     if (queryCtx.getMapInfo().isEmpty()) {
@@ -82,7 +83,6 @@ public class ChatWorkflowEngine {
                     long start = System.currentTimeMillis();
                     performTranslating(queryCtx, parseResult);
                     parseResult.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
-                    parseResult.setState(ParseResp.ParseState.COMPLETED);
                     queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
                 default:
@@ -143,7 +143,12 @@ public class ChatWorkflowEngine {
                         ContextUtils.getBean(SemanticLayerService.class);
                 SemanticTranslateResp explain =
                         queryService.translate(semanticQueryReq, queryCtx.getRequest().getUser());
-                parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
+                if (explain.isOk()) {
+                    parseInfo.getSqlInfo().setQuerySQL(explain.getQuerySQL());
+                    parseResult.setState(ParseResp.ParseState.COMPLETED);
+                } else {
+                    parseResult.setState(ParseResp.ParseState.FAILED);
+                }
                 if (StringUtils.isNotBlank(explain.getErrMsg())) {
                     errorMsg.add(explain.getErrMsg());
                 }
@@ -154,7 +159,7 @@ public class ChatWorkflowEngine {
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getCorrectedS2SQL()),
                         StringUtils.normalizeSpace(parseInfo.getSqlInfo().getQuerySQL()));
             } catch (Exception e) {
-                log.warn("get sql info failed:{}", parseInfo, e);
+                log.warn("get sql info failed:{}", e);
                 errorMsg.add(String.format("S2SQL:%s %s", parseInfo.getSqlInfo().getParsedS2SQL(),
                         e.getMessage()));
             }

@@ -2,14 +2,9 @@ package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
-import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +26,7 @@ public class MetricDrillDownChecker {
     private MetricService metricService;
 
     public void checkQuery(QueryStatement queryStatement) {
-        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchemaResp();
+        SemanticSchemaResp semanticSchemaResp = queryStatement.getSemanticSchema();
         String sql = queryStatement.getSql();
         if (StringUtils.isBlank(sql)) {
             return;
@@ -61,9 +56,6 @@ public class MetricDrillDownChecker {
             }
         }
         for (String dimensionBizName : groupByFields) {
-            if (TimeDimensionEnum.containsTimeDimension(dimensionBizName)) {
-                continue;
-            }
             List<MetricResp> metricResps = getMetrics(metricFields, semanticSchemaResp);
             if (!checkDrillDownDimension(dimensionBizName, metricResps, semanticSchemaResp)) {
                 DimSchemaResp dimSchemaResp = semanticSchemaResp.getDimension(dimensionBizName);

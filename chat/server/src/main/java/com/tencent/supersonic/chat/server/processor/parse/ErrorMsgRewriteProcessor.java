@@ -40,17 +40,20 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
         ChatAppManager.register(APP_KEY_ERROR_MESSAGE,
                 ChatApp.builder().prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION).name("异常提示改写")
                         .appModule(AppModule.CHAT).description("通过大模型将异常信息改写为更友好和引导性的提示用语")
-                        .enable(false).build());
+                        .enable(true).build());
+    }
+
+    @Override
+    public boolean accept(ParseContext parseContext) {
+        ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
+        return StringUtils.isNotBlank(parseContext.getResponse().getErrorMsg())
+                && Objects.nonNull(chatApp) && chatApp.isEnable();
     }
 
     @Override
     public void process(ParseContext parseContext) {
         String errMsg = parseContext.getResponse().getErrorMsg();
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
-        if (StringUtils.isBlank(errMsg) || Objects.isNull(chatApp) || !chatApp.isEnable()) {
-            return;
-        }
-
         Map<String, Object> variables = new HashMap<>();
         variables.put("user_question", parseContext.getRequest().getQueryText());
         variables.put("system_message", errMsg);

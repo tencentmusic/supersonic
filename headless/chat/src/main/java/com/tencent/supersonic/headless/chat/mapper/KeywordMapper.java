@@ -71,8 +71,9 @@ public class KeywordMapper extends BaseMapper {
                     continue;
                 }
                 // 存储 elementType 和 nature 到 map 中
-                if (SchemaElementType.VALUE.equals(elementType)){
-                    elementTypeToNatureMap.computeIfAbsent(elementType, k -> new ArrayList<>()).add(hanlpMapResult.getName() + nature);
+                if (SchemaElementType.VALUE.equals(elementType)) {
+                    elementTypeToNatureMap.computeIfAbsent(elementType, k -> new ArrayList<>())
+                            .add(hanlpMapResult.getName() + nature);
                 }
                 Long elementID = NatureHelper.getElementID(nature);
                 SchemaElement element = getSchemaElement(dataSetId, elementType, elementID,
@@ -91,7 +92,8 @@ public class KeywordMapper extends BaseMapper {
                 addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
             }
         }
-        DimensionValuesMatchUtils dimensionValuesMatchUtils = ContextUtils.getBean(DimensionValuesMatchUtils.class);
+        DimensionValuesMatchUtils dimensionValuesMatchUtils =
+                ContextUtils.getBean(DimensionValuesMatchUtils.class);
         dimensionValuesMatchUtils.processDimensions(elementTypeToNatureMap, chatQueryContext);
     }
 

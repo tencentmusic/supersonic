@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.jsqlparser;
 
+import com.google.common.collect.Sets;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
@@ -11,6 +12,7 @@ import java.util.Set;
 public class FieldAcquireVisitor extends ExpressionVisitorAdapter {
 
     private Set<String> fields;
+    private Set<String> aliases = Sets.newHashSet();
 
     public FieldAcquireVisitor(Set<String> fields) {
         this.fields = fields;
@@ -26,8 +28,9 @@ public class FieldAcquireVisitor extends ExpressionVisitorAdapter {
     public void visit(SelectItem selectItem) {
         Alias alias = selectItem.getAlias();
         if (alias != null) {
-            fields.add(alias.getName());
+            aliases.add(alias.getName());
         }
+
         Expression expression = selectItem.getExpression();
         if (expression != null) {
             expression.accept(this);

@@ -98,6 +98,9 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     @Value("${s2.demo.names:S2VisitsDemo}")
     protected List<String> demoList;
 
+    @Value("${spring.datasource.driver-class-name}")
+    protected String driverClassName;
+
     public void run(String... args) {
         demoDatabase = addDatabaseIfNotExist();
         demoChatModel = addChatModelIfNotExist();
@@ -121,7 +124,13 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         DatabaseReq databaseReq = new DatabaseReq();
         databaseReq.setName("S2数据库DEMO");
         databaseReq.setDescription("样例数据库实例仅用于体验");
-        databaseReq.setType(DataType.POSTGRESQL.getFeature());
+        databaseReq.setType(DataType.H2.getFeature());
+        if ("org.postgresql.Driver".equals(driverClassName)) {
+            databaseReq.setType(DataType.POSTGRESQL.getFeature());
+        } else if ("com.mysql.cj.jdbc.Driver".equals(driverClassName)
+                || "com.mysql.jdbc.Driver".equals(driverClassName)) {
+            databaseReq.setType(DataType.MYSQL.getFeature());
+        }
         databaseReq.setUrl(url);
         databaseReq.setUsername(dataSourceProperties.getUsername());
         databaseReq
@@ -190,7 +199,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
         return relateDimension;
     }
 
-    protected void updateQueryScore(Integer queryId) {
+    protected void updateQueryScore(Long queryId) {
         chatManageService.updateFeedback(queryId, 5, "");
     }
 

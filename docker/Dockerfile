@@ -1,13 +1,11 @@
 # Use an official OpenJDK runtime as a parent image
-FROM openjdk:8-jdk
+FROM openjdk:21-jdk-bullseye
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION
-
-RUN apt-get update
 
 # Install necessary packages, including Postgres client
 RUN apt-get update && apt-get install -y postgresql-client

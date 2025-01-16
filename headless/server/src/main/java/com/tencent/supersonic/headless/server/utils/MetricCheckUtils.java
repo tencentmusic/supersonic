@@ -33,9 +33,6 @@ public class MetricCheckUtils {
                 throw new InvalidArgumentException("指标定义参数不可为空");
             }
             expr = typeParams.getExpr();
-            if (CollectionUtils.isEmpty(typeParams.getMeasures())) {
-                throw new InvalidArgumentException("定义指标的度量列表参数不可为空");
-            }
             if (hasAggregateFunction(expr)) {
                 throw new InvalidArgumentException("基于度量来创建指标,表达式中不可再包含聚合函数");
             }
@@ -46,9 +43,9 @@ public class MetricCheckUtils {
                 throw new InvalidArgumentException("指标定义参数不可为空");
             }
             expr = typeParams.getExpr();
-            if (CollectionUtils.isEmpty(typeParams.getFields())) {
-                throw new InvalidArgumentException("定义指标的字段列表参数不可为空");
-            }
+            // if (CollectionUtils.isEmpty(typeParams.getFields())) {
+            // throw new InvalidArgumentException("定义指标的字段列表参数不可为空");
+            // }
             if (!hasAggregateFunction(expr)) {
                 throw new InvalidArgumentException("基于字段来创建指标,表达式中必须包含聚合函数");
             }

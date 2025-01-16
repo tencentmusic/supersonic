@@ -36,9 +36,11 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
 
     @Override
     public List<ChatModel> getChatModels(User user) {
-        List<ChatModel> chatModelList = list().stream().map(this::convert).collect(Collectors.toList());
+        List<ChatModel> chatModelList =
+                list().stream().map(this::convert).collect(Collectors.toList());
         setPermission(chatModelList, user);
-        return chatModelList.stream().filter(ChatModel::isHasPermission).collect(Collectors.toList());
+        return chatModelList.stream().filter(ChatModel::isHasPermission)
+                .collect(Collectors.toList());
     }
 
     private void setPermission(List<ChatModel> chatModelList, User user) {
@@ -52,6 +54,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
             }
         });
     }
+
     private void setCommonModelPermissions(ChatModel chatModel) {
         chatModel.setHasPermission(true);
         chatModel.setHasUsePermission(true);
@@ -71,8 +74,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
 
     private boolean isAdminOrCreatorOrSuperAdmin(ChatModel chatModel, User user) {
         return chatModel.getAdmins().contains(user.getName())
-                || user.getName().equalsIgnoreCase(chatModel.getCreatedBy())
-                || user.isSuperAdmin();
+                || user.getName().equalsIgnoreCase(chatModel.getCreatedBy()) || user.isSuperAdmin();
     }
 
     private boolean isViewer(ChatModel chatModel, User user) {

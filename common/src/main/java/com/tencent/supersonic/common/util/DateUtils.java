@@ -218,4 +218,18 @@ public class DateUtils {
             return false;
         }
     }
+
+    // 获取后一天的日期
+    public static String getNextDate(String date) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+        LocalDate localDate = LocalDate.parse(date, dateTimeFormatter);
+        return localDate.plusDays(1).format(dateTimeFormatter);
+    }
+
+    // 获取前一天的日期
+    public static String getPreviousDate(String date) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+        LocalDate localDate = LocalDate.parse(date, dateTimeFormatter);
+        return localDate.minusDays(1).format(dateTimeFormatter);
+    }
 }

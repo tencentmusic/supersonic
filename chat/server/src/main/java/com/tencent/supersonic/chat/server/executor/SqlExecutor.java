@@ -44,7 +44,7 @@ public class SqlExecutor implements ChatQueryExecutor {
                                 Text2SQLExemplar.class);
 
                 MemoryService memoryService = ContextUtils.getBean(MemoryService.class);
-                memoryService.createMemory(ChatMemory.builder()
+                memoryService.createMemory(ChatMemory.builder().queryId(queryResult.getQueryId())
                         .agentId(executeContext.getAgent().getId()).status(MemoryStatus.PENDING)
                         .question(exemplar.getQuestion()).sideInfo(exemplar.getSideInfo())
                         .dbSchema(exemplar.getDbSchema()).s2sql(exemplar.getSql())
@@ -77,6 +77,7 @@ public class SqlExecutor implements ChatQueryExecutor {
         sqlReq.setQueryId(executeContext.getRequest().getQueryId());
         long startTime = System.currentTimeMillis();
         QueryResult queryResult = new QueryResult();
+        queryResult.setQueryId(executeContext.getRequest().getQueryId());
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
         queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);

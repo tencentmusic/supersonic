@@ -4,7 +4,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlValidHelper;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
@@ -51,10 +50,6 @@ public class GroupByCorrector extends BaseSemanticCorrector {
         Set<String> dimensions = getDimensions(dataSetId, semanticSchema);
         List<String> selectFields = SqlSelectHelper.getSelectFields(correctS2SQL);
         if (CollectionUtils.isEmpty(selectFields) || CollectionUtils.isEmpty(dimensions)) {
-            return false;
-        }
-        // if only date in select not add group by.
-        if (selectFields.size() == 1 && TimeDimensionEnum.containsZhTimeDimension(selectFields)) {
             return false;
         }
         if (SqlSelectHelper.hasGroupBy(correctS2SQL)) {

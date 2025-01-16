@@ -6,8 +6,9 @@ import com.tencent.supersonic.common.pojo.DimValuesConstants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
-import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
+import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.*;
@@ -20,8 +21,8 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.executor.QueryExecutor;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.SqlQueryParam;
-import com.tencent.supersonic.headless.core.pojo.StructQueryParam;
+import com.tencent.supersonic.headless.core.pojo.SqlQuery;
+import com.tencent.supersonic.headless.core.pojo.StructQuery;
 import com.tencent.supersonic.headless.core.translator.SemanticTranslator;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
@@ -84,6 +85,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     @Autowired
     private DimensionValuesMatchHelper dimensionValuesMatchHelper;
+
     @S2DataPermission
     @Override
     public SemanticTranslateResp translate(SemanticQueryReq queryReq, User user) throws Exception {
@@ -106,8 +108,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         SemanticQueryResp queryResp;
         if (queryId != null && condition != null && condition) {
-            List<Map.Entry<String, String>> dimensionValuesAndId = (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
-            queryResp = getSemanticQueryResp(queryReq, user,dimensionValuesAndId);
+            List<Map.Entry<String, String>> dimensionValuesAndId =
+                    (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
+            queryResp = getSemanticQueryResp(queryReq, user, dimensionValuesAndId);
             queryCache.put(fullQueryKey, true);
         } else {
             queryResp = queryByReq(queryReq, user);
@@ -118,7 +121,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     @S2DataPermission
     @SneakyThrows
-    private SemanticQueryResp getSemanticQueryResp(SemanticQueryReq queryReq, User user,List<Map.Entry<String, String>> dimensionValuesAndId) {
+    private SemanticQueryResp getSemanticQueryResp(SemanticQueryReq queryReq, User user,
+            List<Map.Entry<String, String>> dimensionValuesAndId) {
         TaskStatusEnum state = TaskStatusEnum.SUCCESS;
         log.info("[queryReq:{}]", queryReq);
         try {
@@ -148,9 +152,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
             metricDrillDownChecker.checkQuery(queryStatement);
             // 4.execute query
             SemanticQueryResp queryResp = null;
-            queryResp = dimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
-            queryUtils.populateQueryColumns(queryResp,
-                    queryStatement.getSemanticSchemaResp());
+            queryResp =
+                    dimensionValuesMatchHelper.executeQuery(dimensionValuesAndId, queryStatement);
+            queryUtils.populateQueryColumns(queryResp, queryStatement.getSemanticSchema());
 
             // 5.reset cache and set stateInfo
             Boolean setCacheSuccess = queryCache.put(cacheKey, queryResp);
@@ -211,8 +215,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             for (QueryExecutor queryExecutor : queryExecutors) {
                 if (queryExecutor.accept(queryStatement)) {
                     queryResp = queryExecutor.execute(queryStatement);
-                    queryUtils.populateQueryColumns(queryResp,
-                            queryStatement.getSemanticSchemaResp());
+                    queryUtils.populateQueryColumns(queryResp, queryStatement.getSemanticSchema());
                 }
             }
 
@@ -293,8 +296,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
         List<Dimension> timeDims = modelResp.getTimeDimension();
         if (CollectionUtils.isNotEmpty(timeDims)) {
             sql = String.format("%s and %s >= '%s' and %s <= '%s'", sql,
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getStartDate(),
-                    TimeDimensionEnum.DAY.getName(), queryDimValueReq.getDateInfo().getEndDate());
+                    queryDimValueReq.getDateInfo().getDateField(),
+                    queryDimValueReq.getDateInfo().getStartDate(),
+                    queryDimValueReq.getDateInfo().getDateField(),
+                    queryDimValueReq.getDateInfo().getEndDate());
         }
         if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
             sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"
@@ -367,9 +372,10 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (Objects.nonNull(queryStatement) && Objects.nonNull(semanticQueryReq.getSqlInfo())
                 && StringUtils.isNotBlank(semanticQueryReq.getSqlInfo().getQuerySQL())) {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
-            queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
             queryStatement.setIsTranslated(true);
         }
+        queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
+        queryStatement.setDataSetName(semanticQueryReq.getDataSetName());
         return queryStatement;
     }
 
@@ -382,7 +388,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
         queryStatement.setDataSetId(queryReq.getDataSetId());
-        queryStatement.setSemanticSchemaResp(semanticSchemaResp);
+        queryStatement.setDataSetName(queryReq.getDataSetName());
+        queryStatement.setSemanticSchema(semanticSchemaResp);
         queryStatement.setOntology(semanticSchemaManager.buildOntology(semanticSchemaResp));
         return queryStatement;
     }
@@ -391,9 +398,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
         QueryStatement queryStatement = buildQueryStatement(querySqlReq);
         queryStatement.setIsS2SQL(true);
 
-        SqlQueryParam sqlQueryParam = new SqlQueryParam();
-        sqlQueryParam.setSql(querySqlReq.getSql());
-        queryStatement.setSqlQueryParam(sqlQueryParam);
+        SqlQuery sqlQuery = new SqlQuery();
+        sqlQuery.setSql(querySqlReq.getSql());
+        queryStatement.setSqlQuery(sqlQuery);
 
         // If dataSetId or DataSetName is empty, parse dataSetId from the SQL
         if (querySqlReq.needGetDataSetId()) {
@@ -405,9 +412,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private QueryStatement buildStructQueryStatement(SemanticQueryReq queryReq) {
         QueryStatement queryStatement = buildQueryStatement(queryReq);
-        StructQueryParam structQueryParam = new StructQueryParam();
-        BeanUtils.copyProperties(queryReq, structQueryParam);
-        queryStatement.setStructQueryParam(structQueryParam);
+        StructQuery structQuery = new StructQuery();
+        BeanUtils.copyProperties(queryReq, structQuery);
+        queryStatement.setStructQuery(structQuery);
         queryStatement.setIsS2SQL(false);
         return queryStatement;
     }
@@ -416,7 +423,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
         List<QueryStatement> queryStatements = new ArrayList<>();
         for (QueryStructReq queryStructReq : queryMultiStructReq.getQueryStructReqs()) {
             QueryStatement queryStatement = buildStructQueryStatement(queryStructReq);
-            semanticTranslator.translate(queryStatement);
+            try {
+                semanticTranslator.translate(queryStatement);
+            } catch (Exception e) {
+                log.warn("Failed to translate for semantic query " + queryStructReq);
+            }
             queryStatements.add(queryStatement);
         }
         log.info("Union multiple query statements:{}", queryStatements);

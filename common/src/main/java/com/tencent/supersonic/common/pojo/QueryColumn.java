@@ -17,10 +17,12 @@ public class QueryColumn {
     private String dataFormatType;
     private DataFormat dataFormat;
     private String comment;
+    private Long modelId;
 
     public QueryColumn(String nameEn, String type) {
         this.type = type;
         this.nameEn = nameEn;
+        this.name = nameEn;
     }
 
     public QueryColumn(String name, String type, String nameEn) {

@@ -14,6 +14,7 @@ import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.config.GeneralManageConfig;
+import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -22,6 +23,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -29,8 +31,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,7 +50,9 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private GeneralManageConfig generalManageConfig;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(1);
+    @Autowired
+    @Qualifier("chatExecutor")
+    private ThreadPoolExecutor executor;
 
     @Override
     public List<Agent> getAgents(User user, AuthType authType) {
@@ -63,7 +66,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         }
         List<Long> chatAgentIds = generalManageConfig.getChatAgentIds();
         boolean hasCommonAgents = chatAgentIds != null && !chatAgentIds.isEmpty();
-        if (hasCommonAgents && chatAgentIds.contains(Long.valueOf(agent.getId()))){
+        if (hasCommonAgents && chatAgentIds.contains(Long.valueOf(agent.getId()))) {
             return true;
         }
         authType = authType == null ? AuthType.VIEWER : authType;
@@ -120,7 +123,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
      * @param agent
      */
     private void executeAgentExamplesAsync(Agent agent) {
-        executorService.execute(() -> doExecuteAgentExamples(agent));
+        executor.execute(() -> doExecuteAgentExamples(agent));
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {

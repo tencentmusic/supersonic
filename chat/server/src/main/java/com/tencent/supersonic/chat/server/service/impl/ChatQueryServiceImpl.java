@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.pojo.enums.JsqlParserType;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
@@ -41,11 +42,14 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +99,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
-        parseResultProcessors.forEach(p -> p.process(parseContext));
+
+        for (ParseResultProcessor processor : parseResultProcessors) {
+            if (processor.accept(parseContext)) {
+                processor.process(parseContext);
+            }
+        }
 
         if (!parseContext.needFeedback()) {
             chatManageService.batchAddParse(chatParseReq, parseContext.getResponse());
@@ -116,9 +125,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             }
         }
 
+        executeContext.setResponse(queryResult);
         if (queryResult != null) {
             for (ExecuteResultProcessor processor : executeResultProcessors) {
-                processor.process(executeContext, queryResult);
+                if (processor.accept(executeContext)) {
+                    processor.process(executeContext);
+                }
             }
             saveQueryResult(chatExecuteReq, queryResult);
         }
@@ -230,7 +242,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return queryResult;
     }
 
-    private boolean checkMetricReplace(ChatQueryDataReq chatQueryDataReq, SemanticParseInfo parseInfo) {
+    private boolean checkMetricReplace(ChatQueryDataReq chatQueryDataReq,
+            SemanticParseInfo parseInfo) {
         List<String> oriFields = getFieldsFromSql(parseInfo);
         Set<SchemaElement> metrics = chatQueryDataReq.getMetrics();
         if (CollectionUtils.isEmpty(oriFields) || CollectionUtils.isEmpty(metrics)) {
@@ -242,9 +255,16 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private String replaceFilters(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-                                  DataSetSchema dataSetSchema) {
+            DataSetSchema dataSetSchema) {
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
+        JsqlParserType jsqlParserType = checkJsqlParserType(correctorSql);
+        if (jsqlParserType != JsqlParserType.COMMON) {
+            log.info("校验sql结构存在子查询，使用replaceFiltersTest解析sql");
+            correctorSql = replaceFiltersByJsqlParserType(queryData, parseInfo, dataSetSchema,jsqlParserType);
+            return correctorSql;
+        }
+        log.info("校验sql结构不存在子查询，使用replaceFilters解析sql");
         // get where filter and having filter
         List<FieldExpression> whereExpressionList =
                 SqlSelectHelper.getWhereExpressions(correctorSql);
@@ -277,6 +297,313 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         correctorSql = SqlAddHelper.addHaving(correctorSql, addHavingConditions);
         log.info("correctorSql after replacing:{}", correctorSql);
         return correctorSql;
+    }
+
+    private String replaceFiltersByJsqlParserType(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
+            DataSetSchema dataSetSchema, JsqlParserType jsqlParserType) {
+
+        String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
+        log.info("correctorSql before replacing:{}", correctorSql);
+
+        Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+
+        ArrayList<Select> selectArrayList = new ArrayList<>();
+        if (jsqlParserType == JsqlParserType.WITH){
+            selectArrayList.addAll(SqlSelectHelper.getWithItem(selectStatement));
+        }else {
+
+            Select fromItemSelect = plainSelect.getFromItem(ParenthesedSelect.class).getSelect();
+            log.info("fromItemSelect is:{}", fromItemSelect);
+
+            List<Join> joins = plainSelect.getJoins();
+            FromItem fromItem = joins.get(0).getFromItem();
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
+            Select JoinItemSelect = parenthesedSelect.getSelect();
+            log.info("JoinItemSelect is:{}", JoinItemSelect);
+
+
+            selectArrayList.add(fromItemSelect);
+            selectArrayList.add(JoinItemSelect);
+        }
+
+        List<String> modifiedSubQueries = new ArrayList<>();
+        selectArrayList.forEach(select -> {
+            String selectSql = select.toString();
+            log.info("selectSql is:{}", selectSql);
+
+            Map<String, String> dateRange = extractDateRangeFromSql(selectSql);
+            log.info("Extracted date range: {}", dateRange);
+
+            // get where filter and having filter
+            List<FieldExpression> whereExpressionList =
+                    SqlSelectHelper.getWhereExpressions(selectSql);
+
+            // replace where filter
+            List<Expression> addWhereConditions = new ArrayList<>();
+            Set<String> removeWhereFieldNames =
+                    updateFilters(whereExpressionList, queryData.getDimensionFilters(),
+                            parseInfo.getDimensionFilters(), addWhereConditions);
+
+            Map<String, Map<String, String>> filedNameToValueMap = new HashMap<>();
+            Set<String> removeDataFieldNames =
+                    updateDateInfoTest(queryData, parseInfo, dataSetSchema, filedNameToValueMap,
+                            whereExpressionList, addWhereConditions, dateRange);
+            removeWhereFieldNames.addAll(removeDataFieldNames);
+
+            selectSql = SqlReplaceHelper.replaceValue(selectSql, filedNameToValueMap);
+            selectSql = SqlRemoveHelper.removeWhereCondition(selectSql, removeWhereFieldNames);
+
+            // replace having filter
+            List<FieldExpression> havingExpressionList =
+                    SqlSelectHelper.getHavingExpressions(selectSql);
+            List<Expression> addHavingConditions = new ArrayList<>();
+            Set<String> removeHavingFieldNames =
+                    updateFilters(havingExpressionList, queryData.getDimensionFilters(),
+                            parseInfo.getDimensionFilters(), addHavingConditions);
+            selectSql = SqlReplaceHelper.replaceHavingValue(selectSql, new HashMap<>());
+            selectSql = SqlRemoveHelper.removeHavingCondition(selectSql, removeHavingFieldNames);
+
+            selectSql = SqlAddHelper.addWhere(selectSql, addWhereConditions);
+            selectSql = SqlAddHelper.addHaving(selectSql, addHavingConditions);
+            log.info("selectSql after replacing:{}", selectSql);
+            modifiedSubQueries.add(selectSql);
+        });
+
+        correctorSql = rebuildCorrectorSql(correctorSql, modifiedSubQueries, jsqlParserType);
+        log.info("correctorSql after replacing:{}", correctorSql);
+        return correctorSql;
+    }
+
+    private JsqlParserType checkJsqlParserType(String correctorSql) {
+        Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            throw new IllegalArgumentException("修正S2SQL的结构有误！");
+        }
+
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+
+        FromItem fromItem = plainSelect.getFromItem();
+        List<Join> joins = plainSelect.getJoins();
+        Expression where = plainSelect.getWhere();
+        List<WithItem> withItemsList = plainSelect.getWithItemsList();
+
+        if (Objects.nonNull(withItemsList) && withItemsList.size() >= 2){
+            return JsqlParserType.WITH;
+        }
+        if (withItemsList == null && fromItem != null && joins != null && !joins.isEmpty() && where == null) {
+            log.info("非with语句，fromItem和joins不为null，where为null，返回SELECT。");
+            return JsqlParserType.SELECT;
+        }
+        return JsqlParserType.COMMON;
+    }
+
+    private String rebuildCorrectorSql(String correctorSql, List<String> modifiedSubQueries, JsqlParserType jsqlParserType) {
+        Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            throw new IllegalArgumentException("修正S2SQL的结构有误！");
+        }
+
+        if (jsqlParserType == JsqlParserType.WITH) {
+            // 针对 WITH 的 SQL 重建逻辑
+            log.info("Detected WITH clause in correctorSql, rebuilding WITH structure...");
+            rebuildWithClause(selectStatement, modifiedSubQueries);
+        } else {
+            // 普通 SELECT 的 SQL 重建逻辑
+            log.info("Detected standard SELECT structure, rebuilding...");
+            rebuildSelectClause(selectStatement, modifiedSubQueries);
+        }
+
+        String finalSql = selectStatement.toString();
+        log.info("Rebuilt correctorSql: {}", finalSql);
+
+        return finalSql;
+    }
+
+    private void rebuildWithClause(Select selectStatement, List<String> modifiedSubQueries) {
+        List<WithItem> withItemsList = selectStatement.getWithItemsList();
+        if (withItemsList == null || withItemsList.size() != modifiedSubQueries.size()) {
+            throw new IllegalArgumentException("WITH 子查询数量与修改后的子查询数量不匹配！");
+        }
+
+        for (int i = 0; i < withItemsList.size(); i++) {
+            WithItem withItem = withItemsList.get(i);
+            String modifiedSubQuery = modifiedSubQueries.get(i);
+
+            // 使用修改后的 SQL 替换 WITH 子查询
+            Select modifiedWithSelect = SqlSelectHelper.getSelect(modifiedSubQuery);
+            Select withSelect = withItem.getSelect();
+            if (withSelect instanceof ParenthesedSelect) {
+                ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withSelect;
+                parenthesedSelect.setSelect(modifiedWithSelect);
+            }
+        }
+    }
+    private void rebuildSelectClause(Select selectStatement, List<String> modifiedSubQueries) {
+        if (!(selectStatement instanceof PlainSelect)) {
+            throw new IllegalArgumentException("SELECT 结构有误，无法解析！");
+        }
+
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+
+        // 替换 FROM 子查询
+        if (modifiedSubQueries.size() < 1) {
+            throw new IllegalArgumentException("缺少 FROM 子查询！");
+        }
+        ParenthesedSelect fromItem = (ParenthesedSelect) plainSelect.getFromItem();
+        Select fromItemSelect = SqlSelectHelper.getSelect(modifiedSubQueries.get(0));
+        fromItem.setSelect(fromItemSelect);
+
+        // 替换 JOIN 子查询
+        List<Join> joins = plainSelect.getJoins();
+        if (joins != null && !joins.isEmpty()) {
+            for (int i = 0; i < joins.size(); i++) {
+                if (i + 1 >= modifiedSubQueries.size()) {
+                    throw new IllegalArgumentException("JOIN 子查询数量不足！");
+                }
+                Join join = joins.get(i);
+                ParenthesedSelect joinFromItem = (ParenthesedSelect) join.getRightItem();
+                Select joinItemSelect = SqlSelectHelper.getSelect(modifiedSubQueries.get(i + 1));
+                joinFromItem.setSelect(joinItemSelect);
+            }
+        }
+    }
+
+    private Map<String, String> extractDateRangeFromSql(String sql) {
+        Map<String, String> dateRange = new HashMap<>();
+        Select select = SqlSelectHelper.getSelect(sql);
+        if (!(select instanceof PlainSelect plainSelect)) {
+            return dateRange;
+        }
+
+        Expression where = plainSelect.getWhere();
+        if (where == null) {
+            return dateRange;
+        }
+
+        extractDateRangeFromExpression(where, dateRange);
+        return dateRange;
+    }
+
+    private void extractDateRangeFromExpression(Expression expression,
+            Map<String, String> dateRange) {
+        if (expression instanceof EqualsTo equalsTo) {
+            if (equalsTo.getLeftExpression() instanceof Column
+                    && "数据日期".equals(((Column) equalsTo.getLeftExpression()).getColumnName())) {
+                if (equalsTo.getRightExpression() instanceof StringValue) {
+                    String date = ((StringValue) equalsTo.getRightExpression()).getValue();
+                    dateRange.put("startDate", date);
+                    dateRange.put("endDate", date);
+                }
+            }
+        } else if (expression instanceof GreaterThanEquals greaterThanEquals) {
+            if (greaterThanEquals.getLeftExpression() instanceof Column && "数据日期"
+                    .equals(((Column) greaterThanEquals.getLeftExpression()).getColumnName())) {
+                if (greaterThanEquals.getRightExpression() instanceof StringValue) {
+                    dateRange.put("startDate",
+                            ((StringValue) greaterThanEquals.getRightExpression()).getValue());
+                }
+            }
+        } else if (expression instanceof GreaterThan greaterThan) {
+            if (greaterThan.getLeftExpression() instanceof Column
+                    && "数据日期".equals(((Column) greaterThan.getLeftExpression()).getColumnName())) {
+                if (greaterThan.getRightExpression() instanceof StringValue) {
+                    String originalDate =
+                            ((StringValue) greaterThan.getRightExpression()).getValue();
+                    String adjustedDate = DateUtils.getNextDate(originalDate);
+                    dateRange.put("startDate", adjustedDate);
+                }
+            }
+        } else if (expression instanceof MinorThanEquals minorThanEquals) {
+            if (minorThanEquals.getLeftExpression() instanceof Column && "数据日期"
+                    .equals(((Column) minorThanEquals.getLeftExpression()).getColumnName())) {
+                if (minorThanEquals.getRightExpression() instanceof StringValue) {
+                    dateRange.put("endDate",
+                            ((StringValue) minorThanEquals.getRightExpression()).getValue());
+                }
+            }
+        } else if (expression instanceof MinorThan minorThan) {
+            if (minorThan.getLeftExpression() instanceof Column
+                    && "数据日期".equals(((Column) minorThan.getLeftExpression()).getColumnName())) {
+                if (minorThan.getRightExpression() instanceof StringValue) {
+                    String originalDate = ((StringValue) minorThan.getRightExpression()).getValue();
+                    String adjustedDate = DateUtils.getPreviousDate(originalDate);
+                    dateRange.put("endDate", adjustedDate);
+                }
+            }
+        } else if (expression instanceof AndExpression andExpression) {
+            // 递归处理 AND 条件
+            extractDateRangeFromExpression(andExpression.getLeftExpression(), dateRange);
+            extractDateRangeFromExpression(andExpression.getRightExpression(), dateRange);
+        }
+    }
+
+
+    private Set<String> updateDateInfoTest(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
+            DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
+            List<FieldExpression> fieldExpressionList, List<Expression> addConditions,
+            Map<String, String> dateRange) {
+        Set<String> removeFieldNames = new HashSet<>();
+        if (Objects.isNull(queryData.getDateInfo())) {
+            return removeFieldNames;
+        }
+        if (queryData.getDateInfo().getUnit() > 1) {
+            queryData.getDateInfo()
+                    .setStartDate(DateUtils.getBeforeDate(queryData.getDateInfo().getUnit() + 1));
+            queryData.getDateInfo().setEndDate(DateUtils.getBeforeDate(0));
+        }
+        SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
+
+        String startDate = dateRange.get("startDate");
+        String endDate = dateRange.get("endDate");
+        // startDate equals to endDate
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            if (partitionDimension.getName().equals(fieldExpression.getFieldName())) {
+                // first remove,then add
+                removeFieldNames.add(partitionDimension.getName());
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                String greaterThanEqualsDate;
+                String minorThanEqualsDate;
+                if (startDate != null) {
+                    greaterThanEqualsDate = startDate;
+                } else {
+                    greaterThanEqualsDate = queryData.getDateInfo().getStartDate();
+                }
+                addTimeFilters(greaterThanEqualsDate, greaterThanEquals, addConditions,
+                        partitionDimension);
+                if (endDate != null) {
+                    minorThanEqualsDate = endDate;
+                } else {
+                    minorThanEqualsDate = queryData.getDateInfo().getEndDate();
+                }
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                addTimeFilters(minorThanEqualsDate, minorThanEquals, addConditions,
+                        partitionDimension);
+                break;
+            }
+        }
+        for (FieldExpression fieldExpression : fieldExpressionList) {
+            for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
+                if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
+                        && FilterOperatorEnum.LIKE.getValue()
+                                .equalsIgnoreCase(fieldExpression.getOperator())) {
+                    Map<String, String> replaceMap = new HashMap<>();
+                    String preValue = fieldExpression.getFieldValue().toString();
+                    String curValue = queryFilter.getValue().toString();
+                    if (preValue.startsWith("%")) {
+                        curValue = "%" + curValue;
+                    }
+                    if (preValue.endsWith("%")) {
+                        curValue = curValue + "%";
+                    }
+                    replaceMap.put(preValue, curValue);
+                    filedNameToValueMap.put(fieldExpression.getFieldName(), replaceMap);
+                    break;
+                }
+            }
+        }
+        parseInfo.setDateInfo(queryData.getDateInfo());
+        return removeFieldNames;
     }
 
     private String replaceMetrics(SemanticParseInfo parseInfo, SchemaElement metric) {

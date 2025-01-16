@@ -7,12 +7,12 @@ package com.tencent.supersonic.common.exception;
  * @create: 2021-04-29 17:00
  **/
 
-public class EasyBiException extends  RuntimeException{
+public class EasyBiException extends RuntimeException {
     private IErrorCode errorCode;
 
-    public EasyBiException(IErrorCode errorCode){
+    public EasyBiException(IErrorCode errorCode) {
         super(errorCode.getMessage());
-        this.errorCode=errorCode;
+        this.errorCode = errorCode;
     }
 
     public EasyBiException(String message) {

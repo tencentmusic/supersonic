@@ -8,16 +8,7 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -183,6 +174,8 @@ public class SqlRemoveHelper {
                 handleInExpression((InExpression) expression, removeFieldNames);
             } else if (expression instanceof LikeExpression) {
                 handleLikeExpression((LikeExpression) expression, removeFieldNames);
+            } else if (expression instanceof Between) {
+                handleBetweenExpression((Between) expression, removeFieldNames);
             }
         } catch (JSQLParserException e) {
             log.error("JSQLParserException", e);
@@ -226,6 +219,17 @@ public class SqlRemoveHelper {
         updateLikeExpression(likeExpression, constantExpression);
     }
 
+    private static void handleBetweenExpression(Between between, Set<String> removeFieldNames)
+            throws JSQLParserException {
+        String columnName = SqlSelectHelper.getColumnName(between.getLeftExpression());
+        if (!removeFieldNames.contains(columnName)) {
+            return;
+        }
+        Between constantExpression =
+                (Between) CCJSqlParserUtil.parseCondExpression(JsqlConstants.BETWEEN_AND_CONSTANT);
+        updateBetweenExpression(between, constantExpression);
+    }
+
     private static void updateComparisonOperator(ComparisonOperator original,
             ComparisonOperator constantExpression) {
         original.setLeftExpression(constantExpression.getLeftExpression());
@@ -243,6 +247,12 @@ public class SqlRemoveHelper {
             LikeExpression constantExpression) {
         original.setLeftExpression(constantExpression.getLeftExpression());
         original.setRightExpression(constantExpression.getRightExpression());
+    }
+
+    private static void updateBetweenExpression(Between between, Between constantExpression) {
+        between.setBetweenExpressionEnd(constantExpression.getBetweenExpressionEnd());
+        between.setBetweenExpressionStart(constantExpression.getBetweenExpressionStart());
+        between.setLeftExpression(constantExpression.getLeftExpression());
     }
 
     public static String removeHavingCondition(String sql, Set<String> removeFieldNames) {
@@ -372,6 +382,10 @@ public class SqlRemoveHelper {
         } else if (expression instanceof LikeExpression) {
             LikeExpression likeExpression = (LikeExpression) expression;
             Expression leftExpression = likeExpression.getLeftExpression();
+            return recursionBase(leftExpression, expression, sqlEditEnum);
+        } else if (expression instanceof Between) {
+            Between between = (Between) expression;
+            Expression leftExpression = between.getLeftExpression();
             return recursionBase(leftExpression, expression, sqlEditEnum);
         }
         return expression;

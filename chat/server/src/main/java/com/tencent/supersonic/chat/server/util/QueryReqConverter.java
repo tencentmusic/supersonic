@@ -21,7 +21,7 @@ public class QueryReqConverter {
         queryNLReq.setDataSetIds(getDataSetIds(parseContext));
         queryNLReq.setChatAppConfig(parseContext.getAgent().getChatAppConfig());
         queryNLReq.setSelectedParseInfo(parseContext.getRequest().getSelectedParse());
-        if (parseContext.getResponse() != null){
+        if (parseContext.getResponse() != null) {
             queryNLReq.setQueryId(parseContext.getResponse().getQueryId());
         }
         return queryNLReq;

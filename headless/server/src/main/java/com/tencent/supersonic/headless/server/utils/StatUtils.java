@@ -137,8 +137,8 @@ public class StatUtils {
         QueryStat queryStatInfo = new QueryStat();
         List<String> aggFields = SqlSelectHelper.getAggregateFields(querySqlReq.getSql());
         List<String> allFields = SqlSelectHelper.getAllSelectFields(querySqlReq.getSql());
-        List<String> dimensions =
-                allFields.stream().filter(aggFields::contains).collect(Collectors.toList());
+        List<String> dimensions = allFields.stream().filter(field -> !aggFields.contains(field))
+                .collect(Collectors.toList());
 
         String userName = getUserName(facadeUser);
         try {

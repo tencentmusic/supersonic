@@ -7,6 +7,8 @@ import com.tencent.supersonic.headless.chat.knowledge.MapResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,10 +16,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Slf4j
 public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStrategy<T> {
+
+    @Autowired
+    @Qualifier("mapExecutor")
+    private ThreadPoolExecutor executor;
+
     @Override
     public Map<MatchText, List<T>> match(ChatQueryContext chatQueryContext, List<S2Term> terms,
             Set<Long> detectDataSetIds) {
@@ -60,6 +69,18 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
             } else {
                 existResults.add(oneRoundResult);
             }
+        }
+    }
+
+    protected void executeTasks(List<Callable<Void>> tasks) {
+        try {
+            executor.invokeAll(tasks);
+            for (Callable<Void> future : tasks) {
+                future.call();
+            }
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Task execution interrupted", e);
         }
     }
 

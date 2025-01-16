@@ -18,6 +18,8 @@ public class ModelDetail {
 
     private String queryType;
 
+    private String dbType;
+
     private String sqlQuery;
 
     private String tableQuery;

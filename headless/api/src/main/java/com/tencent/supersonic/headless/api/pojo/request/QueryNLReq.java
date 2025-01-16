@@ -32,6 +32,7 @@ public class QueryNLReq extends SemanticQueryReq implements Serializable {
     private SemanticParseInfo selectedParseInfo;
     private boolean descriptionMapped;
     private Long queryId;
+
     @Override
     public String toCustomizedString() {
         StringBuilder stringBuilder = new StringBuilder("{");

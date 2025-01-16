@@ -2,11 +2,7 @@ package com.tencent.supersonic.chat.server.pojo;
 
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Date;
 
@@ -19,6 +15,8 @@ public class ChatMemory {
     private Long id;
 
     private Integer agentId;
+
+    private Long queryId;
 
     private String question;
 

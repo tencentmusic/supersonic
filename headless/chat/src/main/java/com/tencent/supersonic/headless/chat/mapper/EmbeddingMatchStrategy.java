@@ -16,10 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.EMBEDDING_MAPPER_NUMBER;
@@ -40,7 +41,7 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
     @Override
     public List<EmbeddingResult> detectByBatch(ChatQueryContext chatQueryContext,
             Set<Long> detectDataSetIds, Set<String> detectSegments) {
-        Set<EmbeddingResult> results = new HashSet<>();
+        Set<EmbeddingResult> results = ConcurrentHashMap.newKeySet();
         int embeddingMapperBatch = Integer
                 .valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
 
@@ -52,12 +53,24 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
         List<List<String>> queryTextsSubList =
                 Lists.partition(queryTextsList, embeddingMapperBatch);
 
+        List<Callable<Void>> tasks = new ArrayList<>();
         for (List<String> queryTextsSub : queryTextsSubList) {
+            tasks.add(createTask(chatQueryContext, detectDataSetIds, queryTextsSub, results));
+        }
+        executeTasks(tasks);
+        return new ArrayList<>(results);
+    }
+
+    private Callable<Void> createTask(ChatQueryContext chatQueryContext, Set<Long> detectDataSetIds,
+            List<String> queryTextsSub, Set<EmbeddingResult> results) {
+        return () -> {
             List<EmbeddingResult> oneRoundResults =
                     detectByQueryTextsSub(detectDataSetIds, queryTextsSub, chatQueryContext);
-            selectResultInOneRound(results, oneRoundResults);
-        }
-        return new ArrayList<>(results);
+            synchronized (results) {
+                selectResultInOneRound(results, oneRoundResults);
+            }
+            return null;
+        };
     }
 
     private List<EmbeddingResult> detectByQueryTextsSub(Set<Long> detectDataSetIds,

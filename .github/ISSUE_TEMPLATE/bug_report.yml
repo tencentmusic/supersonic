@@ -11,59 +11,28 @@ body:
         If it is an idea or help wanted, please go to:
         [Github Discussion](https://github.com/tencentmusic/supersonic/discussions)
 
-  - type: checkboxes
+  - type: input
+    id: version
     attributes:
-      label: Search before asking
-      description: >
-        Please make sure to search in the [issues](https://github.com/tencentmusic/supersonic/issues?q=is%3Aissue) first to see
-        whether the same issue was reported already.
-      options:
-        - label: >
-            I had searched in the [issues](https://github.com/tencentmusic/supersonic/issues?q=is%3Aissue) and found no similar
-            issues.
-          required: true
+      label: SuperSonic version
+      description: Please tell us which version you are using.
+      placeholder: "0.9.8"
+    validations:
+      required: true
 
-  - type: textarea
+  - type: input
+    id: organization
     attributes:
-      label: Version
-      description: What is the current version
-      placeholder: >
-        Please provide the version you are using.
-        If it is the trunk version, please input commit id.
+      label: Your organization
+      description: Please tell us your organization so that we can provide you better support and advice.
+      placeholder: "TME..."
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: What's Wrong?
-      description: Describe the bug.
-      placeholder: >
-        Describe the specific problem, the more detailed the better.
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: What You Expected?
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: How to Reproduce?
-      placeholder: >
-        Please try to give reproducing steps to facilitate quick location of the problem.
-
-        - What actions were performed
-        - Table building statement
-        - Import statement
-        - Cluster information: number of nodes, configuration, etc.
-
-        If it is hard to reproduce, please also explain the general scene.
-
-  - type: textarea
-    attributes:
-      label: Anything Else?
+      label: Description
+      description: Describe the bug you met.
 
   - type: checkboxes
     attributes:
@@ -73,16 +42,6 @@ body:
         If you are willing to submit a PR to fix this problem, please tick it.
       options:
         - label: Yes I am willing to submit a PR!
-
-  - type: checkboxes
-    attributes:
-      label: Code of Conduct
-      description: The Code of Conduct helps create a safe space for everyone. We require that everyone agrees to it.
-      options:
-        - label: >
-            I agree to follow this project's
-            [Code of Conduct](https://www.apache.org/foundation/policies/conduct)
-          required: true
 
   - type: markdown
     attributes:

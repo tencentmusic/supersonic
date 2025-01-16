@@ -35,7 +35,8 @@ public class LLMSqlParser implements SemanticParser {
             if (dataSetId == null) {
                 return;
             }
-            log.info("try generating query statement for dataSetId:{}", dataSetId);
+            log.info("try generating query statement for query:{}, dataSetId:{}",
+                    queryCtx.getRequest().getQueryText(), dataSetId);
 
             // 3.invoke LLM service to do parsing.
             tryParse(queryCtx, dataSetId);

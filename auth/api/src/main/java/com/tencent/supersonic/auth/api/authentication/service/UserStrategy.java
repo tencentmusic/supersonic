@@ -1,11 +1,12 @@
 package com.tencent.supersonic.auth.api.authentication.service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.tencent.supersonic.common.pojo.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserStrategy {
+
+    String getStrategyName();
 
     boolean accept(boolean isEnableAuthentication);
 

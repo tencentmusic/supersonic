@@ -8,7 +8,6 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
-import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -21,12 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +28,12 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 public class ParseInfoFormatProcessor implements ParseResultProcessor {
+
+    @Override
+    public boolean accept(ParseContext parseContext) {
+        return !parseContext.getResponse().getSelectedParses().isEmpty();
+    }
+
     @Override
     public void process(ParseContext parseContext) {
         parseContext.getResponse().getSelectedParses().forEach(p -> {
@@ -96,7 +96,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
 
         // extract date filter from S2SQL
         try {
-            if (parseInfo.getDateInfo() == null && !CollectionUtils.isEmpty(expressions)) {
+            if (!CollectionUtils.isEmpty(expressions)) {
                 parseInfo.setDateInfo(extractDateFilter(expressions, dsSchema));
             }
         } catch (Exception e) {
@@ -216,9 +216,6 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
     }
 
     private static boolean isPartitionDimension(DataSetSchema dataSetSchema, String sqlFieldName) {
-        if (TimeDimensionEnum.containsTimeDimension(sqlFieldName)) {
-            return true;
-        }
         if (Objects.isNull(dataSetSchema) || Objects.isNull(dataSetSchema.getPartitionDimension())
                 || Objects.isNull(dataSetSchema.getPartitionDimension().getName())) {
             return false;

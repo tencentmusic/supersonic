@@ -32,6 +32,16 @@ public class Dimension {
         this.type = type;
         this.isCreateDimension = isCreateDimension;
         this.bizName = bizName;
+        this.expr = bizName;
+    }
+
+    public Dimension(String name, String bizName, String expr, DimensionType type,
+            Integer isCreateDimension) {
+        this.name = name;
+        this.type = type;
+        this.isCreateDimension = isCreateDimension;
+        this.bizName = bizName;
+        this.expr = expr;
     }
 
     public Dimension(String name, String bizName, DimensionType type, Integer isCreateDimension,
@@ -45,12 +55,7 @@ public class Dimension {
         this.bizName = bizName;
     }
 
-    public static Dimension getDefault() {
-        return new Dimension("数据日期", "imp_date", DimensionType.partition_time, 0, "imp_date",
-                Constants.DAY_FORMAT, new DimensionTimeTypeParams("false", "day"));
-    }
-
     public String getFieldName() {
-        return bizName;
+        return expr;
     }
 }

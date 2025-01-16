@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_query`
     `create_time`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `query_text`          mediumtext,
     `user_name`         varchar(150)  DEFAULT NULL COMMENT '',
-    `query_state`             int(1) DEFAULT NULL,
+    `query_state`             int DEFAULT NULL,
     `chat_id`           BIGINT NOT NULL , -- context chat id
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_statistics`
     `user_name`         varchar(150)  DEFAULT NULL COMMENT '',
     `query_text`          varchar(200),
     `interface_name`         varchar(100)  DEFAULT NULL COMMENT '',
-    `cost` INT(6) NOT NULL ,
+    `cost` INT NOT NULL ,
     `type` INT NOT NULL ,
     `create_time`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -86,14 +86,15 @@ COMMENT ON TABLE s2_chat_config IS 'chat config information table ';
 CREATE TABLE IF NOT EXISTS `s2_chat_memory` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `question` varchar(655)    ,
+    `query_id`  BIGINT    ,
     `agent_id`  INT    ,
     `db_schema`  TEXT    ,
     `s2_sql` TEXT   ,
     `side_info` TEXT    ,
-    `status` char(10)   ,
-    `llm_review` char(10)   ,
+    `status` varchar(10)   ,
+    `llm_review` varchar(10)   ,
     `llm_comment`   TEXT,
-    `human_review` char(10) ,
+    `human_review` varchar(10) ,
     `human_comment` TEXT    ,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP  ,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
@@ -298,7 +299,7 @@ CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
   `sql_cmd_md5` varchar(200) DEFAULT NULL, -- sql type request parameter md5
   `query_struct_cmd`LONGVARCHAR , -- struct type request parameter
   `struct_cmd_md5` varchar(200) DEFAULT NULL, -- struct type request parameter md5值
-  `sql`LONGVARCHAR ,
+  `query_sql` LONGVARCHAR ,
   `sql_md5` varchar(200) DEFAULT NULL, -- sql md5
   `query_engine` varchar(20) DEFAULT NULL,
   `elapsed_ms` bigINT DEFAULT NULL,
