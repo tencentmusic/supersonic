@@ -1,16 +1,15 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum EngineType {
-    TDW(0, "tdw"),
-    MYSQL(1, "mysql"),
-    DORIS(2, "doris"),
-    CLICKHOUSE(3, "clickhouse"),
-    KAFKA(4, "kafka"),
-    H2(5, "h2"),
-    POSTGRESQL(6, "postgresql"),
-    OTHER(7, "other"),
-    DUCKDB(8, "duckdb"),
-    HANADB(9, "hanadb");
+    TDW(0, "TDW"),
+    MYSQL(1, "MYSQL"),
+    DORIS(2, "DORIS"),
+    CLICKHOUSE(3, "CLICKHOUSE"),
+    H2(5, "H2"),
+    POSTGRESQL(6, "POSTGRESQL"),
+    OTHER(7, "OTHER"),
+    DUCKDB(8, "DUCKDB"),
+    HANADB(9, "HANADB");
 
     private Integer code;
 

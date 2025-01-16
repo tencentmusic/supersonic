@@ -96,7 +96,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
 
         // extract date filter from S2SQL
         try {
-            if (parseInfo.getDateInfo() == null && !CollectionUtils.isEmpty(expressions)) {
+            if (!CollectionUtils.isEmpty(expressions)) {
                 parseInfo.setDateInfo(extractDateFilter(expressions, dsSchema));
             }
         } catch (Exception e) {

@@ -144,6 +144,15 @@ public class SqlSelectHelper {
         return result;
     }
 
+    public static Set<String> getAliasFields(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Set<String> aliasFields = new HashSet<>();
+        plainSelects.forEach(select -> {
+            aliasFields.addAll(getAliasFields(select));
+        });
+        return aliasFields;
+    }
+
     public static List<PlainSelect> getPlainSelect(Select selectStatement) {
         if (selectStatement == null) {
             return null;
