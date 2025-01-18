@@ -21,6 +21,6 @@ public class DbAdaptorFactory {
     }
 
     public static DbAdaptor getEngineAdaptor(String engineType) {
-        return dbAdaptorMap.get(engineType);
+        return dbAdaptorMap.get(engineType.toUpperCase());
     }
 }

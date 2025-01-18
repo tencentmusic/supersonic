@@ -59,9 +59,15 @@ public class DateConf {
             return false;
         }
         DateConf dateConf = (DateConf) o;
-        return dateMode == dateConf.dateMode && Objects.equals(startDate, dateConf.startDate)
-                && Objects.equals(endDate, dateConf.endDate) && Objects.equals(unit, dateConf.unit)
-                && Objects.equals(period, dateConf.period);
+        if (dateMode != dateConf.dateMode) {
+            return false;
+        }
+        if (dateMode == DateMode.RECENT) {
+            return Objects.equals(unit, dateConf.unit) && Objects.equals(period, dateConf.period);
+        } else {
+            return Objects.equals(startDate, dateConf.startDate)
+                    && Objects.equals(endDate, dateConf.endDate);
+        }
     }
 
     @Override

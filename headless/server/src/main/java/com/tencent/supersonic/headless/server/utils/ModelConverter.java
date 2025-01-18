@@ -28,8 +28,7 @@ public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        // ModelDetail modelDetail = createModelDetail(modelReq);
-        ModelDetail modelDetail = modelReq.getModelDetail();
+        ModelDetail modelDetail = createModelDetail(modelReq);
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
@@ -267,16 +266,35 @@ public class ModelConverter {
     private static ModelDetail createModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
-        if (measures == null) {
-            measures = Lists.newArrayList();
-        }
-        for (Measure measure : measures) {
-            if (StringUtils.isBlank(measure.getBizName())) {
-                continue;
+        List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
+        List<Identify> identifiers = modelReq.getModelDetail().getIdentifiers();
+
+        if (measures != null) {
+            for (Measure measure : measures) {
+                if (StringUtils.isNotBlank(measure.getBizName())
+                        && StringUtils.isBlank(measure.getExpr())) {
+                    measure.setExpr(measure.getBizName());
+                }
             }
-            measure.setExpr(measure.getBizName());
-            measure.setBizName(String.format("%s_%s", modelReq.getBizName(), measure.getExpr()));
         }
+        if (dimensions != null) {
+            for (Dimension dimension : dimensions) {
+                if (StringUtils.isNotBlank(dimension.getBizName())
+                        && StringUtils.isBlank(dimension.getExpr())) {
+                    dimension.setExpr(dimension.getBizName());
+                }
+            }
+        }
+        if (identifiers != null) {
+            for (Identify identify : identifiers) {
+                if (StringUtils.isNotBlank(identify.getBizName())
+                        && StringUtils.isBlank(identify.getName())) {
+                    identify.setName(identify.getBizName());
+                }
+                identify.setIsCreateDimension(1);
+            }
+        }
+
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }

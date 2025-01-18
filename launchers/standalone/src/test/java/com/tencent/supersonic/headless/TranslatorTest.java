@@ -92,7 +92,7 @@ public class TranslatorTest extends BaseTest {
                 .translate(QueryReqBuilder.buildS2SQLReq(sql, dataSetId), User.getDefaultUser());
         assertNotNull(explain);
         assertNotNull(explain.getQuerySQL());
-        assertTrue(explain.getQuerySQL().contains("department"));
+        assertTrue(explain.getQuerySQL().contains("user_name"));
         assertTrue(explain.getQuerySQL().contains("pv"));
         executeSql(explain.getQuerySQL());
     }
