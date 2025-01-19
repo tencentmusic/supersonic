@@ -138,15 +138,14 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user) {
-        DatabaseResp databaseResp = getDatabase(id);
+    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, User user) {
+        DatabaseResp databaseResp = getDatabase(sqlExecuteReq.getId());
         if (databaseResp == null) {
             return new SemanticQueryResp();
         }
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
-        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(),
-                Lists.newArrayList());
+        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
