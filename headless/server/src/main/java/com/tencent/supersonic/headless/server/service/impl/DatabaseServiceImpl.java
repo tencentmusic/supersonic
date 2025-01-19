@@ -145,7 +145,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         }
         checkPermission(databaseResp, user);
         String sql = sqlExecuteReq.getSql();
-        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(), Lists.newArrayList());
+        sql = SqlVariableParseUtils.parse(sql, sqlExecuteReq.getSqlVariables(),
+                Lists.newArrayList());
         return executeSql(sql, databaseResp);
     }
 
