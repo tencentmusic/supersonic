@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { Button, DatePicker, Row, Col } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, ReloadOutlined } from '@ant-design/icons';
@@ -37,6 +37,8 @@ type Props = {
   onDateInfoChange: (dateRange: any) => void;
   onRefresh: () => void;
   handlePresetClick: any;
+  isGoRefresh?: boolean;
+  setIsGoRefresh?: (isGoRefresh:boolean)=> void;
 };
 
 type RangeValue = [Dayjs, Dayjs];
@@ -61,7 +63,15 @@ const ParseTip: React.FC<Props> = ({
   onDateInfoChange,
   onRefresh,
   handlePresetClick,
+  isGoRefresh,
+  setIsGoRefresh
 }) => {
+  useEffect(() => {
+    if (isGoRefresh) {
+      onRefresh()
+      setIsGoRefresh && setIsGoRefresh(false)
+    }
+  }, [isGoRefresh]);
   const ranges: Record<RangeKeys, RangeValue> = {
     近7日: [dayjs().subtract(7, 'day'), dayjs()],
     近14日: [dayjs().subtract(14, 'day'), dayjs()],
