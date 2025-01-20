@@ -9,7 +9,7 @@ import {
   RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { chatExecute, chatParse, queryData, deleteQuery, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
@@ -102,7 +102,7 @@ const ChatItem: React.FC<Props> = ({
     {}
   );
   const [isParserError, setIsParseError] = useState<boolean>(false);
-
+  const [isGoRefresh , setIsGoRefresh] = useState<boolean>(false);
   const resetState = () => {
     setParseLoading(false);
     setParseTimeCost(undefined);
@@ -171,6 +171,26 @@ const ChatItem: React.FC<Props> = ({
     }
     try {
       const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
+      // todo 
+      // 判断res.data.queryResults是否长度为1 且 res.data.resultType为true 
+      // 如果是则setDimensionFitlers将dimensionFilters里对应的value设置为res.data.queryResults[0]里的值
+      // 然后调用onRefresh根据新条件重新查询
+      if(res.data.queryResults?.length === 1 && res.data.resultType){
+        setDimensionFilters(filters => {
+          const newFilters = filters.map(item => {  
+            const nameEn = res.data.queryColumns?.find((queryColumnsItem:{ name: string; nameEn: string }) => {
+              return queryColumnsItem.name === item.name
+            })?.nameEn
+            if(nameEn){
+              item.value = res.data.queryResults[0][nameEn];
+            }
+            return item;
+          })
+          return newFilters;
+        })
+        // 通知ParseTip触发onRefresh
+        setIsGoRefresh(true)
+      }
       const valid = updateData(res);
       onMsgDataLoaded?.(
         {
@@ -218,6 +238,7 @@ const ChatItem: React.FC<Props> = ({
     });
     setParseLoading(false);
     const { code, data } = parseData || {};
+    console.log(data,'data')
     const { state, selectedParses, candidateParses, queryId, parseTimeCost, errorMsg } = data || {};
     const parses = selectedParses?.concat(candidateParses || []) || [];
     if (
@@ -474,6 +495,8 @@ const ChatItem: React.FC<Props> = ({
 
               {!preParseMode && (
                 <ParseTip
+                  isGoRefresh={isGoRefresh}
+                  setIsGoRefresh={setIsGoRefresh}
                   isSimpleMode={isSimpleMode}
                   parseLoading={parseLoading}
                   parseInfoOptions={parseInfoOptions}
