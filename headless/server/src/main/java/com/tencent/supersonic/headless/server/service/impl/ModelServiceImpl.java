@@ -627,7 +627,7 @@ public class ModelServiceImpl implements ModelService {
     private DataItem getDataItem(ModelDO modelDO) {
         return DataItem.builder().id(modelDO.getId().toString()).name(modelDO.getName())
                 .bizName(modelDO.getBizName()).modelId(modelDO.getId().toString())
-                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.DIMENSION).build();
+                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.MODEL).build();
     }
 
 }

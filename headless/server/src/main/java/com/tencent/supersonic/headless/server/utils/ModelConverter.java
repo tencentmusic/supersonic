@@ -271,26 +271,24 @@ public class ModelConverter {
 
         if (measures != null) {
             for (Measure measure : measures) {
-                if (StringUtils.isBlank(measure.getBizName())) {
-                    continue;
+                if (StringUtils.isNotBlank(measure.getBizName())
+                        && StringUtils.isBlank(measure.getExpr())) {
+                    measure.setExpr(measure.getBizName());
                 }
-                measure.setExpr(measure.getBizName());
             }
         }
         if (dimensions != null) {
             for (Dimension dimension : dimensions) {
-                if (StringUtils.isBlank(dimension.getBizName())) {
-                    continue;
+                if (StringUtils.isNotBlank(dimension.getBizName())
+                        && StringUtils.isBlank(dimension.getExpr())) {
+                    dimension.setExpr(dimension.getBizName());
                 }
-                dimension.setExpr(dimension.getBizName());
             }
         }
         if (identifiers != null) {
             for (Identify identify : identifiers) {
-                if (StringUtils.isBlank(identify.getBizName())) {
-                    continue;
-                }
-                if (StringUtils.isBlank(identify.getName())) {
+                if (StringUtils.isNotBlank(identify.getBizName())
+                        && StringUtils.isBlank(identify.getName())) {
                     identify.setName(identify.getBizName());
                 }
                 identify.setIsCreateDimension(1);

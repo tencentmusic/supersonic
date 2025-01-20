@@ -12,8 +12,8 @@ import com.tencent.supersonic.auth.authentication.persistence.repository.UserRep
 import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
-import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.*;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,19 +39,10 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
         authenticationConfig = ContextUtils.getBean(AuthenticationConfig.class);
         userServiceImpl = ContextUtils.getBean(UserServiceImpl.class);
         tokenService = ContextUtils.getBean(TokenService.class);
-        s2ThreadContext = ContextUtils.getBean(S2ThreadContext.class);
         if (!authenticationConfig.isEnabled()) {
-            setFakerUser(request);
             return true;
         }
-        if (isInternalRequest(request)) {
-            setFakerUser(request);
-            return true;
-        }
-        if (isAppRequest(request)) {
-            setFakerUser(request);
-            return true;
-        }
+
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
