@@ -28,7 +28,7 @@ public class ResultFormatter {
         }
         for (Map<String, Object> row : queryResults) {
             for (QueryColumn column : queryColumns) {
-                String columnKey = column.getNameEn();
+                String columnKey = column.getBizName();
                 Object value = row.get(columnKey);
                 table.append("| ").append(value != null ? value.toString() : "").append(" ");
             }

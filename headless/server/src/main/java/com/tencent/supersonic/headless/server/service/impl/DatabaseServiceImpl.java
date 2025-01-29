@@ -257,7 +257,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         List<DBColumn> dbColumns = Lists.newArrayList();
         for (QueryColumn queryColumn : semanticQueryResp.getColumns()) {
             DBColumn dbColumn = new DBColumn();
-            dbColumn.setColumnName(queryColumn.getNameEn());
+            dbColumn.setColumnName(queryColumn.getBizName());
             dbColumn.setDataType(queryColumn.getType());
             dbColumns.add(dbColumn);
         }

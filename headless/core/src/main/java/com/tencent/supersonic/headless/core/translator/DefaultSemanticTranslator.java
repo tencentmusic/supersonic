@@ -55,12 +55,12 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
 
     private void mergeOntologyQuery(QueryStatement queryStatement) throws Exception {
         OntologyQuery ontologyQuery = queryStatement.getOntologyQuery();
-        log.info("parse with ontology: [{}]", ontologyQuery);
-
         if (Objects.isNull(ontologyQuery) || StringUtils.isBlank(ontologyQuery.getSql())) {
-            throw new Exception(String.format("parse ontology table [%s] error [%s]",
-                    queryStatement.getSqlQuery().getTable(), queryStatement.getErrMsg()));
+            throw new Exception(String.format("parse ontology sql [%s] error [%s]",
+                    StringUtils.normalizeSpace(queryStatement.getSqlQuery().getSql()),
+                    queryStatement.getErrMsg()));
         }
+        log.info("parse with ontologyQuery fields: [{}]", ontologyQuery.getFields());
 
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
         String ontologyOuterSql = sqlQuery.getSql();

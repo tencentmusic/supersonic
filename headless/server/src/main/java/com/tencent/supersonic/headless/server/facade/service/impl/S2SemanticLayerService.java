@@ -227,7 +227,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private List<QueryColumn> createQueryColumns(DimensionValueReq dimensionValueReq) {
         QueryColumn queryColumn = new QueryColumn();
-        queryColumn.setNameEn(dimensionValueReq.getBizName());
+        queryColumn.setBizName(dimensionValueReq.getBizName());
         queryColumn.setShowType(SemanticType.CATEGORY.name());
         queryColumn.setAuthorized(true);
         queryColumn.setType("CHAR");

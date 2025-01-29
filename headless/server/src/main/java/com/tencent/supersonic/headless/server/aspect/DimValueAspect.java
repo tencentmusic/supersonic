@@ -200,7 +200,7 @@ public class DimValueAspect {
         }
 
         for (QueryColumn queryColumn : columns) {
-            if (dimAndTechNameAndBizNamePair.containsKey(queryColumn.getNameEn())) {
+            if (dimAndTechNameAndBizNamePair.containsKey(queryColumn.getBizName())) {
                 return true;
             }
         }
