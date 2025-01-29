@@ -18,26 +18,8 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
     }
 
     protected void visitBinaryExpression(BinaryExpression expr) {
-        Expression left = expr.getLeftExpression();
-        String toReplace = "";
-        if (left instanceof Function) {
-            Function leftFunc = (Function) left;
-            if (leftFunc.getParameters().getExpressions().get(0) instanceof Column) {
-                toReplace = getReplaceExpr(leftFunc, fieldExprMap);
-            }
-        }
-        if (left instanceof Column) {
-            toReplace = getReplaceExpr((Column) left, fieldExprMap);
-        }
-        if (!toReplace.isEmpty()) {
-            Expression expression = getExpression(toReplace);
-            if (Objects.nonNull(expression)) {
-                expr.setLeftExpression(expression);
-                return;
-            }
-        }
-        expr.getLeftExpression().accept(this);
-        expr.getRightExpression().accept(this);
+        expr.setLeftExpression(replace(expr.getLeftExpression(), fieldExprMap));
+        expr.setRightExpression(replace(expr.getRightExpression(), fieldExprMap));
     }
 
     public void visit(SelectItem selectExpressionItem) {
@@ -59,6 +41,11 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
             columnName = column.getColumnName();
             toReplace = getReplaceExpr((Column) expression, fieldExprMap);
         }
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression binaryExpression = (BinaryExpression) expression;
+            visitBinaryExpression(binaryExpression);
+        }
+
         if (!toReplace.isEmpty()) {
             Expression toReplaceExpr = getExpression(toReplace);
             if (Objects.nonNull(toReplaceExpr)) {
