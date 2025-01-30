@@ -41,6 +41,7 @@ public class ReplaceService {
         String columnName = StringUtil.replaceBackticks(column.getColumnName());
         String replaceColumn = getReplaceValue(columnName, fieldNameMap, exactReplace);
         if (StringUtils.isNotBlank(replaceColumn)) {
+            log.debug("Replaced column {} to {}", column.getColumnName(), replaceColumn);
             column.setColumnName(replaceColumn);
         }
     }

@@ -459,6 +459,9 @@ public class SqlSelectHelper {
                 .map(fieldExpression -> fieldExpression.getFieldName()).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         result.addAll(collect);
+
+        Set<String> aliases = getAliasFields(plainSelect);
+        result.removeAll(aliases);
     }
 
     public static List<FieldExpression> getOrderByExpressions(String sql) {
