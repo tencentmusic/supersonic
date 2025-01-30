@@ -73,7 +73,7 @@ public class DatabaseController {
     public SemanticQueryResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return databaseService.executeSql(sqlExecuteReq, sqlExecuteReq.getId(), user);
+        return databaseService.executeSql(sqlExecuteReq, user);
     }
 
     @RequestMapping("/getDbNames")

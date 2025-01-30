@@ -12,7 +12,7 @@ import java.util.List;
 public class SqlExecuteReq {
     public static final String LIMIT_WRAPPER = " SELECT * FROM ( %s ) a LIMIT %d ";
 
-    @NotNull(message = "modelId can not be null")
+    @NotNull(message = "databaseId can not be null")
     private Long id;
 
     @NotBlank(message = "sql can not be blank")
