@@ -113,7 +113,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         sqlInfo.setCorrectedS2SQL(sql);
     }
 
-    public void removeFilterIfNotInLinkingValue(ChatQueryContext chatQueryContext,
+    public void removeUnmappedFilterValue(ChatQueryContext chatQueryContext,
             SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectedS2SQL();

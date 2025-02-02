@@ -1,21 +1,8 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -28,13 +15,14 @@ import java.util.Objects;
 @Slf4j
 public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
 
-    private boolean exactReplace;
-    private Map<String, Map<String, String>> filedNameToValueMap;
+    private final boolean exactReplace;
+
+    private final Map<String, Map<String, String>> filedNameToValueMap;
 
     public FieldValueReplaceVisitor(boolean exactReplace,
             Map<String, Map<String, String>> filedNameToValueMap) {
-        this.exactReplace = exactReplace;
         this.filedNameToValueMap = filedNameToValueMap;
+        this.exactReplace = exactReplace;
     }
 
     @Override
@@ -137,9 +125,8 @@ public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
 
     private String getReplaceValue(Map<String, String> valueMap, String beforeValue) {
         String afterValue = valueMap.get(String.valueOf(beforeValue));
-        if (StringUtils.isEmpty(afterValue) && !exactReplace) {
-            ReplaceService replaceService = ContextUtils.getBean(ReplaceService.class);
-            return replaceService.getReplaceValue(beforeValue, valueMap, false);
+        if (StringUtils.isEmpty(afterValue)) {
+            return SqlReplaceHelper.getReplaceValue(beforeValue, valueMap, exactReplace);
         }
         return afterValue;
     }

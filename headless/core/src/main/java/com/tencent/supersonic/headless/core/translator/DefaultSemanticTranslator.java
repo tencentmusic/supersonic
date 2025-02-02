@@ -50,7 +50,8 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
                 optimizer.rewrite(queryStatement);
             }
         }
-        log.info("translated query SQL: [{}]", StringUtils.normalizeSpace(queryStatement.getSql()));
+        log.debug("translated query SQL: [{}]",
+                StringUtils.normalizeSpace(queryStatement.getSql()));
     }
 
     private void mergeOntologyQuery(QueryStatement queryStatement) throws Exception {

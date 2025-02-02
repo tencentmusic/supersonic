@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class QueryBySqlTest extends BaseTest {
 
     @Test
+    @SetSystemProperty(key = "s2.test", value = "true")
     public void testDetailQuery() throws Exception {
         SemanticQueryResp semanticQueryResp =
                 queryBySql("SELECT 用户名,访问次数 FROM 超音数PVUV统计 WHERE 用户名='alice' ");
