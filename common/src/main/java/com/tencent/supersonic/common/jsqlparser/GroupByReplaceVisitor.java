@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -15,12 +14,17 @@ import java.util.Map;
 @Slf4j
 public class GroupByReplaceVisitor implements GroupByVisitor {
 
+    private final double replaceMatchThreshold;
     private Map<String, String> fieldNameMap;
-    private boolean exactReplace;
+
 
     public GroupByReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
         this.fieldNameMap = fieldNameMap;
-        this.exactReplace = exactReplace;
+        if (exactReplace) {
+            this.replaceMatchThreshold = 1.0;
+        } else {
+            this.replaceMatchThreshold = 0.4;
+        }
     }
 
     public void visit(GroupByElement groupByElement) {
@@ -34,11 +38,12 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
     }
 
     private void replaceExpression(Expression expression) {
-        ReplaceService replaceService = ContextUtils.getBean(ReplaceService.class);
         if (expression instanceof Column) {
-            replaceService.replaceColumn((Column) expression, fieldNameMap, exactReplace);
+            SqlReplaceHelper.replaceColumn((Column) expression, fieldNameMap,
+                    replaceMatchThreshold);
         } else if (expression instanceof Function) {
-            replaceService.replaceFunction((Function) expression, fieldNameMap, exactReplace);
+            SqlReplaceHelper.replaceFunction((Function) expression, fieldNameMap,
+                    replaceMatchThreshold);
         }
     }
 }

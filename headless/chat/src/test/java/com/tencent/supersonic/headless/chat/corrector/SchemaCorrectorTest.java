@@ -78,7 +78,8 @@ class SchemaCorrectorTest {
 
         semanticParseInfo.getSqlInfo().setCorrectedS2SQL(sql);
         semanticParseInfo.getSqlInfo().setParsedS2SQL(sql);
-        schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
+        // schemaCorrector.removeFilterIfNotInLinkingValue(chatQueryContext, semanticParseInfo);
+        schemaCorrector.correct(chatQueryContext, semanticParseInfo);
         Assert.assertEquals(
                 "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
                         + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10",

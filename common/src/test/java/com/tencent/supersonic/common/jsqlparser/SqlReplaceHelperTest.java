@@ -9,11 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Mockito.mockStatic;
 
@@ -25,13 +21,8 @@ class SqlReplaceHelperTest {
 
     @BeforeEach
     public void setUp() {
-        ReplaceService replaceService = new ReplaceService();
-        replaceService.setReplaceColumnThreshold(0.4);
-
         // Mock the static method ContextUtils.getBean
         mockedContextUtils = mockStatic(ContextUtils.class);
-        mockedContextUtils.when(() -> ContextUtils.getBean(ReplaceService.class))
-                .thenReturn(replaceService);
     }
 
     @Test
