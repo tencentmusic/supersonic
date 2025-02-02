@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
@@ -323,6 +324,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             DataSetResp dataSetResp = dataSetService.getDataSet(querySqlReq.getDataSetId());
             queryStatement.setDataSetId(dataSetResp.getId());
             queryStatement.setDataSetName(dataSetResp.getName());
+            sqlQuery.setTable(Constants.TABLE_PREFIX + dataSetResp.getId());
         }
         return queryStatement;
     }

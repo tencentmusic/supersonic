@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
@@ -41,9 +40,8 @@ public class DimExpressionParser implements QueryParser {
 
         Map<String, String> bizName2Expr = getDimensionExpressions(semanticSchema, ontologyQuery);
         if (!CollectionUtils.isEmpty(bizName2Expr)) {
-            String sql = SqlReplaceHelper.replaceSqlByExpression(
-                    Constants.TABLE_PREFIX + queryStatement.getDataSetId(), sqlQuery.getSql(),
-                    bizName2Expr);
+            String sql = SqlReplaceHelper.replaceSqlByExpression(sqlQuery.getTable(),
+                    sqlQuery.getSql(), bizName2Expr);
             sqlQuery.setSql(sql);
         }
     }
