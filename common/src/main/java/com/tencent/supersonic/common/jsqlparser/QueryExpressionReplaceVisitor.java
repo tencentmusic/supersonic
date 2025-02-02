@@ -18,6 +18,11 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
         this.fieldExprMap = fieldExprMap;
     }
 
+    protected void visitBinaryExpression(BinaryExpression expr) {
+        expr.setLeftExpression(replace(expr.getLeftExpression(), fieldExprMap));
+        expr.setRightExpression(replace(expr.getRightExpression(), fieldExprMap));
+    }
+
     public void visit(SelectItem selectExpressionItem) {
         Expression expression = selectExpressionItem.getExpression();
         String toReplace = "";
@@ -37,6 +42,11 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
             BinaryExpression expr = (BinaryExpression) expression;
             expr.setLeftExpression(replace(expr.getLeftExpression(), fieldExprMap));
             expr.setRightExpression(replace(expr.getRightExpression(), fieldExprMap));
+        }
+
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression binaryExpression = (BinaryExpression) expression;
+            visitBinaryExpression(binaryExpression);
         }
 
         if (!toReplace.isEmpty()) {
