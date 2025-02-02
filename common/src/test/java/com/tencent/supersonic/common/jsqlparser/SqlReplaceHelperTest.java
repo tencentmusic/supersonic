@@ -1,29 +1,16 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 import java.util.*;
-
-import static org.mockito.Mockito.mockStatic;
 
 /**
  * SqlParserReplaceHelperTest
  */
 class SqlReplaceHelperTest {
-    private MockedStatic<ContextUtils> mockedContextUtils;
-
-    @BeforeEach
-    public void setUp() {
-        // Mock the static method ContextUtils.getBean
-        mockedContextUtils = mockStatic(ContextUtils.class);
-    }
 
     @Test
     void testReplaceAggField() {
@@ -376,11 +363,4 @@ class SqlReplaceHelperTest {
         return fieldToBizName;
     }
 
-    @AfterEach
-    public void tearDown() {
-        // Close the mocked static context
-        if (mockedContextUtils != null) {
-            mockedContextUtils.close();
-        }
-    }
 }
