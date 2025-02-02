@@ -42,13 +42,15 @@ class SchemaCorrectorTest {
         SchemaCorrector schemaCorrector = new SchemaCorrector();
         schemaCorrector.correct(chatQueryContext, parseInfo);
 
-        Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' ORDER BY SUM(播放量) DESC LIMIT 10",
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' ORDER BY SUM(播放量) DESC LIMIT 10",
                 parseInfo.getSqlInfo().getCorrectedS2SQL());
     }
 
     @Test
     void testRemoveUnmappedFilterValue() throws JsonProcessingException {
-        String sql = "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10";
+        String sql =
+                "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10";
         ChatQueryContext chatQueryContext = buildQueryContext(sql);
         SemanticParseInfo parseInfo = chatQueryContext.getCandidateQueries().get(0).getParseInfo();
 
@@ -60,7 +62,8 @@ class SchemaCorrectorTest {
         SchemaCorrector schemaCorrector = new SchemaCorrector();
         schemaCorrector.removeUnmappedFilterValue(chatQueryContext, parseInfo);
 
-        Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' ORDER BY 播放量 DESC LIMIT 10",
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' ORDER BY 播放量 DESC LIMIT 10",
                 parseInfo.getSqlInfo().getCorrectedS2SQL());
 
         List<LLMReq.ElementValue> linkingValues = new ArrayList<>();
@@ -74,7 +77,8 @@ class SchemaCorrectorTest {
         parseInfo.getSqlInfo().setCorrectedS2SQL(sql);
         parseInfo.getSqlInfo().setParsedS2SQL(sql);
         schemaCorrector.removeUnmappedFilterValue(chatQueryContext, parseInfo);
-        Assert.assertEquals("SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
+        Assert.assertEquals(
+                "SELECT 歌曲名 FROM 歌曲 WHERE 发行日期 >= '2024-01-01' "
                         + "AND 商务组 = 'xxx' ORDER BY 播放量 DESC LIMIT 10",
                 parseInfo.getSqlInfo().getCorrectedS2SQL());
     }
