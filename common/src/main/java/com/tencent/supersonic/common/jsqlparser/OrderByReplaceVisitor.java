@@ -10,28 +10,22 @@ import java.util.Map;
 
 public class OrderByReplaceVisitor extends OrderByVisitorAdapter {
 
-    private final double replaceMatchThreshold;
-    private Map<String, String> fieldNameMap;
+    private final boolean exactReplace;
+    private final Map<String, String> fieldNameMap;
 
     public OrderByReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
         this.fieldNameMap = fieldNameMap;
-        if (exactReplace) {
-            this.replaceMatchThreshold = 1.0;
-        } else {
-            this.replaceMatchThreshold = 0.4;
-        }
+        this.exactReplace = exactReplace;
     }
 
     @Override
     public void visit(OrderByElement orderBy) {
         Expression expression = orderBy.getExpression();
         if (expression instanceof Column) {
-            SqlReplaceHelper.replaceColumn((Column) expression, fieldNameMap,
-                    replaceMatchThreshold);
+            SqlReplaceHelper.replaceColumn((Column) expression, fieldNameMap, exactReplace);
         }
         if (expression instanceof Function) {
-            SqlReplaceHelper.replaceFunction((Function) expression, fieldNameMap,
-                    replaceMatchThreshold);
+            SqlReplaceHelper.replaceFunction((Function) expression, fieldNameMap, exactReplace);
         }
         super.visit(orderBy);
     }

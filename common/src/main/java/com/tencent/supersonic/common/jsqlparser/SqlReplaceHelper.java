@@ -769,20 +769,20 @@ public class SqlReplaceHelper {
     }
 
     public static void replaceFunction(Function expression, Map<String, String> fieldNameMap,
-            double matchThreshold) {
+            boolean exactReplace) {
         Function function = expression;
         ExpressionList<?> expressions = function.getParameters();
         for (Expression column : expressions) {
             if (column instanceof Column) {
-                replaceColumn((Column) column, fieldNameMap, matchThreshold);
+                replaceColumn((Column) column, fieldNameMap, exactReplace);
             }
         }
     }
 
     public static void replaceColumn(Column column, Map<String, String> fieldNameMap,
-            double matchThreshold) {
+            boolean exactReplace) {
         String columnName = StringUtil.replaceBackticks(column.getColumnName());
-        String replaceColumn = getReplaceValue(columnName, fieldNameMap, matchThreshold);
+        String replaceColumn = getReplaceValue(columnName, fieldNameMap, exactReplace);
         if (StringUtils.isNotBlank(replaceColumn)) {
             log.debug("Replaced column {} to {}", column.getColumnName(), replaceColumn);
             column.setColumnName(replaceColumn);
@@ -790,12 +790,12 @@ public class SqlReplaceHelper {
     }
 
     public static String getReplaceValue(String beforeValue, Map<String, String> valueMap,
-            double replaceColumnThreshold) {
+            boolean exactReplace) {
         String replaceValue = valueMap.get(beforeValue);
         if (StringUtils.isNotBlank(replaceValue)) {
             return replaceValue;
         }
-        if (replaceColumnThreshold == 1.0) {
+        if (exactReplace) {
             return null;
         }
         Optional<Map.Entry<String, String>> first =

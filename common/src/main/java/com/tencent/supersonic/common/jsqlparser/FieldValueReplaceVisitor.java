@@ -15,18 +15,14 @@ import java.util.Objects;
 @Slf4j
 public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
 
-    private final double replaceMatchThreshold;
+    private final boolean exactReplace;
 
-    private Map<String, Map<String, String>> filedNameToValueMap;
+    private final Map<String, Map<String, String>> filedNameToValueMap;
 
     public FieldValueReplaceVisitor(boolean exactReplace,
             Map<String, Map<String, String>> filedNameToValueMap) {
         this.filedNameToValueMap = filedNameToValueMap;
-        if (exactReplace) {
-            this.replaceMatchThreshold = 1.0;
-        } else {
-            this.replaceMatchThreshold = 0.4;
-        }
+        this.exactReplace = exactReplace;
     }
 
     @Override
@@ -130,7 +126,7 @@ public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
     private String getReplaceValue(Map<String, String> valueMap, String beforeValue) {
         String afterValue = valueMap.get(String.valueOf(beforeValue));
         if (StringUtils.isEmpty(afterValue)) {
-            return SqlReplaceHelper.getReplaceValue(beforeValue, valueMap, replaceMatchThreshold);
+            return SqlReplaceHelper.getReplaceValue(beforeValue, valueMap, exactReplace);
         }
         return afterValue;
     }

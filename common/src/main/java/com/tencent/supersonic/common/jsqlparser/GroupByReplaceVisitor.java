@@ -14,17 +14,12 @@ import java.util.Map;
 @Slf4j
 public class GroupByReplaceVisitor implements GroupByVisitor {
 
-    private final double replaceMatchThreshold;
-    private Map<String, String> fieldNameMap;
-
+    private final boolean exactReplace;
+    private final Map<String, String> fieldNameMap;
 
     public GroupByReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
         this.fieldNameMap = fieldNameMap;
-        if (exactReplace) {
-            this.replaceMatchThreshold = 1.0;
-        } else {
-            this.replaceMatchThreshold = 0.4;
-        }
+        this.exactReplace = exactReplace;
     }
 
     public void visit(GroupByElement groupByElement) {
@@ -39,11 +34,9 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
 
     private void replaceExpression(Expression expression) {
         if (expression instanceof Column) {
-            SqlReplaceHelper.replaceColumn((Column) expression, fieldNameMap,
-                    replaceMatchThreshold);
+            SqlReplaceHelper.replaceColumn((Column) expression, fieldNameMap, exactReplace);
         } else if (expression instanceof Function) {
-            SqlReplaceHelper.replaceFunction((Function) expression, fieldNameMap,
-                    replaceMatchThreshold);
+            SqlReplaceHelper.replaceFunction((Function) expression, fieldNameMap, exactReplace);
         }
     }
 }

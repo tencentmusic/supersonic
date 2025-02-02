@@ -14,33 +14,27 @@ import java.util.Map;
 @Slf4j
 public class FieldReplaceVisitor extends ExpressionVisitorAdapter {
 
-    private final double replaceMatchThreshold = 0.4;
     private Map<String, String> fieldNameMap;
-    private ThreadLocal<Double> matchThreshold =
-            ThreadLocal.withInitial(() -> replaceMatchThreshold);
+    private ThreadLocal<Boolean> exactReplace = ThreadLocal.withInitial(() -> false);
 
     public FieldReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
         this.fieldNameMap = fieldNameMap;
-        if (exactReplace) {
-            this.matchThreshold.set(1.0);
-        } else {
-            this.matchThreshold.set(0.4);
-        }
+        this.exactReplace.set(exactReplace);
     }
 
     @Override
     public void visit(Column column) {
-        SqlReplaceHelper.replaceColumn(column, fieldNameMap, matchThreshold.get());
+        SqlReplaceHelper.replaceColumn(column, fieldNameMap, exactReplace.get());
     }
 
     @Override
     public void visit(Function function) {
-        double originalExactReplace = matchThreshold.get();
-        matchThreshold.set(1.0);
+        boolean originalExactReplace = exactReplace.get();
+        exactReplace.set(true);
         try {
             super.visit(function);
         } finally {
-            matchThreshold.set(originalExactReplace);
+            exactReplace.set(originalExactReplace);
         }
     }
 
