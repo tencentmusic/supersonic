@@ -459,6 +459,9 @@ public class SqlSelectHelper {
                 .map(fieldExpression -> fieldExpression.getFieldName()).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         result.addAll(collect);
+
+        Set<String> aliases = getAliasFields(plainSelect);
+        result.removeAll(aliases);
     }
 
     public static List<FieldExpression> getOrderByExpressions(String sql) {
@@ -663,8 +666,9 @@ public class SqlSelectHelper {
                 }
                 if (withSelect instanceof ParenthesedSelect) {
                     ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withSelect;
-                    PlainSelect withPlainSelect = parenthesedSelect.getPlainSelect();
-                    plainSelectList.add(withPlainSelect);
+                    List<PlainSelect> plainSelects = new ArrayList<>();
+                    SqlReplaceHelper.getFromSelect(parenthesedSelect, plainSelects);
+                    plainSelectList.addAll(plainSelects);
                 }
             }
         }
@@ -890,7 +894,9 @@ public class SqlSelectHelper {
             collectSelects(withItem.getSelect(), selects);
         } else if (select instanceof ParenthesedSelect) {
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) select;
-            collectSelects(parenthesedSelect.getPlainSelect(), selects);
+            List<PlainSelect> plainSelects = new ArrayList<>();
+            SqlReplaceHelper.getFromSelect(parenthesedSelect, plainSelects);
+            plainSelects.forEach(s -> collectSelects(s, selects));
         }
     }
 
