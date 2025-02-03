@@ -163,13 +163,11 @@ public class ModelConverter {
                         getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure = new Measure(columnSchema.getName(),
-                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
                         columnSchema.getColumnName(), columnSchema.getAgg().getOperator(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dimension dim = new Dimension(columnSchema.getName(),
-                        modelReq.getBizName() + "_" + columnSchema.getColumnName(),
+                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
                         columnSchema.getColumnName(),
                         DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);

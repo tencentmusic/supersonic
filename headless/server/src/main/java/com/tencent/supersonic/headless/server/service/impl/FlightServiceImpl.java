@@ -309,7 +309,7 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
         int columnNum = resp.getColumns().size();
         rowSetMetaData.setColumnCount(columnNum);
         for (int i = 1; i <= columnNum; i++) {
-            String columnName = resp.getColumns().get(i - 1).getNameEn();
+            String columnName = resp.getColumns().get(i - 1).getBizName();
             rowSetMetaData.setColumnName(i, columnName);
             Optional<Map<String, Object>> valOpt = resp.getResultList().stream()
                     .filter(r -> r.containsKey(columnName) && Objects.nonNull(r.get(columnName)))
@@ -329,7 +329,7 @@ public class FlightServiceImpl extends BasicFlightSqlProducer implements FlightS
         for (Map<String, Object> row : resp.getResultList()) {
             rowset.moveToInsertRow();
             for (int i = 1; i <= columnNum; i++) {
-                String columnName = resp.getColumns().get(i - 1).getNameEn();
+                String columnName = resp.getColumns().get(i - 1).getBizName();
                 if (row.containsKey(columnName)) {
                     rowset.updateObject(i, row.get(columnName));
                 } else {

@@ -20,7 +20,7 @@ public class DefaultQueryCache implements QueryCache {
         if (isCache(semanticQueryReq)) {
             Object result = cacheManager.get(cacheKey);
             if (Objects.nonNull(result)) {
-                log.info("query from cache, key:{},result:{}", cacheKey,
+                log.debug("query from cache, key:{},result:{}", cacheKey,
                         StringUtils.normalizeSpace(result.toString()));
             }
             return result;
