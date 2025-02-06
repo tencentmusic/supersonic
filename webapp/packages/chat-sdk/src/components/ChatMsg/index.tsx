@@ -114,7 +114,7 @@ const ChatMsg: React.FC<Props> = ({
       metricFields.length > 0 &&
       categoryField.length <= 1 &&
       !(metricFields.length > 1 && categoryField.length > 0) &&
-      !dataSource.every(item => item[dateField.nameEn] === dataSource[0][dateField.nameEn]);
+      !dataSource.every(item => item[dateField.bizName] === dataSource[0][dateField.bizName]);
 
     if (isMetricTrend) {
       return MsgContentTypeEnum.METRIC_TREND;
@@ -330,7 +330,7 @@ const ChatMsg: React.FC<Props> = ({
     !isEntityMode;
 
   const recommendMetrics = chatContext?.metrics?.filter(metric =>
-    queryColumns.every(queryColumn => queryColumn.nameEn !== metric.bizName)
+    queryColumns.every(queryColumn => queryColumn.bizName !== metric.bizName)
   );
 
   const isMultipleMetric =
