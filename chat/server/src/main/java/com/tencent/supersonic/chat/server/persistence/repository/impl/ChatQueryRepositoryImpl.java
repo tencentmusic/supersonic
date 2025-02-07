@@ -17,6 +17,7 @@ import com.tencent.supersonic.chat.server.persistence.mapper.ChatParseMapper;
 import com.tencent.supersonic.chat.server.persistence.mapper.ChatQueryDOMapper;
 import com.tencent.supersonic.chat.server.persistence.mapper.custom.ShowCaseCustomMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
+import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.PageUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -116,6 +117,20 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
                 JsonUtil.toObject(chatQueryDO.getQueryResult(), QueryResult.class);
         if (queryResult != null) {
             queryResult.setQueryId(chatQueryDO.getQuestionId());
+            // fix bugs, compatible with bugs caused by history field changes
+            if (!CollectionUtils.isEmpty(queryResult.getQueryColumns())) {
+                List<QueryColumn> queryColumns = queryResult.getQueryColumns().stream().peek(x -> {
+                    if (StringUtils.isEmpty(x.getBizName())
+                            && StringUtils.isNotEmpty(x.getNameEn())) {
+                        x.setBizName(x.getNameEn());
+                    }
+                    if (StringUtils.isNotEmpty(x.getBizName())
+                            && StringUtils.isEmpty(x.getNameEn())) {
+                        x.setNameEn(x.getBizName());
+                    }
+                }).collect(Collectors.toList());
+                queryResult.setQueryColumns(queryColumns);
+            }
             queryResp.setQueryResult(queryResult);
         }
         queryResp.setSimilarQueries(JSONObject.parseArray(chatQueryDO.getSimilarQueries(),

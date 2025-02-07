@@ -37,7 +37,7 @@ public class MetricConverter {
         metricDO.setClassifications(metricReq.getClassifications());
         metricDO.setRelateDimensions(JSONObject.toJSONString(metricReq.getRelateDimension()));
         metricDO.setStatus(StatusEnum.ONLINE.getCode());
-        metricDO.setIsPublish(PublishEnum.UN_PUBLISHED.getCode());
+        metricDO.setIsPublish(PublishEnum.PUBLISHED.getCode());
         if (metricReq.getExt() != null) {
             metricDO.setExt(JSONObject.toJSONString(metricReq.getExt()));
         }

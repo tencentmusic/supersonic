@@ -19,16 +19,16 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
 
   const prefixCls = `${CLS_PREFIX}-table`;
   const tableColumns: any[] = queryColumns.map(
-    ({ name, nameEn, showType, dataFormatType, dataFormat, authorized }) => {
+    ({ name, bizName, showType, dataFormatType, dataFormat, authorized }) => {
       return {
-        dataIndex: nameEn,
-        key: nameEn,
-        title: name || nameEn,
+        dataIndex: bizName,
+        key: bizName,
+        title: name || bizName,
         defaultSortOrder: 'descend',
         sorter:
           showType === 'NUMBER'
             ? (a, b) => {
-                return a[nameEn] - b[nameEn];
+                return a[bizName] - b[bizName];
               }
             : undefined,
         render: (value: string | number) => {
@@ -59,7 +59,7 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
               </div>
             );
           }
-          if (nameEn.includes('photo')) {
+          if (bizName.includes('photo')) {
             return (
               <div className={`${prefixCls}-photo`}>
                 <img width={40} height={40} src={value as string} alt="" />
@@ -78,7 +78,7 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
 
   const dateColumn = queryColumns.find(column => column.type === 'DATE');
   const dataSource = dateColumn
-    ? queryResults.sort((a, b) => moment(a[dateColumn.nameEn]).diff(moment(b[dateColumn.nameEn])))
+    ? queryResults.sort((a, b) => moment(a[dateColumn.bizName]).diff(moment(b[dateColumn.bizName])))
     : queryResults;
   return (
     <div className={prefixCls}>
