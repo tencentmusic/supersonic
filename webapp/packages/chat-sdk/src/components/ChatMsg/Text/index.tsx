@@ -17,10 +17,10 @@ const Text: React.FC<Props> = ({ columns, referenceColumn, dataSource }) => {
   const prefixCls = `${CLS_PREFIX}-text`;
 
   const initData = () => {
-    let textValue = dataSource[0][columns[0].nameEn];
+    let textValue = dataSource[0][columns[0].bizName];
     setText(textValue === undefined ? '暂无数据' : textValue);
     if (referenceColumn) {
-      const referenceDataValue = dataSource[0][referenceColumn.nameEn];
+      const referenceDataValue = dataSource[0][referenceColumn.bizName];
       setReferenceData(referenceDataValue || []);
     }
   };
