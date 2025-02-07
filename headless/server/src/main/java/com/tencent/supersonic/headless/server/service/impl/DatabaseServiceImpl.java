@@ -138,8 +138,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user) {
-        DatabaseResp databaseResp = getDatabase(id);
+    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, User user) {
+        DatabaseResp databaseResp = getDatabase(sqlExecuteReq.getId());
         if (databaseResp == null) {
             return new SemanticQueryResp();
         }
@@ -257,7 +257,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         List<DBColumn> dbColumns = Lists.newArrayList();
         for (QueryColumn queryColumn : semanticQueryResp.getColumns()) {
             DBColumn dbColumn = new DBColumn();
-            dbColumn.setColumnName(queryColumn.getNameEn());
+            dbColumn.setColumnName(queryColumn.getBizName());
             dbColumn.setDataType(queryColumn.getType());
             dbColumns.add(dbColumn);
         }

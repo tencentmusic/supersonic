@@ -55,12 +55,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
             SemanticParseInfo semanticParseInfo) {
         Map<String, String> fieldNameMap =
                 getFieldNameMap(chatQueryContext, semanticParseInfo.getDataSetId());
-        // add as fieldName
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
-        List<String> asFields = SqlAsHelper.getAsFields(sqlInfo.getCorrectedS2SQL());
-        for (String asField : asFields) {
-            fieldNameMap.put(asField, asField);
-        }
         String sql = SqlReplaceHelper.replaceFields(sqlInfo.getCorrectedS2SQL(), fieldNameMap);
         sqlInfo.setCorrectedS2SQL(sql);
     }
@@ -113,7 +108,7 @@ public class SchemaCorrector extends BaseSemanticCorrector {
         sqlInfo.setCorrectedS2SQL(sql);
     }
 
-    public void removeFilterIfNotInLinkingValue(ChatQueryContext chatQueryContext,
+    public void removeUnmappedFilterValue(ChatQueryContext chatQueryContext,
             SemanticParseInfo semanticParseInfo) {
         SqlInfo sqlInfo = semanticParseInfo.getSqlInfo();
         String correctS2SQL = sqlInfo.getCorrectedS2SQL();

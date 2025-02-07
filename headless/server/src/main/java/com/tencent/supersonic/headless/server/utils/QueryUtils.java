@@ -72,7 +72,7 @@ public class QueryUtils {
     private void processColumn(QueryColumn column, Map<String, String> namePair,
             Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap,
             Map<String, DimensionResp> dimensionRespMap) {
-        String nameEn = getName(column.getNameEn());
+        String nameEn = getName(column.getBizName());
         if (nameEn.contains(JOIN_UNDERLINE)) {
             nameEn = nameEn.split(JOIN_UNDERLINE)[1];
         }
@@ -110,8 +110,8 @@ public class QueryUtils {
             column.setModelId(dimensionRespMap.get(nameEn).getModelId());
         }
         // set name by NameEn
-        if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getNameEn())) {
-            column.setName(column.getNameEn());
+        if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getBizName())) {
+            column.setName(column.getBizName());
         }
     }
 
@@ -119,16 +119,11 @@ public class QueryUtils {
         if (StringUtils.isBlank(type)) {
             return false;
         }
-        return type.equalsIgnoreCase("int")
-                || type.equalsIgnoreCase("bigint")
-                || type.equalsIgnoreCase("tinyint")
-                || type.equalsIgnoreCase("smallint")
-                || type.equalsIgnoreCase("float")
-                || type.equalsIgnoreCase("double")
-                || type.equalsIgnoreCase("real")
-                || type.equalsIgnoreCase("numeric")
-                || type.toLowerCase().startsWith("decimal")
-                || type.toLowerCase().startsWith("uint")
+        return type.equalsIgnoreCase("int") || type.equalsIgnoreCase("bigint")
+                || type.equalsIgnoreCase("tinyint") || type.equalsIgnoreCase("smallint")
+                || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")
+                || type.equalsIgnoreCase("real") || type.equalsIgnoreCase("numeric")
+                || type.toLowerCase().startsWith("decimal") || type.toLowerCase().startsWith("uint")
                 || type.toLowerCase().startsWith("int");
     }
 

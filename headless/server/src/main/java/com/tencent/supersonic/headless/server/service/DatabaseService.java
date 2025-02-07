@@ -20,7 +20,7 @@ public interface DatabaseService {
 
     List<DatabaseResp> getDatabaseByType(DataType dataType);
 
-    SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user);
+    SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, User user);
 
     DatabaseResp getDatabase(Long id, User user);
 

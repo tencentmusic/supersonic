@@ -91,6 +91,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         Long queryId = chatParseReq.getQueryId();
         if (Objects.isNull(queryId)) {
             queryId = chatManageService.createChatQuery(chatParseReq);
+            chatParseReq.setQueryId(queryId);
         }
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));

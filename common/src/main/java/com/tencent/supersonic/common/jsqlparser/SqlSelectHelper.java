@@ -144,6 +144,15 @@ public class SqlSelectHelper {
         return result;
     }
 
+    public static Set<String> getAliasFields(String sql) {
+        List<PlainSelect> plainSelects = getPlainSelects(getPlainSelect(sql));
+        Set<String> aliasFields = new HashSet<>();
+        plainSelects.forEach(select -> {
+            aliasFields.addAll(getAliasFields(select));
+        });
+        return aliasFields;
+    }
+
     public static List<PlainSelect> getPlainSelect(Select selectStatement) {
         if (selectStatement == null) {
             return null;
@@ -450,6 +459,9 @@ public class SqlSelectHelper {
                 .map(fieldExpression -> fieldExpression.getFieldName()).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         result.addAll(collect);
+
+        Set<String> aliases = getAliasFields(plainSelect);
+        result.removeAll(aliases);
     }
 
     public static List<FieldExpression> getOrderByExpressions(String sql) {
@@ -654,8 +666,9 @@ public class SqlSelectHelper {
                 }
                 if (withSelect instanceof ParenthesedSelect) {
                     ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withSelect;
-                    PlainSelect withPlainSelect = parenthesedSelect.getPlainSelect();
-                    plainSelectList.add(withPlainSelect);
+                    List<PlainSelect> plainSelects = new ArrayList<>();
+                    SqlReplaceHelper.getFromSelect(parenthesedSelect, plainSelects);
+                    plainSelectList.addAll(plainSelects);
                 }
             }
         }
@@ -881,7 +894,9 @@ public class SqlSelectHelper {
             collectSelects(withItem.getSelect(), selects);
         } else if (select instanceof ParenthesedSelect) {
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) select;
-            collectSelects(parenthesedSelect.getPlainSelect(), selects);
+            List<PlainSelect> plainSelects = new ArrayList<>();
+            SqlReplaceHelper.getFromSelect(parenthesedSelect, plainSelects);
+            plainSelects.forEach(s -> collectSelects(s, selects));
         }
     }
 

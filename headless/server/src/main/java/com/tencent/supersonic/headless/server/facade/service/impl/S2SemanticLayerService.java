@@ -227,7 +227,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private List<QueryColumn> createQueryColumns(DimensionValueReq dimensionValueReq) {
         QueryColumn queryColumn = new QueryColumn();
-        queryColumn.setNameEn(dimensionValueReq.getBizName());
+        queryColumn.setBizName(dimensionValueReq.getBizName());
         queryColumn.setShowType(SemanticType.CATEGORY.name());
         queryColumn.setAuthorized(true);
         queryColumn.setType("CHAR");
@@ -288,8 +288,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
             queryStatement.setIsTranslated(true);
         }
-        queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
-        queryStatement.setDataSetName(semanticQueryReq.getDataSetName());
         return queryStatement;
     }
 
@@ -320,6 +318,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (querySqlReq.needGetDataSetId()) {
             Long dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
             querySqlReq.setDataSetId(dataSetId);
+        }
+        if (querySqlReq.getDataSetId() != null) {
+            DataSetResp dataSetResp = dataSetService.getDataSet(querySqlReq.getDataSetId());
+            queryStatement.setDataSetId(dataSetResp.getId());
+            queryStatement.setDataSetName(dataSetResp.getName());
         }
         return queryStatement;
     }

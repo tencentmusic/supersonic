@@ -114,7 +114,7 @@ public class PromptHelper {
             dimensionStr.append(dimension.getName());
             if (!CollectionUtils.isEmpty(dimension.getAlias())) {
                 StringBuilder alias = new StringBuilder();
-                dimension.getAlias().stream().forEach(a -> alias.append(a + ","));
+                dimension.getAlias().stream().forEach(a -> alias.append(a + ";"));
                 dimensionStr.append(" ALIAS '" + alias + "'");
             }
             if (StringUtils.isNotEmpty(dimension.getTimeFormat())) {

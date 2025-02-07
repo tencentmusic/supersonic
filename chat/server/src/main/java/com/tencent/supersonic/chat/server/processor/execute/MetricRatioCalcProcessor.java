@@ -142,7 +142,7 @@ public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
             return new HashSet<>();
         }
         return queryResult.getQueryColumns().stream()
-                .flatMap(c -> SqlSelectHelper.getFieldsFromExpr(c.getNameEn()).stream())
+                .flatMap(c -> SqlSelectHelper.getFieldsFromExpr(c.getBizName()).stream())
                 .collect(Collectors.toSet());
     }
 
@@ -167,16 +167,16 @@ public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
 
         Map<String, Object> result = queryResp.getResultList().get(0);
         Optional<QueryColumn> valueColumn = queryResp.getColumns().stream()
-                .filter(c -> c.getNameEn().equals(metric.getBizName())).findFirst();
+                .filter(c -> c.getBizName().equals(metric.getBizName())).findFirst();
 
         if (!valueColumn.isPresent()) {
             return metricInfo;
         }
-        String valueField = String.format("%s_%s", valueColumn.get().getNameEn(),
+        String valueField = String.format("%s_%s", valueColumn.get().getBizName(),
                 aggOperatorEnum.getOperator());
-        if (result.containsKey(valueColumn.get().getNameEn())) {
+        if (result.containsKey(valueColumn.get().getBizName())) {
             DecimalFormat df = new DecimalFormat("#.####");
-            metricInfo.setValue(df.format(result.get(valueColumn.get().getNameEn())));
+            metricInfo.setValue(df.format(result.get(valueColumn.get().getBizName())));
         }
         String ratio = "";
         if (Objects.nonNull(result.get(valueField))) {

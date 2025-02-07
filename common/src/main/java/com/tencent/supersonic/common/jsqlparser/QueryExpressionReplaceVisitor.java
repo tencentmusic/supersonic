@@ -12,59 +12,49 @@ import java.util.Objects;
 public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
 
     private Map<String, String> fieldExprMap;
+    private String lastColumnName;
 
     public QueryExpressionReplaceVisitor(Map<String, String> fieldExprMap) {
         this.fieldExprMap = fieldExprMap;
     }
 
     protected void visitBinaryExpression(BinaryExpression expr) {
-        Expression left = expr.getLeftExpression();
-        String toReplace = "";
-        if (left instanceof Function) {
-            Function leftFunc = (Function) left;
-            if (leftFunc.getParameters().getExpressions().get(0) instanceof Column) {
-                toReplace = getReplaceExpr(leftFunc, fieldExprMap);
-            }
-        }
-        if (left instanceof Column) {
-            toReplace = getReplaceExpr((Column) left, fieldExprMap);
-        }
-        if (!toReplace.isEmpty()) {
-            Expression expression = getExpression(toReplace);
-            if (Objects.nonNull(expression)) {
-                expr.setLeftExpression(expression);
-                return;
-            }
-        }
-        expr.getLeftExpression().accept(this);
-        expr.getRightExpression().accept(this);
+        expr.setLeftExpression(replace(expr.getLeftExpression(), fieldExprMap));
+        expr.setRightExpression(replace(expr.getRightExpression(), fieldExprMap));
     }
 
     public void visit(SelectItem selectExpressionItem) {
-
         Expression expression = selectExpressionItem.getExpression();
         String toReplace = "";
-        String columnName = "";
         if (expression instanceof Function) {
             Function leftFunc = (Function) expression;
             if (Objects.nonNull(leftFunc.getParameters())
                     && leftFunc.getParameters().getExpressions().get(0) instanceof Column) {
                 Column column = (Column) leftFunc.getParameters().getExpressions().get(0);
-                columnName = column.getColumnName();
+                lastColumnName = column.getColumnName();
                 toReplace = getReplaceExpr(leftFunc, fieldExprMap);
             }
-        }
-        if (expression instanceof Column) {
+        } else if (expression instanceof Column) {
             Column column = (Column) expression;
-            columnName = column.getColumnName();
+            lastColumnName = column.getColumnName();
             toReplace = getReplaceExpr((Column) expression, fieldExprMap);
+        } else if (expression instanceof BinaryExpression) {
+            BinaryExpression expr = (BinaryExpression) expression;
+            expr.setLeftExpression(replace(expr.getLeftExpression(), fieldExprMap));
+            expr.setRightExpression(replace(expr.getRightExpression(), fieldExprMap));
         }
+
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression binaryExpression = (BinaryExpression) expression;
+            visitBinaryExpression(binaryExpression);
+        }
+
         if (!toReplace.isEmpty()) {
             Expression toReplaceExpr = getExpression(toReplace);
             if (Objects.nonNull(toReplaceExpr)) {
                 selectExpressionItem.setExpression(toReplaceExpr);
                 if (Objects.isNull(selectExpressionItem.getAlias())) {
-                    selectExpressionItem.setAlias(new Alias(columnName, true));
+                    selectExpressionItem.setAlias(new Alias(lastColumnName, true));
                 }
             }
         }
@@ -81,6 +71,18 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
         if (expression instanceof Column) {
             toReplace = getReplaceExpr((Column) expression, fieldExprMap);
         }
+        if (expression instanceof BinaryExpression) {
+            BinaryExpression binaryExpression = (BinaryExpression) expression;
+            binaryExpression
+                    .setLeftExpression(replace(binaryExpression.getLeftExpression(), fieldExprMap));
+            binaryExpression.setRightExpression(
+                    replace(binaryExpression.getRightExpression(), fieldExprMap));
+        }
+        if (expression instanceof Parenthesis) {
+            Parenthesis parenthesis = (Parenthesis) expression;
+            parenthesis.setExpression(replace(parenthesis.getExpression(), fieldExprMap));
+        }
+
         if (!toReplace.isEmpty()) {
             Expression replace = getExpression(toReplace);
             if (Objects.nonNull(replace)) {

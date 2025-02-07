@@ -125,7 +125,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp createModel(ModelReq modelReq, User user) throws Exception {
-        checkParams(modelReq);
+        // checkParams(modelReq);
         ModelDO modelDO = ModelConverter.convert(modelReq, user);
         modelRepository.createModel(modelDO);
         batchCreateDimension(modelDO, user);
@@ -150,7 +150,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        checkParams(modelReq);
+        // checkParams(modelReq);
         checkRelations(modelReq);
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
@@ -627,7 +627,7 @@ public class ModelServiceImpl implements ModelService {
     private DataItem getDataItem(ModelDO modelDO) {
         return DataItem.builder().id(modelDO.getId().toString()).name(modelDO.getName())
                 .bizName(modelDO.getBizName()).modelId(modelDO.getId().toString())
-                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.DIMENSION).build();
+                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.MODEL).build();
     }
 
 }
