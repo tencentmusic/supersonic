@@ -21,7 +21,7 @@ const MetricCard: React.FC<Props> = ({ data, question, loading, onApplyAuth }) =
   const { metricInfos } = aggregateInfo || {};
 
   const indicatorColumn = queryColumns?.find(column => column.showType === 'NUMBER');
-  const indicatorColumnName = indicatorColumn?.nameEn || '';
+  const indicatorColumnName = indicatorColumn?.bizName || '';
 
   const { dataFormatType, dataFormat } = indicatorColumn || {};
   const value = queryResults?.[0]?.[indicatorColumnName] || 0;

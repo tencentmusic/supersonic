@@ -121,7 +121,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
           showSymbol: resultList.length === 1,
           smooth: true,
           data: resultList.map((item: any) => {
-            const value = item[metricField.nameEn];
+            const value = item[metricField.bizName];
             return (metricField.dataFormatType === 'percent' ||
               metricField.dataFormatType === 'decimal') &&
               metricField.dataFormat?.needMultiply100

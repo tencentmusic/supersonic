@@ -44,9 +44,9 @@ const BarChart: React.FC<Props> = ({
   const { queryColumns, queryResults, entityInfo } = data;
 
   const categoryColumnName =
-    queryColumns?.find(column => column.showType === 'CATEGORY')?.nameEn || '';
+    queryColumns?.find(column => column.showType === 'CATEGORY')?.bizName || '';
   const metricColumn = queryColumns?.find(column => column.showType === 'NUMBER');
-  const metricColumnName = metricColumn?.nameEn || '';
+  const metricColumnName = metricColumn?.bizName || '';
 
   const renderChart = () => {
     let instanceObj: any;
@@ -158,7 +158,7 @@ const BarChart: React.FC<Props> = ({
           },
         },
         data: data.map(item => {
-          return item[metricColumn?.nameEn || ''];
+          return item[metricColumn?.bizName || ''];
         }),
       },
     });
