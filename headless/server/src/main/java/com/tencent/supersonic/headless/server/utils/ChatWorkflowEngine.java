@@ -34,8 +34,8 @@ public class ChatWorkflowEngine {
     private final List<SemanticCorrector> semanticCorrectors =
             CoreComponentFactory.getSemanticCorrectors();
 
-    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
-            ParseResp parseResult) {
+    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx) {
+        ParseResp parseResult = queryCtx.getParseResp();
         queryCtx.setChatWorkflowState(initialState);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {

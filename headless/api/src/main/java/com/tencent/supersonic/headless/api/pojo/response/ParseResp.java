@@ -1,16 +1,16 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class ParseResp {
+public class ParseResp implements Serializable {
     private final String queryText;
     private ParseState state = ParseState.PENDING;
     private String errorMsg;
