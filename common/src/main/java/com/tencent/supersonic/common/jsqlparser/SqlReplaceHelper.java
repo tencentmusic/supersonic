@@ -486,6 +486,19 @@ public class SqlReplaceHelper {
         return selectStatement.toString();
     }
 
+    public static String replaceAliasWithBackticks(String sql) {
+          Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+        FieldAliasReplaceWithBackticksVisitor visitor = new FieldAliasReplaceWithBackticksVisitor();
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(visitor);
+        }
+        return selectStatement.toString();
+    }
+
     public static String replaceAlias(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (!(selectStatement instanceof PlainSelect)) {
