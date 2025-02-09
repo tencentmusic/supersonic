@@ -111,6 +111,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             List<Map.Entry<String, String>> dimensionValuesAndId =
                     (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
             queryResp = getSemanticQueryResp(queryReq, user, dimensionValuesAndId);
+            queryResp.setResultType(true);
             queryCache.put(fullQueryKey, true);
         } else {
             queryResp = queryByReq(queryReq, user);

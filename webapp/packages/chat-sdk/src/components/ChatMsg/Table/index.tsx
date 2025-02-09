@@ -66,7 +66,7 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
               </div>
             );
           }
-          if (nameEn.includes('url')) {
+          if (bizName.includes('url')) {
             return (
               <div className={`${prefixCls}-url`} dangerouslySetInnerHTML={{__html:value as string}}></div>
             );

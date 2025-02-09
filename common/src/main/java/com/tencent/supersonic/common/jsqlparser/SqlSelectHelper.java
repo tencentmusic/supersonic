@@ -910,7 +910,7 @@ public class SqlSelectHelper {
                 continue;
             }
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) rightItem;
-            selects.add(parenthesedSelect.getPlainSelect());
+            collectSelects(parenthesedSelect.getSelect(), selects);
         }
     }
 

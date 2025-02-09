@@ -70,15 +70,9 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
 
         UserWithPassword user = getUserWithPassword(request);
         if (user != null) {
-            setContext(user.getName(), request);
             return true;
         }
         throw new AccessException("authentication failed, please login");
-    }
-
-    private boolean handleFakerUserRequest(HttpServletRequest request) {
-        setFakerUser(request);
-        return true;
     }
 
     private boolean verifyAnalysisCloud(HttpServletRequest request) {
@@ -120,29 +114,6 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
             throw new AccessException(
                     String.valueOf(AuthErrorEnum.ANALYSIS_CLOUD_TOKEN_LOGIN_FAILED));
         }
-    }
-
-    private void setFakerUser(HttpServletRequest request) {
-        String token = generateAdminToken(request);
-        reflectSetParam(request, authenticationConfig.getTokenHttpHeaderKey(), token);
-        setContext(User.getDefaultUser().getName(), request);
-    }
-
-    private void setContext(String userName, HttpServletRequest request) {
-        ThreadContext threadContext = ThreadContext.builder()
-                .token(request.getHeader(authenticationConfig.getTokenHttpHeaderKey()))
-                .userName(userName).build();
-        s2ThreadContext.set(threadContext);
-    }
-
-    public String generateAdminToken(HttpServletRequest request) {
-        UserWithPassword admin = new UserWithPassword("admin");
-        admin.setId(1L);
-        admin.setName("admin");
-        admin.setPassword("c3VwZXJzb25pY0BiaWNvbdktJJYWw6A3rEmBUPzbn/6DNeYnD+y3mAwDKEMS3KVT");
-        admin.setDisplayName("admin");
-        admin.setIsAdmin(1);
-        return tokenService.generateToken(UserWithPassword.convert(admin), request);
     }
 
     public UserWithPassword getUserWithPassword(HttpServletRequest request) {
