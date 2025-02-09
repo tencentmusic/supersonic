@@ -303,6 +303,26 @@ class SqlReplaceHelperTest {
     }
 
     @Test
+    void testReplaceAliasWithBackticks() {
+        String sql = "SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数 WHERE "
+                + "datediff('day', 数据日期, '2023-09-05') <= 3 GROUP BY 部门 ORDER BY 总访问次数 DESC LIMIT 10";
+        String replaceSql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT 部门, SUM(访问次数) AS `总访问次数` FROM 超音数 WHERE "
+                + "datediff('day', 数据日期, '2023-09-05') <= 3 GROUP BY 部门 ORDER BY 总访问次数 DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select 部门, sum(访问次数) as 访问次数 from 超音数 where "
+                + "(datediff('day', 数据日期, '2023-09-05') <= 3) and 数据日期 = '2023-10-10' "
+                + "group by 部门 order by 访问次数 desc limit 10";
+        replaceSql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT 部门, sum(访问次数) AS `访问次数` FROM 超音数 WHERE (datediff('day', 数据日期, "
+                + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门 ORDER BY 访问次数 DESC LIMIT 10",
+                replaceSql);
+    }
+
+    @Test
     void testReplaceAliasFieldName() {
         Map<String, String> map = new HashMap<>();
         map.put("总访问次数", "\"总访问次数\"");
