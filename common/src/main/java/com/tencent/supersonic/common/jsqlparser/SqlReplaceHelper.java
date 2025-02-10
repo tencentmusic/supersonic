@@ -487,7 +487,7 @@ public class SqlReplaceHelper {
     }
 
     public static String replaceAliasWithBackticks(String sql) {
-          Select selectStatement = SqlSelectHelper.getSelect(sql);
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (!(selectStatement instanceof PlainSelect)) {
             return sql;
         }
@@ -495,6 +495,26 @@ public class SqlReplaceHelper {
         FieldAliasReplaceWithBackticksVisitor visitor = new FieldAliasReplaceWithBackticksVisitor();
         for (SelectItem selectItem : plainSelect.getSelectItems()) {
             selectItem.accept(visitor);
+        }
+        // Replace `order by` and `group by`
+        // Get the map of field aliases that have been replaced
+        Map<String, String> aliasReplacedMap = visitor.getFieldAliasReplacedMap();
+
+        // If no aliases have been replaced, return the original SQL statement as a string
+        if (aliasReplacedMap.isEmpty()) {
+            return selectStatement.toString();
+        }
+        // Order by elements
+        List<OrderByElement> orderByElements = selectStatement.getOrderByElements();
+        if (!CollectionUtils.isEmpty(orderByElements)) {
+            for (OrderByElement orderByElement : orderByElements) {
+                orderByElement.accept(new OrderByReplaceVisitor(aliasReplacedMap, true));
+            }
+        }
+        // Group by elements
+        GroupByElement groupByElement = plainSelect.getGroupBy();
+        if (Objects.nonNull(groupByElement)) {
+            groupByElement.accept(new GroupByReplaceVisitor(aliasReplacedMap, true));
         }
         return selectStatement.toString();
     }
