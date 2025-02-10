@@ -5,7 +5,12 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitorAdapter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FieldAliasReplaceWithBackticksVisitor extends SelectItemVisitorAdapter {
+
+    private Map<String, String> fieldAliasReplacedMap = new HashMap<>();
 
     @Override
     public void visit(SelectItem selectExpressionItem) {
@@ -19,6 +24,7 @@ public class FieldAliasReplaceWithBackticksVisitor extends SelectItemVisitorAdap
             return;
         }
         alias.setName(replaceValue);
+        fieldAliasReplacedMap.put(aliasName, replaceValue);
     }
 
     private String addBackticks(String aliasName) {
@@ -29,5 +35,9 @@ public class FieldAliasReplaceWithBackticksVisitor extends SelectItemVisitorAdap
             return "";
         }
         return "`" + aliasName + "`";
+    }
+
+    public Map<String, String> getFieldAliasReplacedMap() {
+        return fieldAliasReplacedMap;
     }
 }
