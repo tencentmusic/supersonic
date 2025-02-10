@@ -34,8 +34,8 @@ public class ChatWorkflowEngine {
     private final List<SemanticCorrector> semanticCorrectors =
             CoreComponentFactory.getSemanticCorrectors();
 
-    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
-            ParseResp parseResult) {
+    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx) {
+        ParseResp parseResult = queryCtx.getParseResp();
         queryCtx.setChatWorkflowState(initialState);
         while (queryCtx.getChatWorkflowState() != ChatWorkflowState.FINISHED) {
             switch (queryCtx.getChatWorkflowState()) {
@@ -61,14 +61,14 @@ public class ChatWorkflowEngine {
                                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
                         parseResult.setSelectedParses(parseInfos);
                         if (queryCtx.needSQL()) {
-                            queryCtx.setChatWorkflowState(ChatWorkflowState.CORRECTING);
+                            queryCtx.setChatWorkflowState(ChatWorkflowState.S2SQL_CORRECTING);
                         } else {
                             parseResult.setState(ParseResp.ParseState.COMPLETED);
                             queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                         }
                     }
                     break;
-                case CORRECTING:
+                case S2SQL_CORRECTING:
                     performCorrecting(queryCtx);
                     queryCtx.setChatWorkflowState(ChatWorkflowState.TRANSLATING);
                     break;
@@ -109,7 +109,8 @@ public class ChatWorkflowEngine {
             for (SemanticQuery semanticQuery : candidateQueries) {
                 for (SemanticCorrector corrector : semanticCorrectors) {
                     corrector.correct(queryCtx, semanticQuery.getParseInfo());
-                    if (!ChatWorkflowState.CORRECTING.equals(queryCtx.getChatWorkflowState())) {
+                    if (!ChatWorkflowState.S2SQL_CORRECTING
+                            .equals(queryCtx.getChatWorkflowState())) {
                         break;
                     }
                 }
