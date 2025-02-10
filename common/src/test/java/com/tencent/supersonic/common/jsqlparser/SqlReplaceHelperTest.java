@@ -321,14 +321,15 @@ class SqlReplaceHelperTest {
                 + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门 ORDER BY `访问次数` DESC LIMIT 10",
                 replaceSql);
 
-        sql = "select 部门, sum(访问次数) as 访问次数, count(部门) as 部门数, count(部门) as 部门数2 from 超音数 where "
+        sql = "select 部门, sum(访问次数) as 访问次数, count(部门) as 部门数, count(部门) as 部门数2, 访问次数 from 超音数 where "
                 + "(datediff('day', 数据日期, '2023-09-05') <= 3) and 数据日期 = '2023-10-10' "
-                + "group by 部门, 部门数, 部门数2  order by 访问次数 desc limit 10";
+                + "group by 部门, 部门数, 部门数2 having 访问次数 > 1 AND 部门数2 > 2 AND 部门数 > 1 AND 访问次数 > 1 order by 访问次数 desc  limit 10";
         replaceSql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
         System.out.println(replaceSql);
-        Assert.assertEquals("SELECT 部门, sum(访问次数) AS `访问次数`, count(部门) AS `部门数`, count(部门) AS `部门数2` FROM 超音数 WHERE (datediff('day', 数据日期, "
-                + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门, `部门数`, `部门数2` ORDER BY `访问次数` DESC LIMIT 10",
+        Assert.assertEquals("SELECT 部门, sum(访问次数) AS `访问次数`, count(部门) AS `部门数`, count(部门) AS `部门数2`, `访问次数` FROM 超音数 WHERE (datediff('day', 数据日期, "
+                + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门, `部门数`, `部门数2` HAVING `访问次数` > 1 AND `部门数2` > 2 AND `部门数` > 1 AND `访问次数` > 1 ORDER BY `访问次数` DESC LIMIT 10",
                 replaceSql);
+
     }
 
     @Test
