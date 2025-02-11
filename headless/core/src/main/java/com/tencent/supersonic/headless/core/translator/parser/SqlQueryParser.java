@@ -68,6 +68,8 @@ public class SqlQueryParser implements QueryParser {
         ontologyQuery.setAggOption(sqlQueryAggOption);
 
         convertNameToBizName(queryStatement);
+        // Solve the problem of SQL execution error when alias is Chinese
+        aliasesWithBackticks(queryStatement);
         rewriteOrderBy(queryStatement);
 
         // fill sqlQuery
@@ -86,6 +88,12 @@ public class SqlQueryParser implements QueryParser {
         }
 
         log.info("parse sqlQuery [{}] ", sqlQuery);
+    }
+
+    private void aliasesWithBackticks(QueryStatement queryStatement) {
+        String sql = queryStatement.getSqlQuery().getSql();
+        sql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
+        queryStatement.getSqlQuery().setSql(sql);
     }
 
     private AggOption getAggOption(String sql, Set<MetricSchemaResp> metricSchemas) {

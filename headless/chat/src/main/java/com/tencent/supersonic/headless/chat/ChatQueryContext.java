@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.enums.ChatWorkflowState;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
+import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import lombok.Data;
 
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class ChatQueryContext implements Serializable {
 
     private QueryNLReq request;
+    private ParseResp parseResp;
     private Map<Long, List<Long>> modelIdToDataSetIds;
     private List<SemanticQuery> candidateQueries = new ArrayList<>();
     private SchemaMapInfo mapInfo = new SchemaMapInfo();
