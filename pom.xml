@@ -79,6 +79,7 @@
         <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.1</stax2.version>
         <io.springfox.version>3.0.0</io.springfox.version>
+        <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -175,6 +176,11 @@
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-opensearch</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-pgvector</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
@@ -212,6 +218,11 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>2.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk</artifactId>
+                <version>${aws-java-sdk.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
