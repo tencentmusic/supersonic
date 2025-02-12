@@ -70,6 +70,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
     private final OpenAiClient client;
     private final String baseUrl;
     private final String modelName;
+    private final String apiVersion;
     private final Double temperature;
     private final Double topP;
     private final List<String> stop;
@@ -88,7 +89,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
     private final List<ChatModelListener> listeners;
 
     @Builder
-    public OpenAiChatModel(String baseUrl, String apiKey, String organizationId, String modelName,
+    public OpenAiChatModel(String baseUrl, String apiKey, String organizationId, String modelName, String apiVersion,
             Double temperature, Double topP, List<String> stop, Integer maxTokens,
             Double presencePenalty, Double frequencyPenalty, Map<String, Integer> logitBias,
             String responseFormat, Boolean strictJsonSchema, Integer seed, String user,
@@ -104,12 +105,13 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
 
         timeout = getOrDefault(timeout, ofSeconds(60));
 
-        this.client = OpenAiClient.builder().openAiApiKey(apiKey).baseUrl(baseUrl)
+        this.client = OpenAiClient.builder().openAiApiKey(apiKey).baseUrl(baseUrl).apiVersion(apiVersion)
                 .organizationId(organizationId).callTimeout(timeout).connectTimeout(timeout)
                 .readTimeout(timeout).writeTimeout(timeout).proxy(proxy).logRequests(logRequests)
                 .logResponses(logResponses).userAgent(DEFAULT_USER_AGENT)
                 .customHeaders(customHeaders).build();
         this.modelName = getOrDefault(modelName, GPT_3_5_TURBO);
+        this.apiVersion = apiVersion;
         this.temperature = getOrDefault(temperature, 0.7);
         this.topP = topP;
         this.stop = stop;
