@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.chroma.spring.ChromaEmbeddingStoreFactory;
 import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
 import dev.langchain4j.milvus.spring.MilvusEmbeddingStoreFactory;
+import dev.langchain4j.opensearch.spring.OpenSearchEmbeddingStoreFactory;
 import dev.langchain4j.pgvector.spring.PgvectorEmbeddingStoreFactory;
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,6 +45,11 @@ public class EmbeddingStoreFactoryProvider {
                 .equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
             return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new InMemoryEmbeddingStoreFactory(storeConfig));
+        }
+        if (EmbeddingStoreType.OPENSEARCH.name()
+                .equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
+            return factoryMap.computeIfAbsent(embeddingStoreConfig,
+                    storeConfig -> new OpenSearchEmbeddingStoreFactory(storeConfig));
         }
         throw new RuntimeException("Unsupported EmbeddingStoreFactory provider: "
                 + embeddingStoreConfig.getProvider());
