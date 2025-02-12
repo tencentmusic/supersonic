@@ -120,10 +120,12 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
             // fix bugs, compatible with bugs caused by history field changes
             if (!CollectionUtils.isEmpty(queryResult.getQueryColumns())) {
                 List<QueryColumn> queryColumns = queryResult.getQueryColumns().stream().peek(x -> {
-                    if (StringUtils.isEmpty(x.getBizName()) && StringUtils.isNotEmpty(x.getNameEn())) {
+                    if (StringUtils.isEmpty(x.getBizName())
+                            && StringUtils.isNotEmpty(x.getNameEn())) {
                         x.setBizName(x.getNameEn());
                     }
-                    if (StringUtils.isNotEmpty(x.getBizName()) && StringUtils.isEmpty(x.getNameEn())) {
+                    if (StringUtils.isNotEmpty(x.getBizName())
+                            && StringUtils.isEmpty(x.getNameEn())) {
                         x.setNameEn(x.getBizName());
                     }
                 }).collect(Collectors.toList());

@@ -65,14 +65,15 @@ public class S2ChatLayerService implements ChatLayerService {
 
     @Override
     public ParseResp parse(QueryNLReq queryNLReq) {
-        ParseResp parseResult = new ParseResp(queryNLReq.getQueryText());
+        ParseResp parseResp = new ParseResp(queryNLReq.getQueryText());
         ChatQueryContext queryCtx = buildChatQueryContext(queryNLReq);
+        queryCtx.setParseResp(parseResp);
         if (queryCtx.getMapInfo().isEmpty()) {
-            chatWorkflowEngine.start(ChatWorkflowState.MAPPING, queryCtx, parseResult);
+            chatWorkflowEngine.start(ChatWorkflowState.MAPPING, queryCtx);
         } else {
-            chatWorkflowEngine.start(ChatWorkflowState.PARSING, queryCtx, parseResult);
+            chatWorkflowEngine.start(ChatWorkflowState.PARSING, queryCtx);
         }
-        return parseResult;
+        return parseResp;
     }
 
     public void correct(QuerySqlReq querySqlReq, User user) {
