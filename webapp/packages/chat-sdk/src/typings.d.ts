@@ -94,6 +94,7 @@ type TopNConfig = {
 
 type ColumnType = {
   name: string;
+  nameEn: string;
   type: string;
 };
 
