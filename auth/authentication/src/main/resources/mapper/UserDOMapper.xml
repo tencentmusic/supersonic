@@ -59,14 +59,6 @@
       limit #{limitStart} , #{limitEnd}
     </if>
   </select>
-  <insert id="insert" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO">
-    insert into s2_user (id, name, password, salt,
-      display_name, email, is_admin
-      )
-    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR},
-      #{displayName,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{isAdmin,jdbcType=INTEGER}
-      )
-  </insert>
   <insert id="insertSelective" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO">
     insert into s2_user
     <trim prefix="(" suffix=")" suffixOverrides=",">

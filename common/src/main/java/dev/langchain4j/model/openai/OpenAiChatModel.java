@@ -89,13 +89,14 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
     private final List<ChatModelListener> listeners;
 
     @Builder
-    public OpenAiChatModel(String baseUrl, String apiKey, String organizationId, String modelName, String apiVersion,
-            Double temperature, Double topP, List<String> stop, Integer maxTokens,
-            Double presencePenalty, Double frequencyPenalty, Map<String, Integer> logitBias,
-            String responseFormat, Boolean strictJsonSchema, Integer seed, String user,
-            Boolean strictTools, Boolean parallelToolCalls, Duration timeout, Integer maxRetries,
-            Proxy proxy, Boolean logRequests, Boolean logResponses, Tokenizer tokenizer,
-            Map<String, String> customHeaders, List<ChatModelListener> listeners) {
+    public OpenAiChatModel(String baseUrl, String apiKey, String organizationId, String modelName,
+            String apiVersion, Double temperature, Double topP, List<String> stop,
+            Integer maxTokens, Double presencePenalty, Double frequencyPenalty,
+            Map<String, Integer> logitBias, String responseFormat, Boolean strictJsonSchema,
+            Integer seed, String user, Boolean strictTools, Boolean parallelToolCalls,
+            Duration timeout, Integer maxRetries, Proxy proxy, Boolean logRequests,
+            Boolean logResponses, Tokenizer tokenizer, Map<String, String> customHeaders,
+            List<ChatModelListener> listeners) {
 
         baseUrl = getOrDefault(baseUrl, OPENAI_URL);
         if (OPENAI_DEMO_API_KEY.equals(apiKey)) {
@@ -105,10 +106,10 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
 
         timeout = getOrDefault(timeout, ofSeconds(60));
 
-        this.client = OpenAiClient.builder().openAiApiKey(apiKey).baseUrl(baseUrl).apiVersion(apiVersion)
-                .organizationId(organizationId).callTimeout(timeout).connectTimeout(timeout)
-                .readTimeout(timeout).writeTimeout(timeout).proxy(proxy).logRequests(logRequests)
-                .logResponses(logResponses).userAgent(DEFAULT_USER_AGENT)
+        this.client = OpenAiClient.builder().openAiApiKey(apiKey).baseUrl(baseUrl)
+                .apiVersion(apiVersion).organizationId(organizationId).callTimeout(timeout)
+                .connectTimeout(timeout).readTimeout(timeout).writeTimeout(timeout).proxy(proxy)
+                .logRequests(logRequests).logResponses(logResponses).userAgent(DEFAULT_USER_AGENT)
                 .customHeaders(customHeaders).build();
         this.modelName = getOrDefault(modelName, GPT_3_5_TURBO);
         this.apiVersion = apiVersion;

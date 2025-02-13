@@ -518,14 +518,15 @@ public class SqlReplaceHelper {
         }
         // Alias columns
         for (SelectItem<?> selectItem : plainSelect.getSelectItems()) {
-            if (selectItem.getExpression() instanceof Column){
+            if (selectItem.getExpression() instanceof Column) {
                 replaceColumn((Column) selectItem.getExpression(), aliasReplacedMap, true);
             }
         }
         // Having
         Expression having = plainSelect.getHaving();
         if (Objects.nonNull(having)) {
-            ExpressionReplaceVisitor expressionReplaceVisitor = new ExpressionReplaceVisitor(aliasReplacedMap);
+            ExpressionReplaceVisitor expressionReplaceVisitor =
+                    new ExpressionReplaceVisitor(aliasReplacedMap);
             having.accept(expressionReplaceVisitor);
         }
         return selectStatement.toString();

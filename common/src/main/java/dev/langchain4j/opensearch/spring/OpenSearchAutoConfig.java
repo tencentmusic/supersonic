@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static dev.langchain4j.opensearch.spring.Properties.PREFIX;
+
 @Configuration
 @EnableConfigurationProperties(dev.langchain4j.opensearch.spring.Properties.class)
 public class OpenSearchAutoConfig {

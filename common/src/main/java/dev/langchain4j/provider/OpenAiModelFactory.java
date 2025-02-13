@@ -24,9 +24,8 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return OpenAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
                 .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
-                .apiVersion(modelConfig.getApiVersion())
-                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
-                .maxRetries(modelConfig.getMaxRetries())
+                .apiVersion(modelConfig.getApiVersion()).temperature(modelConfig.getTemperature())
+                .topP(modelConfig.getTopP()).maxRetries(modelConfig.getMaxRetries())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
                 .logResponses(modelConfig.getLogResponses()).build();

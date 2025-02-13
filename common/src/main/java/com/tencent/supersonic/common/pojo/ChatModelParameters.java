@@ -34,8 +34,8 @@ public class ChatModelParameters {
     public static final Parameter CHAT_MODEL_API_KEY = new Parameter("apiKey", "", "ApiKey", "",
             "password", MODULE_NAME, null, getApiKeyDependency());
 
-    public static final Parameter CHAT_MODEL_API_VERSION = new Parameter("apiVersion", "2024-02-01", "ApiVersion", "",
-            "string", MODULE_NAME, null, getApiVersionDependency());
+    public static final Parameter CHAT_MODEL_API_VERSION = new Parameter("apiVersion", "2024-02-01",
+            "ApiVersion", "", "string", MODULE_NAME, null, getApiVersionDependency());
 
     public static final Parameter CHAT_MODEL_ENDPOINT = new Parameter("endpoint", "llama_2_70b",
             "Endpoint", "", "string", MODULE_NAME, null, getEndpointDependency());
@@ -95,8 +95,8 @@ public class ChatModelParameters {
 
     private static List<Parameter.Dependency> getApiVersionDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(OpenAiModelFactory.PROVIDER),
-                ImmutableMap.of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_API_VERSION));
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER), ImmutableMap
+                        .of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_API_VERSION));
     }
 
     private static List<Parameter.Dependency> getModelNameDependency() {

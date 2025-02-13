@@ -17,9 +17,10 @@ import java.util.List;
 public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static final String MODULE_NAME = "向量数据库配置";
 
-    public static final Parameter EMBEDDING_STORE_PROVIDER = new Parameter(
-            "s2.embedding.store.provider", EmbeddingStoreType.IN_MEMORY.name(), "向量库类型",
-            "目前支持四种类型：IN_MEMORY、MILVUS、CHROMA、PGVECTOR、OPENSEARCH", "list", MODULE_NAME, getCandidateValues());
+    public static final Parameter EMBEDDING_STORE_PROVIDER =
+            new Parameter("s2.embedding.store.provider", EmbeddingStoreType.IN_MEMORY.name(),
+                    "向量库类型", "目前支持四种类型：IN_MEMORY、MILVUS、CHROMA、PGVECTOR、OPENSEARCH", "list",
+                    MODULE_NAME, getCandidateValues());
 
     public static final Parameter EMBEDDING_STORE_BASE_URL =
             new Parameter("s2.embedding.store.base.url", "", "BaseUrl", "", "string", MODULE_NAME,
@@ -93,8 +94,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getBaseUrlDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.CHROMA.name(),
-                        EmbeddingStoreType.PGVECTOR.name(),
+                        EmbeddingStoreType.CHROMA.name(), EmbeddingStoreType.PGVECTOR.name(),
                         EmbeddingStoreType.OPENSEARCH.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "http://localhost:19530",
                         EmbeddingStoreType.CHROMA.name(), "http://localhost:8000",
@@ -117,8 +117,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getDimensionDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.PGVECTOR.name(),
-                        EmbeddingStoreType.OPENSEARCH.name()),
+                        EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "384",
                         EmbeddingStoreType.PGVECTOR.name(), "512",
                         EmbeddingStoreType.OPENSEARCH.name(), "512"));
@@ -127,8 +126,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getDatabaseNameDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.PGVECTOR.name(),
-                        EmbeddingStoreType.OPENSEARCH.name()),
+                        EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "",
                         EmbeddingStoreType.PGVECTOR.name(), "postgres",
                         EmbeddingStoreType.OPENSEARCH.name(), "ai_sql"));
@@ -143,8 +141,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getUserDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.PGVECTOR.name(),
-                        EmbeddingStoreType.OPENSEARCH.name()),
+                        EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus",
                         EmbeddingStoreType.PGVECTOR.name(), "postgres",
                         EmbeddingStoreType.OPENSEARCH.name(), "opensearch"));
@@ -153,8 +150,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getPasswordDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.PGVECTOR.name(),
-                        EmbeddingStoreType.OPENSEARCH.name()),
+                        EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "milvus",
                         EmbeddingStoreType.PGVECTOR.name(), "postgres",
                         EmbeddingStoreType.OPENSEARCH.name(), "opensearch"));
