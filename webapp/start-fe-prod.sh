@@ -23,6 +23,10 @@ cd ./packages/chat-sdk
 pnpm i
 
 pnpm run build
+if [ $? -ne 0 ]; then
+    echo "Failed to build chat sdk."
+    exit 1
+fi
 
 pnpm link --global
 
@@ -33,6 +37,10 @@ pnpm link ../chat-sdk
 pnpm i
 
 pnpm run build:os-local
+if [ $? -ne 0 ]; then
+    echo "Failed to build supersonic-fe."
+    exit 1
+fi
 
 tar -zcvf supersonic-webapp.tar.gz ./supersonic-webapp
 
