@@ -1,7 +1,13 @@
 package com.tencent.supersonic.auth.authentication.persistence.dataobject;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+@TableName("s2_user")
 public class UserDO {
-    /** */
+
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /** */
