@@ -300,6 +300,15 @@ public class ModelConverter {
     private static ModelDetail updateModelDetail(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
+        List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
+        if (!CollectionUtils.isEmpty(dimensions)) {
+            for (Dimension dimension : dimensions) {
+                if (StringUtils.isNotBlank(dimension.getBizName())
+                        && StringUtils.isBlank(dimension.getExpr())) {
+                    dimension.setExpr(dimension.getBizName());
+                }
+            }
+        }
         if (measures == null) {
             measures = Lists.newArrayList();
         }

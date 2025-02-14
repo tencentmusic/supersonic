@@ -34,6 +34,9 @@ public class ChatModelParameters {
     public static final Parameter CHAT_MODEL_API_KEY = new Parameter("apiKey", "", "ApiKey", "",
             "password", MODULE_NAME, null, getApiKeyDependency());
 
+    public static final Parameter CHAT_MODEL_API_VERSION = new Parameter("apiVersion", "2024-02-01",
+            "ApiVersion", "", "string", MODULE_NAME, null, getApiVersionDependency());
+
     public static final Parameter CHAT_MODEL_ENDPOINT = new Parameter("endpoint", "llama_2_70b",
             "Endpoint", "", "string", MODULE_NAME, null, getEndpointDependency());
 
@@ -51,7 +54,7 @@ public class ChatModelParameters {
 
     public static List<Parameter> getParameters() {
         return Lists.newArrayList(CHAT_MODEL_PROVIDER, CHAT_MODEL_BASE_URL, CHAT_MODEL_ENDPOINT,
-                CHAT_MODEL_API_KEY, CHAT_MODEL_SECRET_KEY, CHAT_MODEL_NAME,
+                CHAT_MODEL_API_KEY, CHAT_MODEL_SECRET_KEY, CHAT_MODEL_NAME, CHAT_MODEL_API_VERSION,
                 CHAT_MODEL_ENABLE_SEARCH, CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT);
     }
 
@@ -88,6 +91,12 @@ public class ChatModelParameters {
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), DashscopeModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), DifyModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey()));
+    }
+
+    private static List<Parameter.Dependency> getApiVersionDependency() {
+        return getDependency(CHAT_MODEL_PROVIDER.getName(),
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER), ImmutableMap
+                        .of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_API_VERSION));
     }
 
     private static List<Parameter.Dependency> getModelNameDependency() {

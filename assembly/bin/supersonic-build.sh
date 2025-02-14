@@ -56,6 +56,11 @@ function packageRelease {
   # package webapp
   tar xvf supersonic-webapp.tar.gz
   mv supersonic-webapp webapp
+  # check webapp build result
+  if [ $? -ne 0 ]; then
+      echo "Failed to get supersonic webapp package."
+      exit 1
+  fi
   json='{"env": "''"}'
   echo $json > webapp/supersonic.config.json
   mv webapp $release_dir/

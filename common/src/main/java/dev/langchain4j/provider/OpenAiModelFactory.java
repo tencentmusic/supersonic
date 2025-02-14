@@ -18,13 +18,14 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
     public static final String DEFAULT_BASE_URL = "https://api.openai.com/v1";
     public static final String DEFAULT_MODEL_NAME = "gpt-4o-mini";
     public static final String DEFAULT_EMBEDDING_MODEL_NAME = "text-embedding-ada-002";
+    public static final String DEFAULT_API_VERSION = "2024-02-01";
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
         return OpenAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
                 .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
-                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
-                .maxRetries(modelConfig.getMaxRetries())
+                .apiVersion(modelConfig.getApiVersion()).temperature(modelConfig.getTemperature())
+                .topP(modelConfig.getTopP()).maxRetries(modelConfig.getMaxRetries())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
                 .logResponses(modelConfig.getLogResponses()).build();
