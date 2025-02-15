@@ -1,0 +1,59 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 6,
+      "number_of_replicas": 2,
+      "knn": true
+    },
+    "analysis": {
+      "analyzer": {
+        "ik_max_word_lowercase_html_strip": {
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ],
+          "char_filter": [
+            "html_strip"
+          ],
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "queryId": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "text": {
+        "type": "text",
+        "analyzer": "ik_max_word_lowercase_html_strip",
+        "search_analyzer": "ik_smart"
+      },
+      "vector": {
+        "type": "knn_vector",
+        "dimension": 512,
+        "method": {
+          "name": "hnsw",
+          "engine": "lucene",
+          "space_type": "cosinesimil",
+          "parameters": {
+            "ef_construction": 100,
+            "m": 16
+          }
+        }
+      }
+    }
+  }
+}

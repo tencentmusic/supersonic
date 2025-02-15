@@ -36,6 +36,9 @@ public class DuckdbAdaptor extends DefaultDbAdaptor {
 
     @Override
     public String rewriteSql(String sql) {
+        if (sql == null) {
+            return null;
+        }
         return sql.replaceAll("`", "");
     }
 
