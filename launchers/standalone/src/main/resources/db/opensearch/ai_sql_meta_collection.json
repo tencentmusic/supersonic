@@ -1,0 +1,131 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 6,
+      "number_of_replicas": 2,
+      "knn": true
+    },
+    "analysis": {
+      "analyzer": {
+        "ik_max_word_lowercase_html_strip": {
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ],
+          "char_filter": [
+            "html_strip"
+          ],
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "bizName": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "defaultAgg": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "domainId": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "id": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "modelId": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "newName": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "queryId": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          },
+          "type": {
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            },
+            "type": "text"
+          }
+        }
+      },
+      "text": {
+        "analyzer": "ik_max_word_lowercase_html_strip",
+        "search_analyzer": "ik_smart",
+        "type": "text"
+      },
+      "vector": {
+        "dimension": 512,
+        "method": {
+          "engine": "lucene",
+          "space_type": "cosinesimil",
+          "name": "hnsw",
+          "parameters": {
+            "ef_construction": 100,
+            "m": 16
+          }
+        },
+        "type": "knn_vector"
+      }
+    }
+  }
+}

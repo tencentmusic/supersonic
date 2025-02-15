@@ -19,7 +19,10 @@ cd ./packages/chat-sdk
 pnpm i
 
 pnpm run build
-
+if [ $? -ne 0 ]; then
+    echo "Failed to build chat sdk."
+    exit 1
+fi
 pnpm link --global
 
 cd ../supersonic-fe
