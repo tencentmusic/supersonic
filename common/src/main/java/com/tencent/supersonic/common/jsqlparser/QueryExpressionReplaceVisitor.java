@@ -49,6 +49,10 @@ public class QueryExpressionReplaceVisitor extends ExpressionVisitorAdapter {
             visitBinaryExpression(binaryExpression);
         }
 
+        if (expression instanceof Parenthesis) {
+            replace(expression, fieldExprMap);
+        }
+
         if (!toReplace.isEmpty()) {
             Expression toReplaceExpr = getExpression(toReplace);
             if (Objects.nonNull(toReplaceExpr)) {

@@ -74,7 +74,7 @@ public class UserController {
 
     @PostMapping("/resetPassword")
     public void resetPassword(@RequestBody UserReq userCmd, HttpServletRequest request,
-                                HttpServletResponse response) {
+            HttpServletResponse response) {
         User user = userService.getCurrentUser(request, response);
         userService.resetPassword(user.getName(), userCmd.getPassword(), userCmd.getNewPassword());
     }
