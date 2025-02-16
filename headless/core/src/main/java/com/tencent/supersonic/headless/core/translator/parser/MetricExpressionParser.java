@@ -110,7 +110,7 @@ public class MetricExpressionParser implements QueryParser {
                         if (allMeasures.containsKey(field)) {
                             Measure measure = allMeasures.get(field);
                             String expr = metricExpr;
-                            if (Objects.nonNull(measure.getAgg())) {
+                            if (StringUtils.isNotBlank(measure.getAgg())) {
                                 expr = String.format("%s (%s)", measure.getAgg(), metricExpr);
                             }
                             replace.put(field, expr);

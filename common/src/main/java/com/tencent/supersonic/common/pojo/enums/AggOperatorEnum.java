@@ -1,7 +1,7 @@
 package com.tencent.supersonic.common.pojo.enums;
 
 public enum AggOperatorEnum {
-    ANY("ANY"),
+    NONE(""),
 
     MAX("MAX"),
 
