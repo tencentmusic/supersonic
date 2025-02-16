@@ -76,7 +76,7 @@ const ModelFieldForm: React.FC<Props> = ({
 
   const columns = [
     {
-      title: '英文名称',
+      title: '字段名称',
       dataIndex: 'fieldName',
       width: 250,
     },
@@ -204,29 +204,8 @@ const ModelFieldForm: React.FC<Props> = ({
     {
       title: '扩展配置',
       dataIndex: 'extender',
-      // width: 200,
       render: (_: any, record: FieldItem) => {
         const { type } = record;
-        // if (type === EnumDataSourceType.PRIMARY) {
-        //   return (
-        //     <Space>
-        //       <Select
-        //         style={{ minWidth: 150 }}
-        //         value={tagObjectId ? tagObjectId : undefined}
-        //         placeholder="请选择所属对象"
-        //         onChange={(value) => {
-        //           onTagObjectChange?.(value);
-        //         }}
-        //         options={tagObjectList.map((item: ISemantic.ITagObjectItem) => {
-        //           return {
-        //             label: item.name,
-        //             value: item.id,
-        //           };
-        //         })}
-        //       />
-        //     </Space>
-        //   );
-        // }
         if (type === EnumDataSourceType.MEASURES) {
           return (
             <Select
