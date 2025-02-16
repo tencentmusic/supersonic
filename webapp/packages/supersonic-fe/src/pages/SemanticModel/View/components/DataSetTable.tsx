@@ -12,6 +12,7 @@ import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
 import ViewSearchFormModal from './ViewSearchFormModal';
 import { toDatasetEditPage } from '@/pages/SemanticModel/utils';
+import UploadFile from './UploadFile';
 
 type Props = {
   // dataSetList: ISemantic.IDatasetItem[];
@@ -92,9 +93,6 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
           <a
             onClick={() => {
               toDatasetEditPage(record.domainId, record.id, 'relation');
-              // setEditFormStep(1);
-              // setViewItem(record);
-              // setCreateDataSourceModalOpen(true);
             }}
           >
             {name}
@@ -146,9 +144,6 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
               key="metricEditBtn"
               onClick={() => {
                 toDatasetEditPage(record.domainId, record.id);
-                // setEditFormStep(0);
-                // setViewItem(record);
-                // setCreateDataSourceModalOpen(true);
               }}
             >
               编辑
@@ -189,6 +184,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
                 启用
               </Button>
             )}
+            <UploadFile key="uploadFile" buttonType="link" datasetId={record.id} />
             <Popconfirm
               title="确认删除？"
               okText="是"
@@ -229,6 +225,12 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
           disabledEdit
             ? [<></>]
             : [
+                <UploadFile
+                  key="uploadFile"
+                  onFileUploaded={() => {
+                    queryDataSetList();
+                  }}
+                />,
                 <Button
                   key="create"
                   type="primary"

@@ -9,7 +9,7 @@ import {
   RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { chatExecute, chatParse, queryData, deleteQuery, switchEntity } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
@@ -490,9 +490,7 @@ const ChatItem: React.FC<Props> = ({
                   onSwitchEntity={onSwitchEntity}
                   onFiltersChange={onFiltersChange}
                   onDateInfoChange={onDateInfoChange}
-                  onRefresh={() => {
-                    onRefresh();
-                  }}
+                  onRefresh={onRefresh}
                   handlePresetClick={handlePresetClick}
                 />
               )}
