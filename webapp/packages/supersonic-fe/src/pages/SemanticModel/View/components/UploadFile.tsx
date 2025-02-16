@@ -5,15 +5,16 @@ import { Button, message, Upload } from 'antd';
 
 type Props = {
   buttonType?: string;
+  domainId?: number;
   datasetId?: string;
   onFileUploaded?: () => void;
 };
 
-const UploadFile = ({ buttonType, datasetId, onFileUploaded }: Props) => {
+const UploadFile = ({ buttonType, domainId, datasetId, onFileUploaded }: Props) => {
   const props: UploadProps = {
     name: 'multipartFile',
-    action: `/aibi/api/data/file/uploadFileNew?type=DATASET${
-      datasetId ? `&datasetId=${datasetId}` : ''
+    action: `/aibi/api/data/file/uploadFileNew?type=DATASET&domainId=${domainId}${
+      datasetId ? `&dataSetId=${datasetId}` : ''
     }`,
     showUploadList: false,
     onChange(info) {

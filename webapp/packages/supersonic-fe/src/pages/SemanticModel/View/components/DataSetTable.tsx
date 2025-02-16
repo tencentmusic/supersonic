@@ -184,7 +184,12 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
                 启用
               </Button>
             )}
-            <UploadFile key="uploadFile" buttonType="link" datasetId={record.id} />
+            <UploadFile
+              key="uploadFile"
+              buttonType="link"
+              domainId={record.domainId}
+              datasetId={record.id}
+            />
             <Popconfirm
               title="确认删除？"
               okText="是"
@@ -227,6 +232,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
             : [
                 <UploadFile
                   key="uploadFile"
+                  domainId={selectDomainId}
                   onFileUploaded={() => {
                     queryDataSetList();
                   }}
