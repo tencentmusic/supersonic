@@ -2,6 +2,7 @@
 
 sbinDir=$(cd "$(dirname "$0")"; pwd)
 source $sbinDir/supersonic-common.sh
+source $sbinDir/supersonic-env.sh
 
 command=$1
 service=$2
@@ -12,7 +13,7 @@ if [ -z "$service"  ]; then
 fi
 
 if [ -z "$profile" ]; then
-  profile="local"
+  profile=${S2_DB_TYPE}
 fi
 
 model_name=$service
