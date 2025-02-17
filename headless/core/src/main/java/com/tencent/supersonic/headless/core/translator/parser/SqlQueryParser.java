@@ -77,7 +77,7 @@ public class SqlQueryParser implements QueryParser {
         if (StringUtils.isEmpty(tableName)) {
             return;
         }
-        sqlQuery.setTable(tableName.toLowerCase());
+        sqlQuery.setTable(Constants.TABLE_PREFIX + queryStatement.getDataSetId());
         SqlGenerateUtils sqlGenerateUtils = ContextUtils.getBean(SqlGenerateUtils.class);
         SemanticSchemaResp semanticSchema = queryStatement.getSemanticSchema();
         if (!sqlGenerateUtils.isSupportWith(

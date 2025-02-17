@@ -110,6 +110,10 @@ export const AGG_OPTIONS = [
     label: 'count_distinct',
     value: 'count_distinct',
   },
+  {
+    label: 'none',
+    value: '',
+  },
 ];
 
 export const DATE_OPTIONS = ['day', 'week', 'month'];
