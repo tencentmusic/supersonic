@@ -38,6 +38,7 @@ public class LLMReq {
     @Data
     public static class LLMSchema {
         private String databaseType;
+        private String databaseVersion;
         private Long dataSetId;
         private String dataSetName;
         private List<SchemaElement> metrics;
