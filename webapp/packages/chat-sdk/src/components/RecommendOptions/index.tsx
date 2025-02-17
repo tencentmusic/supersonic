@@ -1,6 +1,5 @@
 import { getFormattedValue, isMobile } from '../../utils/utils';
-import { Table } from 'antd';
-import Avatar from 'antd/lib/avatar/avatar';
+import { Table, Avatar } from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { queryEntities } from '../../service';
