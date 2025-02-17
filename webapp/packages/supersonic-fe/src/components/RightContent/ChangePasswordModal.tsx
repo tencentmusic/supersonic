@@ -3,7 +3,8 @@ import { Form, Input, message, Modal } from 'antd';
 import { useBoolean } from 'ahooks';
 import { changePassword } from '@/services/user';
 import { pick } from 'lodash';
-import { encryptPassword, encryptKey } from '@/utils/utils';
+import { encryptPassword } from '@/utils/utils';
+import CryptoJS from 'crypto-js';
 
 export interface IRef {
   open: () => void;
@@ -14,6 +15,7 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
   const [form] = Form.useForm();
   const [open, { setTrue: openModal, setFalse: closeModal }] = useBoolean(false);
   const [confirmLoading, { set: setConfirmLoading }] = useBoolean(false);
+  const encryptKey = CryptoJS.enc.Utf8.parse('supersonic@2024');
 
   useImperativeHandle(ref, () => ({
     open: () => {
