@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Spin, Select, message } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
-import { getDbNames, getTables, getDimensionList } from '../../service';
+import {getDbNames, getTables, getDimensionList, getCatalogs} from '../../service';
 import { ISemantic } from '../../data';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
@@ -20,13 +20,16 @@ const ModelBasicForm: React.FC<Props> = ({
   isEdit,
   modelItem,
   databaseConfigList,
+  form,
   mode = 'normal',
 }) => {
   const [currentDbLinkConfigId, setCurrentDbLinkConfigId] = useState<number>();
+  const [catalogList, setCatalogList] = useState<string[]>([]);
   const [dbNameList, setDbNameList] = useState<string[]>([]);
   const [tableNameList, setTableNameList] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [dimensionOptions, setDimensionOptions] = useState<{ label: string; value: number }[]>([]);
+  const [catalogSelectOpen, setCatalogSelectOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (modelItem?.id) {
@@ -50,9 +53,49 @@ const ModelBasicForm: React.FC<Props> = ({
     }
   };
 
-  const queryDbNameList = async (databaseId: number) => {
+  const onDatabaseSelect = (databaseId: number, type: string) => {
     setLoading(true);
-    const { code, data, msg } = await getDbNames(databaseId);
+    if (type === 'STARROCKS') {
+      queryCatalogList(databaseId)
+      setCatalogSelectOpen(true);
+      setDbNameList([]);
+    } else {
+      queryDbNameList(databaseId, "");
+      setCatalogSelectOpen(false);
+      setCatalogList([]);
+    }
+    form.setFieldsValue({
+      catalog: undefined,
+      dbName: undefined,
+      tableName: undefined,
+    })
+  };
+
+  const queryCatalogList = async (databaseId: number) => {
+    setLoading(true);
+    const { code, data, msg } = await getCatalogs(databaseId);
+    setLoading(false)
+    if (code === 200) {
+      const list = data || [];
+      setCatalogList(list);
+    } else {
+      message.error(msg);
+    }
+  }
+
+  const onCatalogSelect = (catalog: string) => {
+    if (currentDbLinkConfigId) {
+      queryDbNameList(currentDbLinkConfigId, catalog);
+    }
+    form.setFieldsValue({
+      dbName: undefined,
+      tableName: undefined,
+    })
+  }
+
+  const queryDbNameList = async (databaseId: number, catalog: string) => {
+    setLoading(true);
+    const { code, data, msg } = await getDbNames(databaseId, catalog);
     setLoading(false);
     if (code === 200) {
       const list = data || [];
@@ -61,6 +104,7 @@ const ModelBasicForm: React.FC<Props> = ({
       message.error(msg);
     }
   };
+
   const queryTableNameList = async (databaseName: string) => {
     if (!currentDbLinkConfigId) {
       return;
@@ -89,14 +133,33 @@ const ModelBasicForm: React.FC<Props> = ({
               showSearch
               placeholder="请选择数据库连接"
               disabled={isEdit}
-              onChange={(dbLinkConfigId: number) => {
-                queryDbNameList(dbLinkConfigId);
+              onSelect={(dbLinkConfigId: number, option) => {
+                onDatabaseSelect(dbLinkConfigId, option.type);
                 setCurrentDbLinkConfigId(dbLinkConfigId);
               }}
             >
               {databaseConfigList.map((item) => (
-                <Select.Option key={item.id} value={item.id} disabled={!item.hasUsePermission}>
+                <Select.Option key={item.id} value={item.id} disabled={!item.hasUsePermission} type={item.type}>
                   {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </FormItem>
+          <FormItem
+            name="catalog"
+            label="Catalog"
+            rules={[{ required: true, message: '请选择Catalog' }]}
+            hidden={!catalogSelectOpen}
+          >
+            <Select
+              showSearch
+              placeholder="请选择Catalog"
+              disabled={isEdit}
+              onSelect={onCatalogSelect}
+            >
+              {catalogList.map((item) => (
+                <Select.Option key={item} value={item}>
+                  {item}
                 </Select.Option>
               ))}
             </Select>
@@ -110,8 +173,11 @@ const ModelBasicForm: React.FC<Props> = ({
               showSearch
               placeholder="请先选择一个数据库连接"
               disabled={isEdit}
-              onChange={(dbName: string) => {
+              onSelect={(dbName: string) => {
                 queryTableNameList(dbName);
+                form.setFieldsValue({
+                  tableName: undefined,
+                })
               }}
             >
               {dbNameList.map((item) => (
