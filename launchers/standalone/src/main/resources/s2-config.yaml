@@ -41,3 +41,5 @@ s2:
       threshold: 0.5
       min:
         threshold: 0.3
+    embedding:
+      use-llm-enhance: true

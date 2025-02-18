@@ -1,10 +1,6 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -21,6 +17,7 @@ public class SchemaElementMatch implements Serializable {
     private String word;
     private Long frequency;
     private boolean isInherited;
+    private boolean llmMatched;
 
     public boolean isFullMatched() {
         return 1.0 == similarity;
