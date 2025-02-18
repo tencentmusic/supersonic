@@ -1,11 +1,8 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
+import com.tencent.supersonic.common.pojo.Pair;
 import com.tencent.supersonic.common.util.DateUtils;
-import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
@@ -17,11 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
@@ -56,7 +49,9 @@ public class LLMRequestService {
         LLMReq llmReq = new LLMReq();
         llmReq.setQueryText(queryText);
         llmReq.setSchema(llmSchema);
-        llmSchema.setDatabaseType(getDatabaseType(queryCtx, dataSetId));
+        Pair<String, String> databaseInfo = getDatabaseType(queryCtx, dataSetId);
+        llmSchema.setDatabaseType(databaseInfo.first);
+        llmSchema.setDatabaseVersion(databaseInfo.second);
         llmSchema.setDataSetId(dataSetId);
         llmSchema.setDataSetName(dataSetIdToName.get(dataSetId));
         llmSchema.setPartitionTime(getPartitionTime(queryCtx, dataSetId));
@@ -171,13 +166,14 @@ public class LLMRequestService {
         return dataSetSchema.getPrimaryKey();
     }
 
-    protected String getDatabaseType(@NotNull ChatQueryContext queryCtx, Long dataSetId) {
+    protected Pair<String, String> getDatabaseType(@NotNull ChatQueryContext queryCtx,
+            Long dataSetId) {
         SemanticSchema semanticSchema = queryCtx.getSemanticSchema();
         if (semanticSchema == null || semanticSchema.getDataSetSchemaMap() == null) {
             return null;
         }
         Map<Long, DataSetSchema> dataSetSchemaMap = semanticSchema.getDataSetSchemaMap();
         DataSetSchema dataSetSchema = dataSetSchemaMap.get(dataSetId);
-        return dataSetSchema.getDatabaseType();
+        return new Pair(dataSetSchema.getDatabaseType(), dataSetSchema.getDatabaseVersion());
     }
 }

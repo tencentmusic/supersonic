@@ -24,6 +24,7 @@ public class DataSetSchemaBuilder {
                 .bizName(resp.getBizName()).type(SchemaElementType.DATASET).build();
         dataSetSchema.setDataSet(dataSet);
         dataSetSchema.setDatabaseType(resp.getDatabaseType());
+        dataSetSchema.setDatabaseVersion(resp.getDatabaseVersion());
 
         Set<SchemaElement> metrics = getMetrics(resp);
         dataSetSchema.getMetrics().addAll(metrics);

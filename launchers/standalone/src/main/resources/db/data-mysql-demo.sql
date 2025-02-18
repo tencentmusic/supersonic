@@ -1,4 +1,9 @@
 -- S2VisitsDemo
+-- clear data if already exists
+DELETE FROM s2_pv_uv_statis;
+DELETE FROM s2_stay_time_statis;
+DELETE FROM s2_user_department;
+
 INSERT INTO s2_user_department (user_name, department) values ('jack','HR');
 INSERT INTO s2_user_department (user_name, department) values ('tom','sales');
 INSERT INTO s2_user_department (user_name, department) values ('lucy','marketing');
@@ -1020,6 +1025,10 @@ INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATE_SUB(CURRENT_DATE(), INTERVAL 8 DAY), 'lucy', '0.039935860913407284', 'p2');
 
 -- S2ArtistDemo
+-- clear data if already exists
+DELETE FROM singer;
+DELETE FROM genre;
+
 INSERT INTO singer (singer_name, act_area, song_name, genre, js_play_cnt, down_cnt, favor_cnt)
 VALUES ('周杰伦', '港台', '青花瓷', '国风', 1000000, 1000000, 1000000);
 INSERT INTO singer (singer_name, act_area, song_name, genre, js_play_cnt, down_cnt, favor_cnt)
@@ -1041,6 +1050,11 @@ INSERT INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大')
 INSERT INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
 
 -- S2CompanyDemo
+-- clear data if already exists
+DELETE FROM brand_revenue;
+DELETE FROM brand;
+DELETE FROM company;
+
 INSERT INTO company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_131','微软','西雅图','1975','盖茨','纳德拉',102300000000,210000);
 INSERT INTO company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_132','特斯拉','加州','2003','艾伯哈德','马斯克',376800000000,140473);
 INSERT INTO company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_133','谷歌','加州','1998','拉里佩奇','劈柴',321600000000,182503);
