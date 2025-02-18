@@ -83,7 +83,7 @@ public class DatabaseController {
 
     @RequestMapping("/getDbNames")
     public List<String> getDbNames(@RequestParam("id") Long databaseId,
-                                   @RequestParam(value = "catalog", required = false) String catalog) throws SQLException {
+            @RequestParam(value = "catalog", required = false) String catalog) throws SQLException {
         return databaseService.getDbNames(databaseId, catalog);
     }
 
