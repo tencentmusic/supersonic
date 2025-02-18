@@ -3,7 +3,9 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
+import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.service.ExemplarService;
+import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +17,9 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_EXEMPLAR_RECALL_NUMBER;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_FEW_SHOT_NUMBER;
-import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_SELF_CONSISTENCY_NUMBER;
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
 
 @Component
 @Slf4j
@@ -65,6 +66,11 @@ public class PromptHelper {
 
         if (StringUtils.isNotEmpty(llmReq.getPriorExts())) {
             sideInfos.add(String.format("PriorKnowledge=[%s]", llmReq.getPriorExts()));
+        }
+
+        LLMReq.LLMSchema schema = llmReq.getSchema();
+        if (!isSupportWith(schema.getDatabaseType(), schema.getDatabaseVersion())) {
+            sideInfos.add("[Database does not support with statement]");
         }
 
         String termStr = buildTermStr(llmReq);
@@ -152,12 +158,17 @@ public class PromptHelper {
         if (llmReq.getSchema().getDatabaseType() != null) {
             databaseTypeStr = llmReq.getSchema().getDatabaseType();
         }
+        String databaseVersionStr = "";
+        if (llmReq.getSchema().getDatabaseVersion() != null) {
+            databaseVersionStr = llmReq.getSchema().getDatabaseVersion();
+        }
 
         String template =
-                "DatabaseType=[%s], Table=[%s], PartitionTimeField=[%s], PrimaryKeyField=[%s], "
+                "DatabaseType=[%s], DatabaseVersion=[%s], Table=[%s], PartitionTimeField=[%s], PrimaryKeyField=[%s], "
                         + "Metrics=[%s], Dimensions=[%s], Values=[%s]";
-        return String.format(template, databaseTypeStr, tableStr, partitionTimeStr, primaryKeyStr,
-                String.join(",", metrics), String.join(",", dimensions), String.join(",", values));
+        return String.format(template, databaseTypeStr, databaseVersionStr, tableStr,
+                partitionTimeStr, primaryKeyStr, String.join(",", metrics),
+                String.join(",", dimensions), String.join(",", values));
     }
 
     private String buildTermStr(LLMReq llmReq) {
@@ -175,5 +186,17 @@ public class PromptHelper {
         }
 
         return ret;
+    }
+
+    public static boolean isSupportWith(String type, String version) {
+        if (type.equalsIgnoreCase(EngineType.MYSQL.getName()) && Objects.nonNull(version)
+                && StringUtil.compareVersion(version, "8.0") < 0) {
+            return false;
+        }
+        if (type.equalsIgnoreCase(EngineType.CLICKHOUSE.getName()) && Objects.nonNull(version)
+                && StringUtil.compareVersion(version, "20.4") < 0) {
+            return false;
+        }
+        return true;
     }
 }

@@ -1,14 +1,13 @@
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/mysql?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
-    username: root
-    password:
+    url: jdbc:mysql://${S2_DB_HOST:localhost}:${S2_DB_PORT:3306}/${S2_DB_DATABASE:mysql}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    username: ${S2_DB_USER:root}
+    password: ${S2_DB_PASSWORD:}
   sql:
     init:
-      enabled: false
       mode: always
-      username: root
-      password:
+      username: ${S2_DB_USER:root}
+      password: ${S2_DB_PASSWORD:}
       schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
       data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql

@@ -197,6 +197,7 @@ public class SchemaServiceImpl implements SchemaService {
                 DatabaseResp databaseResp = databaseService
                         .getDatabase(dataSetSchemaResp.getModelResps().get(0).getDatabaseId());
                 dataSetSchemaResp.setDatabaseType(databaseResp.getType());
+                dataSetSchemaResp.setDatabaseVersion(databaseResp.getVersion());
             }
             dataSetSchemaResps.add(dataSetSchemaResp);
         }
