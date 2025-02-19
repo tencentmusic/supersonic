@@ -56,9 +56,7 @@ const BarChart: React.FC<Props> = ({
     } else {
       instanceObj = instanceRef.current;
     }
-    const data = (queryResults || []).sort(
-      (a: any, b: any) => b[metricColumnName] - a[metricColumnName]
-    );
+    const data = (queryResults || []);
     const xData = data.map(item =>
       item[categoryColumnName] !== undefined ? item[categoryColumnName] : '未知'
     );
