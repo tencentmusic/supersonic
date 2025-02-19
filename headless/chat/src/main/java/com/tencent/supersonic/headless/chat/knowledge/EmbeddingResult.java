@@ -13,6 +13,7 @@ public class EmbeddingResult extends MapResult {
 
     private String id;
     private Map<String, String> metadata;
+    private boolean llmMatched;
 
     @Override
     public boolean equals(Object o) {
