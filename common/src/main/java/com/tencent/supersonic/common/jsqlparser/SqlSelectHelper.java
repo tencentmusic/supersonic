@@ -294,7 +294,8 @@ public class SqlSelectHelper {
         }
         // do not account in aliases
         results.removeAll(aliases);
-        return new ArrayList<>(results);
+        return new ArrayList<>(
+                results.stream().map(r -> r.replaceAll("`", "")).collect(Collectors.toList()));
     }
 
     private static List<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
