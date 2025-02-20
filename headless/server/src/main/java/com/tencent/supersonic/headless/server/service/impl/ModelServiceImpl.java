@@ -145,8 +145,7 @@ public class ModelServiceImpl implements ModelService {
         // Comment out below checks for now, they seem unnecessary and
         // lead to unexpected exception in updating model
         /*
-        checkParams(modelReq);
-        checkRelations(modelReq);
+         * checkParams(modelReq); checkRelations(modelReq);
          */
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
