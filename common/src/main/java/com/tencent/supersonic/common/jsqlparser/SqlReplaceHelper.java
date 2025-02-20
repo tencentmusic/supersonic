@@ -38,6 +38,10 @@ public class SqlReplaceHelper {
 
     private final static double replaceColumnThreshold = 0.4;
 
+    public static String escapeTableName(String table) {
+        return String.format("`%s`", table);
+    }
+
     public static String replaceAggFields(String sql,
             Map<String, Pair<String, String>> fieldNameToAggMap) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
