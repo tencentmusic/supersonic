@@ -30,9 +30,29 @@ logging:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
-    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
-    enabled: true
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
   packages-to-scan: com.tencent.supersonic
   paths-to-match: /api/chat/**,/api/semantic/**
+
+knife4j:
+  enable: true
+  openapi:
+    title: 'SuperSonic API Documentation'
+    description: 'SuperSonic API Documentation'
+    version: v1.0
+  setting:
+    language: zh-CN
+#  basic:
+#    enable: true
+#    username: test
+#    password: 123456#
+  documents:
+    default:
+      title: ChatBI API Documents
+      description: ChatBI API Documents

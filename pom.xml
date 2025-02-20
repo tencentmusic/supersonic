@@ -78,7 +78,6 @@
         <spotless.version>2.27.1</spotless.version>
         <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.1</stax2.version>
-        <io.springfox.version>3.0.0</io.springfox.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
     </properties>
 
