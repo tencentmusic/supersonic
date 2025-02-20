@@ -145,25 +145,27 @@ const ModelBasicForm: React.FC<Props> = ({
               ))}
             </Select>
           </FormItem>
-          <FormItem
-            name="catalog"
-            label="Catalog"
-            rules={[{ required: true, message: '请选择Catalog' }]}
-            hidden={!catalogSelectOpen}
-          >
-            <Select
-              showSearch
-              placeholder="请选择Catalog"
-              disabled={isEdit}
-              onSelect={onCatalogSelect}
+
+           <FormItem
+              name="catalog"
+              label="Catalog"
+              rules={[{ required: catalogSelectOpen, message: '请选择Catalog' }]}
+              hidden={!catalogSelectOpen}
             >
-              {catalogList.map((item) => (
-                <Select.Option key={item} value={item}>
-                  {item}
-                </Select.Option>
-              ))}
-            </Select>
-          </FormItem>
+              <Select
+                showSearch
+                placeholder="请选择Catalog"
+                disabled={isEdit}
+                onSelect={onCatalogSelect}
+              >
+                {catalogList.map((item) => (
+                  <Select.Option key={item} value={item}>
+                    {item}
+                  </Select.Option>
+                ))}
+              </Select>
+            </FormItem>
+
           <FormItem
             name="dbName"
             label="数据库名"
