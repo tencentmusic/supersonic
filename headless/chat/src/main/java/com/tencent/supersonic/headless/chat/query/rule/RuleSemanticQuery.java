@@ -241,7 +241,7 @@ public abstract class RuleSemanticQuery extends BaseSemanticQuery {
                     .forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
         }
         List<Filter> metricFilters = queryStructReq.getMetricFilters();
-        if (CollectionUtils.isNotEmpty(dimensionFilters)) {
+        if (CollectionUtils.isNotEmpty(metricFilters)) {
             metricFilters.forEach(filter -> filter.setName(bizNameToName.get(filter.getBizName())));
         }
     }

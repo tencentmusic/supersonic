@@ -16,6 +16,6 @@ public class ResultLimitOptimizer implements QueryOptimizer {
 
     @Override
     public void rewrite(QueryStatement queryStatement) {
-        queryStatement.setSql(queryStatement.getSql() + " limit " + queryStatement.getLimit());
+        queryStatement.setSql(queryStatement.getSql() + " LIMIT " + queryStatement.getLimit());
     }
 }

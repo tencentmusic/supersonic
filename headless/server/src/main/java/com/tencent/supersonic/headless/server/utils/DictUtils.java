@@ -431,6 +431,10 @@ public class DictUtils {
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
         ItemValueConfig config = dictItemResp.getConfig();
+        if (config == null) {
+            return "";
+        }
+
         if (!partitionedModel(dictItemResp.getModelId())) {
             return "";
         }
