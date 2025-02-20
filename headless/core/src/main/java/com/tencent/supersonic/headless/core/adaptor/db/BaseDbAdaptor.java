@@ -17,7 +17,20 @@ import java.util.List;
 @Slf4j
 public abstract class BaseDbAdaptor implements DbAdaptor {
 
-    public List<String> getDBs(ConnectInfo connectionInfo) throws SQLException {
+    @Override
+    public List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException {
+        // Apart from supporting multiple catalog types of data sources, other types will return an
+        // empty set by default.
+        return List.of();
+    }
+
+    public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {
+        // Except for special types implemented separately, the generic logic catalog does not take
+        // effect.
+        return getDBs(connectionInfo);
+    }
+
+    protected List<String> getDBs(ConnectInfo connectionInfo) throws SQLException {
         List<String> dbs = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
         try {

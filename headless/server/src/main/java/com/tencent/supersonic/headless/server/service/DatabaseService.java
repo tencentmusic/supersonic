@@ -36,7 +36,9 @@ public interface DatabaseService {
 
     void deleteDatabase(Long databaseId);
 
-    List<String> getDbNames(Long id) throws SQLException;
+    List<String> getCatalogs(Long id) throws SQLException;
+
+    List<String> getDbNames(Long id, String catalog) throws SQLException;
 
     List<String> getTables(Long id, String db) throws SQLException;
 

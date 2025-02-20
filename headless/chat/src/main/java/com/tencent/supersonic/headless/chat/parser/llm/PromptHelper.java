@@ -106,8 +106,6 @@ public class PromptHelper {
             }
             if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
                 metricStr.append(" AGGREGATE '" + metric.getDefaultAgg().toUpperCase() + "'");
-            } else {
-                metricStr.append(" AGGREGATE 'NONE'");
             }
             metricStr.append(">");
             metrics.add(metricStr.toString());

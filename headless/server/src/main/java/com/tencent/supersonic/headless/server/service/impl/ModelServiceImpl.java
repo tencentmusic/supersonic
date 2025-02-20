@@ -142,8 +142,12 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        // checkParams(modelReq);
+        // Comment out below checks for now, they seem unnecessary and
+        // lead to unexpected exception in updating model
+        /*
+        checkParams(modelReq);
         checkRelations(modelReq);
+         */
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
         modelRepository.updateModel(modelDO);

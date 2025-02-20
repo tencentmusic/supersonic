@@ -76,9 +76,15 @@ public class DatabaseController {
         return databaseService.executeSql(sqlExecuteReq, user);
     }
 
+    @RequestMapping("/getCatalogs")
+    public List<String> getCatalogs(@RequestParam("id") Long databaseId) throws SQLException {
+        return databaseService.getCatalogs(databaseId);
+    }
+
     @RequestMapping("/getDbNames")
-    public List<String> getDbNames(@RequestParam("id") Long databaseId) throws SQLException {
-        return databaseService.getDbNames(databaseId);
+    public List<String> getDbNames(@RequestParam("id") Long databaseId,
+            @RequestParam(value = "catalog", required = false) String catalog) throws SQLException {
+        return databaseService.getDbNames(databaseId, catalog);
     }
 
     @RequestMapping("/getTables")
