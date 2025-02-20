@@ -38,8 +38,6 @@ public class ChatWorkflowEngine {
     @Autowired
     private DimensionValuesMatchHelper dimensionValuesMatchHelper;
 
-    public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx,
-            ParseResp parseResult) {
     public void start(ChatWorkflowState initialState, ChatQueryContext queryCtx) {
         ParseResp parseResult = queryCtx.getParseResp();
         queryCtx.setChatWorkflowState(initialState);
