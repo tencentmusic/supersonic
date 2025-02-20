@@ -100,7 +100,28 @@ public class QueryUtils {
             column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
             column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
             column.setModelId(metricRespMap.get(nameEn).getModelId());
+        } else {
+            // if column nameEn contains metric name, use metric dataFormatType
+            metricRespMap.values().forEach(metric -> {
+                if (nameEn.contains(metric.getName()) || nameEn.contains(metric.getBizName())) {
+                    column.setDataFormatType(metric.getDataFormatType());
+                    column.setDataFormat(metric.getDataFormat());
+                    column.setModelId(metric.getModelId());
+                }
+                // if column nameEn contains metric alias, use metric dataFormatType
+                if (column.getDataFormatType() == null && metric.getAlias() != null) {
+                    for (String alias : metric.getAlias().split(",")) {
+                        if (nameEn.contains(alias)) {
+                            column.setDataFormatType(metric.getDataFormatType());
+                            column.setDataFormat(metric.getDataFormat());
+                            column.setModelId(metric.getModelId());
+                            break;
+                        }
+                    }
+                }
+            });
         }
+
         if (dimensionRespMap.containsKey(nameEn)) {
             column.setModelId(dimensionRespMap.get(nameEn).getModelId());
         }
@@ -119,7 +140,7 @@ public class QueryUtils {
                 || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")
                 || type.equalsIgnoreCase("real") || type.equalsIgnoreCase("numeric")
                 || type.toLowerCase().startsWith("decimal") || type.toLowerCase().startsWith("uint")
-                || type.toLowerCase().startsWith("int");
+                || type.toLowerCase().startsWith("int") || type.toLowerCase().equalsIgnoreCase("decfloat");
     }
 
     private String getName(String nameEn) {
