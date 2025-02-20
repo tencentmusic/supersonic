@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class DataSetSchema implements Serializable {
 
     private String databaseType;
+    private String databaseVersion;
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = new HashSet<>();
     private Set<SchemaElement> dimensions = new HashSet<>();

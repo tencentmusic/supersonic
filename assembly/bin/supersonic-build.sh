@@ -35,10 +35,15 @@ function buildWebapp {
   chmod +x $projectDir/webapp/start-fe-prod.sh
   cd $projectDir/webapp
   sh ./start-fe-prod.sh
-  cp -fr  ./supersonic-webapp.tar.gz ${buildDir}/
   # check build result
   if [ $? -ne 0 ]; then
       echo "Failed to build frontend webapp."
+      exit 1
+  fi
+  cp -fr  ./supersonic-webapp.tar.gz ${buildDir}/
+  # check build result
+  if [ $? -ne 0 ]; then
+      echo "Failed to get supersonic webapp package."
       exit 1
   fi
   echo "finished building supersonic webapp"
@@ -56,6 +61,11 @@ function packageRelease {
   # package webapp
   tar xvf supersonic-webapp.tar.gz
   mv supersonic-webapp webapp
+  # check webapp build result
+  if [ $? -ne 0 ]; then
+      echo "Failed to get supersonic webapp package."
+      exit 1
+  fi
   json='{"env": "''"}'
   echo $json > webapp/supersonic.config.json
   mv webapp $release_dir/

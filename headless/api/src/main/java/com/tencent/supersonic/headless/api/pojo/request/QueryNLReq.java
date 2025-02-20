@@ -18,6 +18,7 @@ import java.util.Set;
 
 @Data
 public class QueryNLReq extends SemanticQueryReq implements Serializable {
+    private Long queryId;
     private String queryText;
     private Set<Long> dataSetIds = Sets.newHashSet();
     private User user;
@@ -31,7 +32,6 @@ public class QueryNLReq extends SemanticQueryReq implements Serializable {
     private SemanticParseInfo contextParseInfo;
     private SemanticParseInfo selectedParseInfo;
     private boolean descriptionMapped;
-    private Long queryId;
 
     @Override
     public String toCustomizedString() {

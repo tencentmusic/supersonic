@@ -1,6 +1,7 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.util.EditDistanceUtils;
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
@@ -25,21 +26,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Sql Parser replace Helper
  */
 @Slf4j
 public class SqlReplaceHelper {
+
+    private final static double replaceColumnThreshold = 0.4;
+
     public static String replaceAggFields(String sql,
             Map<String, Pair<String, String>> fieldNameToAggMap) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
@@ -488,6 +486,52 @@ public class SqlReplaceHelper {
         return selectStatement.toString();
     }
 
+    public static String replaceAliasWithBackticks(String sql) {
+        Select selectStatement = SqlSelectHelper.getSelect(sql);
+        if (!(selectStatement instanceof PlainSelect)) {
+            return sql;
+        }
+        PlainSelect plainSelect = (PlainSelect) selectStatement;
+        FieldAliasReplaceWithBackticksVisitor visitor = new FieldAliasReplaceWithBackticksVisitor();
+        for (SelectItem selectItem : plainSelect.getSelectItems()) {
+            selectItem.accept(visitor);
+        }
+        // Replace `order by` and `group by`
+        // Get the map of field aliases that have been replaced
+        Map<String, String> aliasReplacedMap = visitor.getFieldAliasReplacedMap();
+
+        // If no aliases have been replaced, return the original SQL statement as a string
+        if (aliasReplacedMap.isEmpty()) {
+            return selectStatement.toString();
+        }
+        // Order by elements
+        List<OrderByElement> orderByElements = selectStatement.getOrderByElements();
+        if (!CollectionUtils.isEmpty(orderByElements)) {
+            for (OrderByElement orderByElement : orderByElements) {
+                orderByElement.accept(new OrderByReplaceVisitor(aliasReplacedMap, true));
+            }
+        }
+        // Group by elements
+        GroupByElement groupByElement = plainSelect.getGroupBy();
+        if (Objects.nonNull(groupByElement)) {
+            groupByElement.accept(new GroupByReplaceVisitor(aliasReplacedMap, true));
+        }
+        // Alias columns
+        for (SelectItem<?> selectItem : plainSelect.getSelectItems()) {
+            if (selectItem.getExpression() instanceof Column) {
+                replaceColumn((Column) selectItem.getExpression(), aliasReplacedMap, true);
+            }
+        }
+        // Having
+        Expression having = plainSelect.getHaving();
+        if (Objects.nonNull(having)) {
+            ExpressionReplaceVisitor expressionReplaceVisitor =
+                    new ExpressionReplaceVisitor(aliasReplacedMap);
+            having.accept(expressionReplaceVisitor);
+        }
+        return selectStatement.toString();
+    }
+
     public static String replaceAlias(String sql) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
         if (!(selectStatement instanceof PlainSelect)) {
@@ -769,4 +813,54 @@ public class SqlReplaceHelper {
             }
         }
     }
+
+    public static void replaceFunction(Function expression, Map<String, String> fieldNameMap,
+            boolean exactReplace) {
+        Function function = expression;
+        ExpressionList<?> expressions = function.getParameters();
+        for (Expression column : expressions) {
+            if (column instanceof Column) {
+                replaceColumn((Column) column, fieldNameMap, exactReplace);
+            }
+        }
+    }
+
+    public static void replaceColumn(Column column, Map<String, String> fieldNameMap,
+            boolean exactReplace) {
+        String columnName = StringUtil.replaceBackticks(column.getColumnName());
+        String replaceColumn = getReplaceValue(columnName, fieldNameMap, exactReplace);
+        if (StringUtils.isNotBlank(replaceColumn)) {
+            log.debug("Replaced column {} to {}", column.getColumnName(), replaceColumn);
+            column.setColumnName(replaceColumn);
+        }
+    }
+
+    public static String getReplaceValue(String beforeValue, Map<String, String> valueMap,
+            boolean exactReplace) {
+        String replaceValue = valueMap.get(beforeValue);
+        if (StringUtils.isNotBlank(replaceValue)) {
+            return replaceValue;
+        }
+        if (exactReplace) {
+            return null;
+        }
+        Optional<Map.Entry<String, String>> first =
+                valueMap.entrySet().stream().sorted((k1, k2) -> {
+                    String k1Value = k1.getKey();
+                    String k2Value = k2.getKey();
+                    Double k1Similarity = EditDistanceUtils.getSimilarity(beforeValue, k1Value);
+                    Double k2Similarity = EditDistanceUtils.getSimilarity(beforeValue, k2Value);
+                    return k2Similarity.compareTo(k1Similarity);
+                }).collect(Collectors.toList()).stream().findFirst();
+
+        if (first.isPresent()) {
+            replaceValue = first.get().getValue();
+            double similarity = EditDistanceUtils.getSimilarity(beforeValue, replaceValue);
+            if (similarity > replaceColumnThreshold) {
+                return replaceValue;
+            }
+        }
+        return beforeValue;
+    }
+
 }

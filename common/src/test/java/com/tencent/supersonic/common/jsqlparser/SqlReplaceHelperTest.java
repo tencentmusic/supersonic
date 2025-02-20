@@ -1,38 +1,16 @@
 package com.tencent.supersonic.common.jsqlparser;
 
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
-import com.tencent.supersonic.common.util.ContextUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static org.mockito.Mockito.mockStatic;
+import java.util.*;
 
 /**
  * SqlParserReplaceHelperTest
  */
 class SqlReplaceHelperTest {
-    private MockedStatic<ContextUtils> mockedContextUtils;
-
-    @BeforeEach
-    public void setUp() {
-        ReplaceService replaceService = new ReplaceService();
-        replaceService.setReplaceColumnThreshold(0.4);
-
-        // Mock the static method ContextUtils.getBean
-        mockedContextUtils = mockStatic(ContextUtils.class);
-        mockedContextUtils.when(() -> ContextUtils.getBean(ReplaceService.class))
-                .thenReturn(replaceService);
-    }
 
     @Test
     void testReplaceAggField() {
@@ -325,6 +303,37 @@ class SqlReplaceHelperTest {
     }
 
     @Test
+    void testReplaceAliasWithBackticks() {
+        String sql = "SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数 WHERE "
+                + "datediff('day', 数据日期, '2023-09-05') <= 3 GROUP BY 部门 ORDER BY 总访问次数 DESC LIMIT 10";
+        String replaceSql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT 部门, SUM(访问次数) AS `总访问次数` FROM 超音数 WHERE "
+                + "datediff('day', 数据日期, '2023-09-05') <= 3 GROUP BY 部门 ORDER BY `总访问次数` DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select 部门, sum(访问次数) as 访问次数 from 超音数 where "
+                + "(datediff('day', 数据日期, '2023-09-05') <= 3) and 数据日期 = '2023-10-10' "
+                + "group by 部门 order by 访问次数 desc limit 10";
+        replaceSql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
+        System.out.println(replaceSql);
+        Assert.assertEquals("SELECT 部门, sum(访问次数) AS `访问次数` FROM 超音数 WHERE (datediff('day', 数据日期, "
+                + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门 ORDER BY `访问次数` DESC LIMIT 10",
+                replaceSql);
+
+        sql = "select 部门, sum(访问次数) as 访问次数, count(部门) as 部门数, count(部门) as 部门数2, 访问次数 from 超音数 where "
+                + "(datediff('day', 数据日期, '2023-09-05') <= 3) and 数据日期 = '2023-10-10' "
+                + "group by 部门, 部门数, 部门数2 having 访问次数 > 1 AND 部门数2 > 2 AND 部门数 > 1 AND 访问次数 > 1 order by 访问次数 desc  limit 10";
+        replaceSql = SqlReplaceHelper.replaceAliasWithBackticks(sql);
+        System.out.println(replaceSql);
+        Assert.assertEquals(
+                "SELECT 部门, sum(访问次数) AS `访问次数`, count(部门) AS `部门数`, count(部门) AS `部门数2`, `访问次数` FROM 超音数 WHERE (datediff('day', 数据日期, "
+                        + "'2023-09-05') <= 3) AND 数据日期 = '2023-10-10' GROUP BY 部门, `部门数`, `部门数2` HAVING `访问次数` > 1 AND `部门数2` > 2 AND `部门数` > 1 AND `访问次数` > 1 ORDER BY `访问次数` DESC LIMIT 10",
+                replaceSql);
+
+    }
+
+    @Test
     void testReplaceAliasFieldName() {
         Map<String, String> map = new HashMap<>();
         map.put("总访问次数", "\"总访问次数\"");
@@ -385,11 +394,4 @@ class SqlReplaceHelperTest {
         return fieldToBizName;
     }
 
-    @AfterEach
-    public void tearDown() {
-        // Close the mocked static context
-        if (mockedContextUtils != null) {
-            mockedContextUtils.close();
-        }
-    }
 }

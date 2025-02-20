@@ -14,7 +14,9 @@ public interface DbAdaptor {
 
     String rewriteSql(String sql);
 
-    List<String> getDBs(ConnectInfo connectInfo) throws SQLException;
+    List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException;
+
+    List<String> getDBs(ConnectInfo connectInfo, String catalog) throws SQLException;
 
     List<String> getTables(ConnectInfo connectInfo, String schemaName) throws SQLException;
 

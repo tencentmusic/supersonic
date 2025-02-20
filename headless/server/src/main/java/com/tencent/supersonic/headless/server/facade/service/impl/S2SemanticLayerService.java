@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DimValuesConstants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
@@ -24,6 +25,7 @@ import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.pojo.StructQuery;
 import com.tencent.supersonic.headless.core.translator.SemanticTranslator;
+import com.tencent.supersonic.headless.core.translator.TranslatorConfig;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
@@ -58,6 +60,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final KnowledgeBaseService knowledgeBaseService;
     private final MetricService metricService;
     private final DimensionService dimensionService;
+    private final TranslatorConfig translatorConfig;
     private final QueryCache queryCache = ComponentFactory.getQueryCache();
     private final List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
 
@@ -66,7 +69,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             SchemaService schemaService, SemanticTranslator semanticTranslator,
             MetricDrillDownChecker metricDrillDownChecker,
             KnowledgeBaseService knowledgeBaseService, MetricService metricService,
-            DimensionService dimensionService) {
+            DimensionService dimensionService, TranslatorConfig translatorConfig) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.semanticSchemaManager = semanticSchemaManager;
@@ -77,6 +80,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.knowledgeBaseService = knowledgeBaseService;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
+        this.translatorConfig = translatorConfig;
     }
 
     public DataSetSchema getDataSetSchema(Long id) {
@@ -111,6 +115,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
             List<Map.Entry<String, String>> dimensionValuesAndId =
                     (List<Map.Entry<String, String>>) queryCache.get(dimensionKey);
             queryResp = getSemanticQueryResp(queryReq, user, dimensionValuesAndId);
+            queryResp.setResultType(true);
             queryCache.put(fullQueryKey, true);
         } else {
             queryResp = queryByReq(queryReq, user);
@@ -313,7 +318,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
     private List<QueryColumn> createQueryColumns(DimensionValueReq dimensionValueReq) {
         QueryColumn queryColumn = new QueryColumn();
-        queryColumn.setNameEn(dimensionValueReq.getBizName());
+        queryColumn.setBizName(dimensionValueReq.getBizName());
         queryColumn.setShowType(SemanticType.CATEGORY.name());
         queryColumn.setAuthorized(true);
         queryColumn.setType("CHAR");
@@ -374,8 +379,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
             queryStatement.setSql(semanticQueryReq.getSqlInfo().getQuerySQL());
             queryStatement.setIsTranslated(true);
         }
-        queryStatement.setDataSetId(semanticQueryReq.getDataSetId());
-        queryStatement.setDataSetName(semanticQueryReq.getDataSetName());
         return queryStatement;
     }
 
@@ -387,6 +390,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
+        queryStatement.setLimit(Integer.parseInt(translatorConfig.getParameterValue(
+                TranslatorConfig.TRANSLATOR_RESULT_LIMIT)));
         queryStatement.setDataSetId(queryReq.getDataSetId());
         queryStatement.setDataSetName(queryReq.getDataSetName());
         queryStatement.setSemanticSchema(semanticSchemaResp);
@@ -406,6 +411,12 @@ public class S2SemanticLayerService implements SemanticLayerService {
         if (querySqlReq.needGetDataSetId()) {
             Long dataSetId = dataSetService.getDataSetIdFromSql(querySqlReq.getSql(), user);
             querySqlReq.setDataSetId(dataSetId);
+        }
+        if (querySqlReq.getDataSetId() != null) {
+            DataSetResp dataSetResp = dataSetService.getDataSet(querySqlReq.getDataSetId());
+            queryStatement.setDataSetId(dataSetResp.getId());
+            queryStatement.setDataSetName(dataSetResp.getName());
+            sqlQuery.setTable(Constants.TABLE_PREFIX + dataSetResp.getId());
         }
         return queryStatement;
     }

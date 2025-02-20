@@ -51,7 +51,7 @@ const MetricTrendChart: React.FC<Props> = ({
       instanceObj.clear();
     }
 
-    const valueColumnName = metricField.nameEn;
+    const valueColumnName = metricField.bizName;
     const dataSource = resultList.map((item: any) => {
       return {
         ...item,

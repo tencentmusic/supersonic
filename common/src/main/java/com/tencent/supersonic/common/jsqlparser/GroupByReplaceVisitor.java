@@ -1,6 +1,5 @@
 package com.tencent.supersonic.common.jsqlparser;
 
-import com.tencent.supersonic.common.util.ContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -15,8 +14,8 @@ import java.util.Map;
 @Slf4j
 public class GroupByReplaceVisitor implements GroupByVisitor {
 
-    private Map<String, String> fieldNameMap;
-    private boolean exactReplace;
+    private final boolean exactReplace;
+    private final Map<String, String> fieldNameMap;
 
     public GroupByReplaceVisitor(Map<String, String> fieldNameMap, boolean exactReplace) {
         this.fieldNameMap = fieldNameMap;
@@ -34,11 +33,10 @@ public class GroupByReplaceVisitor implements GroupByVisitor {
     }
 
     private void replaceExpression(Expression expression) {
-        ReplaceService replaceService = ContextUtils.getBean(ReplaceService.class);
         if (expression instanceof Column) {
-            replaceService.replaceColumn((Column) expression, fieldNameMap, exactReplace);
+            SqlReplaceHelper.replaceColumn((Column) expression, fieldNameMap, exactReplace);
         } else if (expression instanceof Function) {
-            replaceService.replaceFunction((Function) expression, fieldNameMap, exactReplace);
+            SqlReplaceHelper.replaceFunction((Function) expression, fieldNameMap, exactReplace);
         }
     }
 }

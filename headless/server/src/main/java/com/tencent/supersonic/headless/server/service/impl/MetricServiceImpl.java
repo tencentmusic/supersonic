@@ -104,11 +104,11 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
             } else {
                 MetricResp metricRespByBizName = bizNameMap.get(metric.getBizName());
                 MetricResp metricRespByName = nameMap.get(metric.getName());
-                if (null != metricRespByBizName && isChange(metric, metricRespByBizName)) {
+                if (null != metricRespByBizName) {
                     metric.setId(metricRespByBizName.getId());
                     this.updateMetric(metric, user);
                 } else {
-                    if (null != metricRespByName && isChange(metric, metricRespByName)) {
+                    if (null != metricRespByName) {
                         metric.setId(metricRespByName.getId());
                         this.updateMetric(metric, user);
                     }
@@ -819,7 +819,7 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         return modelResps.stream().map(ModelResp::getId).collect(Collectors.toSet());
     }
 
-    private boolean isChange(MetricReq metricReq, MetricResp metricResp) {
+    private boolean isNameChange(MetricReq metricReq, MetricResp metricResp) {
         boolean isNameChange = !metricReq.getName().equals(metricResp.getName());
         return isNameChange;
     }

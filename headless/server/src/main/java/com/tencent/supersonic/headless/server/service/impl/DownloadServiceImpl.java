@@ -179,7 +179,7 @@ public class DownloadServiceImpl implements DownloadService {
         for (Map<String, Object> row : semanticQueryResp.getResultList()) {
             List<String> rowData = new ArrayList<>();
             for (QueryColumn column : semanticQueryResp.getColumns()) {
-                rowData.add(String.valueOf(row.get(column.getNameEn())));
+                rowData.add(String.valueOf(row.get(column.getBizName())));
             }
             data.add(rowData);
         }
@@ -217,7 +217,7 @@ public class DownloadServiceImpl implements DownloadService {
             QueryColumn metric = metricColumns.get(0);
             List<String> groups = queryStructReq.getGroups();
             List<Map<String, Object>> dataTransformed =
-                    DataTransformUtils.transform(queryResult.getResultList(), metric.getNameEn(),
+                    DataTransformUtils.transform(queryResult.getResultList(), metric.getBizName(),
                             groups, queryStructReq.getDateInfo());
             List<List<String>> headers =
                     buildHeader(dimensionColumns, queryStructReq.getDateInfo().getDateList());
@@ -264,7 +264,7 @@ public class DownloadServiceImpl implements DownloadService {
 
     private Map<String, String> getDimensionNameMap(List<QueryColumn> queryColumns) {
         return queryColumns.stream()
-                .collect(Collectors.toMap(QueryColumn::getName, QueryColumn::getNameEn));
+                .collect(Collectors.toMap(QueryColumn::getName, QueryColumn::getBizName));
     }
 
     private List<DimensionResp> getMetricRelaDimensions(MetricResp metricResp,

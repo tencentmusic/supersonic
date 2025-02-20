@@ -73,12 +73,18 @@ public class DatabaseController {
     public SemanticQueryResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return databaseService.executeSql(sqlExecuteReq, sqlExecuteReq.getId(), user);
+        return databaseService.executeSql(sqlExecuteReq, user);
+    }
+
+    @RequestMapping("/getCatalogs")
+    public List<String> getCatalogs(@RequestParam("id") Long databaseId) throws SQLException {
+        return databaseService.getCatalogs(databaseId);
     }
 
     @RequestMapping("/getDbNames")
-    public List<String> getDbNames(@RequestParam("id") Long databaseId) throws SQLException {
-        return databaseService.getDbNames(databaseId);
+    public List<String> getDbNames(@RequestParam("id") Long databaseId,
+            @RequestParam(value = "catalog", required = false) String catalog) throws SQLException {
+        return databaseService.getDbNames(databaseId, catalog);
     }
 
     @RequestMapping("/getTables")

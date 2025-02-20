@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class LLMReq {
+    private Long queryId;
     private String queryText;
     private LLMSchema schema;
     private List<Term> terms;
@@ -37,6 +38,7 @@ public class LLMReq {
     @Data
     public static class LLMSchema {
         private String databaseType;
+        private String databaseVersion;
         private Long dataSetId;
         private String dataSetName;
         private List<SchemaElement> metrics;

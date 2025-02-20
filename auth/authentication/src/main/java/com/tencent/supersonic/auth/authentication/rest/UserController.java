@@ -72,6 +72,13 @@ public class UserController {
         return userService.login(userCmd, request);
     }
 
+    @PostMapping("/resetPassword")
+    public void resetPassword(@RequestBody UserReq userCmd, HttpServletRequest request,
+            HttpServletResponse response) {
+        User user = userService.getCurrentUser(request, response);
+        userService.resetPassword(user.getName(), userCmd.getPassword(), userCmd.getNewPassword());
+    }
+
     @PostMapping("/generateToken")
     public UserToken generateToken(@RequestBody UserTokenReq userTokenReq,
             HttpServletRequest request, HttpServletResponse response) {

@@ -294,7 +294,8 @@ public class SqlSelectHelper {
         }
         // do not account in aliases
         results.removeAll(aliases);
-        return new ArrayList<>(results);
+        return new ArrayList<>(
+                results.stream().map(r -> r.replaceAll("`", "")).collect(Collectors.toList()));
     }
 
     private static List<String> getFieldsByPlainSelect(PlainSelect plainSelect) {
@@ -459,6 +460,9 @@ public class SqlSelectHelper {
                 .map(fieldExpression -> fieldExpression.getFieldName()).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         result.addAll(collect);
+
+        Set<String> aliases = getAliasFields(plainSelect);
+        result.removeAll(aliases);
     }
 
     public static List<FieldExpression> getOrderByExpressions(String sql) {
@@ -663,8 +667,9 @@ public class SqlSelectHelper {
                 }
                 if (withSelect instanceof ParenthesedSelect) {
                     ParenthesedSelect parenthesedSelect = (ParenthesedSelect) withSelect;
-                    PlainSelect withPlainSelect = parenthesedSelect.getPlainSelect();
-                    plainSelectList.add(withPlainSelect);
+                    List<PlainSelect> plainSelects = new ArrayList<>();
+                    SqlReplaceHelper.getFromSelect(parenthesedSelect, plainSelects);
+                    plainSelectList.addAll(plainSelects);
                 }
             }
         }
@@ -890,7 +895,9 @@ public class SqlSelectHelper {
             collectSelects(withItem.getSelect(), selects);
         } else if (select instanceof ParenthesedSelect) {
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) select;
-            collectSelects(parenthesedSelect.getPlainSelect(), selects);
+            List<PlainSelect> plainSelects = new ArrayList<>();
+            SqlReplaceHelper.getFromSelect(parenthesedSelect, plainSelects);
+            plainSelects.forEach(s -> collectSelects(s, selects));
         }
     }
 
@@ -904,7 +911,7 @@ public class SqlSelectHelper {
                 continue;
             }
             ParenthesedSelect parenthesedSelect = (ParenthesedSelect) rightItem;
-            selects.add(parenthesedSelect.getPlainSelect());
+            collectSelects(parenthesedSelect.getSelect(), selects);
         }
     }
 

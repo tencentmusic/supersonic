@@ -28,4 +28,5 @@ public class QueryResult {
     private List<SchemaElement> recommendedDimensions;
     private AggregateInfo aggregateInfo;
     private String errorMsg;
+    private  Boolean resultType = false;
 }

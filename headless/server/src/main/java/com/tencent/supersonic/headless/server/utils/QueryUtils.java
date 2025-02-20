@@ -19,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.tencent.supersonic.common.pojo.Constants.JOIN_UNDERLINE;
 import static com.tencent.supersonic.common.pojo.Constants.UNIONALL;
 
 @Slf4j
@@ -72,11 +71,7 @@ public class QueryUtils {
     private void processColumn(QueryColumn column, Map<String, String> namePair,
             Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap,
             Map<String, DimensionResp> dimensionRespMap) {
-        String nameEn = getName(column.getNameEn());
-        if (nameEn.contains(JOIN_UNDERLINE)) {
-            nameEn = nameEn.split(JOIN_UNDERLINE)[1];
-        }
-        // set name
+        String nameEn = getName(column.getBizName());
         if (namePair.containsKey(nameEn)) {
             column.setName(namePair.get(nameEn));
         } else {
@@ -110,8 +105,8 @@ public class QueryUtils {
             column.setModelId(dimensionRespMap.get(nameEn).getModelId());
         }
         // set name by NameEn
-        if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getNameEn())) {
-            column.setName(column.getNameEn());
+        if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getBizName())) {
+            column.setName(column.getBizName());
         }
     }
 

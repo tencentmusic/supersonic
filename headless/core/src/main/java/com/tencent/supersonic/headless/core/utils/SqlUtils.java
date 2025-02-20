@@ -139,7 +139,7 @@ public class SqlUtils {
             throws SQLException {
         Map<String, Object> map = new LinkedHashMap<>();
         for (QueryColumn queryColumn : queryColumns) {
-            String colName = queryColumn.getNameEn();
+            String colName = queryColumn.getBizName();
             Object value = rs.getObject(colName);
             map.put(colName, getValue(value));
         }

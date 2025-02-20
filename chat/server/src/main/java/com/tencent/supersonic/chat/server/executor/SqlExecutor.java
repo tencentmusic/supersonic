@@ -90,6 +90,7 @@ public class SqlExecutor implements ChatQueryExecutor {
             queryResult.setQueryColumns(queryResp.getColumns());
             queryResult.setQueryState(QueryState.SUCCESS);
             queryResult.setErrorMsg(queryResp.getErrorMsg());
+            queryResult.setResultType(queryResp.getResultType());
             chatCtx.setParseInfo(parseInfo);
             chatContextService.updateContext(chatCtx);
         } else {

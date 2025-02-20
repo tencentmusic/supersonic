@@ -131,7 +131,7 @@ public class KeywordMapper extends BaseMapper {
                     .similarity(EditDistanceUtils.getSimilarity(match.getDetectWord(),
                             schemaElement.getName()))
                     .build();
-            log.info("add to schema, elementMatch {}", schemaElementMatch);
+            log.debug("add to schema, elementMatch {}", schemaElementMatch);
             addToSchemaMap(chatQueryContext.getMapInfo(), schemaElement.getDataSetId(),
                     schemaElementMatch);
         }

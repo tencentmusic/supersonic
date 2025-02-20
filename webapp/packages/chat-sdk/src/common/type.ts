@@ -179,6 +179,7 @@ export type ColumnType = {
   authorized: boolean;
   name: string;
   nameEn: string;
+  bizName: string;
   showType: string;
   type: string;
   dataFormatType: string;

@@ -379,11 +379,21 @@ export async function listColumnsBySql(data: { databaseId: number; sql: string }
   });
 }
 
-export function getDbNames(dbId: number): Promise<any> {
+export function getCatalogs(dbId: number): Promise<any> {
+  return request(`${process.env.API_BASE_URL}database/getCatalogs`, {
+    method: 'GET',
+    params: {
+      id: dbId,
+    },
+  });
+}
+
+export function getDbNames(dbId: number, catalog: string): Promise<any> {
   return request(`${process.env.API_BASE_URL}database/getDbNames`, {
     method: 'GET',
     params: {
       id: dbId,
+      catalog: catalog,
     },
   });
 }

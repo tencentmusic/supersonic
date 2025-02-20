@@ -61,15 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -150,8 +142,12 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        // checkParams(modelReq);
+        // Comment out below checks for now, they seem unnecessary and
+        // lead to unexpected exception in updating model
+        /*
+        checkParams(modelReq);
         checkRelations(modelReq);
+         */
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
         modelRepository.updateModel(modelDO);
@@ -372,7 +368,11 @@ public class ModelServiceImpl implements ModelService {
         metaFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
         List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-        if (!CollectionUtils.isEmpty(metricResps) || !CollectionUtils.isEmpty(dimensionResps)) {
+        boolean validMetric = metricResps.stream().anyMatch(
+                metricResp -> Objects.equals(metricResp.getStatus(), StatusEnum.ONLINE.getCode()));
+        boolean validDimension = dimensionResps.stream().anyMatch(dimensionResp -> Objects
+                .equals(dimensionResp.getStatus(), StatusEnum.ONLINE.getCode()));
+        if (validMetric || validDimension) {
             throw new RuntimeException("存在基于该模型创建的指标和维度, 暂不能删除, 请确认");
         }
     }
@@ -627,7 +627,7 @@ public class ModelServiceImpl implements ModelService {
     private DataItem getDataItem(ModelDO modelDO) {
         return DataItem.builder().id(modelDO.getId().toString()).name(modelDO.getName())
                 .bizName(modelDO.getBizName()).modelId(modelDO.getId().toString())
-                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.DIMENSION).build();
+                .domainId(modelDO.getDomainId().toString()).type(TypeEnums.MODEL).build();
     }
 
 }

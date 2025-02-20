@@ -150,8 +150,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user) {
-        DatabaseResp databaseResp = getDatabase(id);
+    public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, User user) {
+        DatabaseResp databaseResp = getDatabase(sqlExecuteReq.getId());
         if (databaseResp == null) {
             return new SemanticQueryResp();
         }
@@ -212,11 +212,17 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public List<String> getDbNames(Long id) throws SQLException {
+    public List<String> getCatalogs(Long id) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
-        DbAdaptor dbAdaptor =
-                DbAdaptorFactory.getEngineAdaptor(databaseResp.getType().toUpperCase());
-        return dbAdaptor.getDBs(DatabaseConverter.getConnectInfo(databaseResp));
+        DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        return dbAdaptor.getCatalogs(DatabaseConverter.getConnectInfo(databaseResp));
+    }
+
+    @Override
+    public List<String> getDbNames(Long id, String catalog) throws SQLException {
+        DatabaseResp databaseResp = getDatabase(id);
+        DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+        return dbAdaptor.getDBs(DatabaseConverter.getConnectInfo(databaseResp), catalog);
     }
 
     @Override
@@ -270,7 +276,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         List<DBColumn> dbColumns = Lists.newArrayList();
         for (QueryColumn queryColumn : semanticQueryResp.getColumns()) {
             DBColumn dbColumn = new DBColumn();
-            dbColumn.setColumnName(queryColumn.getNameEn());
+            dbColumn.setColumnName(queryColumn.getBizName());
             dbColumn.setDataType(queryColumn.getType());
             dbColumns.add(dbColumn);
         }

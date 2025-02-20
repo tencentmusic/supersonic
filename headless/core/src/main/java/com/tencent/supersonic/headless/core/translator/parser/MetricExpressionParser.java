@@ -2,7 +2,6 @@ package com.tencent.supersonic.headless.core.translator.parser;
 
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
-import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
@@ -40,9 +39,8 @@ public class MetricExpressionParser implements QueryParser {
 
         Map<String, String> bizName2Expr = getMetricExpressions(semanticSchema, ontologyQuery);
         if (!CollectionUtils.isEmpty(bizName2Expr)) {
-            String sql = SqlReplaceHelper.replaceSqlByExpression(
-                    Constants.TABLE_PREFIX + queryStatement.getDataSetId(), sqlQuery.getSql(),
-                    bizName2Expr);
+            String sql = SqlReplaceHelper.replaceSqlByExpression(sqlQuery.getTable(),
+                    sqlQuery.getSql(), bizName2Expr);
             sqlQuery.setSql(sql);
         }
     }
@@ -110,7 +108,7 @@ public class MetricExpressionParser implements QueryParser {
                         if (allMeasures.containsKey(field)) {
                             Measure measure = allMeasures.get(field);
                             String expr = metricExpr;
-                            if (Objects.nonNull(measure.getAgg())) {
+                            if (StringUtils.isNotBlank(measure.getAgg())) {
                                 expr = String.format("%s (%s)", measure.getAgg(), metricExpr);
                             }
                             replace.put(field, expr);

@@ -55,11 +55,11 @@ s2:
 
   dimension:
     mapping:
-      pid1_2022: "53"
-      pid2_2022: "54"
-      pid3_2022: "55"
-      pid4_2022: "56"
-      dataSet: 5
+      pid1_2022: "28"
+      pid2_2022: "29"
+      pid3_2022: "30"
+      pid4_2022: "31"
+      dataSet: 4
     database:
       name: "supersonic"
 #      pid1_2022: "313"
@@ -69,4 +69,5 @@ s2:
 #      dataSet: 31
 #    database:
 #      name: "bvreport"
+
 

@@ -18,6 +18,7 @@ public class ChatModelConfig implements Serializable {
     private String baseUrl;
     private String apiKey;
     private String modelName;
+    private String apiVersion;
     private Double temperature = 0.0d;
     private Long timeOut = 60L;
     private String endpoint;

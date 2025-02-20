@@ -1,5 +1,5 @@
 services:
-  postgres:
+  supersonic_postgres:
     image: pgvector/pgvector:pg17
     privileged: true
     container_name: supersonic_postgres
@@ -25,31 +25,6 @@ services:
       timeout: 10s
       retries: 5
 
-  db_init:
-    image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
-    privileged: true
-    container_name: supersonic_db_init
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - supersonic_network
-    command: >
-      sh -c "
-        if ! PGPASSWORD=supersonic_password psql -h supersonic_postgres -U supersonic_user -d postgres -c 'select * from s2_database limit 1' > /dev/null;
-        then
-          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-postgres.sql
-          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/schema-postgres-demo.sql
-          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-postgres.sql
-          PGPASSWORD=supersonic_password psql -hsupersonic_postgres -U supersonic_user -d postgres < /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/db/data-postgres-demo.sql 
-        else
-          echo 'Database already initialized.'
-        fi"
-    dns:
-      - 114.114.114.114
-      - 8.8.8.8
-      - 8.8.4.4
-
   supersonic_standalone:
     image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
     privileged: true
@@ -62,10 +37,8 @@ services:
     ports:
       - "9080:9080"
     depends_on:
-      postgres:
+      supersonic_postgres:
         condition: service_healthy
-      db_init:
-        condition: service_completed_successfully
     networks:
       - supersonic_network
     dns:
