@@ -303,8 +303,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
         QueryStatement queryStatement = new QueryStatement();
         queryStatement.setEnableOptimize(queryUtils.enableOptimize());
-        queryStatement.setLimit(Integer.parseInt(translatorConfig.getParameterValue(
-                TranslatorConfig.TRANSLATOR_RESULT_LIMIT)));
+        queryStatement.setLimit(Integer.parseInt(
+                translatorConfig.getParameterValue(TranslatorConfig.TRANSLATOR_RESULT_LIMIT)));
         queryStatement.setDataSetId(queryReq.getDataSetId());
         queryStatement.setDataSetName(queryReq.getDataSetName());
         queryStatement.setSemanticSchema(semanticSchemaResp);
