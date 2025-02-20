@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS s2_available_date_info (
     created_by varchar(100) NOT NULL,
     updated_at timestamp NULL,
     updated_by varchar(100) NOT NULL,
-    status smallint DEFAULT 0
+    status smallint DEFAULT 0,
+    UNIQUE(item_id, type)
 );
 
 CREATE TABLE IF NOT EXISTS s2_chat (
@@ -491,5 +492,6 @@ CREATE TABLE IF NOT EXISTS s2_user (
     password varchar(256) NULL,
     salt varchar(256) DEFAULT NULL,
     email varchar(100) NULL,
-    is_admin smallint NULL
+    is_admin smallint NULL,
+    UNIQUE(name)
 );

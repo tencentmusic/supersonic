@@ -1,8 +1,3 @@
--- clear data if already exists
-DELETE FROM s2_user;
-DELETE FROM s2_available_date_info;
-DELETE FROM s2_canvas;
-
 -- sample user
 -- The default value for the password is 123456
 insert into s2_user ("name", password, salt, display_name, email, is_admin) values ('admin','c3VwZXJzb25pY0BiaWNvbdktJJYWw6A3rEmBUPzbn/6DNeYnD+y3mAwDKEMS3KVT','jGl25bVBBBW96Qi9Te4V3w==','admin','admin@xx.com', 1);
