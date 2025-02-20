@@ -110,7 +110,8 @@ public class ModelConverter {
         dimensionReq.setExpr(dim.getExpr());
         dimensionReq.setType(dim.getType().name());
         dimensionReq
-                .setDescription(Objects.isNull(dim.getDescription()) ? "" : dim.getDescription());
+                .setDescription(Objects.isNull(dim.getDescription()) ? dimensionReq.getDescription()
+                        : dim.getDescription());
         dimensionReq.setTypeParams(dim.getTypeParams());
         return dimensionReq;
     }
