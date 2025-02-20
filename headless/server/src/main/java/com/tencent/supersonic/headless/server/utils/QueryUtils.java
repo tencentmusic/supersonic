@@ -140,7 +140,8 @@ public class QueryUtils {
                 || type.equalsIgnoreCase("float") || type.equalsIgnoreCase("double")
                 || type.equalsIgnoreCase("real") || type.equalsIgnoreCase("numeric")
                 || type.toLowerCase().startsWith("decimal") || type.toLowerCase().startsWith("uint")
-                || type.toLowerCase().startsWith("int") || type.toLowerCase().equalsIgnoreCase("decfloat");
+                || type.toLowerCase().startsWith("int")
+                || type.toLowerCase().equalsIgnoreCase("decfloat");
     }
 
     private String getName(String nameEn) {
