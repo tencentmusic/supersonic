@@ -6,6 +6,7 @@ spring:
     password: ${S2_DB_PASSWORD:postgres}
   sql:
     init:
+      continue-on-error: true
       mode: always
       username: ${S2_DB_USER:postgres}
       password: ${S2_DB_PASSWORD:postgres}

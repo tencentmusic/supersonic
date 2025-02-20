@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `s2_available_date_info` (
   `updated_at` timestamp NULL,
   `updated_by` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` tinyint DEFAULT 0,
+  UNIQUE(`item_id`, `type`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -382,6 +383,7 @@ CREATE TABLE IF NOT EXISTS s2_user
     salt varchar(256) DEFAULT NULL COMMENT 'md5密码盐',
     email varchar(100) null,
     is_admin tinyint null,
+    UNIQUE (`name`),
     PRIMARY KEY (`id`)
 );
 
