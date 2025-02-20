@@ -51,6 +51,7 @@ const getCreateFieldName = (type: EnumDataSourceType) => {
     EnumDataSourceType.CATEGORICAL,
     EnumDataSourceType.TIME,
     EnumDataSourceType.PARTITION_TIME,
+    EnumDataSourceType.FOREIGN,
   ].includes(type as EnumDataSourceType)
     ? 'isCreateDimension'
     : 'isCreateMetric';
@@ -101,7 +102,7 @@ const ModelFieldForm: React.FC<Props> = ({
               value={selectTypeValue}
               allowClear
               onChange={(value) => {
-                let defaultParams = {};
+                let defaultParams:any = {};
                 if (value === EnumDataSourceType.MEASURES) {
                   defaultParams = {
                     agg: AGG_OPTIONS[0].value,
@@ -127,12 +128,13 @@ const ModelFieldForm: React.FC<Props> = ({
                   };
                 } else {
                   defaultParams = {
+                    type: value,
                     agg: undefined,
                     dateFormat: undefined,
                     timeGranularity: undefined,
                   };
                 }
-                const isCreateName = getCreateFieldName(value);
+                const isCreateName = getCreateFieldName(defaultParams.type);
                 const editState = !isUndefined(record[isCreateName])
                   ? !!record[isCreateName]
                   : true;
