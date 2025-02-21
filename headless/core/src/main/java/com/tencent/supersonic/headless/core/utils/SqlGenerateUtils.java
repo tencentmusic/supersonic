@@ -86,17 +86,17 @@ public class SqlGenerateUtils {
 
     public String getSelectField(final Aggregator agg) {
         if (AggOperatorEnum.COUNT_DISTINCT.equals(agg.getFunc())) {
-            return "count(distinct " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
+            return "count(distinct " + agg.getColumn() + " ) ";
         }
         if (CollectionUtils.isEmpty(agg.getArgs())) {
-            return agg.getFunc() + "( " + agg.getColumn() + " ) AS " + agg.getColumn() + " ";
+            return agg.getFunc() + "( " + agg.getColumn() + " ) ";
         }
         return agg.getFunc() + "( "
                 + agg.getArgs().stream()
                         .map(arg -> arg.equals(agg.getColumn()) ? arg
                                 : (StringUtils.isNumeric(arg) ? arg : ("'" + arg + "'")))
                         .collect(Collectors.joining(","))
-                + " ) AS " + agg.getColumn() + " ";
+                + " ) ";
     }
 
     public String getSelectField(final Aggregator agg, Map<String, String> deriveMetrics) {
