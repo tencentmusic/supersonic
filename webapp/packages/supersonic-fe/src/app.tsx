@@ -140,7 +140,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
           style={{ display: 'inline-block', marginTop: 8 }}
         />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>
-          分析云智能助手
+          红海ChatBI
         </div>
       </Space>
     ),
