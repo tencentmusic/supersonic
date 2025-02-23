@@ -73,15 +73,31 @@ public class SqlGenerateUtils {
     public String getSelect(StructQuery structQuery) {
         String aggStr = structQuery.getAggregators().stream().map(this::getSelectField)
                 .collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(structQuery.getGroups()) ? aggStr
-                : String.join(",", structQuery.getGroups()) + "," + aggStr;
+        String result = String.join(",", structQuery.getGroups());
+        if (StringUtils.isNotBlank(aggStr)) {
+            if (!CollectionUtils.isEmpty(structQuery.getGroups())) {
+                result = String.join(",", structQuery.getGroups()) + "," + aggStr;
+            } else {
+                result = aggStr;
+            }
+        }
+
+        return result;
     }
 
     public String getSelect(StructQuery structQuery, Map<String, String> deriveMetrics) {
         String aggStr = structQuery.getAggregators().stream()
                 .map(a -> getSelectField(a, deriveMetrics)).collect(Collectors.joining(","));
-        return CollectionUtils.isEmpty(structQuery.getGroups()) ? aggStr
-                : String.join(",", structQuery.getGroups()) + "," + aggStr;
+        String result = String.join(",", structQuery.getGroups());
+        if (StringUtils.isNotBlank(aggStr)) {
+            if (!CollectionUtils.isEmpty(structQuery.getGroups())) {
+                result = String.join(",", structQuery.getGroups()) + "," + aggStr;
+            } else {
+                result = aggStr;
+            }
+        }
+
+        return result;
     }
 
     public String getSelectField(final Aggregator agg) {
@@ -140,7 +156,10 @@ public class SqlGenerateUtils {
     public String generateWhere(StructQuery structQuery, ItemDateResp itemDateResp) {
         String whereClauseFromFilter =
                 sqlFilterUtils.getWhereClause(structQuery.getDimensionFilters());
-        String whereFromDate = getDateWhereClause(structQuery.getDateInfo(), itemDateResp);
+        String whereFromDate = "";
+        if (structQuery.getDateInfo() != null) {
+            whereFromDate = getDateWhereClause(structQuery.getDateInfo(), itemDateResp);
+        }
         String mergedWhere =
                 mergeDateWhereClause(structQuery, whereClauseFromFilter, whereFromDate);
         if (StringUtils.isNotBlank(mergedWhere)) {
