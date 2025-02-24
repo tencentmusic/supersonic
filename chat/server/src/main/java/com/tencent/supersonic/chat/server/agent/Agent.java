@@ -38,6 +38,9 @@ public class Agent extends RecordInfo {
     private VisualConfig visualConfig;
     private List<String> admins = Lists.newArrayList();
     private List<String> viewers = Lists.newArrayList();
+    private List<String> adminOrgs = Lists.newArrayList();
+    private List<String> viewOrgs = Lists.newArrayList();
+    private Integer isOpen = 0;
 
     public List<String> getTools(AgentToolType type) {
         Map<String, Object> map = JSONObject.parseObject(toolConfig, Map.class);
@@ -113,6 +116,10 @@ public class Agent extends RecordInfo {
 
     public boolean contains(User user, Function<Agent, List<String>> list) {
         return list.apply(this).contains(user.getName());
+    }
+
+    public boolean openToAll() {
+        return isOpen != null && isOpen == 1;
     }
 
 }

@@ -377,8 +377,11 @@ CREATE TABLE IF NOT EXISTS s2_agent
     updated_at  TIMESTAMP null,
     enable_search int null,
     enable_feedback int null,
-    admin varchar(1000),
-    viewer varchar(1000),
+    `admin` varchar(3000) DEFAULT NULL  , -- administrator
+    `admin_org` varchar(3000) DEFAULT NULL  , -- administrators organization
+    `is_open` TINYINT DEFAULT NULL  , -- whether the public
+    `viewer` varchar(3000) DEFAULT NULL  , -- available users
+    `view_org` varchar(3000) DEFAULT NULL  , -- available organization
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_agent IS 'agent information table';
 

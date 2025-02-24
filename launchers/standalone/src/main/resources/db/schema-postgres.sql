@@ -15,8 +15,11 @@ CREATE TABLE IF NOT EXISTS s2_agent (
     created_at timestamp DEFAULT NULL,
     updated_by varchar(100) DEFAULT NULL,
     updated_at timestamp DEFAULT NULL,
-    admin varchar(1000) DEFAULT NULL,
-    viewer varchar(1000) DEFAULT NULL
+    admin varchar(3000) DEFAULT NULL,
+    admin_org varchar(3000) DEFAULT NULL,
+    is_open smallint DEFAULT NULL,
+    viewer varchar(3000) DEFAULT NULL,
+    view_org varchar(3000) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS s2_auth_groups (

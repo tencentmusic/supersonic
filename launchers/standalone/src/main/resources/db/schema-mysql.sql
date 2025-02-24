@@ -15,8 +15,11 @@ CREATE TABLE IF NOT EXISTS `s2_agent` (
     `created_at` datetime DEFAULT NULL,
     `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `updated_at` datetime DEFAULT NULL,
-    `admin` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
-    `viewer` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
+     `admin` varchar(3000) DEFAULT NULL COMMENT '管理员',
+     `admin_org` varchar(3000) DEFAULT NULL COMMENT '管理员组织',
+     `is_open` tinyint DEFAULT NULL COMMENT '是否公开',
+     `viewer` varchar(3000) DEFAULT NULL COMMENT '可用用户',
+     `view_org` varchar(3000) DEFAULT NULL COMMENT '可用组织',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
