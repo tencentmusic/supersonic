@@ -214,10 +214,10 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public List<String> getTables(Long id, String db) throws SQLException {
+    public List<String> getTables(Long id, String catalog, String db) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        return dbAdaptor.getTables(DatabaseConverter.getConnectInfo(databaseResp), db);
+        return dbAdaptor.getTables(DatabaseConverter.getConnectInfo(databaseResp), catalog, db);
     }
 
     @Override

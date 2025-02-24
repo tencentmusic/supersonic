@@ -59,7 +59,15 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         return dbs;
     }
 
-    public List<String> getTables(ConnectInfo connectionInfo, String schemaName)
+    @Override
+    public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
+            throws SQLException {
+        // Except for special types implemented separately, the generic logic catalog does not take
+        // effect.
+        return getTables(connectInfo, schemaName);
+    }
+
+    protected List<String> getTables(ConnectInfo connectionInfo, String schemaName)
             throws SQLException {
         List<String> tablesAndViews = new ArrayList<>();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);

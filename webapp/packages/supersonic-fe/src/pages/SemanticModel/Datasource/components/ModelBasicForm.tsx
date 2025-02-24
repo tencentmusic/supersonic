@@ -24,6 +24,7 @@ const ModelBasicForm: React.FC<Props> = ({
   mode = 'normal',
 }) => {
   const [currentDbLinkConfigId, setCurrentDbLinkConfigId] = useState<number>();
+  const [currentCatalog, setCurrentCatalog] = useState<string>("");
   const [catalogList, setCatalogList] = useState<string[]>([]);
   const [dbNameList, setDbNameList] = useState<string[]>([]);
   const [tableNameList, setTableNameList] = useState<any[]>([]);
@@ -87,6 +88,7 @@ const ModelBasicForm: React.FC<Props> = ({
     if (currentDbLinkConfigId) {
       queryDbNameList(currentDbLinkConfigId, catalog);
     }
+    setCurrentCatalog(catalog);
     form.setFieldsValue({
       catalog,
       dbName: undefined,
@@ -111,7 +113,7 @@ const ModelBasicForm: React.FC<Props> = ({
       return;
     }
     setLoading(true);
-    const { code, data, msg } = await getTables(currentDbLinkConfigId, databaseName);
+    const { code, data, msg } = await getTables(currentDbLinkConfigId, currentCatalog, databaseName);
     setLoading(false);
     if (code === 200) {
       const list = data || [];
@@ -137,6 +139,7 @@ const ModelBasicForm: React.FC<Props> = ({
               onSelect={(dbLinkConfigId: number, option) => {
                 onDatabaseSelect(dbLinkConfigId, option.type);
                 setCurrentDbLinkConfigId(dbLinkConfigId);
+                setCurrentCatalog("");
               }}
             >
               {databaseConfigList.map((item) => (

@@ -398,11 +398,12 @@ export function getDbNames(dbId: number, catalog: string): Promise<any> {
   });
 }
 
-export function getTables(databaseId: number, dbName: string): Promise<any> {
+export function getTables(databaseId: number, catalog: string, dbName: string): Promise<any> {
   return request(`${process.env.API_BASE_URL}database/getTables`, {
     method: 'GET',
     params: {
       databaseId,
+      catalog: catalog,
       db: dbName,
     },
   });

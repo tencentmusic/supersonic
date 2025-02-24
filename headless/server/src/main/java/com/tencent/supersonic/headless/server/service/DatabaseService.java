@@ -40,7 +40,7 @@ public interface DatabaseService {
 
     List<String> getDbNames(Long id, String catalog) throws SQLException;
 
-    List<String> getTables(Long id, String db) throws SQLException;
+    List<String> getTables(Long id, String catalog, String db) throws SQLException;
 
     Map<String, List<DBColumn>> getDbColumns(ModelBuildReq modelBuildReq) throws SQLException;
 

@@ -18,7 +18,8 @@ public interface DbAdaptor {
 
     List<String> getDBs(ConnectInfo connectInfo, String catalog) throws SQLException;
 
-    List<String> getTables(ConnectInfo connectInfo, String schemaName) throws SQLException;
+    List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
+            throws SQLException;
 
     List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
             throws SQLException;
