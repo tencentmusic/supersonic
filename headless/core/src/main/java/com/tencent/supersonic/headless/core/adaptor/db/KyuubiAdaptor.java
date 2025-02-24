@@ -2,7 +2,16 @@ package com.tencent.supersonic.headless.core.adaptor.db;
 
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 public class KyuubiAdaptor extends BaseDbAdaptor {
 
     /** transform YYYYMMDD to YYYY-MM-DD YYYY-MM YYYY-MM-DD(MONDAY) */
@@ -30,6 +39,24 @@ public class KyuubiAdaptor extends BaseDbAdaptor {
             }
         }
         return column;
+    }
+
+    @Override
+    public List<String> getTables(ConnectInfo connectionInfo, String schemaName)
+            throws SQLException {
+        List<String> tablesAndViews = new ArrayList<>();
+        DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
+
+        try {
+            ResultSet resultSet = metaData.getTables(null, schemaName, null, new String[] {"TABLE", "VIEW"});;
+            while (resultSet.next()) {
+                String name = resultSet.getString("TABLE_NAME");
+                tablesAndViews.add(name);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get tables and views", e);
+        }
+        return tablesAndViews;
     }
 
     @Override

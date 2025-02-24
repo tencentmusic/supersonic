@@ -40,7 +40,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
                 dbs.add(db);
             }
         } catch (Exception e) {
-            log.info("get meta schemas failed, try to get catalogs");
+            log.warn("get meta schemas failed", e);
+            log.warn("get meta schemas failed, try to get catalogs");
         }
         try {
             ResultSet catalogSet = metaData.getCatalogs();
@@ -49,7 +50,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
                 dbs.add(db);
             }
         } catch (Exception e) {
-            log.info("get meta catalogs failed, try to get schemas");
+            log.warn("get meta catalogs failed", e);
+            log.warn("get meta catalogs failed, try to get schemas");
         }
         return dbs;
     }

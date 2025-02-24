@@ -1,7 +1,14 @@
 package com.tencent.supersonic.headless.core.adaptor.db;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.Assert;
+
+import java.sql.*;
+import java.util.List;
 
 public class PrestoAdaptor extends BaseDbAdaptor {
 
@@ -31,6 +38,37 @@ public class PrestoAdaptor extends BaseDbAdaptor {
             }
         }
         return column;
+    }
+
+    public List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException {
+        List<String> catalogs = Lists.newArrayList();
+        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(),
+                connectInfo.getUserName(), connectInfo.getPassword());
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery("SHOW CATALOGS")) {
+            while (rs.next()) {
+                catalogs.add(rs.getString(1));
+            }
+        }
+        return catalogs;
+    }
+
+    @Override
+    public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {
+        List<String> dbs = Lists.newArrayList();
+        String sql = "SHOW SCHEMAS";
+        if (StringUtils.isNotBlank(catalog)) {
+            sql = "SHOW SCHEMAS IN " + catalog;
+        }
+        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(),
+                connectionInfo.getUserName(), connectionInfo.getPassword());
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                dbs.add(rs.getString(1));
+            }
+        }
+        return dbs;
     }
 
     @Override
