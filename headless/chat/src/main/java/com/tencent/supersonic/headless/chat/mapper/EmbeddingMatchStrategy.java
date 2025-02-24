@@ -72,7 +72,8 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
         // 1. Base detection
         List<EmbeddingResult> baseResults = super.detect(chatQueryContext, terms, detectDataSetIds);
 
-        boolean useLLM = Boolean.parseBoolean(mapperConfig.getParameterValue(EMBEDDING_MAPPER_USE_LLM));
+        boolean useLLM =
+                Boolean.parseBoolean(mapperConfig.getParameterValue(EMBEDDING_MAPPER_USE_LLM));
 
         // 2. LLM enhanced detection
         if (useLLM) {
@@ -115,7 +116,8 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
      * Extract valid word segments by filtering out unwanted word natures
      */
     private Set<String> extractValidSegments(String text) {
-        List<String> natureList = Arrays.asList(StringUtils.split(mapperConfig.getParameterValue(EMBEDDING_MAPPER_ALLOWED_SEGMENT_NATURE ), ","));
+        List<String> natureList = Arrays.asList(StringUtils.split(
+                mapperConfig.getParameterValue(EMBEDDING_MAPPER_ALLOWED_SEGMENT_NATURE), ","));
         return HanlpHelper.getSegment().seg(text).stream()
                 .filter(t -> natureList.stream().noneMatch(nature -> t.nature.startsWith(nature)))
                 .map(Term::getWord).collect(Collectors.toSet());

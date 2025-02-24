@@ -63,6 +63,6 @@ public class MapperConfig extends ParameterConfig {
                     "embedding的结果再通过一次LLM来筛选，这时候忽略各个向量阀值", "bool", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_ALLOWED_SEGMENT_NATURE =
-            new Parameter("s2.mapper.embedding.allowed-segment-nature", "['v', 'd', 'a']", "使用LLM召回二次处理时对问题分词词性的控制",
-                    "分词后允许的词性才会进行向量召回", "list", "Mapper相关配置");
+            new Parameter("s2.mapper.embedding.allowed-segment-nature", "['v', 'd', 'a']",
+                    "使用LLM召回二次处理时对问题分词词性的控制", "分词后允许的词性才会进行向量召回", "list", "Mapper相关配置");
 }
