@@ -11,11 +11,11 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.AggOption;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
+import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.pojo.SqlQuery;
 import com.tencent.supersonic.headless.core.utils.SqlGenerateUtils;
@@ -51,18 +51,18 @@ public class SqlQueryParser implements QueryParser {
         Ontology ontology = queryStatement.getOntology();
         OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);
         // check if there are fields not matched with any metric or dimension
-//        if (queryFields.size() > ontologyQuery.getMetrics().size()
-//                + ontologyQuery.getDimensions().size()) {
-//            List<String> semanticFields = Lists.newArrayList();
-//            ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
-//            ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
-//            String errMsg =
-//                    String.format("Querying columns[%s] not matched with semantic fields[%s].",
-//                            queryFields, semanticFields);
-//            queryStatement.setErrMsg(errMsg);
-//            queryStatement.setStatus(QueryState.INVALID);
-//            return;
-//        }
+        // if (queryFields.size() > ontologyQuery.getMetrics().size()
+        // + ontologyQuery.getDimensions().size()) {
+        // List<String> semanticFields = Lists.newArrayList();
+        // ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
+        // ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
+        // String errMsg =
+        // String.format("Querying columns[%s] not matched with semantic fields[%s].",
+        // queryFields, semanticFields);
+        // queryStatement.setErrMsg(errMsg);
+        // queryStatement.setStatus(QueryState.INVALID);
+        // return;
+        // }
         queryStatement.setOntologyQuery(ontologyQuery);
 
         AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), ontologyQuery.getMetrics());

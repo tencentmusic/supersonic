@@ -171,7 +171,8 @@ public abstract class SemanticNode {
                     return table;
                 }
                 if (sqlBasicCall.getOperandList().get(0) instanceof SqlBasicCall) {
-                    SqlBasicCall sqlBasicCall1 = (SqlBasicCall) sqlBasicCall.getOperandList().get(0);
+                    SqlBasicCall sqlBasicCall1 =
+                            (SqlBasicCall) sqlBasicCall.getOperandList().get(0);
                     if (sqlBasicCall1.getOperator().getKind().equals(SqlKind.UNION)) {
                         return sqlBasicCall.getOperandList().get(0);
                     }

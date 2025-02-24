@@ -65,11 +65,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final List<QueryExecutor> queryExecutors = ComponentFactory.getQueryExecutors();
 
     public S2SemanticLayerService(StatUtils statUtils, QueryUtils queryUtils,
-            SemanticSchemaManager semanticSchemaManager, DataSetService dataSetService,
-            SchemaService schemaService, SemanticTranslator semanticTranslator,
-            MetricDrillDownChecker metricDrillDownChecker,
-            KnowledgeBaseService knowledgeBaseService, MetricService metricService,
-            DimensionService dimensionService, TranslatorConfig translatorConfig) {
+                                  SemanticSchemaManager semanticSchemaManager, DataSetService dataSetService,
+                                  SchemaService schemaService, SemanticTranslator semanticTranslator,
+                                  MetricDrillDownChecker metricDrillDownChecker,
+                                  KnowledgeBaseService knowledgeBaseService, MetricService metricService,
+                                  DimensionService dimensionService, TranslatorConfig translatorConfig) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.semanticSchemaManager = semanticSchemaManager;
@@ -106,7 +106,6 @@ public class S2SemanticLayerService implements SemanticLayerService {
         String conditionKey = queryId + DimValuesConstants.CONDITION;
         String dimensionKey = queryId + DimValuesConstants.DIMENSION_VALUS_AND_ID;
         String fullQueryKey = queryId + DimValuesConstants.FULL_QUERY;
-
         // 取出缓存中的判断条件和维度数据
         Boolean condition = (Boolean) queryCache.get(conditionKey);
 
@@ -127,7 +126,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     @S2DataPermission
     @SneakyThrows
     private SemanticQueryResp getSemanticQueryResp(SemanticQueryReq queryReq, User user,
-            List<Map.Entry<String, String>> dimensionValuesAndId) {
+                                                   List<Map.Entry<String, String>> dimensionValuesAndId) {
         TaskStatusEnum state = TaskStatusEnum.SUCCESS;
         log.info("[queryReq:{}]", queryReq);
         try {
@@ -206,11 +205,16 @@ public class S2SemanticLayerService implements SemanticLayerService {
                 return queryResp;
             }
             StatUtils.get().setUseResultCache(false);
+            String queryId = String.valueOf(queryReq.getQueryId());
+            String simpleMode = queryId + DimValuesConstants.SIMPLE_MODE;
+            String simpleModeSQL = (String) queryCache.get(simpleMode);
 
             // 3 translate query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
             semanticTranslator.translate(queryStatement);
-
+            if (queryReq.getDataSetId() != null && queryReq.getDataSetId()== 9L && queryId != null && simpleModeSQL != null) {
+                queryStatement.setSql(simpleModeSQL);
+            }
             // Check whether the dimensions of the metric drill-down are correct temporarily,
             // add the abstraction of a validator later.
             metricDrillDownChecker.checkQuery(queryStatement);
@@ -269,7 +273,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private List<String> getDimensionValuesFromDict(DimensionValueReq dimensionValueReq,
-            Set<Long> dataSetIds) {
+                                                    Set<Long> dataSetIds) {
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
@@ -289,7 +293,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private SemanticQueryResp getDimensionValuesFromDb(DimensionValueReq queryDimValueReq,
-            User user) {
+                                                       User user) {
         QuerySqlReq querySqlReq = new QuerySqlReq();
         List<ModelResp> modelResps =
                 schemaService.getModelList(Lists.newArrayList(queryDimValueReq.getModelId()));
@@ -329,7 +333,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     private List<Map<String, Object>> createResultList(DimensionValueReq dimensionValueReq,
-            List<String> dimensionValues) {
+                                                       List<String> dimensionValues) {
         return dimensionValues.stream().map(value -> {
             Map<String, Object> map = new HashMap<>();
             map.put(dimensionValueReq.getBizName(), value);

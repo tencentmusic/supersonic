@@ -79,77 +79,83 @@ public class NL2SQLParser implements ChatQueryParser {
             return;
         }
 
-        // first go with rule-based parsers unless the user has already selected one parse.
-        if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
+        if (parseContext.getRequest().getAgentId() == 4){
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-            queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
-            if (parseContext.enableLLM()) {
-                queryNLReq.setText2SQLType(Text2SQLType.NONE);
-            }
-
-            // for every requested dataSet, recursively invoke rule-based parser with different
-            // mapModes
-            Set<Long> requestedDatasets = queryNLReq.getDataSetIds();
-            List<SemanticParseInfo> candidateParses = Lists.newArrayList();
-            StringBuilder errMsg = new StringBuilder();
-            for (Long datasetId : requestedDatasets) {
-                queryNLReq.setDataSetIds(Collections.singleton(datasetId));
-                ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
-                for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.STRICT,
-                        MapModeEnum.MODERATE)) {
-                    queryNLReq.setMapModeEnum(mode);
-                    doParse(queryNLReq, parseResp);
+            ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
+            doParse(queryNLReq, parseResp);
+        }else {
+            // first go with rule-based parsers unless the user has already selected one parse.
+            if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
+                QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+                queryNLReq.setText2SQLType(Text2SQLType.ONLY_RULE);
+                if (parseContext.enableLLM()) {
+                    queryNLReq.setText2SQLType(Text2SQLType.NONE);
                 }
 
-                if (parseResp.getSelectedParses().isEmpty() && candidateParses.isEmpty()) {
-                    queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
-                    doParse(queryNLReq, parseResp);
+                // for every requested dataSet, recursively invoke rule-based parser with different
+                // mapModes
+                Set<Long> requestedDatasets = queryNLReq.getDataSetIds();
+                List<SemanticParseInfo> candidateParses = Lists.newArrayList();
+                StringBuilder errMsg = new StringBuilder();
+                for (Long datasetId : requestedDatasets) {
+                    queryNLReq.setDataSetIds(Collections.singleton(datasetId));
+                    ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
+                    for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.STRICT,
+                            MapModeEnum.MODERATE)) {
+                        queryNLReq.setMapModeEnum(mode);
+                        doParse(queryNLReq, parseResp);
+                    }
+
+                    if (parseResp.getSelectedParses().isEmpty() && candidateParses.isEmpty()) {
+                        queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
+                        doParse(queryNLReq, parseResp);
+                    }
+
+                    if (parseResp.getSelectedParses().isEmpty()) {
+                        errMsg.append(parseResp.getErrorMsg());
+                        continue;
+                    }
+                    // for one dataset select the top 1 parse after sorting
+                    SemanticParseInfo.sort(parseResp.getSelectedParses());
+                    candidateParses.add(parseResp.getSelectedParses().get(0));
+                }
+                ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
+                int parserShowCount =
+                        Integer.parseInt(parserConfig.getParameterValue(PARSER_SHOW_COUNT));
+                SemanticParseInfo.sort(candidateParses);
+                parseContext.getResponse().setSelectedParses(
+                        candidateParses.subList(0, Math.min(parserShowCount, candidateParses.size())));
+                if (parseContext.getResponse().getSelectedParses().isEmpty()) {
+                    parseContext.getResponse().setState(ParseResp.ParseState.FAILED);
+                    parseContext.getResponse().setErrorMsg(errMsg.toString());
+                }
+            }
+
+            // next go with llm-based parsers unless LLM is disabled or use feedback is needed.
+            if (parseContext.needLLMParse() && !parseContext.needFeedback()) {
+                // either the user or the system selects one parse from the candidate parses.
+                if (Objects.isNull(parseContext.getRequest().getSelectedParse())
+                        && parseContext.getResponse().getSelectedParses().isEmpty()) {
+                    return;
                 }
 
-                if (parseResp.getSelectedParses().isEmpty()) {
-                    errMsg.append(parseResp.getErrorMsg());
-                    continue;
-                }
-                // for one dataset select the top 1 parse after sorting
-                SemanticParseInfo.sort(parseResp.getSelectedParses());
-                candidateParses.add(parseResp.getSelectedParses().get(0));
-            }
-            ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
-            int parserShowCount =
-                    Integer.parseInt(parserConfig.getParameterValue(PARSER_SHOW_COUNT));
-            SemanticParseInfo.sort(candidateParses);
-            parseContext.getResponse().setSelectedParses(
-                    candidateParses.subList(0, Math.min(parserShowCount, candidateParses.size())));
-            if (parseContext.getResponse().getSelectedParses().isEmpty()) {
-                parseContext.getResponse().setState(ParseResp.ParseState.FAILED);
-                parseContext.getResponse().setErrorMsg(errMsg.toString());
-            }
-        }
+                QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+                queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
+                SemanticParseInfo userSelectParse = parseContext.getRequest().getSelectedParse();
+                queryNLReq.setSelectedParseInfo(Objects.nonNull(userSelectParse) ? userSelectParse
+                        : parseContext.getResponse().getSelectedParses().get(0));
+                parseContext.setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
 
-        // next go with llm-based parsers unless LLM is disabled or use feedback is needed.
-        if (parseContext.needLLMParse() && !parseContext.needFeedback()) {
-            // either the user or the system selects one parse from the candidate parses.
-            if (Objects.isNull(parseContext.getRequest().getSelectedParse())
-                    && parseContext.getResponse().getSelectedParses().isEmpty()) {
-                return;
-            }
-
-            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
-            SemanticParseInfo userSelectParse = parseContext.getRequest().getSelectedParse();
-            queryNLReq.setSelectedParseInfo(Objects.nonNull(userSelectParse) ? userSelectParse
-                    : parseContext.getResponse().getSelectedParses().get(0));
-            parseContext.setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
-
-            rewriteMultiTurn(parseContext, queryNLReq);
-            addDynamicExemplars(parseContext, queryNLReq);
-            doParse(queryNLReq, parseContext.getResponse());
-
-            // try again with all semantic fields passed to LLM
-            if (parseContext.getResponse().getState().equals(ParseResp.ParseState.FAILED)) {
-                queryNLReq.setSelectedParseInfo(null);
-                queryNLReq.setMapModeEnum(MapModeEnum.ALL);
+                rewriteMultiTurn(parseContext, queryNLReq);
+                addDynamicExemplars(parseContext, queryNLReq);
                 doParse(queryNLReq, parseContext.getResponse());
+
+                // try again with all semantic fields passed to LLM
+                if (parseContext.getResponse().getState().equals(ParseResp.ParseState.FAILED)) {
+                    queryNLReq.setSelectedParseInfo(null);
+                    queryNLReq.setMapModeEnum(MapModeEnum.ALL);
+                    doParse(queryNLReq, parseContext.getResponse());
+                }
             }
         }
     }

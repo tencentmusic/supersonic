@@ -10,4 +10,6 @@ public class DimValuesConstants {
             "DimensionValuesMatchHelper_DimensionValusAndId";
 
     public static final String FULL_QUERY = "DimensionValuesMatchHelper_FullQuery";
+
+    public static final String SIMPLE_MODE = "simpleMode";
 }

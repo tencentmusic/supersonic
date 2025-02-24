@@ -164,12 +164,14 @@ public class DateUtils {
     public static List<String> getDateList(String startDateStr, String endDateStr,
             DatePeriodEnum period) {
         try {
-            LocalDate startDate ;
+            LocalDate startDate;
             LocalDate endDate;
-            if (startDateStr.length() == 6){
-                 startDate = LocalDate.parse(startDateStr + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
-                 endDate = LocalDate.parse(endDateStr + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
-            }else {
+            if (startDateStr.length() == 6) {
+                startDate = LocalDate.parse(startDateStr + "01",
+                        DateTimeFormatter.ofPattern("yyyyMMdd"));
+                endDate =
+                        LocalDate.parse(endDateStr + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+            } else {
                 startDate = LocalDate.parse(startDateStr);
                 endDate = LocalDate.parse(endDateStr);
             }

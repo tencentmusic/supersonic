@@ -13,6 +13,8 @@ import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
+import com.tencent.supersonic.headless.core.cache.QueryCache;
+import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -101,13 +103,22 @@ public class ChatWorkflowEngine {
             schemaMappers.forEach(mapper -> mapper.map(queryCtx));
         }
     }
-
+    private final QueryCache queryCache = ComponentFactory.getQueryCache();
     private void performParsing(ChatQueryContext queryCtx) {
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx);
             log.debug("{} result:{}", parser.getClass().getSimpleName(),
                     JsonUtil.toString(queryCtx));
         });
+        if (queryCtx.getRequest().getDataSetIds().contains(9L)){
+            String parsedS2SQL = queryCtx.getCandidateQueries().get(0).getParseInfo().getSqlInfo().getParsedS2SQL();
+            Long queryId = queryCtx.getRequest().getQueryId();
+            if (StringUtils.isNotBlank(parsedS2SQL)){
+                queryCache.put(queryId+"simpleMode", parsedS2SQL);
+            }else {
+                queryCache.put(queryId+"simpleMode", queryCtx.getCandidateQueries().get(0).getParseInfo().getSqlInfo().getCorrectedS2SQL());
+            }
+        }
     }
 
     private void performCorrecting(ChatQueryContext queryCtx) {

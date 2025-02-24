@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
+import com.tencent.supersonic.headless.api.pojo.Cache;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
-
     public static final String APP_KEY = "S2SQL_PARSER";
     public static final String INSTRUCTION =
             "#Role: You are a data analyst experienced in SQL languages."
@@ -68,16 +69,33 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     public LLMResp generate(LLMReq llmReq) {
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());
+        // 判断是否是简易模型
+        ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
+        ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatApp.getChatModelConfig());
+        SemanticSqlExtractor extractor =
+                AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
+        // 1. 如果是简易模型，则使用SimpleStrategy生成提示词
+        if (llmReq.getSchema().getDataSetId() == 9L) {
+            // 使用SimpleStrategy生成提示词
+            SimpleStrategy simpleStrategy = new SimpleStrategy();
+            String promptText = simpleStrategy.generatePrompt(llmReq.getQueryText());
+
+            // 使用提示词生成SQL
+            SemanticSql s2Sql = extractor.generateSemanticSql(promptText);
+
+            // 3. 格式化返回结果
+            llmResp.setSqlOutput(s2Sql.getSql());
+            // 根据需求填写合适的数据
+            llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(), Collections.emptyMap()));
+
+            log.info("Simplified model SQL generation, SQL: {}", s2Sql.getSql());
+            return llmResp;
+        }
         // 1.recall exemplars
         log.debug("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
         List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         // 2.generate sql generation prompt for each self-consistency inference
-        ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
-        ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatApp.getChatModelConfig());
-        SemanticSqlExtractor extractor =
-                AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
-
         Map<Prompt, List<Text2SQLExemplar>> prompt2Exemplar = new HashMap<>();
         for (List<Text2SQLExemplar> exemplars : exemplarsList) {
             llmReq.setDynamicExemplars(exemplars);
