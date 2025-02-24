@@ -95,10 +95,14 @@ export type AgentType = {
   enableSearch?: 0 | 1;
   enableFeedback?: 0 | 1;
   toolConfig?: string;
-  // modelConfig?: LlmConfigType;
   chatAppConfig: ChatAppConfig;
   multiTurnConfig?: MultiTurnConfig;
   visualConfig?: VisualConfig;
+  admins?: string[];
+  adminOrgs?: string[];
+  viewers?: string[];
+  viewOrgs?: string[];
+  isOpen: number;
 };
 
 export type ModelType = {

@@ -1,6 +1,6 @@
-import { Form, Input, Button, Switch, Tabs, Select, message, Space, Tooltip, Row, Col } from 'antd';
+import { Form, Input, Button, Switch, Tabs, Select, message, Space, Tooltip } from 'antd';
 import MainTitleMark from '@/components/MainTitleMark';
-import { AgentType, ChatAppConfig, ChatAppConfigItem } from './type';
+import { AgentType, ChatAppConfig } from './type';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -9,9 +9,9 @@ import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
-import FormItemTitle from '@/components/FormHelper/FormItemTitle';
-import { getLlmModelTypeList, getLlmModelAppList, getLlmList } from '../../services/system';
+import { getLlmModelAppList, getLlmList } from '../../services/system';
 import MemorySection from './MemorySection';
+import PermissionSection from './PermissionSection';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -195,16 +195,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           <FormItem name="enableFeedback" label="开启用户确认" valuePropName="checked" htmlFor="">
             <Switch />
           </FormItem>
-          {/* <FormItem
-            name={['multiTurnConfig', 'enableMultiTurn']}
-            label="开启多轮对话"
-            valuePropName="checked"
-          >
-            <Switch />
-          </FormItem>
-          <FormItem name="enableMemoryReview" label="开启记忆评估" valuePropName="checked">
-            <Switch />
-          </FormItem> */}
           <FormItem
             name={['toolConfig', 'simpleMode']}
             label="开启精简模式"
@@ -214,7 +204,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
           >
             <Switch />
           </FormItem>
-
           <FormItem
             name={['toolConfig', 'debugMode']}
             label="开启调试信息"
@@ -286,8 +275,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             </Space>
           </div>
           <Space style={{ alignItems: 'start' }}>
-            {/* <Row> */}
-            {/* <Col flex="400px"> */}
             <div style={{ width: 350 }}>
               {modelTypeOptions.map((item) => {
                 return (
@@ -312,8 +299,6 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 );
               })}
             </div>
-            {/* </Col>
-            <Col flex="auto"> */}
             <div style={{ width: 900 }}>
               {modelTypeOptions.map((item) => {
                 return (
@@ -358,44 +343,10 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                 );
               })}
             </div>
-            {/* </Col> */}
-            {/* </Row> */}
           </Space>
         </div>
       ),
     },
-    // {
-    //   label: '提示词配置',
-    //   key: 'promptConfig',
-    //   children: (
-    //     <div className={styles.agentFormContainer}>
-    //       <FormItem
-    //         name={['promptConfig', 'promptTemplate']}
-    //         label={
-    //           <>
-    //             <Space>
-    //               提示词模板
-    //               <Tooltip
-    //                 overlayInnerStyle={{ width: 400 }}
-    //                 title={
-    //                   <>
-    //                     {tips.map((tip) => (
-    //                       <div>{tip}</div>
-    //                     ))}
-    //                   </>
-    //                 }
-    //               >
-    //                 <QuestionCircleOutlined />
-    //               </Tooltip>
-    //             </Space>
-    //           </>
-    //         }
-    //       >
-    //         <Input.TextArea style={{ minHeight: 600 }} />
-    //       </FormItem>
-    //     </div>
-    //   ),
-    // },
     {
       label: '工具配置',
       key: 'tools',
@@ -405,6 +356,11 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       label: '记忆管理',
       key: 'memory',
       children: <MemorySection agentId={editAgent?.id} />,
+    },
+    {
+      label: '权限管理',
+      key: 'permissonSetting',
+      children: <PermissionSection currentAgent={editAgent} onSaveAgent={onSaveAgent} />,
     },
   ];
 
@@ -421,7 +377,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       <Tabs
         tabBarExtraContent={
           <Space>
-            {activeKey !== 'memory' && (
+            {activeKey !== 'memory' && activeKey !== 'permissonSetting' && (
               <Button
                 type="primary"
                 loading={saveLoading}
