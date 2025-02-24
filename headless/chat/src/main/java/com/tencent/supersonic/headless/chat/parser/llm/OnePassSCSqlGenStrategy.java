@@ -15,6 +15,7 @@ import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +76,10 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         SemanticSqlExtractor extractor =
                 AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
         // 1. 如果是简易模型，则使用SimpleStrategy生成提示词
-        if (llmReq.getSchema().getDataSetId() == 9L) {
+        if (StringUtils.endsWithIgnoreCase(llmReq.getSchema().getDataSetName(),"直连模式")) {
             // 使用SimpleStrategy生成提示词
             SimpleStrategy simpleStrategy = new SimpleStrategy();
-            String promptText = simpleStrategy.generatePrompt(llmReq.getQueryText());
+            String promptText = simpleStrategy.generatePrompt(llmReq);
 
             // 使用提示词生成SQL
             SemanticSql s2Sql = extractor.generateSemanticSql(promptText);
@@ -86,7 +87,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             // 3. 格式化返回结果
             llmResp.setSqlOutput(s2Sql.getSql());
             // 根据需求填写合适的数据
-            llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(), Collections.emptyMap()));
+            llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(),
+                    Collections.emptyMap()));
 
             log.info("Simplified model SQL generation, SQL: {}", s2Sql.getSql());
             return llmResp;
