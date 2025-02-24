@@ -69,7 +69,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static void addSchemaTable(SqlValidatorScope scope, ModelResp dataModel, String db,
-                                       String tb, Set<String> fields) throws Exception {
+            String tb, Set<String> fields) throws Exception {
         Set<String> dateInfo = new HashSet<>();
         Set<String> dimensions = new HashSet<>();
         Set<String> metrics = new HashSet<>();
@@ -106,7 +106,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static List<SqlNode> getExtendField(Map<String, String> exprList,
-                                               SqlValidatorScope scope, EngineType engineType) throws Exception {
+            SqlValidatorScope scope, EngineType engineType) throws Exception {
         List<SqlNode> sqlNodeList = new ArrayList<>();
         for (String expr : exprList.keySet()) {
             sqlNodeList.add(parse(expr, scope, engineType));
@@ -127,7 +127,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static List<ModelResp> getQueryDataModels(Ontology ontology,
-                                                     OntologyQuery ontologyQuery) {
+            OntologyQuery ontologyQuery) {
         // get query measures and dimensions
         Set<String> queryMeasures = new HashSet<>();
         Set<String> queryDimensions = new HashSet<>();
@@ -162,7 +162,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     public static void getQueryDimensionMeasure(Ontology ontology, OntologyQuery ontologyQuery,
-                                                Set<String> queryDimensions, Set<String> queryMeasures) {
+            Set<String> queryDimensions, Set<String> queryMeasures) {
         ontologyQuery.getMetrics().forEach(m -> {
             if (Objects.nonNull(m.getMetricDefineByMeasureParams())) {
                 m.getMetricDefineByMeasureParams().getMeasures()
@@ -215,7 +215,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static boolean checkMatch(ModelResp baseDataModel, Set<String> queryMeasures,
-                                      Set<String> queryDimension) {
+            Set<String> queryDimension) {
         boolean isAllMatch = true;
         Set<String> baseMeasures = baseDataModel.getMeasures().stream().map(Measure::getName)
                 .collect(Collectors.toSet());
@@ -248,8 +248,8 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<ModelResp> findRelatedModelsByRelation(Ontology ontology,
-                                                               OntologyQuery ontologyQuery, ModelResp baseDataModel, Set<String> queryDimensions,
-                                                               Set<String> queryMeasures) {
+            OntologyQuery ontologyQuery, ModelResp baseDataModel, Set<String> queryDimensions,
+            Set<String> queryMeasures) {
         Set<String> joinDataModelNames = new HashSet<>();
         List<ModelResp> joinDataModels = new ArrayList<>();
         Set<String> before = new HashSet<>();
@@ -333,7 +333,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static void sortJoinRelation(List<JoinRelation> joinRelations, String next,
-                                         Set<Long> visited, List<JoinRelation> sortedJoins) {
+            Set<Long> visited, List<JoinRelation> sortedJoins) {
         for (JoinRelation link : joinRelations) {
             if (!visited.contains(link.getId())) {
                 if (link.getLeft().equals(next) || link.getRight().equals(next)) {
@@ -348,7 +348,7 @@ public class DataModelNode extends SemanticNode {
     }
 
     private static List<ModelResp> findRelatedModelsByIdentifier(Ontology ontology,
-                                                                 ModelResp baseDataModel, Set<String> queryDimension, Set<String> measures) {
+            ModelResp baseDataModel, Set<String> queryDimension, Set<String> measures) {
         Set<String> baseIdentifiers = baseDataModel.getModelDetail().getIdentifiers().stream()
                 .map(Identify::getName).collect(Collectors.toSet());
         if (baseIdentifiers.isEmpty()) {

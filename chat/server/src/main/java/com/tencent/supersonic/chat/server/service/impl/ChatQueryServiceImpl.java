@@ -262,7 +262,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         JsqlParserType jsqlParserType = checkJsqlParserType(correctorSql);
         if (jsqlParserType != JsqlParserType.COMMON) {
             log.info("校验sql结构存在子查询，使用replaceFiltersTest解析sql");
-            correctorSql = replaceFiltersByJsqlParserType(queryData, parseInfo, dataSetSchema,jsqlParserType);
+            correctorSql = replaceFiltersByJsqlParserType(queryData, parseInfo, dataSetSchema,
+                    jsqlParserType);
             return correctorSql;
         }
         log.info("校验sql结构不存在子查询，使用replaceFilters解析sql");
@@ -300,8 +301,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         return correctorSql;
     }
 
-    private String replaceFiltersByJsqlParserType(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema, JsqlParserType jsqlParserType) {
+    private String replaceFiltersByJsqlParserType(ChatQueryDataReq queryData,
+            SemanticParseInfo parseInfo, DataSetSchema dataSetSchema,
+            JsqlParserType jsqlParserType) {
 
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
@@ -310,9 +312,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         PlainSelect plainSelect = (PlainSelect) selectStatement;
 
         ArrayList<Select> selectArrayList = new ArrayList<>();
-        if (jsqlParserType == JsqlParserType.WITH){
+        if (jsqlParserType == JsqlParserType.WITH) {
             selectArrayList.addAll(SqlSelectHelper.getWithItem(selectStatement));
-        }else {
+        } else {
 
             Select fromItemSelect = plainSelect.getFromItem(ParenthesedSelect.class).getSelect();
             log.info("fromItemSelect is:{}", fromItemSelect);
@@ -389,17 +391,19 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         Expression where = plainSelect.getWhere();
         List<WithItem> withItemsList = plainSelect.getWithItemsList();
 
-        if (Objects.nonNull(withItemsList) && withItemsList.size() >= 2){
+        if (Objects.nonNull(withItemsList) && withItemsList.size() >= 2) {
             return JsqlParserType.WITH;
         }
-        if (withItemsList == null && fromItem != null && joins != null && !joins.isEmpty() && where == null) {
+        if (withItemsList == null && fromItem != null && joins != null && !joins.isEmpty()
+                && where == null) {
             log.info("非with语句，fromItem和joins不为null，where为null，返回SELECT。");
             return JsqlParserType.SELECT;
         }
         return JsqlParserType.COMMON;
     }
 
-    private String rebuildCorrectorSql(String correctorSql, List<String> modifiedSubQueries, JsqlParserType jsqlParserType) {
+    private String rebuildCorrectorSql(String correctorSql, List<String> modifiedSubQueries,
+            JsqlParserType jsqlParserType) {
         Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
         if (!(selectStatement instanceof PlainSelect)) {
             throw new IllegalArgumentException("修正S2SQL的结构有误！");
@@ -440,6 +444,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             }
         }
     }
+
     private void rebuildSelectClause(Select selectStatement, List<String> modifiedSubQueries) {
         if (!(selectStatement instanceof PlainSelect)) {
             throw new IllegalArgumentException("SELECT 结构有误，无法解析！");
