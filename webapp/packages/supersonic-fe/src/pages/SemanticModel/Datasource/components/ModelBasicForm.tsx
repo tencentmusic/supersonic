@@ -88,12 +88,12 @@ const ModelBasicForm: React.FC<Props> = ({
     if (currentDbLinkConfigId) {
       queryDbNameList(currentDbLinkConfigId, catalog);
     }
-    setCurrentCatalog(catalog);
     form.setFieldsValue({
-      catalog: currentCatalog,
+      catalog: catalog,
       dbName: undefined,
       tableName: undefined,
     })
+    setCurrentCatalog(catalog);
   }
 
   const queryDbNameList = async (databaseId: number, catalog: string) => {
