@@ -135,15 +135,24 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
 
     public Properties getProperties(ConnectInfo connectionInfo) {
         final Properties properties = new Properties();
+        String url = connectionInfo.getUrl().toLowerCase();
+
+        // 设置通用属性
         properties.setProperty("user", connectionInfo.getUserName());
-        if (connectionInfo.getUrl().startsWith("jdbc:presto") || connectionInfo.getUrl().startsWith("jdbc:trino")) {
-            if (connectionInfo.getUrl().toLowerCase().contains("ssl=false")) {
-                properties.setProperty("password", null);
+
+        // 针对 Presto 和 Trino ssl=false 的情况，不需要设置密码
+        if (url.startsWith("jdbc:presto") || url.startsWith("jdbc:trino")) {
+            // 检查是否需要处理 SSL
+            if (!url.contains("ssl=false")) {
+                properties.setProperty("password", connectionInfo.getPassword());
             }
-        }else {
+        } else {
+            // 针对其他数据库类型
             properties.setProperty("password", connectionInfo.getPassword());
         }
+
         return properties;
     }
+
 
 }

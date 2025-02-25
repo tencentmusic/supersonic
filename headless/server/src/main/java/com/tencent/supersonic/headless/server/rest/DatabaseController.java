@@ -96,7 +96,7 @@ public class DatabaseController {
 
     @RequestMapping("/getColumnsByName")
     public List<DBColumn> getColumnsByName(@RequestParam("databaseId") Long databaseId,
-                                           @RequestParam("catalog") String catalog,
+                                           @RequestParam(name="catalog", required = false) String catalog,
                                            @RequestParam("db") String db,
                                            @RequestParam("table") String table)
             throws SQLException {
