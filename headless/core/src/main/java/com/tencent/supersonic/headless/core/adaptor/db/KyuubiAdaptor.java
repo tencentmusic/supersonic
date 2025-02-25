@@ -7,10 +7,9 @@ import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +41,24 @@ public class KyuubiAdaptor extends BaseDbAdaptor {
             }
         }
         return column;
+    }
+
+    @Override
+    public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {
+        List<String> dbs = Lists.newArrayList();
+        final StringBuilder sql =  new StringBuilder("SHOW DATABASES");
+        if (StringUtils.isNotBlank(catalog)) {
+            sql.append(" IN ").append(catalog);
+        }
+        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(),
+                connectionInfo.getUserName(), connectionInfo.getPassword());
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql.toString())) {
+            while (rs.next()) {
+                dbs.add(rs.getString(1));
+            }
+        }
+        return dbs;
     }
 
     @Override

@@ -6,11 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +15,16 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
 
     @Override
     public List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException {
-        // Apart from supporting multiple catalog types of data sources, other types will return an
-        // empty set by default.
-        return List.of();
+        List<String> catalogs = Lists.newArrayList();
+        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(),
+                connectInfo.getUserName(), connectInfo.getPassword());
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery("SHOW CATALOGS")) {
+            while (rs.next()) {
+                catalogs.add(rs.getString(1));
+            }
+        }
+        return catalogs;
     }
 
     public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {

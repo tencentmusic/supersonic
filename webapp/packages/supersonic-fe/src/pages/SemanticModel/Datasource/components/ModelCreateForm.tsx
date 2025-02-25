@@ -575,11 +575,11 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
         }}
         onValuesChange={(value, values) => {
           const { tableName } = value;
-          const { dbName, databaseId } = values;
+          const { catalog, dbName, databaseId } = values;
           setFormDatabaseId(databaseId);
           if (tableName) {
             //::TODO add catalog
-            queryTableColumnList(databaseId, '', dbName, tableName);
+            queryTableColumnList(databaseId, catalog, dbName, tableName);
           }
         }}
         className={styles.form}

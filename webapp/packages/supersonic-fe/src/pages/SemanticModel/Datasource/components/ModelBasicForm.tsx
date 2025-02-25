@@ -88,6 +88,7 @@ const ModelBasicForm: React.FC<Props> = ({
       queryDbNameList(currentDbLinkConfigId, catalog);
     }
     form.setFieldsValue({
+      catalog,
       dbName: undefined,
       tableName: undefined,
     })
