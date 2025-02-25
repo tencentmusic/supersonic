@@ -67,14 +67,14 @@ public class StarrocksAdaptor extends MysqlAdaptor {
 
             // 切换到指定的 catalog（或 database/schema），这在某些 SQL 方言中很重要
             if (StringUtils.isNotBlank(catalog)) {
-                st.execute("USE " + catalog);
+                st.execute("SET CATALOG " + catalog);
             }
 
             // 获取 DatabaseMetaData; 需要注意调用此方法的位置（在 USE 之后）
             DatabaseMetaData metaData = con.getMetaData();
 
             // 获取特定表的列信息
-            try (ResultSet columns = metaData.getColumns(null, schemaName, tableName, null)) {
+            try (ResultSet columns = metaData.getColumns(schemaName, schemaName, tableName, null)) {
                 while (columns.next()) {
                     String columnName = columns.getString("COLUMN_NAME");
                     String dataType = columns.getString("TYPE_NAME");
