@@ -78,11 +78,11 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         return metaData.getTables(schemaName, schemaName, null, new String[] {"TABLE", "VIEW"});
     }
 
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
             throws SQLException {
         List<DBColumn> dbColumns = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);
-        ResultSet columns = metaData.getColumns(schemaName, schemaName, tableName, null);
+        ResultSet columns = metaData.getColumns(catalog, schemaName, tableName, null);
         while (columns.next()) {
             String columnName = columns.getString("COLUMN_NAME");
             String dataType = columns.getString("TYPE_NAME");

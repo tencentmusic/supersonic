@@ -234,7 +234,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         } else {
             for (String table : modelBuildReq.getTables()) {
                 List<DBColumn> columns =
-                        getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getDb(), table);
+                        getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getCatalog(), modelBuildReq.getDb(), table);
                 dbColumnMap.put(table, columns);
             }
         }
@@ -242,15 +242,15 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public List<DBColumn> getColumns(Long id, String db, String table) throws SQLException {
+    public List<DBColumn> getColumns(Long id, String catalog, String db, String table) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
-        return getColumns(databaseResp, db, table);
+        return getColumns(databaseResp, catalog, db, table);
     }
 
-    public List<DBColumn> getColumns(DatabaseResp databaseResp, String db, String table)
+    public List<DBColumn> getColumns(DatabaseResp databaseResp, String catalog, String db, String table)
             throws SQLException {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        return engineAdaptor.getColumns(DatabaseConverter.getConnectInfo(databaseResp), db, table);
+        return engineAdaptor.getColumns(DatabaseConverter.getConnectInfo(databaseResp), catalog, db, table);
     }
 
     @Override

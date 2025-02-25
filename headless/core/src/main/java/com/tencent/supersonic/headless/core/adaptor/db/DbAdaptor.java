@@ -20,7 +20,7 @@ public interface DbAdaptor {
 
     List<String> getTables(ConnectInfo connectInfo, String schemaName) throws SQLException;
 
-    List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
+    List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
             throws SQLException;
 
     FieldType classifyColumnType(String typeName);

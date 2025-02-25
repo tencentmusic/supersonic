@@ -95,9 +95,11 @@ public class DatabaseController {
 
     @RequestMapping("/getColumnsByName")
     public List<DBColumn> getColumnsByName(@RequestParam("databaseId") Long databaseId,
-            @RequestParam("db") String db, @RequestParam("table") String table)
+                                           @RequestParam("catalog") String catalog,
+                                           @RequestParam("db") String db,
+                                           @RequestParam("table") String table)
             throws SQLException {
-        return databaseService.getColumns(databaseId, db, table);
+        return databaseService.getColumns(databaseId, catalog, db, table);
     }
 
     @PostMapping("/listColumnsBySql")
