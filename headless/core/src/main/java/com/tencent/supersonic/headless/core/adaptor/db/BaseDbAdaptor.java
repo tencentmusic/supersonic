@@ -136,9 +136,6 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         final Properties properties = new Properties();
         properties.setProperty("user", connectionInfo.getUserName());
         properties.setProperty("password", connectionInfo.getPassword());
-        if (connectionInfo.getUrl().toLowerCase().contains("ssl=true")) {
-            properties.setProperty("SSL", "true");
-        }
         return properties;
     }
 
