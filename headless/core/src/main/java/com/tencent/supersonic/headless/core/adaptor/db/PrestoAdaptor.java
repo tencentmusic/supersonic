@@ -3,6 +3,8 @@ package com.tencent.supersonic.headless.core.adaptor.db;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
+import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,9 +50,7 @@ public class PrestoAdaptor extends BaseDbAdaptor {
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
-
-        final Properties properties = getProperties(connectionInfo);
-        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(), properties);
+        try (Connection con = getConnection(connectionInfo);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
@@ -59,7 +59,6 @@ public class PrestoAdaptor extends BaseDbAdaptor {
         }
         return dbs;
     }
-
 
     @Override
     public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
@@ -72,8 +71,7 @@ public class PrestoAdaptor extends BaseDbAdaptor {
             sql.append(" IN ").append(schemaName);
         }
 
-        final Properties properties = getProperties(connectInfo);
-        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(), properties);
+        try (Connection con = getConnection(connectInfo);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {

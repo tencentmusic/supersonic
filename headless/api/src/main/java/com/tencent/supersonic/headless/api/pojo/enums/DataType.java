@@ -8,7 +8,9 @@ import java.util.Set;
 public enum DataType {
     MYSQL("mysql", "mysql", "com.mysql.cj.jdbc.Driver", "`", "`", "'", "'"),
 
-    HIVE2("hive2", "hive", "org.apache.hive.jdbc.HiveDriver", "`", "`", "`", "`"),
+    HIVE2("hive2", "hive", "org.apache.kyuubi.jdbc.KyuubiHiveDriver", "`", "`", "`", "`"),
+
+    KYUUBI("kyuubi", "kyuubi", "org.apache.kyuubi.jdbc.KyuubiHiveDriver", "`", "`", "`", "`"),
 
     ORACLE("oracle", "oracle", "oracle.jdbc.driver.OracleDriver", "\"", "\"", "\"", "\""),
 
@@ -26,6 +28,8 @@ public enum DataType {
             "com.amazon.opendistroforelasticsearch.jdbc.Driver", "", "", "'", "'"),
 
     PRESTO("presto", "presto", "com.facebook.presto.jdbc.PrestoDriver", "\"", "\"", "\"", "\""),
+
+    TRINO("trino", "trino", "io.trino.jdbc.TrinoDriver", "\"", "\"", "\"", "\""),
 
     MOONBOX("moonbox", "moonbox", "moonbox.jdbc.MbDriver", "`", "`", "`", "`"),
 
@@ -46,6 +50,7 @@ public enum DataType {
     TDENGINE("TAOS", "TAOS", "com.taosdata.jdbc.TSDBDriver", "'", "'", "\"", "\""),
 
     POSTGRESQL("postgresql", "postgresql", "org.postgresql.Driver", "'", "'", "\"", "\""),
+
     DUCKDB("duckdb", "duckdb", "org.duckdb.DuckDBDriver", "'", "'", "\"", "\"");
 
     private String feature;

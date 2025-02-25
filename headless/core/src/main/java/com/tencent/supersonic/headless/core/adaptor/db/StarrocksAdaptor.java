@@ -23,8 +23,7 @@ public class StarrocksAdaptor extends MysqlAdaptor {
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
-        final Properties properties = getProperties(connectionInfo);
-        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(), properties);
+        try (Connection con = getConnection(connectionInfo);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
@@ -45,8 +44,7 @@ public class StarrocksAdaptor extends MysqlAdaptor {
             sql.append(" IN ").append(schemaName);
         }
 
-        final Properties properties = getProperties(connectInfo);
-        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(), properties);
+        try (Connection con = getConnection(connectInfo);
                 Statement st = con.createStatement();
                 ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
@@ -61,8 +59,7 @@ public class StarrocksAdaptor extends MysqlAdaptor {
             throws SQLException {
         List<DBColumn> dbColumns = new ArrayList<>();
 
-        final Properties properties = getProperties(connectInfo);
-        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(), properties);
+        try (Connection con = getConnection(connectInfo);
              Statement st = con.createStatement()) {
 
             // 切换到指定的 catalog（或 database/schema），这在某些 SQL 方言中很重要

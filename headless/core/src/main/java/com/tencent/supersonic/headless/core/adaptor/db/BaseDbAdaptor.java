@@ -18,8 +18,7 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     @Override
     public List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException {
         List<String> catalogs = Lists.newArrayList();
-        final Properties properties = getProperties(connectInfo);
-        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(), properties);
+        try (Connection con = getConnection(connectInfo);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery("SHOW CATALOGS")) {
             while (rs.next()) {
@@ -91,25 +90,32 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         return metaData.getTables(schemaName, schemaName, null, new String[] {"TABLE", "VIEW"});
     }
 
+
+
     public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
             throws SQLException {
-        List<DBColumn> dbColumns = Lists.newArrayList();
-        DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);
-        ResultSet columns = metaData.getColumns(catalog, schemaName, tableName, null);
-        while (columns.next()) {
-            String columnName = columns.getString("COLUMN_NAME");
-            String dataType = columns.getString("TYPE_NAME");
-            String remarks = columns.getString("REMARKS");
-            FieldType fieldType = classifyColumnType(dataType);
-            dbColumns.add(new DBColumn(columnName, dataType, remarks, fieldType));
+        List<DBColumn> dbColumns = new ArrayList<>();
+        // 确保连接会自动关闭
+        try (ResultSet columns = getDatabaseMetaData(connectInfo).getColumns(catalog, schemaName, tableName, null)) {
+            while (columns.next()) {
+                String columnName = columns.getString("COLUMN_NAME");
+                String dataType = columns.getString("TYPE_NAME");
+                String remarks = columns.getString("REMARKS");
+                FieldType fieldType = classifyColumnType(dataType);
+                dbColumns.add(new DBColumn(columnName, dataType, remarks, fieldType));
+            }
         }
         return dbColumns;
     }
 
     protected DatabaseMetaData getDatabaseMetaData(ConnectInfo connectionInfo) throws SQLException {
-        final Properties properties = getProperties(connectionInfo);
-        Connection connection = DriverManager.getConnection(connectionInfo.getUrl(), properties);
+        Connection connection = getConnection(connectionInfo);
         return connection.getMetaData();
+    }
+
+    public Connection getConnection(ConnectInfo connectionInfo) throws SQLException {
+        final Properties properties = getProperties(connectionInfo);
+        return DriverManager.getConnection(connectionInfo.getUrl(), properties);
     }
 
     public FieldType classifyColumnType(String typeName) {

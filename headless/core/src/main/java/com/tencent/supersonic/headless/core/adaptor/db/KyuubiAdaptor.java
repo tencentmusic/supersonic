@@ -50,8 +50,7 @@ public class KyuubiAdaptor extends BaseDbAdaptor {
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
-        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(),
-                connectionInfo.getUserName(), connectionInfo.getPassword());
+        try (Connection con = getConnection(connectionInfo);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
@@ -62,13 +61,11 @@ public class KyuubiAdaptor extends BaseDbAdaptor {
     }
 
     @Override
-    public List<String> getTables(ConnectInfo connectionInfo, String schemaName)
-            throws SQLException {
+    public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName) throws SQLException {
         List<String> tablesAndViews = new ArrayList<>();
-        DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
 
         try {
-            ResultSet resultSet = metaData.getTables(null, schemaName, null, new String[] {"TABLE", "VIEW"});;
+            ResultSet resultSet = getDatabaseMetaData(connectInfo).getTables(catalog, schemaName, null, new String[] {"TABLE", "VIEW"});
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
                 tablesAndViews.add(name);
