@@ -136,7 +136,11 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     public Properties getProperties(ConnectInfo connectionInfo) {
         final Properties properties = new Properties();
         properties.setProperty("user", connectionInfo.getUserName());
-        if (StringUtils.isNotBlank(connectionInfo.getPassword())) {
+        if (connectionInfo.getUrl().startsWith("jdbc:presto") || connectionInfo.getUrl().startsWith("jdbc:trino")) {
+            if (connectionInfo.getUrl().toLowerCase().contains("ssl=false")) {
+                properties.setProperty("password", null);
+            }
+        }else {
             properties.setProperty("password", connectionInfo.getPassword());
         }
         return properties;
