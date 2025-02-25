@@ -578,7 +578,6 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
           const { catalog, dbName, databaseId } = values;
           setFormDatabaseId(databaseId);
           if (tableName) {
-            //::TODO add catalog
             queryTableColumnList(databaseId, catalog, dbName, tableName);
           }
         }}

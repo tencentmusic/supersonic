@@ -90,7 +90,7 @@ const ModelBasicForm: React.FC<Props> = ({
     }
     setCurrentCatalog(catalog);
     form.setFieldsValue({
-      catalog,
+      catalog: currentCatalog,
       dbName: undefined,
       tableName: undefined,
     })

@@ -5,11 +5,11 @@ import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.enums.TimeDimensionEnum;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.Assert;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class PrestoAdaptor extends BaseDbAdaptor {
 
@@ -48,8 +48,9 @@ public class PrestoAdaptor extends BaseDbAdaptor {
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
-        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(),
-                connectionInfo.getUserName(), connectionInfo.getPassword());
+
+        final Properties properties = getProperties(connectionInfo);
+        try (Connection con = DriverManager.getConnection(connectionInfo.getUrl(), properties);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
@@ -58,6 +59,7 @@ public class PrestoAdaptor extends BaseDbAdaptor {
         }
         return dbs;
     }
+
 
     @Override
     public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
@@ -70,8 +72,8 @@ public class PrestoAdaptor extends BaseDbAdaptor {
             sql.append(" IN ").append(schemaName);
         }
 
-        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(),
-                connectInfo.getUserName(), connectInfo.getPassword());
+        final Properties properties = getProperties(connectInfo);
+        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(), properties);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {

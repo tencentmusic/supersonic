@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 @Slf4j
 public abstract class BaseDbAdaptor implements DbAdaptor {
@@ -16,8 +17,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     @Override
     public List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException {
         List<String> catalogs = Lists.newArrayList();
-        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(),
-                connectInfo.getUserName(), connectInfo.getPassword());
+        final Properties properties = getProperties(connectInfo);
+        try (Connection con = DriverManager.getConnection(connectInfo.getUrl(), properties);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery("SHOW CATALOGS")) {
             while (rs.next()) {
@@ -105,8 +106,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     }
 
     protected DatabaseMetaData getDatabaseMetaData(ConnectInfo connectionInfo) throws SQLException {
-        Connection connection = DriverManager.getConnection(connectionInfo.getUrl(),
-                connectionInfo.getUserName(), connectionInfo.getPassword());
+        final Properties properties = getProperties(connectionInfo);
+        Connection connection = DriverManager.getConnection(connectionInfo.getUrl(), properties);
         return connection.getMetaData();
     }
 
@@ -129,6 +130,16 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
             default:
                 return FieldType.categorical;
         }
+    }
+
+    public Properties getProperties(ConnectInfo connectionInfo) {
+        final Properties properties = new Properties();
+        properties.setProperty("user", connectionInfo.getUserName());
+        properties.setProperty("password", connectionInfo.getPassword());
+        if (connectionInfo.getUrl().toLowerCase().contains("ssl=true")) {
+            properties.setProperty("SSL", "true");
+        }
+        return properties;
     }
 
 }
