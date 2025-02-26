@@ -19,7 +19,7 @@ public class DuckdbAdaptor extends DefaultDbAdaptor {
         return metaData.getTables(schemaName, null, null, new String[] {"TABLE", "VIEW"});
     }
 
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
             throws SQLException {
         List<DBColumn> dbColumns = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);

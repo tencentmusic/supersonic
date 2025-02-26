@@ -351,12 +351,24 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     let columns = fieldColumns || [];
     if (queryType === 'table_query') {
       const tableQueryString = tableQuery || '';
-      const [dbName, tableName] = tableQueryString.split('.');
-      columns = await queryTableColumnList(modelItem.databaseId, dbName, tableName);
-      tableQueryInitValue = {
-        dbName,
-        tableName,
-      };
+      if (tableQueryString.split('.').length === 3) {
+        const [catalog, dbName, tableName] = tableQueryString.split('.');
+        columns = await queryTableColumnList(modelItem.databaseId, catalog, dbName, tableName);
+        tableQueryInitValue = {
+          catalog,
+          dbName,
+          tableName,
+        };
+      }
+      if (tableQueryString.split('.').length === 2) {
+        const [dbName, tableName] = tableQueryString.split('.');
+        columns = await queryTableColumnList(modelItem.databaseId, '', dbName, tableName);
+        tableQueryInitValue = {
+          catalog: '',
+          dbName,
+          tableName,
+        };
+      }
     }
     formatterInitData(columns, tableQueryInitValue);
   };
@@ -426,8 +438,8 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     setFields(result);
   };
 
-  const queryTableColumnList = async (databaseId: number, dbName: string, tableName: string) => {
-    const { code, data, msg } = await getColumns(databaseId, dbName, tableName);
+  const queryTableColumnList = async (databaseId: number, catalog: string, dbName: string, tableName: string) => {
+    const { code, data, msg } = await getColumns(databaseId, catalog, dbName, tableName);
     if (code === 200) {
       const list = data || [];
       const columns = list.map((item: any, index: number) => {
@@ -563,10 +575,10 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
         }}
         onValuesChange={(value, values) => {
           const { tableName } = value;
-          const { dbName, databaseId } = values;
+          const { catalog, dbName, databaseId } = values;
           setFormDatabaseId(databaseId);
           if (tableName) {
-            queryTableColumnList(databaseId, dbName, tableName);
+            queryTableColumnList(databaseId, catalog, dbName, tableName);
           }
         }}
         className={styles.form}
