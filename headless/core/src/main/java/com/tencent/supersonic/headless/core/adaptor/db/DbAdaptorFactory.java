@@ -19,6 +19,9 @@ public class DbAdaptorFactory {
         dbAdaptorMap.put(EngineType.DUCKDB.getName(), new DuckdbAdaptor());
         dbAdaptorMap.put(EngineType.HANADB.getName(), new HanadbAdaptor());
         dbAdaptorMap.put(EngineType.STARROCKS.getName(), new StarrocksAdaptor());
+        dbAdaptorMap.put(EngineType.KYUUBI.getName(), new KyuubiAdaptor());
+        dbAdaptorMap.put(EngineType.PRESTO.getName(), new PrestoAdaptor());
+        dbAdaptorMap.put(EngineType.TRINO.getName(), new TrinoAdaptor());
     }
 
     public static DbAdaptor getEngineAdaptor(String engineType) {

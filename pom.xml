@@ -47,6 +47,9 @@
         <jjwt.version>0.12.3</jjwt.version>
         <alibaba.druid.version>1.2.24</alibaba.druid.version>
         <mysql.connector.java.version>5.1.46</mysql.connector.java.version>
+        <kyuubi.version>1.10.1</kyuubi.version>
+        <presto.version>0.291</presto.version>
+        <trino.version>471</trino.version>
         <mybatis.plus.version>3.5.7</mybatis.plus.version>
         <httpclient5.version>5.4.1</httpclient5.version>
 <!--        <httpcore.version>4.4.16</httpcore.version>-->
@@ -207,6 +210,21 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.connector.java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kyuubi</groupId>
+                <artifactId>kyuubi-hive-jdbc</artifactId>
+                <version>${kyuubi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.facebook.presto</groupId>
+                <artifactId>presto-jdbc</artifactId>
+                <version>${presto.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.trino</groupId>
+                <artifactId>trino-jdbc</artifactId>
+                <version>${trino.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>

@@ -99,7 +99,7 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         return tablesAndViews;
     }
 
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String schemaName, String tableName)
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
             throws SQLException {
         List<DBColumn> dbColumns = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);

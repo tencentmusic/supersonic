@@ -29,6 +29,7 @@ public class DefaultParametersBuilder implements DbParametersBuilder {
         password.setComment("密码");
         password.setName("password");
         password.setPlaceholder("请输入密码");
+        password.setRequire(false);
         databaseParameters.add(password);
 
         return databaseParameters;

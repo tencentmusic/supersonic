@@ -61,7 +61,8 @@ public class MapFilter {
             List<SchemaElementMatch> value = entry.getValue();
             if (!CollectionUtils.isEmpty(value)) {
                 value.removeIf(schemaElementMatch -> StringUtils
-                        .length(schemaElementMatch.getDetectWord()) <= 1 && !schemaElementMatch.isLlmMatched());
+                        .length(schemaElementMatch.getDetectWord()) <= 1
+                        && !schemaElementMatch.isLlmMatched());
             }
         }
     }
@@ -80,7 +81,7 @@ public class MapFilter {
     }
 
     public static void filterByQueryDataType(ChatQueryContext chatQueryContext,
-                                             Predicate<SchemaElement> needRemovePredicate) {
+            Predicate<SchemaElement> needRemovePredicate) {
         Map<Long, List<SchemaElementMatch>> dataSetElementMatches =
                 chatQueryContext.getMapInfo().getDataSetElementMatches();
         for (Map.Entry<Long, List<SchemaElementMatch>> entry : dataSetElementMatches.entrySet()) {

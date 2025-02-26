@@ -10,7 +10,10 @@ public enum EngineType {
     OTHER(7, "OTHER"),
     DUCKDB(8, "DUCKDB"),
     HANADB(9, "HANADB"),
-    STARROCKS(10, "STARROCKS"),;
+    STARROCKS(10, "STARROCKS"),
+    KYUUBI(11, "KYUUBI"),
+    PRESTO(12, "PRESTO"),
+    TRINO(13, "TRINO"),;
 
     private Integer code;
 

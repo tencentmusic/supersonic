@@ -19,6 +19,8 @@ public class ModelBuildReq {
 
     private String sql;
 
+    private String catalog;
+
     private String db;
 
     private List<String> tables;
