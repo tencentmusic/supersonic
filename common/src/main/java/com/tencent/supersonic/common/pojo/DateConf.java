@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.util.DateUtils;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
