@@ -12,7 +12,7 @@ import java.util.Objects;
 import static java.time.LocalDate.now;
 
 @Data
-public class DateConf {
+public class DateConf implements Serializable {
 
     private static final long serialVersionUID = 3074129990945004340L;
 
