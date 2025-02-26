@@ -15,6 +15,7 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,7 +54,9 @@ public class LLMResponseService {
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setParsedS2SQL(s2SQL);
         parseInfo.getSqlInfo().setCorrectedS2SQL(s2SQL);
-
+        if (!SqlValidHelper.isValidSQL(s2SQL) && StringUtils.endsWithIgnoreCase(parseResult.getLlmResp().getDataSet(),Constants.SIMPLE_DATASET_NAME)) {
+            parseInfo.getSqlInfo().setResultType("text");
+        }
         DataSetSchema dataSetSchema =
                 queryCtx.getSemanticSchema().getDataSetSchemaMap().get(parseInfo.getDataSetId());
         SchemaElement partitionDimension = dataSetSchema.getPartitionDimension();
@@ -78,7 +81,7 @@ public class LLMResponseService {
                     .anyMatch(existKey -> SqlValidHelper.equals(existKey, key))) {
                 continue;
             }
-            if (!SqlValidHelper.isValidSQL(key)) {
+            if (!SqlValidHelper.isValidSQL(key) && !StringUtils.endsWithIgnoreCase(llmResp.getDataSet(),Constants.SIMPLE_DATASET_NAME)) {
                 log.error("currentRetry:{},sql is not valid:{}", currentRetry, key);
                 continue;
             }

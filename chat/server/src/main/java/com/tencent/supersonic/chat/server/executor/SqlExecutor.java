@@ -28,6 +28,10 @@ public class SqlExecutor implements ChatQueryExecutor {
     @SneakyThrows
     @Override
     public QueryResult execute(ExecuteContext executeContext) {
+        if (Objects.equals(executeContext.getParseInfo().getSqlInfo().getResultType(), "text")){
+            QueryResult queryResult = doExecute(executeContext);
+            return queryResult;
+        }
         QueryResult queryResult = doExecute(executeContext);
 
         if (queryResult != null) {
@@ -81,6 +85,12 @@ public class SqlExecutor implements ChatQueryExecutor {
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
         queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
+        if (Objects.equals(parseInfo.getSqlInfo().getResultType(), "text")){
+            queryResult.setQueryMode("PLAIN_TEXT");
+            queryResult.setQueryState(QueryState.SUCCESS);
+            queryResult.setTextResult(parseInfo.getSqlInfo().getCorrectedS2SQL());
+            return queryResult;
+        }
         SemanticQueryResp queryResp =
                 semanticLayer.queryBySchemaStrValues(sqlReq, executeContext.getRequest().getUser());
         if (queryResp != null) {

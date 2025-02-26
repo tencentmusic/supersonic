@@ -69,7 +69,8 @@ public class ChatWorkflowEngine {
                         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
                         parseResult.setSelectedParses(parseInfos);
-                        if (queryCtx.needSQL()) {
+                        if (queryCtx.needSQL() && !StringUtils.endsWithIgnoreCase(
+                                queryCtx.getSemanticSchema().getDataSets().get(0).getDataSetName(), "直连模式")) {
                             queryCtx.setChatWorkflowState(ChatWorkflowState.S2SQL_CORRECTING);
                         } else {
                             parseResult.setState(ParseResp.ParseState.COMPLETED);
@@ -112,7 +113,8 @@ public class ChatWorkflowEngine {
             log.debug("{} result:{}", parser.getClass().getSimpleName(),
                     JsonUtil.toString(queryCtx));
         });
-        if (StringUtils.endsWithIgnoreCase(queryCtx.getSemanticSchema().getDataSets().get(0).getDataSetName(),"直连模式")) {
+        if (StringUtils.endsWithIgnoreCase(
+                queryCtx.getSemanticSchema().getDataSets().get(0).getDataSetName(), "直连模式")) {
             String parsedS2SQL = queryCtx.getCandidateQueries().get(0).getParseInfo().getSqlInfo()
                     .getParsedS2SQL();
             Long queryId = queryCtx.getRequest().getQueryId();

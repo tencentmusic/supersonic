@@ -60,6 +60,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
         @Description("sql to generate")
         private String sql;
+
+        @Description("如果问题与提供的上下文无关，请礼貌引导用户提问与当前表及数据的相关问题")
+        private String message;
     }
 
     interface SemanticSqlExtractor {
@@ -76,7 +79,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         SemanticSqlExtractor extractor =
                 AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
         // 1. 如果是简易模型，则使用SimpleStrategy生成提示词
-        if (StringUtils.endsWithIgnoreCase(llmReq.getSchema().getDataSetName(),"直连模式")) {
+        if (StringUtils.endsWithIgnoreCase(llmReq.getSchema().getDataSetName(), "直连模式")) {
             // 使用SimpleStrategy生成提示词
             SimpleStrategy simpleStrategy = new SimpleStrategy();
             String promptText = simpleStrategy.generatePrompt(llmReq);
@@ -85,7 +88,13 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             SemanticSql s2Sql = extractor.generateSemanticSql(promptText);
 
             // 3. 格式化返回结果
-            llmResp.setSqlOutput(s2Sql.getSql());
+            if (StringUtils.isNotBlank(s2Sql.getSql())){
+                llmResp.setSqlOutput(s2Sql.getSql());
+            }else if (StringUtils.isNotBlank(s2Sql.getMessage())){
+                llmResp.setSqlOutput(s2Sql.getMessage());
+            }else{
+                llmResp.setSqlOutput(s2Sql.getThought());
+            }
             // 根据需求填写合适的数据
             llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(),
                     Collections.emptyMap()));

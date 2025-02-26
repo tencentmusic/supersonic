@@ -13,4 +13,6 @@ public class SqlInfo {
 
     // SQL to be executed finally
     private String querySQL;
+
+    private String resultType = "";
 }
