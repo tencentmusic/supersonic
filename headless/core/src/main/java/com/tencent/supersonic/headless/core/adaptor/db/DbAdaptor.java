@@ -21,8 +21,8 @@ public interface DbAdaptor {
     List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
             throws SQLException;
 
-    List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
-            throws SQLException;
+    List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName,
+            String tableName) throws SQLException;
 
     FieldType classifyColumnType(String typeName);
 }

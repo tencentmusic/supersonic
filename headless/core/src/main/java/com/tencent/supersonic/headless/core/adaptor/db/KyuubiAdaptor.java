@@ -46,13 +46,13 @@ public class KyuubiAdaptor extends BaseDbAdaptor {
     @Override
     public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {
         List<String> dbs = Lists.newArrayList();
-        final StringBuilder sql =  new StringBuilder("SHOW DATABASES");
+        final StringBuilder sql = new StringBuilder("SHOW DATABASES");
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
         try (Connection con = getConnection(connectionInfo);
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql.toString())) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
                 dbs.add(rs.getString(1));
             }
@@ -61,11 +61,13 @@ public class KyuubiAdaptor extends BaseDbAdaptor {
     }
 
     @Override
-    public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName) throws SQLException {
+    public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
+            throws SQLException {
         List<String> tablesAndViews = new ArrayList<>();
 
         try {
-            try (ResultSet resultSet = getDatabaseMetaData(connectInfo).getTables(catalog, schemaName, null, new String[] {"TABLE", "VIEW"})) {
+            try (ResultSet resultSet = getDatabaseMetaData(connectInfo).getTables(catalog,
+                    schemaName, null, new String[] {"TABLE", "VIEW"})) {
                 while (resultSet.next()) {
                     String name = resultSet.getString("TABLE_NAME");
                     tablesAndViews.add(name);

@@ -19,13 +19,13 @@ public class StarrocksAdaptor extends MysqlAdaptor {
     @Override
     public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {
         List<String> dbs = Lists.newArrayList();
-        final StringBuilder sql =  new StringBuilder("SHOW DATABASES");
+        final StringBuilder sql = new StringBuilder("SHOW DATABASES");
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
         try (Connection con = getConnection(connectionInfo);
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql.toString())) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
                 dbs.add(rs.getString(1));
             }
@@ -37,16 +37,16 @@ public class StarrocksAdaptor extends MysqlAdaptor {
     public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
             throws SQLException {
         List<String> tablesAndViews = new ArrayList<>();
-        final StringBuilder sql =  new StringBuilder("SHOW TABLES");
+        final StringBuilder sql = new StringBuilder("SHOW TABLES");
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog).append(".").append(schemaName);
-        }else {
+        } else {
             sql.append(" IN ").append(schemaName);
         }
 
         try (Connection con = getConnection(connectInfo);
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql.toString())) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
                 tablesAndViews.add(rs.getString(1));
             }
@@ -55,12 +55,11 @@ public class StarrocksAdaptor extends MysqlAdaptor {
     }
 
     @Override
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
-            throws SQLException {
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName,
+            String tableName) throws SQLException {
         List<DBColumn> dbColumns = new ArrayList<>();
 
-        try (Connection con = getConnection(connectInfo);
-             Statement st = con.createStatement()) {
+        try (Connection con = getConnection(connectInfo); Statement st = con.createStatement()) {
 
             // 切换到指定的 catalog（或 database/schema），这在某些 SQL 方言中很重要
             if (StringUtils.isNotBlank(catalog)) {

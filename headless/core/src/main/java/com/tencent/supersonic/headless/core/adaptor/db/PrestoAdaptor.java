@@ -46,13 +46,13 @@ public class PrestoAdaptor extends BaseDbAdaptor {
     @Override
     public List<String> getDBs(ConnectInfo connectionInfo, String catalog) throws SQLException {
         List<String> dbs = Lists.newArrayList();
-        final StringBuilder sql =  new StringBuilder("SHOW SCHEMAS");
+        final StringBuilder sql = new StringBuilder("SHOW SCHEMAS");
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog);
         }
         try (Connection con = getConnection(connectionInfo);
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql.toString())) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
                 dbs.add(rs.getString(1));
             }
@@ -64,16 +64,16 @@ public class PrestoAdaptor extends BaseDbAdaptor {
     public List<String> getTables(ConnectInfo connectInfo, String catalog, String schemaName)
             throws SQLException {
         List<String> tablesAndViews = new ArrayList<>();
-        final StringBuilder sql =  new StringBuilder("SHOW TABLES");
+        final StringBuilder sql = new StringBuilder("SHOW TABLES");
         if (StringUtils.isNotBlank(catalog)) {
             sql.append(" IN ").append(catalog).append(".").append(schemaName);
-        }else {
+        } else {
             sql.append(" IN ").append(schemaName);
         }
 
         try (Connection con = getConnection(connectInfo);
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql.toString())) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql.toString())) {
             while (rs.next()) {
                 tablesAndViews.add(rs.getString(1));
             }

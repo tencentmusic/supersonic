@@ -41,17 +41,19 @@ public class JdbcDataSourceUtils {
             return false;
         }
         // presto/trino ssl=false connection need password
-        if (database.getUrl().startsWith("jdbc:presto") || database.getUrl().startsWith("jdbc:trino")) {
+        if (database.getUrl().startsWith("jdbc:presto")
+                || database.getUrl().startsWith("jdbc:trino")) {
             if (database.getUrl().toLowerCase().contains("ssl=false")) {
-                try (Connection con = DriverManager.getConnection(database.getUrl(), database.getUsername(), null)) {
+                try (Connection con = DriverManager.getConnection(database.getUrl(),
+                        database.getUsername(), null)) {
                     return con != null;
                 } catch (SQLException e) {
                     log.error(e.toString(), e);
                 }
             }
-        }else {
-            try (Connection con = DriverManager.getConnection(database.getUrl(), database.getUsername(),
-                    database.passwordDecrypt())) {
+        } else {
+            try (Connection con = DriverManager.getConnection(database.getUrl(),
+                    database.getUsername(), database.passwordDecrypt())) {
                 return con != null;
             } catch (SQLException e) {
                 log.error(e.toString(), e);

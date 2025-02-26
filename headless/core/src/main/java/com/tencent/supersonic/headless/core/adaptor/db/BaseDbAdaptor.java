@@ -19,8 +19,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
     public List<String> getCatalogs(ConnectInfo connectInfo) throws SQLException {
         List<String> catalogs = Lists.newArrayList();
         try (Connection con = getConnection(connectInfo);
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery("SHOW CATALOGS")) {
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery("SHOW CATALOGS")) {
             while (rs.next()) {
                 catalogs.add(rs.getString(1));
             }
@@ -74,7 +74,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         List<String> tablesAndViews = new ArrayList<>();
 
         try {
-            try(ResultSet resultSet = getResultSet(schemaName, getDatabaseMetaData(connectionInfo))) {
+            try (ResultSet resultSet =
+                    getResultSet(schemaName, getDatabaseMetaData(connectionInfo))) {
                 while (resultSet.next()) {
                     String name = resultSet.getString("TABLE_NAME");
                     tablesAndViews.add(name);
@@ -93,11 +94,12 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
 
 
 
-    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName, String tableName)
-            throws SQLException {
+    public List<DBColumn> getColumns(ConnectInfo connectInfo, String catalog, String schemaName,
+            String tableName) throws SQLException {
         List<DBColumn> dbColumns = new ArrayList<>();
         // 确保连接会自动关闭
-        try (ResultSet columns = getDatabaseMetaData(connectInfo).getColumns(catalog, schemaName, tableName, null)) {
+        try (ResultSet columns =
+                getDatabaseMetaData(connectInfo).getColumns(catalog, schemaName, tableName, null)) {
             while (columns.next()) {
                 String columnName = columns.getString("COLUMN_NAME");
                 String dataType = columns.getString("TYPE_NAME");
