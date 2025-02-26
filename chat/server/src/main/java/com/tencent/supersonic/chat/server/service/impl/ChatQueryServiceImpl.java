@@ -12,6 +12,7 @@ import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.chat.server.processor.execute.DataInterpretProcessor;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.AgentService;
@@ -100,10 +101,12 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
-
-        for (ParseResultProcessor processor : parseResultProcessors) {
-            if (processor.accept(parseContext)) {
-                processor.process(parseContext);
+        SemanticParseInfo semanticParseInfo = parseContext.getResponse().getSelectedParses().get(0);
+        if (semanticParseInfo != null && !Objects.equals(semanticParseInfo.getSqlInfo().getResultType(), "text")){
+            for (ParseResultProcessor processor : parseResultProcessors) {
+                if (processor.accept(parseContext)) {
+                    processor.process(parseContext);
+                }
             }
         }
 
@@ -138,6 +141,21 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         return queryResult;
     }
+public QueryResult executeResultProcessor(ChatExecuteReq chatExecuteReq){
+    QueryResult queryResult = new QueryResult();
+    ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
+    executeContext.setResponse(queryResult);
+    if (queryResult != null) {
+        for (ExecuteResultProcessor processor : executeResultProcessors) {
+            if (processor.accept(executeContext)) {
+                processor.process(executeContext);
+            }
+        }
+        saveQueryResult(chatExecuteReq, queryResult);
+    }
+
+    return queryResult;
+}
 
     @Override
     public QueryResult parseAndExecute(ChatParseReq chatParseReq) {

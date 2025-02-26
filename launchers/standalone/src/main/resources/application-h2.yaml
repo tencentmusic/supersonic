@@ -1,9 +1,9 @@
 spring:
   datasource:
-    #    url: jdbc:mysql://10.194.146.153:3322/supersonic?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true
+#    url: jdbc:mysql://10.194.146.153:3322/supersonic?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true
     url: jdbc:mysql://127.0.0.1:3306/supersonic?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
-    #    username: supersonic
+#    username: supersonic
     username: root
     password: 1234
-    #    password: SePo6*8iNsC
+#    password: SePo6*8iNsC
     driver-class-name: com.mysql.cj.jdbc.Driver
