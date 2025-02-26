@@ -50,12 +50,14 @@ public class ChatQueryController {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.execute(chatExecuteReq);
     }
+
     @PostMapping("dataInterpret")
-    public Object dataInterpret(@RequestBody ChatExecuteReq chatExecuteReq, HttpServletRequest request,
-                          HttpServletResponse response) throws Exception {
+    public Object dataInterpret(@RequestBody ChatExecuteReq chatExecuteReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.dataInterpret(chatExecuteReq);
     }
+
     @PostMapping("/")
     public Object query(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
