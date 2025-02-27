@@ -225,7 +225,7 @@ public class SqlSelectHelper {
     public static Select getSelect(String sql) {
         Statement statement = null;
         try {
-            statement = CCJSqlParserUtil.parse(sql);
+            statement = CCJSqlParserUtil.parse(sql, parser -> parser.withTimeOut(20000));
         } catch (JSQLParserException e) {
             log.error("parse error, sql:{}", sql, e);
             throw new RuntimeException(e);
