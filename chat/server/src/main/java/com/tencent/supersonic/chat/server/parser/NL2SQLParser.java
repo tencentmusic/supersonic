@@ -79,6 +79,14 @@ public class NL2SQLParser implements ChatQueryParser {
             return;
         }
 
+        if (parseContext.getRequest().getAgentId() == 11){
+            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
+            queryNLReq.setSelectedParseInfo(null);
+            queryNLReq.setMapModeEnum(MapModeEnum.ALL);
+            doParse(queryNLReq, parseContext.getResponse());
+            return;
+        }
         // first go with rule-based parsers unless the user has already selected one parse.
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
@@ -94,8 +102,7 @@ public class NL2SQLParser implements ChatQueryParser {
             StringBuilder errMsg = new StringBuilder();
             for (Long datasetId : requestedDatasets) {
                 queryNLReq.setDataSetIds(Collections.singleton(datasetId));
-                ChatParseResp parseResp =
-                        new ChatParseResp(parseContext.getRequest().getQueryId());
+                ChatParseResp parseResp = new ChatParseResp(parseContext.getRequest().getQueryId());
                 for (MapModeEnum mode : Lists.newArrayList(MapModeEnum.STRICT,
                         MapModeEnum.MODERATE)) {
                     queryNLReq.setMapModeEnum(mode);
@@ -119,8 +126,8 @@ public class NL2SQLParser implements ChatQueryParser {
             int parserShowCount =
                     Integer.parseInt(parserConfig.getParameterValue(PARSER_SHOW_COUNT));
             SemanticParseInfo.sort(candidateParses);
-            parseContext.getResponse().setSelectedParses(candidateParses.subList(0,
-                    Math.min(parserShowCount, candidateParses.size())));
+            parseContext.getResponse().setSelectedParses(
+                    candidateParses.subList(0, Math.min(parserShowCount, candidateParses.size())));
             if (parseContext.getResponse().getSelectedParses().isEmpty()) {
                 parseContext.getResponse().setState(ParseResp.ParseState.FAILED);
                 parseContext.getResponse().setErrorMsg(errMsg.toString());
@@ -140,8 +147,7 @@ public class NL2SQLParser implements ChatQueryParser {
             SemanticParseInfo userSelectParse = parseContext.getRequest().getSelectedParse();
             queryNLReq.setSelectedParseInfo(Objects.nonNull(userSelectParse) ? userSelectParse
                     : parseContext.getResponse().getSelectedParses().get(0));
-            parseContext
-                    .setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
+            parseContext.setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
 
             rewriteMultiTurn(parseContext, queryNLReq);
             addDynamicExemplars(parseContext, queryNLReq);

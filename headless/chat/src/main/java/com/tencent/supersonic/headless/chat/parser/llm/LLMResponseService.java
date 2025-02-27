@@ -54,7 +54,8 @@ public class LLMResponseService {
         parseInfo.setQueryMode(semanticQuery.getQueryMode());
         parseInfo.getSqlInfo().setParsedS2SQL(s2SQL);
         parseInfo.getSqlInfo().setCorrectedS2SQL(s2SQL);
-        if (!SqlValidHelper.isValidSQL(s2SQL) && StringUtils.endsWithIgnoreCase(parseResult.getLlmResp().getDataSet(),Constants.SIMPLE_DATASET_NAME)) {
+        if (!SqlValidHelper.isValidSQL(s2SQL) && StringUtils.endsWithIgnoreCase(
+                parseResult.getLlmResp().getDataSet(), Constants.SIMPLE_DATASET_NAME)) {
             parseInfo.getSqlInfo().setResultType("text");
         }
         DataSetSchema dataSetSchema =
@@ -81,7 +82,8 @@ public class LLMResponseService {
                     .anyMatch(existKey -> SqlValidHelper.equals(existKey, key))) {
                 continue;
             }
-            if (!SqlValidHelper.isValidSQL(key) && !StringUtils.endsWithIgnoreCase(llmResp.getDataSet(),Constants.SIMPLE_DATASET_NAME)) {
+            if (!SqlValidHelper.isValidSQL(key) && !StringUtils
+                    .endsWithIgnoreCase(llmResp.getDataSet(), Constants.SIMPLE_DATASET_NAME)) {
                 log.error("currentRetry:{},sql is not valid:{}", currentRetry, key);
                 continue;
             }

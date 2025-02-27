@@ -28,7 +28,7 @@ public class SqlExecutor implements ChatQueryExecutor {
     @SneakyThrows
     @Override
     public QueryResult execute(ExecuteContext executeContext) {
-        if (Objects.equals(executeContext.getParseInfo().getSqlInfo().getResultType(), "text")){
+        if (Objects.equals(executeContext.getParseInfo().getSqlInfo().getResultType(), "text")) {
             QueryResult queryResult = doExecute(executeContext);
             return queryResult;
         }
@@ -85,7 +85,7 @@ public class SqlExecutor implements ChatQueryExecutor {
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
         queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
-        if (Objects.equals(parseInfo.getSqlInfo().getResultType(), "text")){
+        if (Objects.equals(parseInfo.getSqlInfo().getResultType(), "text")) {
             queryResult.setQueryMode("PLAIN_TEXT");
             queryResult.setQueryState(QueryState.SUCCESS);
             queryResult.setTextResult(parseInfo.getSqlInfo().getCorrectedS2SQL());

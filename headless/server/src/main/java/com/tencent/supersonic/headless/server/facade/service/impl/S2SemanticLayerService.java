@@ -209,7 +209,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
             // 3 translate query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
             // 简单查询模式直接查询，不需要转物理sql与校验
-            if (queryReq.getDataSetId()!=null&&StringUtils.endsWithIgnoreCase(
+
+            if (queryReq.getDataSetId() != null && StringUtils.endsWithIgnoreCase(
                     dataSetService.getDataSet(queryReq.getDataSetId()).getName(),
                     Constants.SIMPLE_DATASET_NAME)) {
                 queryStatement.setSql(queryStatement.getSqlQuery().getSql());
