@@ -24,4 +24,6 @@ public interface ChatQueryService {
     Object queryData(ChatQueryDataReq chatQueryDataReq, User user) throws Exception;
 
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
+
+    QueryResult dataInterpret(ChatExecuteReq chatExecuteReq);
 }

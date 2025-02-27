@@ -70,7 +70,8 @@ public class ChatWorkflowEngine {
                                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());
                         parseResult.setSelectedParses(parseInfos);
                         if (queryCtx.needSQL() && !StringUtils.endsWithIgnoreCase(
-                                queryCtx.getSemanticSchema().getDataSets().get(0).getDataSetName(), "直连模式")) {
+                                queryCtx.getSemanticSchema().getDataSets().get(0).getDataSetName(),
+                                "直连模式")) {
                             queryCtx.setChatWorkflowState(ChatWorkflowState.S2SQL_CORRECTING);
                         } else {
                             parseResult.setState(ParseResp.ParseState.COMPLETED);

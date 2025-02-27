@@ -102,7 +102,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
         SemanticParseInfo semanticParseInfo = parseContext.getResponse().getSelectedParses().get(0);
-        if (semanticParseInfo != null && !Objects.equals(semanticParseInfo.getSqlInfo().getResultType(), "text")){
+        if (semanticParseInfo != null
+                && !Objects.equals(semanticParseInfo.getSqlInfo().getResultType(), "text")) {
             for (ParseResultProcessor processor : parseResultProcessors) {
                 if (processor.accept(parseContext)) {
                     processor.process(parseContext);
@@ -141,21 +142,21 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         return queryResult;
     }
-public QueryResult executeResultProcessor(ChatExecuteReq chatExecuteReq){
-    QueryResult queryResult = new QueryResult();
-    ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
-    executeContext.setResponse(queryResult);
-    if (queryResult != null) {
-        for (ExecuteResultProcessor processor : executeResultProcessors) {
-            if (processor.accept(executeContext)) {
-                processor.process(executeContext);
-            }
-        }
-        saveQueryResult(chatExecuteReq, queryResult);
-    }
 
-    return queryResult;
-}
+    @Override
+    public QueryResult dataInterpret(ChatExecuteReq chatExecuteReq) {
+
+        ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
+        QueryResult queryResult = new QueryResult();
+        queryResult.setTextResult(chatExecuteReq.getTextResult());
+        executeContext.setResponse(queryResult);
+        DataInterpretProcessor dataInterpretProcessor = new DataInterpretProcessor();
+        if (queryResult.getTextResult() != null) {
+            dataInterpretProcessor.process(executeContext);
+        }
+
+        return queryResult;
+    }
 
     @Override
     public QueryResult parseAndExecute(ChatParseReq chatParseReq) {

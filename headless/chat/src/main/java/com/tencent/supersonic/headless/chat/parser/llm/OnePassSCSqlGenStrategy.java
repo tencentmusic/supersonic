@@ -88,11 +88,11 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             SemanticSql s2Sql = extractor.generateSemanticSql(promptText);
 
             // 3. 格式化返回结果
-            if (StringUtils.isNotBlank(s2Sql.getSql())){
+            if (StringUtils.isNotBlank(s2Sql.getSql())) {
                 llmResp.setSqlOutput(s2Sql.getSql());
-            }else if (StringUtils.isNotBlank(s2Sql.getMessage())){
+            } else if (StringUtils.isNotBlank(s2Sql.getMessage())) {
                 llmResp.setSqlOutput(s2Sql.getMessage());
-            }else{
+            } else {
                 llmResp.setSqlOutput(s2Sql.getThought());
             }
             // 根据需求填写合适的数据
