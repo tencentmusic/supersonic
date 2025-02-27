@@ -111,21 +111,9 @@ public class ChatWorkflowEngine {
     private void performParsing(ChatQueryContext queryCtx) {
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx);
-            log.debug("{} result:{}", parser.getClass().getSimpleName(),
-                    JsonUtil.toString(queryCtx));
+//            log.debug("{} result:{}", parser.getClass().getSimpleName(),
+//                    JsonUtil.toString(queryCtx));
         });
-        if (StringUtils.endsWithIgnoreCase(
-                queryCtx.getSemanticSchema().getDataSets().get(0).getDataSetName(), "直连模式")) {
-            String parsedS2SQL = queryCtx.getCandidateQueries().get(0).getParseInfo().getSqlInfo()
-                    .getParsedS2SQL();
-            Long queryId = queryCtx.getRequest().getQueryId();
-            if (StringUtils.isNotBlank(parsedS2SQL)) {
-                queryCache.put(queryId + "simpleMode", parsedS2SQL);
-            } else {
-                queryCache.put(queryId + "simpleMode", queryCtx.getCandidateQueries().get(0)
-                        .getParseInfo().getSqlInfo().getCorrectedS2SQL());
-            }
-        }
     }
 
     private void performCorrecting(ChatQueryContext queryCtx) {

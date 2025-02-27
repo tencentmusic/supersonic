@@ -101,9 +101,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
-        SemanticParseInfo semanticParseInfo = parseContext.getResponse().getSelectedParses().get(0);
-        if (semanticParseInfo != null
-                && !Objects.equals(semanticParseInfo.getSqlInfo().getResultType(), "text")) {
+        if (!parseContext.getResponse().getSelectedParses().isEmpty()
+                && !Objects.equals(parseContext.getResponse().getSelectedParses().get(0).getSqlInfo().getResultType(), "text")) {
             for (ParseResultProcessor processor : parseResultProcessors) {
                 if (processor.accept(parseContext)) {
                     processor.process(parseContext);
