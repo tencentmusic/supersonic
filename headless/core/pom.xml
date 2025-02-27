@@ -133,6 +133,10 @@
             <groupId>io.trino</groupId>
             <artifactId>trino-jdbc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+        </dependency>
     </dependencies>
 
 
