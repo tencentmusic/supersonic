@@ -87,11 +87,11 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
     : queryResults;
   return (
     <div className={prefixCls}>
-      {question && (
+      {/* {question && (
         <div className={`${prefixCls}-top-bar`}>
           <div className={`${prefixCls}-indicator-name`}>{question}</div>
         </div>
-      )}
+      )} */}
 
       <AntTable
         pagination={

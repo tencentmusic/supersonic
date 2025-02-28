@@ -67,11 +67,11 @@ const MetricTrend: React.FC<Props> = ({
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-charts`}>
-        <div className={`${prefixCls}-top-bar`}>
+        {/* <div className={`${prefixCls}-top-bar`}>
           <div className={`${prefixCls}-metric-fields ${prefixCls}-metric-field-single`}>
             {question}
           </div>
-        </div>
+        </div> */}
         <Spin spinning={loading}>
           <div className={`${prefixCls}-content`}>
             {!isMobile &&
