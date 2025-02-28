@@ -91,6 +91,9 @@ public class SqlBuilder {
                 }
             }
         }
+        if (selectedGraphPath == null) {
+            return dataModels;
+        }
         Set<String> modelNames = Sets.newHashSet();
         for (DefaultEdge edge : selectedGraphPath.getEdgeList()) {
             modelNames.add(selectedGraphPath.getGraph().getEdgeSource(edge));
