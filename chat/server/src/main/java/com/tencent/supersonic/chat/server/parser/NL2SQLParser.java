@@ -79,6 +79,14 @@ public class NL2SQLParser implements ChatQueryParser {
             return;
         }
 
+        if (parseContext.getRequest().getAgentId() == 11){
+            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
+            queryNLReq.setSelectedParseInfo(null);
+            queryNLReq.setMapModeEnum(MapModeEnum.ALL);
+            doParse(queryNLReq, parseContext.getResponse());
+            return;
+        }
         // first go with rule-based parsers unless the user has already selected one parse.
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
