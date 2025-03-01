@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useModel } from '@umijs/max';
 
 export default function Domain() {
-  const [selectDomain, setSelectDomain] = useState<ISemantic.IDomainItem>(
+  const [selectDomain, setSelectDomain] = useState<ISemantic.IDomainItem | undefined>(
     {} as ISemantic.IDomainItem,
   );
   const [selectDataSet, setSelectDataSet] = useState<ISemantic.IDatasetItem>();

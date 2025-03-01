@@ -147,8 +147,8 @@ export const layout: RunTimeLayoutConfig = (params) => {
               height: location.pathname.includes('chat') ? 'calc(100vh - 56px)' : undefined,
             }}
           >
-            <AppPage dom={dom} />
-            {/* {dom} */}
+            {/* <AppPage dom={dom} /> */}
+            {dom}
             {history.location.pathname !== '/chat' && !isMobile && (
               <Copilot token={getToken() || ''} isDeveloper />
             )}

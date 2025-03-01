@@ -1,11 +1,8 @@
 import { message } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { history, useParams, useModel, Outlet } from '@umijs/max';
-import DomainListTree from './components/DomainList';
-import styles from './components/style.less';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import React, { useEffect } from 'react';
+import { useParams, useModel, Outlet } from '@umijs/max';
 import { ISemantic } from './data';
-import { getDomainList, getDataSetList, getModelDetail } from './service';
+import { getDomainList, getModelDetail } from './service';
 import PageBreadcrumb from './PageBreadcrumb';
 
 type Props = {};
@@ -17,19 +14,9 @@ const SemanticModel: React.FC<Props> = ({}) => {
   const domainModel = useModel('SemanticModel.domainData');
   const modelModel = useModel('SemanticModel.modelData');
   const databaseModel = useModel('SemanticModel.databaseData');
-  const metricModel = useModel('SemanticModel.metricData');
-  const { setSelectDomain, setDomainList, selectDomainId } = domainModel;
-  const { selectModel, setSelectModel, setModelTableHistoryParams, MrefreshModelList } = modelModel;
+  const { setSelectDomain, setDomainList } = domainModel;
+  const { selectModel, setSelectModel } = modelModel;
   const { MrefreshDatabaseList } = databaseModel;
-
-  const { selectMetric, setSelectMetric } = metricModel;
-
-  // useEffect(() => {
-
-  //   return () => {
-  //     setSelectMetric(undefined);
-  //   }
-  // }, [])
 
   const initSelectedDomain = (domainList: ISemantic.IDomainItem[]) => {
     const targetNode = domainList.filter((item: any) => {
@@ -40,9 +27,7 @@ const SemanticModel: React.FC<Props> = ({}) => {
         return item.parentId === 0;
       })[0];
       if (firstRootNode) {
-        const { id } = firstRootNode;
         setSelectDomain(firstRootNode);
-        // pushUrlMenu(id, menuKey);
       }
     } else {
       setSelectDomain(targetNode);
@@ -87,7 +72,6 @@ const SemanticModel: React.FC<Props> = ({}) => {
       </div>
       <div>
         <Outlet />
-        {/* <OverviewContainer /> */}
       </div>
     </div>
   );
