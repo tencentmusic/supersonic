@@ -1,9 +1,9 @@
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Input, message, Popconfirm, Tooltip, Row, Col, Button, Menu } from 'antd';
+import { Input, message, Popconfirm, Tooltip, Row, Col, Button, Menu, MenuProps } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { useModel } from '@umijs/max';
+import { useModel, history } from '@umijs/max';
 import { createDomain, updateDomain, deleteDomain } from '../service';
 import DomainInfoForm from './DomainInfoForm';
 import styles from './style.less';
@@ -71,6 +71,7 @@ const DomainListTree: FC<DomainListProps> = ({
       message.success('编辑分类成功');
       setProjectInfoModalVisible(false);
       onTreeDataUpdate?.();
+      window.location.reload();
     } else {
       message.error(res.msg);
     }
@@ -78,10 +79,13 @@ const DomainListTree: FC<DomainListProps> = ({
 
   const domainSubmit = async (values: any) => {
     if (values.modelType === 'add') {
-      const { code, data } = await createDomain(values);
-      // if (code === 200 && values.type === 'top') {
-      //   await createDefaultModelSet(data.id);
-      // }
+      const { code, data, msg } = await createDomain(values);
+      if (code === 200) {
+        history.push(`/model/domain/${data.id}`);
+        window.location.reload();
+      } else {
+        message.error(msg);
+      }
     } else if (values.modelType === 'edit') {
       await editProject(values);
     }
@@ -95,6 +99,7 @@ const DomainListTree: FC<DomainListProps> = ({
       message.success('删除成功');
       setProjectInfoModalVisible(false);
       onTreeDataUpdate?.();
+      window.location.reload();
     } else {
       message.error(res.msg);
     }
@@ -104,12 +109,7 @@ const DomainListTree: FC<DomainListProps> = ({
     const { id, name, path, hasEditPermission, parentId, hasModel } = node as any;
     const type = parentId === 0 ? 'top' : 'normal';
     return (
-      <div
-        className={styles.projectItem}
-        // onClick={() => {
-        //   handleSelect(id);
-        // }}
-      >
+      <div className={styles.projectItem}>
         <span className={styles.projectItemTitle}>{name}</span>
         {createDomainBtnVisible && hasEditPermission && (
           <span className={`${styles.operation}  ${styles.rowHover} `}>
@@ -175,13 +175,12 @@ const DomainListTree: FC<DomainListProps> = ({
       return {
         key: domain.id,
         label: titleRender(domain),
-        // icon: <AppstoreOutlined />,
       };
     });
 
-  const getLevelKeys = (items1: LevelKeysProps[]) => {
+  const getLevelKeys = (items1: any[]) => {
     const key: Record<string, number> = {};
-    const func = (items2: LevelKeysProps[], level = 1) => {
+    const func = (items2: any[], level = 1) => {
       items2.forEach((item) => {
         if (item.key) {
           key[item.key] = level;
@@ -194,7 +193,7 @@ const DomainListTree: FC<DomainListProps> = ({
     func(items1);
     return key;
   };
-  const levelKeys = getLevelKeys(items as LevelKeysProps[]);
+  const levelKeys = getLevelKeys(items as any[]);
   const [stateOpenKeys, setStateOpenKeys] = useState(['2', '23']);
 
   const onOpenChange: MenuProps['onOpenChange'] = (openKeys) => {
