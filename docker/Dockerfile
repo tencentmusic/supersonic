@@ -1,8 +1,11 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:21-jdk-bullseye
+FROM supersonicbi/supersonic:0.9.10-SNAPSHOT
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
+
+# Delete old supersonic installation directory and the symbolic link
+RUN rm -rf /usr/src/app/supersonic-standalone-0.9.10-SNAPSHOT
+RUN rm -f /usr/src/app/supersonic-standalone-latest
 
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION

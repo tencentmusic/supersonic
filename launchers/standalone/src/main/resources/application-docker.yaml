@@ -4,9 +4,9 @@ spring:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?stringtype=unspecified
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-
   sql:
     init:
+      continue-on-error: true
       mode: always
       username: ${DB_USERNAME}
       password: ${DB_PASSWORD}
