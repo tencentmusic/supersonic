@@ -97,7 +97,7 @@ Few-shot示例${fewShots
 示例${index + 1}：
 问题：${item.question}
 SQL：
-${format(item.sql)}
+${getIsSql(item.sql) ? format(item.sql) : item.sql}
 `;
       })
       .join('')}
@@ -108,7 +108,7 @@ ${format(item.sql)}
     return `
 ${queryMode === 'LLM_S2SQL' || queryMode === 'PLAIN_TEXT' ? 'LLM' : 'Rule'}解析S2SQL
 
-${format(sqlInfo.parsedS2SQL)}
+${getIsSql(sqlInfo.parsedS2SQL) ? format(sqlInfo.parsedS2SQL) : sqlInfo.parsedS2SQL}
 `;
   };
 
@@ -116,7 +116,7 @@ ${format(sqlInfo.parsedS2SQL)}
     return `
 修正S2SQL
 
-${format(sqlInfo.correctedS2SQL)}
+${getIsSql(sqlInfo.correctedS2SQL) ? format(sqlInfo.correctedS2SQL) : sqlInfo.correctedS2SQL}
 `;
   };
 
@@ -124,7 +124,7 @@ ${format(sqlInfo.correctedS2SQL)}
     return `
 最终执行SQL
 
-${format(sqlInfo.querySQL)}
+${getIsSql(sqlInfo.querySQL) ? format(sqlInfo.querySQL) : sqlInfo.querySQL}
 `;
   };
 
@@ -163,7 +163,14 @@ ${executeErrorMsg}
     }
     exportTextFile(text, `supersonic-debug-${agentId}-${queryId}.log`);
   };
-
+  const getIsSql = (sql:any):boolean => {
+    try {
+      format(sql)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
   return (
     <div className={`${tipPrefixCls}-parse-tip`}>
       <div className={`${tipPrefixCls}-title-bar`}>
@@ -329,7 +336,7 @@ ${executeErrorMsg}
             })}
           </div>
         )}
-        {sqlType && sqlInfo[sqlType] && (
+        {sqlType && sqlInfo[sqlType] && getIsSql(sqlInfo[sqlType]) && (
           <>
             <SyntaxHighlighter
               className={`${prefixCls}-code`}
