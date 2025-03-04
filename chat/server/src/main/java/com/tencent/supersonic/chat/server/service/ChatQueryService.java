@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface ChatQueryService {
     Object queryDimensionValue(DimensionValueReq dimensionValueReq, User user) throws Exception;
 
     QueryResult dataInterpret(ChatExecuteReq chatExecuteReq);
+
+    SseEmitter streamParse(ChatParseReq chatParseReq);
 }

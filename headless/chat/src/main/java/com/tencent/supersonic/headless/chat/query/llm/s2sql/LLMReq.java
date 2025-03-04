@@ -28,6 +28,7 @@ public class LLMReq {
     private Map<String, ChatApp> chatAppConfig;
     private String customPrompt;
     private List<Text2SQLExemplar> dynamicExemplars;
+    private Integer agentId;
 
     @Data
     public static class ElementValue {

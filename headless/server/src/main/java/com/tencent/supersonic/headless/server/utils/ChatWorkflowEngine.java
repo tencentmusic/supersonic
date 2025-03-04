@@ -111,8 +111,8 @@ public class ChatWorkflowEngine {
     private void performParsing(ChatQueryContext queryCtx) {
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx);
-//            log.debug("{} result:{}", parser.getClass().getSimpleName(),
-//                    JsonUtil.toString(queryCtx));
+            // log.debug("{} result:{}", parser.getClass().getSimpleName(),
+            // JsonUtil.toString(queryCtx));
         });
     }
 
