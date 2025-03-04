@@ -3,10 +3,12 @@ package dev.langchain4j.provider;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.zhipu.ChatCompletionModel;
 import dev.langchain4j.model.zhipu.ZhipuAiChatModel;
 import dev.langchain4j.model.zhipu.ZhipuAiEmbeddingModel;
+import dev.langchain4j.model.zhipu.ZhipuAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,15 @@ public class ZhipuModelFactory implements ModelFactory, InitializingBean {
                 .connectTimeout(ofSeconds(60)).writeTimeout(ofSeconds(60))
                 .readTimeout(ofSeconds(60)).logRequests(embeddingModelConfig.getLogRequests())
                 .logResponses(embeddingModelConfig.getLogResponses()).build();
+    }
+
+    @Override
+    public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
+        return ZhipuAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey()).model(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override

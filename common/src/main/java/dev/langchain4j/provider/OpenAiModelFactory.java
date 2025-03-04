@@ -3,9 +3,11 @@ package dev.langchain4j.provider;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +42,16 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
                 .logResponses(embeddingModel.getLogResponses()).build();
     }
 
+    @Override
+    public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
+        return OpenAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
+                .temperature(modelConfig.getTemperature())
+                .topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
+    }
     @Override
     public void afterPropertiesSet() {
         ModelProvider.add(PROVIDER, this);

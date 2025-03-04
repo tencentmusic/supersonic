@@ -1,30 +1,38 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
+import com.amazonaws.services.bedrockagent.model.Agent;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
-import com.tencent.supersonic.headless.api.pojo.Cache;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
+import com.tencent.supersonic.headless.chat.service.RecommendedQuestionsService;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.UserMessage;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -53,6 +61,9 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 .appModule(AppModule.CHAT).description("通过大模型做语义解析生成S2SQL").enable(true).build());
     }
 
+    @Autowired
+    private RecommendedQuestionsService recommendedQuestionsService;
+
     @Data
     static class SemanticSql {
         @Description("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, make it short.")
@@ -69,44 +80,36 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         SemanticSql generateSemanticSql(String text);
     }
 
+    interface StreamingSemanticParseExtractor {
+        @UserMessage("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, make it short. {{it}}")
+        Flux<String> generateStreamingSemanticParse(String text);
+    }
+
     @Override
     public LLMResp generate(LLMReq llmReq) {
+
+        // =================== 新增逻辑1：检查是否是推荐问题 ===================
+        LLMResp recommendedResp = handleRecommendedQuestion(llmReq);
+        if (recommendedResp != null) {
+            return recommendedResp;
+        }
+        // =================== 新增逻辑2：检查是否是简易模型(直连模式) ===================
+        if (isDirectLinkMode(llmReq)) {
+            return handleDirectLinkMode(llmReq);
+        }
+        // ================== 原逻辑 ===================
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());
-        // 判断是否是简易模型
-        ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
-        ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatApp.getChatModelConfig());
-        SemanticSqlExtractor extractor =
-                AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
-        // 1. 如果是简易模型，则使用SimpleStrategy生成提示词
-        if (StringUtils.endsWithIgnoreCase(llmReq.getSchema().getDataSetName(), "直连模式")) {
-            // 使用SimpleStrategy生成提示词
-            SimpleStrategy simpleStrategy = new SimpleStrategy();
-            String promptText = simpleStrategy.generatePrompt(llmReq);
-
-            // 使用提示词生成SQL
-            SemanticSql s2Sql = extractor.generateSemanticSql(promptText);
-
-            // 3. 格式化返回结果
-            if (StringUtils.isNotBlank(s2Sql.getSql())) {
-                llmResp.setSqlOutput(s2Sql.getSql());
-            } else if (StringUtils.isNotBlank(s2Sql.getMessage())) {
-                llmResp.setSqlOutput(s2Sql.getMessage());
-            } else {
-                llmResp.setSqlOutput(s2Sql.getThought());
-            }
-            // 根据需求填写合适的数据
-            llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(),
-                    Collections.emptyMap()));
-
-            log.info("Simplified model SQL generation, SQL: {}", s2Sql.getSql());
-            return llmResp;
-        }
         // 1.recall exemplars
         log.debug("OnePassSCSqlGenStrategy llmReq:\n{}", llmReq);
         List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
 
         // 2.generate sql generation prompt for each self-consistency inference
+        ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
+        ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatApp.getChatModelConfig());
+        SemanticSqlExtractor extractor =
+                AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
+
         Map<Prompt, List<Text2SQLExemplar>> prompt2Exemplar = new HashMap<>();
         for (List<Text2SQLExemplar> exemplars : exemplarsList) {
             llmReq.setDynamicExemplars(exemplars);
@@ -132,6 +135,146 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight()));
 
         return llmResp;
+    }
+
+    public SseEmitter streamGenerate(LLMReq llmReq) {
+        // 1. 创建SSE发射器（3分钟超时）
+        SseEmitter emitter = new SseEmitter(180_000L);
+        // 2. 准备模型和参数
+        CompletableFuture.runAsync(() -> {
+            try {
+                // 3. 初始化响应对象
+                LLMResp llmResp = new LLMResp();
+                llmResp.setQuery(llmReq.getQueryText());
+                // 4. 获取模型配置
+                ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
+                // 5. 使用流式专用模型配置
+                StreamingChatLanguageModel streamChatModel = getStreamChatModel(chatApp.getChatModelConfig());
+                // 6. 创建流式解析器
+                StreamingSemanticParseExtractor extractor =
+                        AiServices.create(StreamingSemanticParseExtractor.class, streamChatModel);
+                // 7. 生成prompt
+                SimpleStrategy simpleStrategy = new SimpleStrategy();
+                Prompt promptText = simpleStrategy.generateStreamPrompt(llmReq);
+                // 8. 获取响应流
+                Flux<String> thought = extractor.generateStreamingSemanticParse(promptText.toUserMessage().singleText());
+                // 订阅响应流
+                Disposable subscription = thought.subscribe(
+                        chunk -> {
+                            try {
+                                // 发送单个数据块
+                                emitter.send(SseEmitter.event()
+                                        .data(chunk)
+                                        .id(UUID.randomUUID().toString()));
+                            } catch (IOException e) {
+                                log.error("SSE send error", e);
+                                emitter.completeWithError(e);
+                            }
+                        },
+                        error -> {
+                            log.error("Stream processing error", error);
+                            emitter.completeWithError(error);
+                        },
+                        () -> {
+                            log.info("Stream completed successfully");
+                            emitter.complete();
+                        }
+                );
+                // 添加取消订阅处理
+                emitter.onCompletion(subscription::dispose);
+                emitter.onTimeout(() -> {
+                    subscription.dispose();
+                    emitter.complete();
+                });
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        });
+        return emitter;
+    }
+
+    private boolean isDirectLinkMode(LLMReq llmReq) {
+        return StringUtils.endsWithIgnoreCase(
+                llmReq.getSchema().getDataSetName(), "直连模式"
+        );
+    }
+
+    private LLMResp handleDirectLinkMode(LLMReq llmReq) {
+        LLMResp llmResp = new LLMResp();
+        llmResp.setQuery(llmReq.getQueryText());
+        List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
+
+        Map<Prompt, List<Text2SQLExemplar>> prompt2Exemplar = new HashMap<>();
+        for (List<Text2SQLExemplar> exemplars : exemplarsList) {
+            llmReq.setDynamicExemplars(exemplars);
+            SimpleStrategy simpleStrategy = new SimpleStrategy();
+            Prompt promptText = simpleStrategy.generatePrompt(llmReq, promptHelper);
+            prompt2Exemplar.put(promptText, exemplars);
+        }
+
+        ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
+        ChatLanguageModel languageModel = getChatLanguageModel(chatApp.getChatModelConfig());
+        SemanticSqlExtractor extractor =
+                AiServices.create(SemanticSqlExtractor.class, languageModel);
+
+        Map<String, Prompt> output2Prompt = new ConcurrentHashMap<>();
+        prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
+            SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
+            String key = pickFirstNonBlank(s2Sql.getSql(), s2Sql.getMessage(), s2Sql.getThought());
+            output2Prompt.put(key, prompt);
+            keyPipelineLog.info("OnePassSCSqlGenStrategy modelReq:\n{} \nmodelResp:\n{}",
+                    prompt.text(), s2Sql);
+        });
+
+        Pair<String, Map<String, Double>> sqlMapPair =
+                ResponseHelper.selfConsistencyVote(Lists.newArrayList(output2Prompt.keySet()));
+        llmResp.setSqlOutput(sqlMapPair.getLeft());
+
+        List<Text2SQLExemplar> usedExemplars =
+                prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
+        llmResp.setSqlRespMap(
+                ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight())
+        );
+
+        log.info("Simplified model SQL generation, SQL: {}", llmResp.getSqlOutput());
+        return llmResp;
+    }
+
+    /**
+     * 返回第一个非空的字符串(先看 sql, 再看 message, 再看 thought)
+     */
+    private String pickFirstNonBlank(String... candidates) {
+        for (String c : candidates) {
+            if (StringUtils.isNotBlank(c)) {
+                return c;
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 如果当前提问是“推荐问题”，则直接返回包含该 SQL 的 LLMResp；
+     * 若不是，返回 null。
+     */
+    private LLMResp handleRecommendedQuestion(LLMReq llmReq) {
+        if (llmReq.getAgentId() == null) {
+            return null;
+        }
+        String querySql = recommendedQuestionsService.findQuerySqlByQuestion(
+                Math.toIntExact(llmReq.getAgentId()),
+                llmReq.getQueryText()
+        );
+        if (StringUtils.isNotEmpty(querySql)) {
+            LLMResp resp = new LLMResp();
+            resp.setQuery(llmReq.getQueryText());
+            resp.setSqlOutput(querySql);
+            resp.setSqlRespMap(
+                    ResponseHelper.buildSqlRespMap(Collections.emptyList(), Collections.emptyMap())
+            );
+            log.info("查到推荐问题对应的sql: {}", querySql);
+            return resp;
+        }
+        return null;
     }
 
     private Prompt generatePrompt(LLMReq llmReq, LLMResp llmResp, ChatApp chatApp) {
@@ -163,4 +306,5 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         SqlGenStrategyFactory
                 .addSqlGenerationForFactory(LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY, this);
     }
+
 }

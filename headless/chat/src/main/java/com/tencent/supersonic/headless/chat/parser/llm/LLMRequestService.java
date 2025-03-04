@@ -70,6 +70,7 @@ public class LLMRequestService {
         llmReq.setChatAppConfig(queryCtx.getRequest().getChatAppConfig());
         llmReq.setDynamicExemplars(queryCtx.getRequest().getDynamicExemplars());
 
+        llmReq.setAgentId(queryCtx.getRequest().getAgentId());
         return llmReq;
     }
 
