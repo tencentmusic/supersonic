@@ -196,7 +196,20 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
       },
     ]);
   };
-
+  const appentHelloRep = (msgList: MessageItem[]) => {
+    if (noInput) {
+      setMessageList(msgList)
+    } else {
+      setMessageList([
+        {
+          id: uuid(),
+          type: MessageTypeEnum.AGENT_LIST,
+          msg: currentAgent?.name || agentList?.[0]?.name,
+        },
+        ...msgList,
+      ]);
+    }
+  };
   const convertHistoryMsg = (list: HistoryMsgItemType[]) => {
     return list.map((item: HistoryMsgItemType) => ({
       id: item.questionId,
@@ -215,7 +228,13 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     const res = await getHistoryMsg(page, currentConversation!.chatId, 3);
     const { hasNextPage, list } = res?.data || { hasNextPage: false, list: [] };
     const msgList = [...convertHistoryMsg(list), ...(page === 1 ? [] : messageList)];
-    setMessageList(msgList);
+    /* 需求：无论是否有聊天记录都要有招呼消消息————start */
+    if(res.data.hasNextPage){
+      setMessageList(msgList);
+    } else {
+      appentHelloRep(msgList);
+    }
+    /* 需求：无论是否有聊天记录都要有招呼消息————end */
     setHasNextPage(hasNextPage);
     if (page === 1) {
       if (list.length === 0) {

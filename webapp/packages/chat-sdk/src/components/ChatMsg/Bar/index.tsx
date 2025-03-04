@@ -198,9 +198,9 @@ const BarChart: React.FC<Props> = ({
 
   return (
     <div>
-      <div className={`${prefixCls}-top-bar`}>
+      {/* <div className={`${prefixCls}-top-bar`}>
         <div className={`${prefixCls}-indicator-name`}>{question}</div>
-      </div>
+      </div> */}
       <Spin spinning={loading}>
         <div className={`${prefixCls}-chart`} ref={chartRef} />
       </Spin>

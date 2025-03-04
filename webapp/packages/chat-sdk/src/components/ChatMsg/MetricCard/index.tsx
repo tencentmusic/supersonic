@@ -39,9 +39,9 @@ const MetricCard: React.FC<Props> = ({ data, question, loading, onApplyAuth }) =
 
   return (
     <div className={matricCardClass}>
-      <div className={`${prefixCls}-top-bar`}>
+      {/* <div className={`${prefixCls}-top-bar`}>
         <div className={`${prefixCls}-indicator-name`}>{question}</div>
-      </div>
+      </div> */}
       <Spin spinning={loading}>
         <div className={`${prefixCls}-indicator`}>
           {indicatorColumn && !indicatorColumn?.authorized ? (
