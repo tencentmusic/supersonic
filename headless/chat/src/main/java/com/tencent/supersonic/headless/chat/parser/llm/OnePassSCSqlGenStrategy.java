@@ -149,7 +149,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 // 4. 获取模型配置
                 ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
                 // 5. 使用流式专用模型配置
-                StreamingChatLanguageModel streamChatModel = createStreamChatModel(chatApp.getChatModelConfig());
+                StreamingChatLanguageModel streamChatModel = getStreamChatModel(chatApp.getChatModelConfig());
                 // 6. 创建流式解析器
                 StreamingSemanticParseExtractor extractor =
                         AiServices.create(StreamingSemanticParseExtractor.class, streamChatModel);
