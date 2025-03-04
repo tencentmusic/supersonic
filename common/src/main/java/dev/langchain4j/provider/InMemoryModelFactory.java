@@ -3,6 +3,7 @@ package dev.langchain4j.provider;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.S2OnnxEmbeddingModel;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,11 @@ public class InMemoryModelFactory implements ModelFactory, InitializingBean {
             return EmbeddingModelConstant.ALL_MINI_LM_L6_V2_MODEL;
         }
         return EmbeddingModelConstant.BGE_SMALL_ZH_MODEL;
+    }
+
+    @Override
+    public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

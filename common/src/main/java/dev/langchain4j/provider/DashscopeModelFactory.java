@@ -3,12 +3,17 @@ package dev.langchain4j.provider;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.dashscope.QwenChatModel;
 import dev.langchain4j.model.dashscope.QwenEmbeddingModel;
 import dev.langchain4j.model.dashscope.QwenModelName;
+import dev.langchain4j.model.dashscope.QwenStreamingChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 
 @Service
 public class DashscopeModelFactory implements ModelFactory, InitializingBean {
@@ -30,6 +35,15 @@ public class DashscopeModelFactory implements ModelFactory, InitializingBean {
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModelConfig) {
         return QwenEmbeddingModel.builder().apiKey(embeddingModelConfig.getApiKey())
                 .modelName(embeddingModelConfig.getModelName()).build();
+    }
+
+    @Override
+    public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
+        return QwenStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .apiKey(modelConfig.getApiKey()).modelName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature() == null ? 0L
+                        : modelConfig.getTemperature().floatValue())
+                .topP(modelConfig.getTopP()).enableSearch(modelConfig.getEnableSearch()).build();
     }
 
     @Override
