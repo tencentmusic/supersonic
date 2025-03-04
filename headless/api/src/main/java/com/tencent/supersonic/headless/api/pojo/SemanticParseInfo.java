@@ -109,7 +109,8 @@ public class SemanticParseInfo implements Serializable {
         }
     }
 
-    private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
+    private static class SchemaNameLengthComparator
+            implements Comparator<SchemaElement>, Serializable {
         @Override
         public int compare(SchemaElement o1, SchemaElement o2) {
             if (o1.getOrder() != o2.getOrder()) {

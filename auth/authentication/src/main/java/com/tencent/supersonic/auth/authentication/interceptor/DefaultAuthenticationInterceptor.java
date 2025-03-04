@@ -3,7 +3,7 @@ package com.tencent.supersonic.auth.authentication.interceptor;
 import com.tencent.supersonic.auth.api.authentication.annotation.AuthenticationIgnore;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
-import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
+import com.tencent.supersonic.auth.authentication.service.UserService;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -30,7 +30,7 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws AccessException {
         authenticationConfig = ContextUtils.getBean(AuthenticationConfig.class);
-        userServiceImpl = ContextUtils.getBean(UserServiceImpl.class);
+        userService = ContextUtils.getBean(UserService.class);
         tokenService = ContextUtils.getBean(TokenService.class);
         if (!authenticationConfig.isEnabled()) {
             return true;

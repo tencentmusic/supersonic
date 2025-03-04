@@ -3,7 +3,6 @@ package com.tencent.supersonic.auth.authentication.service;
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
-import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
 import com.tencent.supersonic.common.config.SystemConfig;
@@ -18,11 +17,12 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserService
+        implements com.tencent.supersonic.auth.api.authentication.service.UserService {
 
     private SystemConfigService sysParameterService;
 
-    public UserServiceImpl(SystemConfigService sysParameterService) {
+    public UserService(SystemConfigService sysParameterService) {
         this.sysParameterService = sysParameterService;
     }
 

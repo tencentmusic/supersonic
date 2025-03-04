@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DateConf;
@@ -281,7 +282,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String getTableName() {
         if (StringUtils.isNotBlank(dataSetName)) {
-            return dataSetName;
+            return SqlReplaceHelper.escapeTableName(dataSetName);
         }
         if (dataSetId != null) {
             return Constants.TABLE_PREFIX + dataSetId;

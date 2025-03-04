@@ -27,7 +27,7 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
 
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    public static final String APP_KEY_ERROR_MESSAGE = "REWRITE_ERROR_MESSAGE";
+    public static final String APP_KEY = "REWRITE_ERROR_MESSAGE";
     private static final String REWRITE_ERROR_MESSAGE_INSTRUCTION = ""
             + "#Role: You are a data business partner who closely interacts with business people.\n"
             + "#Task: Your will be provided with user input, system output and some examples, "
@@ -38,7 +38,7 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
             + "#Examples: {{examples}}\n" + "#Response: ";
 
     public ErrorMsgRewriteProcessor() {
-        ChatAppManager.register(APP_KEY_ERROR_MESSAGE,
+        ChatAppManager.register(APP_KEY,
                 ChatApp.builder().prompt(REWRITE_ERROR_MESSAGE_INSTRUCTION).name("异常提示改写")
                         .appModule(AppModule.CHAT).description("通过大模型将异常信息改写为更友好和引导性的提示用语")
                         .enable(true).build());
@@ -46,7 +46,7 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
 
     @Override
     public boolean accept(ParseContext parseContext) {
-        ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
+        ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY);
         return StringUtils.isNotBlank(parseContext.getResponse().getErrorMsg())
                 && Objects.nonNull(chatApp) && chatApp.isEnable();
     }
@@ -54,16 +54,20 @@ public class ErrorMsgRewriteProcessor implements ParseResultProcessor {
     @Override
     public void process(ParseContext parseContext) {
         String errMsg = parseContext.getResponse().getErrorMsg();
-        ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_ERROR_MESSAGE);
+        ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY);
         Map<String, Object> variables = new HashMap<>();
         variables.put("user_question", parseContext.getRequest().getQueryText());
         variables.put("system_message", errMsg);
 
         StringBuilder exampleStr = new StringBuilder();
-        parseContext.getResponse().getUsedExemplars().forEach(e -> exampleStr.append(
-                String.format("<Question:{%s},Schema:{%s}> ", e.getQuestion(), e.getDbSchema())));
-        parseContext.getAgent().getExamples()
-                .forEach(e -> exampleStr.append(String.format("<Question:{%s}> ", e)));
+        if (parseContext.getResponse().getUsedExemplars() != null) {
+            parseContext.getResponse().getUsedExemplars().forEach(e -> exampleStr.append(String
+                    .format("<Question:{%s},Schema:{%s}> ", e.getQuestion(), e.getDbSchema())));
+        }
+        if (parseContext.getAgent().getExamples() != null) {
+            parseContext.getAgent().getExamples()
+                    .forEach(e -> exampleStr.append(String.format("<Question:{%s}> ", e)));
+        }
         variables.put("examples", exampleStr);
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variables);

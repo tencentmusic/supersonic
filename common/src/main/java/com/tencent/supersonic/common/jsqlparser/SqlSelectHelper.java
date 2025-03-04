@@ -228,7 +228,7 @@ public class SqlSelectHelper {
             statement = CCJSqlParserUtil.parse(sql);
         } catch (JSQLParserException e) {
             log.error("parse error, sql:{}", sql, e);
-            return null;
+            throw new RuntimeException(e);
         }
 
         if (statement instanceof ParenthesedSelect) {

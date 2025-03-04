@@ -82,6 +82,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
     });
     if (code === 200) {
       onModelChange?.();
+      window.location.reload();
       return;
     }
     message.error(msg);
@@ -198,6 +199,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
                 const { code, msg } = await deleteModel(record.id);
                 if (code === 200) {
                   onModelChange?.();
+                  window.location.reload();
                 } else {
                   message.error(msg);
                 }
@@ -292,6 +294,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
             onModelChange?.();
             setIsEditing(false);
             setCreateDataSourceModalOpen(false);
+            window.location.reload();
           }}
           onCancel={() => {
             setIsEditing(false);
