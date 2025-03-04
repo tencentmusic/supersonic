@@ -26,7 +26,7 @@
     </parent>
 
     <properties>
-        <revision>0.9.10</revision>
+        <revision>1.0.0-SNAPSHOT</revision>
         <java.source.version>21</java.source.version>
         <java.target.version>21</java.target.version>
         <maven.compiler.source>21</maven.compiler.source>

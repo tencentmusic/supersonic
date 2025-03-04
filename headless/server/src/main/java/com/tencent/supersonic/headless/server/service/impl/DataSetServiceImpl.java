@@ -56,9 +56,9 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     public DataSetResp save(DataSetReq dataSetReq, User user) {
         dataSetReq.createdBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
-        dataSetDO.setStatus(StatusEnum.ONLINE.getCode());
+        dataSetDO.setStatus(dataSetReq.getStatus() != null ? dataSetReq.getStatus()
+                : StatusEnum.ONLINE.getCode());
         DataSetResp dataSetResp = convert(dataSetDO);
-        // conflictCheck(dataSetResp);
         save(dataSetDO);
         dataSetResp.setId(dataSetDO.getId());
         return dataSetResp;
