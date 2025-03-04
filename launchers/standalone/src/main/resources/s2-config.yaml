@@ -26,7 +26,7 @@ s2:
   authentication:
     enable: true
     exclude:
-      path: /api/auth/user/register,/api/auth/user/login
+      path: /api/auth/user/register,/api/auth/user/login,/api/chat/agent/hasAgentRight
     token:
       http:
         header:
