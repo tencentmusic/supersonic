@@ -55,7 +55,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     @Data
     static class SemanticSql {
-        @Description("thought or remarks to tell users about the sql, make it short.")
+        @Description("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, make it short.")
         private String thought;
 
         @Description("sql to generate")

@@ -4,19 +4,13 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.common.pojo.ResultData;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -56,9 +50,24 @@ public class AgentController {
         return agentService.getAgents(user, authType);
     }
 
+
+
+
     @RequestMapping("/getToolTypes")
     public Map<AgentToolType, String> getToolTypes() {
         return AgentToolType.getToolTypes();
+    }
+
+
+
+    @GetMapping("/hasAgentRight")
+    public ResultData hasAgentList(
+            @RequestParam(value = "id", required = true) Integer agentId,
+            @RequestParam(value = "userName", required = true) String userName
+            ) {
+         Agent agent=agentService.getAgent(agentId);
+         return  ResultData.success(agent.getAdmins().contains(userName)||agent.getViewers().contains(userName));
+
     }
 
 }
