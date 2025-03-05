@@ -78,7 +78,7 @@ public abstract class SemanticNode {
                 scope.getValidator().getCatalogReader().getRootSchema(), engineType);
         if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
                 .contains(expression.toUpperCase())) {
-            if (engineType == EngineType.HANADB) {
+            if (engineType == EngineType.HANADB || engineType == EngineType.PRESTO || engineType == EngineType.TRINO) {
                 expression = String.format("\"%s\"", expression);
             } else {
                 expression = String.format("`%s`", expression);
