@@ -91,7 +91,8 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
         }
 
         ExpressionList<?> leftFunctionParams = leftFunction.getParameters();
-        if (CollectionUtils.isEmpty(leftFunctionParams)) {
+        if (CollectionUtils.isEmpty(leftFunctionParams)
+                || !(leftFunctionParams.get(0) instanceof Column)) {
             return result;
         }
 

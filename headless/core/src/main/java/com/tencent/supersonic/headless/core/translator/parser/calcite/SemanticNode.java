@@ -78,7 +78,8 @@ public abstract class SemanticNode {
                 scope.getValidator().getCatalogReader().getRootSchema(), engineType);
         if (Configuration.getSqlAdvisor(sqlValidatorWithHints, engineType).getReservedAndKeyWords()
                 .contains(expression.toUpperCase())) {
-            if (engineType == EngineType.HANADB) {
+            if (engineType == EngineType.HANADB || engineType == EngineType.PRESTO
+                    || engineType == EngineType.TRINO) {
                 expression = String.format("\"%s\"", expression);
             } else {
                 expression = String.format("`%s`", expression);
@@ -166,9 +167,9 @@ public abstract class SemanticNode {
         if (sqlNode instanceof SqlBasicCall) {
             SqlBasicCall sqlBasicCall = (SqlBasicCall) sqlNode;
             if (sqlBasicCall.getOperator().getKind().equals(SqlKind.AS)) {
-                if (sqlBasicCall.getOperandList().get(0) instanceof SqlSelect) {
-                    SqlSelect table = (SqlSelect) sqlBasicCall.getOperandList().get(0);
-                    return table;
+                SqlNode innerQuery = sqlBasicCall.getOperandList().get(0);
+                if (innerQuery instanceof SqlCall) {
+                    return innerQuery;
                 }
             }
         }
