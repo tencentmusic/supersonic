@@ -989,6 +989,15 @@ public class SqlSelectHelper {
         for (SelectItem selectItem : selectItems) {
             selectItem.accept(visitor);
         }
+        if (plainSelect.getHaving() != null) {
+            plainSelect.getHaving().accept(visitor);
+        }
+        if (!CollectionUtils.isEmpty(plainSelect.getOrderByElements())) {
+            for (OrderByElement orderByElement : plainSelect.getOrderByElements()) {
+                orderByElement.getExpression().accept(visitor);
+            }
+        }
+
         return !visitor.getFunctionNames().isEmpty();
     }
 
