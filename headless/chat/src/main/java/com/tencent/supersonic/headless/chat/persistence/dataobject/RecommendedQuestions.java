@@ -1,12 +1,13 @@
 package com.tencent.supersonic.headless.chat.persistence.dataobject;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
 
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 推荐问题配置表
+ * 
  * @TableName recommended_questions
  */
 @TableName("recommended_questions")

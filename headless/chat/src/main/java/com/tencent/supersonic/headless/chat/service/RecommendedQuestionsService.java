@@ -1,7 +1,7 @@
 package com.tencent.supersonic.headless.chat.service;
 
-import com.tencent.supersonic.headless.chat.persistence.dataobject.RecommendedQuestions;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tencent.supersonic.headless.chat.persistence.dataobject.RecommendedQuestions;
 
 
 public interface RecommendedQuestionsService extends IService<RecommendedQuestions> {

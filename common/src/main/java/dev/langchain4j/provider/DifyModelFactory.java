@@ -35,6 +35,7 @@ public class DifyModelFactory implements ModelFactory, InitializingBean {
                 .logRequests(embeddingModelConfig.getLogRequests())
                 .logResponses(embeddingModelConfig.getLogResponses()).build();
     }
+
     @Override
     public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
         // todo dify的流式模型待确认
@@ -42,6 +43,7 @@ public class DifyModelFactory implements ModelFactory, InitializingBean {
                 .apiKey(AESEncryptionUtil.aesDecryptECB(modelConfig.getApiKey()))
                 .modelName(modelConfig.getModelName()).build();
     }
+
     @Override
     public void afterPropertiesSet() {
         ModelProvider.add(PROVIDER, this);

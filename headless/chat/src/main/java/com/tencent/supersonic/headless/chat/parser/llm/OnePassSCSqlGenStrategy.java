@@ -9,13 +9,13 @@ import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
+import com.tencent.supersonic.headless.chat.service.RecommendedQuestionsService;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
-import com.tencent.supersonic.headless.chat.service.RecommendedQuestionsService;
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import lombok.Data;
@@ -149,7 +149,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 // 4. 获取模型配置
                 ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
                 // 5. 使用流式专用模型配置
-                StreamingChatLanguageModel streamChatModel = getStreamChatModel(chatApp.getChatModelConfig());
+                StreamingChatLanguageModel streamChatModel =
+                        getStreamChatModel(chatApp.getChatModelConfig());
                 // 6. 创建流式解析器
                 StreamingSemanticParseExtractor extractor =
                         AiServices.create(StreamingSemanticParseExtractor.class, streamChatModel);
@@ -157,29 +158,25 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 SimpleStrategy simpleStrategy = new SimpleStrategy();
                 Prompt promptText = simpleStrategy.generateStreamPrompt(llmReq);
                 // 8. 获取响应流
-                Flux<String> thought = extractor.generateStreamingSemanticParse(promptText.toUserMessage().singleText());
+                Flux<String> thought = extractor
+                        .generateStreamingSemanticParse(promptText.toUserMessage().singleText());
                 // 订阅响应流
-                Disposable subscription = thought.subscribe(
-                        chunk -> {
-                            try {
-                                // 发送单个数据块
-                                emitter.send(SseEmitter.event()
-                                        .data(chunk)
-                                        .id(UUID.randomUUID().toString()));
-                            } catch (IOException e) {
-                                log.error("SSE send error", e);
-                                emitter.completeWithError(e);
-                            }
-                        },
-                        error -> {
-                            log.error("Stream processing error", error);
-                            emitter.completeWithError(error);
-                        },
-                        () -> {
-                            log.info("Stream completed successfully");
-                            emitter.complete();
-                        }
-                );
+                Disposable subscription = thought.subscribe(chunk -> {
+                    try {
+                        // 发送单个数据块
+                        emitter.send(
+                                SseEmitter.event().data(chunk).id(UUID.randomUUID().toString()));
+                    } catch (IOException e) {
+                        log.error("SSE send error", e);
+                        emitter.completeWithError(e);
+                    }
+                }, error -> {
+                    log.error("Stream processing error", error);
+                    emitter.completeWithError(error);
+                }, () -> {
+                    log.info("Stream completed successfully");
+                    emitter.complete();
+                });
                 // 添加取消订阅处理
                 emitter.onCompletion(subscription::dispose);
                 emitter.onTimeout(() -> {
@@ -194,9 +191,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     private boolean isDirectLinkMode(LLMReq llmReq) {
-        return StringUtils.endsWithIgnoreCase(
-                llmReq.getSchema().getDataSetName(), "直连模式"
-        );
+        return StringUtils.endsWithIgnoreCase(llmReq.getSchema().getDataSetName(), "直连模式");
     }
 
     private LLMResp handleDirectLinkMode(LLMReq llmReq) {
@@ -232,9 +227,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
         List<Text2SQLExemplar> usedExemplars =
                 prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
-        llmResp.setSqlRespMap(
-                ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight())
-        );
+        llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight()));
 
         log.info("Simplified model SQL generation, SQL: {}", llmResp.getSqlOutput());
         return llmResp;
@@ -253,24 +246,20 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     /**
-     * 如果当前提问是“推荐问题”，则直接返回包含该 SQL 的 LLMResp；
-     * 若不是，返回 null。
+     * 如果当前提问是“推荐问题”，则直接返回包含该 SQL 的 LLMResp； 若不是，返回 null。
      */
     private LLMResp handleRecommendedQuestion(LLMReq llmReq) {
         if (llmReq.getAgentId() == null) {
             return null;
         }
         String querySql = recommendedQuestionsService.findQuerySqlByQuestion(
-                Math.toIntExact(llmReq.getAgentId()),
-                llmReq.getQueryText()
-        );
+                Math.toIntExact(llmReq.getAgentId()), llmReq.getQueryText());
         if (StringUtils.isNotEmpty(querySql)) {
             LLMResp resp = new LLMResp();
             resp.setQuery(llmReq.getQueryText());
             resp.setSqlOutput(querySql);
-            resp.setSqlRespMap(
-                    ResponseHelper.buildSqlRespMap(Collections.emptyList(), Collections.emptyMap())
-            );
+            resp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(),
+                    Collections.emptyMap()));
             log.info("查到推荐问题对应的sql: {}", querySql);
             return resp;
         }

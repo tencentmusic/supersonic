@@ -43,8 +43,7 @@ public class LocalAiModelFactory implements ModelFactory, InitializingBean {
                 .modelName(modelConfig.getModelName()).temperature(modelConfig.getTemperature())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut())).topP(modelConfig.getTopP())
                 .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses())
-                .build();
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override

@@ -59,6 +59,7 @@ public class AzureModelFactory implements ModelFactory, InitializingBean {
                         modelConfig.getLogRequests() != null && modelConfig.getLogResponses());
         return builder.build();
     }
+
     @Override
     public void afterPropertiesSet() {
         ModelProvider.add(PROVIDER, this);

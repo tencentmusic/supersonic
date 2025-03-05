@@ -46,12 +46,12 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
     public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
         return OpenAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
                 .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
-                .temperature(modelConfig.getTemperature())
-                .topP(modelConfig.getTopP())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
                 .logResponses(modelConfig.getLogResponses()).build();
     }
+
     @Override
     public void afterPropertiesSet() {
         ModelProvider.add(PROVIDER, this);
