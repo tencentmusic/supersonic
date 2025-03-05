@@ -50,19 +50,19 @@ public class SqlQueryParser implements QueryParser {
         queryFields.removeAll(queryAliases);
         Ontology ontology = queryStatement.getOntology();
         OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);
-        // check if there are fields not matched with any metric or dimension
-        if (queryFields.size() > ontologyQuery.getMetrics().size()
-                + ontologyQuery.getDimensions().size()) {
-            List<String> semanticFields = Lists.newArrayList();
-            ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
-            ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
-            String errMsg =
-                    String.format("Querying columns[%s] not matched with semantic fields[%s].",
-                            queryFields, semanticFields);
-            queryStatement.setErrMsg(errMsg);
-            queryStatement.setStatus(QueryState.INVALID);
-            return;
-        }
+        // // check if there are fields not matched with any metric or dimension
+        // if (queryFields.size() > ontologyQuery.getMetrics().size()
+        //         + ontologyQuery.getDimensions().size()) {
+        //     List<String> semanticFields = Lists.newArrayList();
+        //     ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
+        //     ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
+        //     String errMsg =
+        //             String.format("Querying columns[%s] not matched with semantic fields[%s].",
+        //                     queryFields, semanticFields);
+        //     queryStatement.setErrMsg(errMsg);
+        //     queryStatement.setStatus(QueryState.INVALID);
+        //     return;
+        // }
         queryStatement.setOntologyQuery(ontologyQuery);
 
         AggOption sqlQueryAggOption = getAggOption(sqlQuery.getSql(), ontologyQuery.getMetrics());
