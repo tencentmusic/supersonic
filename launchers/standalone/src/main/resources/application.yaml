@@ -7,12 +7,14 @@ server:
 
 spring:
   profiles:
+#    active: ${S2_DB_TYPE:mysql}
     active: ${S2_DB_TYPE:h2}
   application:
     name: chat
   config:
     import:
-      - classpath:s2-config.yaml
+      - classpath:s2-config-prod.yaml
+#      - classpath:s2-config.yaml
   main:
     allow-circular-references: true
   mvc:
@@ -56,3 +58,4 @@ knife4j:
     default:
       title: ChatBI API Documents
       description: ChatBI API Documents
+
