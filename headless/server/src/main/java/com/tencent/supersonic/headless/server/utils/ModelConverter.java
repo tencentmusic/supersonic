@@ -157,6 +157,7 @@ public class ModelConverter {
             modelDetail.setQueryType(ModelDefineType.TABLE_QUERY.getName());
             modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
         }
+        modelDetail.setFilterSql(modelBuildReq.getFilterSql());
         for (ColumnSchema columnSchema : modelSchema.getColumnSchemas()) {
             FieldType fieldType = columnSchema.getFiledType();
             if (getIdentifyType(fieldType) != null) {

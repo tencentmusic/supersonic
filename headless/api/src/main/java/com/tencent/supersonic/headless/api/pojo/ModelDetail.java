@@ -24,6 +24,8 @@ public class ModelDetail {
 
     private String tableQuery;
 
+    private String filterSql;
+
     private List<Identify> identifiers = Lists.newArrayList();
 
     private List<Dimension> dimensions = Lists.newArrayList();
