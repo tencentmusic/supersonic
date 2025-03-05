@@ -52,8 +52,9 @@ const MetricTrend: React.FC<Props> = ({
     (column: any) => column.showType === 'DATE' || column.type === 'DATE'
   );
   const dateColumnName = dateField?.bizName || '';
-  const categoryColumnName =
-    queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.bizName || '';
+  let categoryColumnName =
+      queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.bizName || '';
+  categoryColumnName = categoryColumnName === dateColumnName ? '' : categoryColumnName;
   const metricFields = queryColumns?.filter((column: any) => column.showType === 'NUMBER');
 
   const currentMetricField = queryColumns?.find((column: any) => column.showType === 'NUMBER');
