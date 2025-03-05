@@ -4,7 +4,9 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
+import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,20 @@ public class AzureModelFactory implements ModelFactory, InitializingBean {
                         .maxRetries(embeddingModelConfig.getMaxRetries())
                         .logRequestsAndResponses(embeddingModelConfig.getLogRequests() != null
                                 && embeddingModelConfig.getLogResponses());
+        return builder.build();
+    }
+
+    @Override
+    public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
+        AzureOpenAiStreamingChatModel.Builder builder = AzureOpenAiStreamingChatModel.builder()
+                .endpoint(modelConfig.getBaseUrl()).apiKey(modelConfig.getApiKey())
+                .deploymentName(modelConfig.getModelName())
+                .temperature(modelConfig.getTemperature()).maxRetries(modelConfig.getMaxRetries())
+                .topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(
+                        modelConfig.getTimeOut() == null ? 0L : modelConfig.getTimeOut()))
+                .logRequestsAndResponses(
+                        modelConfig.getLogRequests() != null && modelConfig.getLogResponses());
         return builder.build();
     }
 

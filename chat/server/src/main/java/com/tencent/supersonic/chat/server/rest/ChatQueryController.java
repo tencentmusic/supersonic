@@ -6,11 +6,19 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
+import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
+import com.tencent.supersonic.headless.chat.parser.llm.SqlGenStrategy;
+import com.tencent.supersonic.headless.chat.parser.llm.SqlGenStrategyFactory;
+import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -21,14 +29,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-/** query controller */
+import static com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy.APP_KEY;
+import static com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY;
+
+/**
+ * query controller
+ */
 @RestController
 @RequestMapping({"/api/chat/query", "/openapi/chat/query"})
 public class ChatQueryController {
 
     @Autowired
     private ChatQueryService chatQueryService;
+
+    @Autowired
+    private static OnePassSCSqlGenStrategy onePassSCSqlGenStrategy;
 
     @PostMapping("search")
     public Object search(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
@@ -88,5 +105,10 @@ public class ChatQueryController {
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         return chatQueryService.queryDimensionValue(dimensionValueReq,
                 UserHolder.findUser(request, response));
+    }
+
+    @PostMapping("streamParse")
+    public SseEmitter streamParse(@RequestBody ChatParseReq chatParseReq) {
+        return chatQueryService.streamParse(chatParseReq);
     }
 }

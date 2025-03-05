@@ -98,6 +98,7 @@ public class S2ChatLayerService implements ChatLayerService {
         Map<Long, List<Long>> modelIdToDataSetIds = dataSetService.getModelIdToDataSetIds();
         queryCtx.setSemanticSchema(semanticSchema);
         queryCtx.setModelIdToDataSetIds(modelIdToDataSetIds);
+        queryCtx.setAgentId(queryNLReq.getAgentId());
 
         return queryCtx;
     }

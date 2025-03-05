@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.parser;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
+import com.tencent.supersonic.chat.server.config.NL2SQLParserConfig;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
@@ -79,14 +80,19 @@ public class NL2SQLParser implements ChatQueryParser {
             return;
         }
 
-        if (parseContext.getRequest().getAgentId() == 11){
-            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
-            queryNLReq.setSelectedParseInfo(null);
-            queryNLReq.setMapModeEnum(MapModeEnum.ALL);
-            doParse(queryNLReq, parseContext.getResponse());
-            return;
-        }
+        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
+        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
+
+//        // 检查当前请求的 agentId 是否在 simpleModelAgentIds 列表中
+//        if (simpleModelAgentIds.contains(parseContext.getRequest().getAgentId())) {
+//            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+//            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
+//            queryNLReq.setSelectedParseInfo(null);
+//            queryNLReq.setMapModeEnum(MapModeEnum.ALL);
+//            addDynamicExemplars(parseContext, queryNLReq);
+//            doParse(queryNLReq, parseContext.getResponse());
+//            return;
+//        }
         // first go with rule-based parsers unless the user has already selected one parse.
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);

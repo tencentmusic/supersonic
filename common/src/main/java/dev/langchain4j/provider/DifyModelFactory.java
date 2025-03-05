@@ -4,8 +4,10 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.dify.DifyAiChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.model.zhipu.ZhipuAiEmbeddingModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,14 @@ public class DifyModelFactory implements ModelFactory, InitializingBean {
                 .maxRetries(embeddingModelConfig.getMaxRetries())
                 .logRequests(embeddingModelConfig.getLogRequests())
                 .logResponses(embeddingModelConfig.getLogResponses()).build();
+    }
+
+    @Override
+    public StreamingChatLanguageModel createStreamChatModel(ChatModelConfig modelConfig) {
+        // todo dify的流式模型待确认
+        return OpenAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .apiKey(AESEncryptionUtil.aesDecryptECB(modelConfig.getApiKey()))
+                .modelName(modelConfig.getModelName()).build();
     }
 
     @Override

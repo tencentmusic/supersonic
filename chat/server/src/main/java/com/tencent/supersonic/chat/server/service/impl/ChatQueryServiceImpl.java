@@ -23,6 +23,7 @@ import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.jsqlparser.*;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -37,8 +38,11 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
+import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
+import com.tencent.supersonic.headless.chat.parser.llm.SqlGenStrategyFactory;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
 import com.tencent.supersonic.headless.chat.query.SemanticQuery;
+import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
@@ -56,9 +60,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY;
 
 @Slf4j
 @Service
@@ -101,8 +108,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
-        if (!parseContext.getResponse().getSelectedParses().isEmpty()
-                && !Objects.equals(parseContext.getResponse().getSelectedParses().get(0).getSqlInfo().getResultType(), "text")) {
+        if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
+                parseContext.getResponse().getSelectedParses().get(0).getSqlInfo().getResultType(),
+                "text")) {
             for (ParseResultProcessor processor : parseResultProcessors) {
                 if (processor.accept(parseContext)) {
                     processor.process(parseContext);
@@ -155,6 +163,18 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         return queryResult;
+    }
+
+    @Override
+    public SseEmitter streamParse(ChatParseReq chatParseReq) {
+        LLMReq llmReq = new LLMReq();
+        llmReq.setQueryText(chatParseReq.getQueryText());
+        AgentService agentService = ContextUtils.getBean(AgentService.class);
+        Agent chatAgent = agentService.getAgent(chatParseReq.getAgentId());
+        llmReq.setChatAppConfig(chatAgent.getChatAppConfig());
+        OnePassSCSqlGenStrategy sqlGenStrategy =
+                (OnePassSCSqlGenStrategy) SqlGenStrategyFactory.get(ONE_PASS_SELF_CONSISTENCY);
+        return sqlGenStrategy.streamGenerate(llmReq);
     }
 
     @Override

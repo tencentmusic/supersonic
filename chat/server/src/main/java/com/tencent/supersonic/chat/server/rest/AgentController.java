@@ -52,7 +52,6 @@ public class AgentController {
 
 
 
-
     @RequestMapping("/getToolTypes")
     public Map<AgentToolType, String> getToolTypes() {
         return AgentToolType.getToolTypes();
@@ -61,12 +60,11 @@ public class AgentController {
 
 
     @GetMapping("/hasAgentRight")
-    public ResultData hasAgentList(
-            @RequestParam(value = "id", required = true) Integer agentId,
-            @RequestParam(value = "userName", required = true) String userName
-            ) {
-         Agent agent=agentService.getAgent(agentId);
-         return  ResultData.success(agent.getAdmins().contains(userName)||agent.getViewers().contains(userName));
+    public ResultData hasAgentList(@RequestParam(value = "id", required = true) Integer agentId,
+            @RequestParam(value = "userName", required = true) String userName) {
+        Agent agent = agentService.getAgent(agentId);
+        return ResultData.success(
+                agent.getAdmins().contains(userName) || agent.getViewers().contains(userName));
 
     }
 

@@ -23,15 +23,15 @@ public class MapperConfig extends ParameterConfig {
                     "指标名、维度名相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_DIMENSION_VALUE_SIZE =
-            new Parameter("s2.mapper.value.size", "1", "一次探测返回维度值结果个数",
+            new Parameter("s2.mapper.value.size", "10", "一次探测返回维度值结果个数",
                     "在每次探测后, 将前后缀匹配的结果合并, 并根据相似度阈值过滤后的维度值结果个数", "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_VALUE_THRESHOLD =
-            new Parameter("s2.mapper.value.threshold", "0.5", "维度值文本相似度阈值",
+            new Parameter("s2.mapper.value.threshold", "0.3", "维度值文本相似度阈值",
                     "文本片段和匹配到的维度值计算出来的编辑距离阈值, 若超出该阈值, 则舍弃", "number", "Mapper相关配置");
 
     public static final Parameter MAPPER_VALUE_THRESHOLD_MIN =
-            new Parameter("s2.mapper.value.min.threshold", "0.3", "维度值最小文本相似度阈值",
+            new Parameter("s2.mapper.value.min.threshold", "0.1", "维度值最小文本相似度阈值",
                     "维度值相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_TEXT_SIZE =
