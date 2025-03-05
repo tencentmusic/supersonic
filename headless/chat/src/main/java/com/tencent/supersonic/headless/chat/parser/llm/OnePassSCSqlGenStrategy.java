@@ -89,7 +89,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     interface StreamingSemanticParseExtractor {
-        @UserMessage("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, 100字以内. {{it}}")
+        @UserMessage("仅展示查询思路，不要表字段, 80字以内. {{it}}")
         Flux<String> generateStreamingSemanticParse(String text);
     }
 
@@ -151,7 +151,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         // 2. 在异步线程中执行后续逻辑，线程池资源隔离
         CompletableFuture.runAsync(() -> {
             try {
-                //初始化响应对象
+                // 初始化响应对象
                 LLMResp llmResp = new LLMResp();
                 llmResp.setQuery(llmReq.getQueryText());
                 // 获取模型配置
@@ -170,23 +170,23 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                         .generateStreamingSemanticParse(promptText.toUserMessage().singleText())
                         .onBackpressureBuffer(100);
                 // 订阅响应流，设置延迟为100毫秒，并行调度
-                Disposable subscription = thought.delayElements(Duration.ofMillis(100), Schedulers.parallel())
-                        .subscribe(chunk -> {
-                            try {
-                                // 发送单个数据块
-                                emitter.send(
-                                        SseEmitter.event().data(chunk));
-                            } catch (IOException e) {
-                                log.error("SSE send error", e);
-                                emitter.completeWithError(e);
-                            }
-                        }, error -> {
-                            log.error("Stream processing error", error);
-                            emitter.completeWithError(error);
-                        }, () -> {
-                            log.info("Stream completed successfully");
-                            emitter.complete();
-                        });
+                Disposable subscription =
+                        thought.delayElements(Duration.ofMillis(100), Schedulers.parallel())
+                                .subscribe(chunk -> {
+                                    try {
+                                        // 发送单个数据块
+                                        emitter.send(SseEmitter.event().data(chunk));
+                                    } catch (IOException e) {
+                                        log.error("SSE send error", e);
+                                        emitter.completeWithError(e);
+                                    }
+                                }, error -> {
+                                    log.error("Stream processing error", error);
+                                    emitter.completeWithError(error);
+                                }, () -> {
+                                    log.info("Stream completed successfully");
+                                    emitter.complete();
+                                });
                 // 添加取消订阅处理
                 emitter.onCompletion(subscription::dispose);
                 emitter.onTimeout(() -> {
