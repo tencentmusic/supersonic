@@ -3,6 +3,7 @@ package com.tencent.supersonic.common.pojo;
 import com.google.common.base.Objects;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+
 import java.io.Serializable;
 
 import static com.tencent.supersonic.common.pojo.Constants.ASC_UPPER;
