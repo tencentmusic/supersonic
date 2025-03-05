@@ -2,11 +2,18 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class SimpleStrategy {
+
+    public static  String DIMENSION_DETECT_REGEX="维度探测:\\[(.*?)\\]";
 
 
     public String generatePrompt(LLMReq llmReq) {
@@ -16,7 +23,7 @@ public class SimpleStrategy {
                 "您是一个SQL专家,名字叫红海AI智能问答小助手。请帮助生成一个SQL查询以回答问题。您的回复仅应基于给定的上下文，并遵循回复指南和格式说明。\n\n");
         ChatApp s2SQLParser = llmReq.getChatAppConfig().get("S2SQL_PARSER");
         if (null != s2SQLParser) {
-            context.append(s2SQLParser.getPrompt()).append("\n");
+            context.append(replaceByDimensionDetect(s2SQLParser.getPrompt(),llmReq.getSchema())).append("\n");
         }
 
         // 组装回复指南部分
@@ -29,6 +36,52 @@ public class SimpleStrategy {
         // 拼接完整的prompt
         return context.append(replyGuideline).append("\n用户的问题是：").append(llmReq.getQueryText())
                 .toString();
+    }
+
+
+    //    根据prompt中的维度探测文本，探测维度值，补全到prompt中
+    public String replaceByDimensionDetect(String promptText, LLMReq.LLMSchema llmSchema) {
+        if (llmSchema == null) {
+            return promptText;
+        }
+        if (CollectionUtils.isEmpty(llmSchema.getValues())) {
+            return promptText;
+        }
+        Map<String, String> fieldsMap = llmSchema.getValues().stream().collect(Collectors.groupingBy(LLMReq.ElementValue::getFieldName
+                ,Collectors.mapping(LLMReq.ElementValue::getFieldValue,Collectors.toList())))
+                .entrySet().stream().collect(Collectors.toMap(
+                        stringListEntry -> stringListEntry.getKey(),
+                        stringListEntry ->stringListEntry.getValue().stream().collect(Collectors.joining(","))
+                ));
+//        探测提示词文本
+        Pattern pattern = Pattern.compile(DIMENSION_DETECT_REGEX);
+        Matcher matcher = pattern.matcher(promptText);
+        String dimensionWordsDetected = null;
+        List<String> dimensionsDetected = new ArrayList<>();
+        if (matcher.find()) {
+            dimensionWordsDetected=matcher.group(0);
+            String dimensionPart = matcher.group(1);
+
+            // 分割维度名
+            String[] dimensionArray = dimensionPart.split(",|，");
+            for(String dimension : dimensionArray) {
+                dimensionsDetected.add(dimension);
+            }
+        }
+        StringBuilder replacement = new StringBuilder();
+        dimensionsDetected.stream().forEach(dimension -> {
+            if(fieldsMap.containsKey(dimension)){
+                replacement.append(dimension).append("条件:").append("\n");
+                replacement.append(fieldsMap.get(dimension));
+            }
+        });
+        if(null!=dimensionsDetected){
+            promptText=promptText.replace(dimensionWordsDetected,replacement.toString());
+        }
+
+           return promptText;
+
+
     }
 
 }
