@@ -179,6 +179,7 @@ public class ModelConverter {
             }
         }
         modelDetail.setFields(fields);
+        modelDetail.setFilterSql(modelBuildReq.getFilterSql());
         modelReq.setModelDetail(modelDetail);
         return modelReq;
     }

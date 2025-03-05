@@ -36,6 +36,7 @@ public class ModelYamlManager {
         } else {
             dataModelYamlTpl.setTableQuery(modelDetail.getTableQuery());
         }
+        dataModelYamlTpl.setFilterSql(modelDetail.getFilterSql());
         dataModelYamlTpl.setFields(modelResp.getModelDetail().getFields());
         dataModelYamlTpl.setId(modelResp.getId());
         return dataModelYamlTpl;
