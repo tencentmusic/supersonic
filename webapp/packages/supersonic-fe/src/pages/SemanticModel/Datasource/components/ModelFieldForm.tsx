@@ -8,7 +8,7 @@ import { ISemantic } from '../../data';
 import {
   AGG_OPTIONS,
   DATE_FORMATTER,
-  DATE_OPTIONS,
+  // DATE_OPTIONS,
   DIM_OPTIONS,
   EnumDataSourceType,
   EnumModelDataType,
@@ -275,7 +275,7 @@ const ModelFieldForm: React.FC<Props> = ({
           }
         }
         if ([EnumDataSourceType.TIME, EnumDataSourceType.PARTITION_TIME].includes(type)) {
-          const { dateFormat, timeGranularity } = record;
+          const { dateFormat } = record;
           const dateFormatterOptions =
             type === EnumDataSourceType.PARTITION_TIME ? PARTITION_TIME_FORMATTER : DATE_FORMATTER;
 
@@ -302,25 +302,25 @@ const ModelFieldForm: React.FC<Props> = ({
                   <ExclamationCircleOutlined />
                 </Tooltip>
               </Space>
-              <Space>
-                <span>时间粒度:</span>
-                <Select
-                  placeholder="时间粒度"
-                  value={timeGranularity === '' ? undefined : timeGranularity}
-                  onChange={(value) => {
-                    handleFieldChange(record, 'timeGranularity', value);
-                  }}
-                  defaultValue={timeGranularity === '' ? undefined : DATE_OPTIONS[0]}
-                  style={{ minWidth: 180 }}
-                  allowClear
-                >
-                  {DATE_OPTIONS.map((item) => (
-                    <Option key={item} value={item}>
-                      {item}
-                    </Option>
-                  ))}
-                </Select>
-              </Space>
+              {/*<Space>*/}
+              {/*  <span>时间粒度:</span>*/}
+              {/*  <Select*/}
+              {/*    placeholder="时间粒度"*/}
+              {/*    value={timeGranularity === '' ? undefined : timeGranularity}*/}
+              {/*    onChange={(value) => {*/}
+              {/*      handleFieldChange(record, 'timeGranularity', value);*/}
+              {/*    }}*/}
+              {/*    defaultValue={timeGranularity === '' ? undefined : DATE_OPTIONS[0]}*/}
+              {/*    style={{ minWidth: 180 }}*/}
+              {/*    allowClear*/}
+              {/*  >*/}
+              {/*    {DATE_OPTIONS.map((item) => (*/}
+              {/*      <Option key={item} value={item}>*/}
+              {/*        {item}*/}
+              {/*      </Option>*/}
+              {/*    ))}*/}
+              {/*  </Select>*/}
+              {/*</Space>*/}
             </Space>
           );
         }
