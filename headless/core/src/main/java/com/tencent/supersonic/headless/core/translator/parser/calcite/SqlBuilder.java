@@ -69,7 +69,13 @@ public class SqlBuilder {
         SqlNode parserNode = tableView.build();
         DatabaseResp database = queryStatement.getOntology().getDatabase();
         EngineType engineType = EngineType.fromString(database.getType());
-        parserNode = optimizeParseNode(parserNode, engineType);
+        try {
+            parserNode = optimizeParseNode(parserNode, engineType);
+        } catch (Exception e) {
+            // failure in optimization phase doesn't affect the query result,
+            // just ignore it
+            log.error("optimizeParseNode error", e);
+        }
         return SemanticNode.getSql(parserNode, engineType);
     }
 
