@@ -6,17 +6,20 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy.APP_KEY;
 
 public class SimpleStrategy {
+
+    public static String DIMENSION_DETECT_REGEX = "维度探测:\\[(.*?)\\]";
 
 
     public Prompt generatePrompt(LLMReq llmReq, PromptHelper promptHelper) {
@@ -26,14 +29,10 @@ public class SimpleStrategy {
                 "您是一个SQL专家,名字叫红海AI智能问答小助手。请帮助生成一个SQL查询以回答问题。您的回复仅应基于给定的上下文，并遵循回复指南和格式说明。\n\n");
         ChatApp s2SQLParser = llmReq.getChatAppConfig().get(APP_KEY);
         if (null != s2SQLParser) {
-            context.append(s2SQLParser.getPrompt()).append("\n\n");
+            context.append(replaceByDimensionDetect(s2SQLParser.getPrompt(), llmReq.getSchema()))
+                    .append("\n");
         }
-        // if (Objects.nonNull(llmReq.getSchema()) &&
-        // StringUtils.equalsIgnoreCase(llmReq.getSchema().getDataSetName(), "红海app数据集直连模式")) {
-        // String dataSemantics = promptHelper.buildSchemaStr(llmReq);
-        // context.append("schema:").append("\n");
-        // context.append(dataSemantics).append("\n");
-        // }
+
         // 组装回复指南部分
         String replyGuideline = "===回复指南\n"
                 + "1. 如果问题与表中字段和表的补充解释等数据相关，则生成有效的SQL查询来回答问题。如果问题与提供的上下文无关，请礼貌引导用户提问与当前表及数据的相关问题。例：\n"
@@ -82,6 +81,54 @@ public class SimpleStrategy {
                 .toString();
         // 拼接完整的prompt
         return PromptTemplate.from(String.valueOf(context)).apply(variable);
+    }
+
+
+    // 根据prompt中的维度探测文本，探测维度值，补全到prompt中
+    public String replaceByDimensionDetect(String promptText, LLMReq.LLMSchema llmSchema) {
+        if (llmSchema == null) {
+            return promptText;
+        }
+        if (CollectionUtils.isEmpty(llmSchema.getValues())) {
+            return promptText;
+        }
+        Map<String, String> fieldsMap = llmSchema.getValues().stream()
+                .collect(Collectors.groupingBy(LLMReq.ElementValue::getFieldName,
+                        Collectors
+                                .mapping(LLMReq.ElementValue::getFieldValue, Collectors.toList())))
+                .entrySet().stream()
+                .collect(Collectors.toMap(stringListEntry -> stringListEntry.getKey(),
+                        stringListEntry -> stringListEntry.getValue().stream()
+                                .collect(Collectors.joining(","))));
+        // 探测提示词文本
+        Pattern pattern = Pattern.compile(DIMENSION_DETECT_REGEX);
+        Matcher matcher = pattern.matcher(promptText);
+        String dimensionWordsDetected = null;
+        List<String> dimensionsDetected = new ArrayList<>();
+        if (matcher.find()) {
+            dimensionWordsDetected = matcher.group(0);
+            String dimensionPart = matcher.group(1);
+
+            // 分割维度名
+            String[] dimensionArray = dimensionPart.split(",|，");
+            for (String dimension : dimensionArray) {
+                dimensionsDetected.add(dimension);
+            }
+        }
+        StringBuilder replacement = new StringBuilder();
+        dimensionsDetected.stream().forEach(dimension -> {
+            if (fieldsMap.containsKey(dimension)) {
+                replacement.append(dimension).append("条件:").append("\n");
+                replacement.append(fieldsMap.get(dimension));
+            }
+        });
+        if (null != dimensionsDetected) {
+            promptText = promptText.replace(dimensionWordsDetected, replacement.toString());
+        }
+
+        return promptText;
+
+
     }
 
 }
