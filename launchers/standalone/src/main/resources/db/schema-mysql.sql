@@ -539,3 +539,16 @@ CREATE TABLE IF NOT EXISTS `s2_user_token` (
      unique key name_username (`name`, `user_name`),
      PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='用户令牌信息表';
+
+CREATE TABLE `recommended_questions` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `agent_id` int NOT NULL COMMENT '助理ID',
+    `question` varchar(500) NOT NULL COMMENT '推荐问题',
+    `query_sql` text NOT NULL COMMENT '对应的物理SQL',
+    `status` tinyint DEFAULT '1' COMMENT '启用状态: 1=启用, 0=禁用',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_agent_question` (`agent_id`,`question`),
+    KEY `idx_agent_status` (`agent_id`,`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='推荐问题配置表';
