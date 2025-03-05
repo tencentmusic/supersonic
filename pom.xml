@@ -26,7 +26,7 @@
     </parent>
 
     <properties>
-        <revision>0.9.10-SNAPSHOT</revision>
+        <revision>1.0.0-SNAPSHOT</revision>
         <java.source.version>21</java.source.version>
         <java.target.version>21</java.target.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -82,6 +82,7 @@
         <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.1</stax2.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
+        <jgrapht.version>1.5.2</jgrapht.version>
     </properties>
 
     <dependencyManagement>
@@ -235,6 +236,11 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk</artifactId>
                 <version>${aws-java-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jgrapht</groupId>
+                <artifactId>jgrapht-core</artifactId>
+                <version>${jgrapht.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

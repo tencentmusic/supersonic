@@ -1,24 +1,14 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:21-jdk-bullseye
+FROM supersonicbi/supersonic:0.9.10-SNAPSHOT
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
+# Delete old supersonic installation directory and the symbolic link
+RUN rm -rf /usr/src/app/supersonic-standalone-0.9.10-SNAPSHOT
+RUN rm -f /usr/src/app/supersonic-standalone-latest
+
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION
-
-# Install necessary packages, including Postgres client
-RUN apt-get update && apt-get install -y postgresql-client
-
-# Install the vim editor.
-RUN apt-get update && apt-get install -y vim && \
-    rm -rf /var/lib/apt/lists/*
-
-# Update the package list and install iputils-ping.
-RUN apt-get update && apt-get install -y iputils-ping
-
-# 更新包列表并安装 dnsutils 包
-RUN apt-get update && apt-get install -y dnsutils
 
 # Copy the supersonic standalone zip file into the container
 COPY assembly/build/supersonic-standalone-${SUPERSONIC_VERSION}.zip .

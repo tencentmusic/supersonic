@@ -12,7 +12,7 @@ services:
     ports:
       - "15432:5432"
 #    volumes:
-#      - postgres_data:/var/lib/postgresql
+#      - postgres_data:/var/lib/postgresql/data
     networks:
       - supersonic_network
     dns:
@@ -21,7 +21,7 @@ services:
       - 8.8.4.4
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U supersonic_user -d postgres'"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
 
