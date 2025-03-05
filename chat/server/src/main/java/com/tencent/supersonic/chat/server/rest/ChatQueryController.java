@@ -49,35 +49,35 @@ public class ChatQueryController {
 
     @PostMapping("search")
     public Object search(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
-                         HttpServletResponse response) {
+            HttpServletResponse response) {
         chatParseReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.search(chatParseReq);
     }
 
     @PostMapping("parse")
     public Object parse(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
-                        HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         chatParseReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.parse(chatParseReq);
     }
 
     @PostMapping("execute")
     public Object execute(@RequestBody ChatExecuteReq chatExecuteReq, HttpServletRequest request,
-                          HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.execute(chatExecuteReq);
     }
 
     @PostMapping("dataInterpret")
     public Object dataInterpret(@RequestBody ChatExecuteReq chatExecuteReq,
-                                HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.dataInterpret(chatExecuteReq);
     }
 
     @PostMapping("/")
     public Object query(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
-                        HttpServletResponse response) throws Exception {
+            HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         chatParseReq.setUser(user);
         ChatParseResp parseResp = chatQueryService.parse(chatParseReq);
@@ -95,14 +95,14 @@ public class ChatQueryController {
 
     @PostMapping("queryData")
     public Object queryData(@RequestBody ChatQueryDataReq chatQueryDataReq,
-                            HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         chatQueryDataReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.queryData(chatQueryDataReq, UserHolder.findUser(request, response));
     }
 
     @PostMapping("queryDimensionValue")
     public Object queryDimensionValue(@RequestBody @Valid DimensionValueReq dimensionValueReq,
-                                      HttpServletRequest request, HttpServletResponse response) throws Exception {
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         return chatQueryService.queryDimensionValue(dimensionValueReq,
                 UserHolder.findUser(request, response));
     }

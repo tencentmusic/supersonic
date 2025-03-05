@@ -172,7 +172,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(chatParseReq.getAgentId());
         llmReq.setChatAppConfig(chatAgent.getChatAppConfig());
-        OnePassSCSqlGenStrategy sqlGenStrategy = (OnePassSCSqlGenStrategy) SqlGenStrategyFactory.get(ONE_PASS_SELF_CONSISTENCY);
+        OnePassSCSqlGenStrategy sqlGenStrategy =
+                (OnePassSCSqlGenStrategy) SqlGenStrategyFactory.get(ONE_PASS_SELF_CONSISTENCY);
         return sqlGenStrategy.streamGenerate(llmReq);
     }
 

@@ -9,13 +9,13 @@ import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
+import com.tencent.supersonic.headless.chat.service.RecommendedQuestionsService;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
-import com.tencent.supersonic.headless.chat.service.RecommendedQuestionsService;
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import lombok.Data;
@@ -25,15 +25,19 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Slf4j
@@ -64,6 +68,10 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     @Autowired
     private RecommendedQuestionsService recommendedQuestionsService;
 
+    @Autowired
+    @Qualifier("chatExecutor")
+    private ThreadPoolExecutor executor;
+
     @Data
     static class SemanticSql {
         @Description("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, make it short.")
@@ -81,7 +89,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     interface StreamingSemanticParseExtractor {
-        @UserMessage("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, make it short. {{it}}")
+        @UserMessage("告诉用户有关这个SQL的查询思路，结合表的元数据与查询的条件数据, 100字以内. {{it}}")
         Flux<String> generateStreamingSemanticParse(String text);
     }
 
@@ -138,48 +146,47 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     public SseEmitter streamGenerate(LLMReq llmReq) {
-        // 1. 创建SSE发射器（3分钟超时）
-        SseEmitter emitter = new SseEmitter(180_000L);
-        // 2. 准备模型和参数
+        // 1. 创建SSE发射器（1分钟超时）
+        SseEmitter emitter = new SseEmitter(60_000L);
+        // 2. 在异步线程中执行后续逻辑，线程池资源隔离
         CompletableFuture.runAsync(() -> {
             try {
-                // 3. 初始化响应对象
+                //初始化响应对象
                 LLMResp llmResp = new LLMResp();
                 llmResp.setQuery(llmReq.getQueryText());
-                // 4. 获取模型配置
+                // 获取模型配置
                 ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
-                // 5. 使用流式专用模型配置
-                StreamingChatLanguageModel streamChatModel = getStreamChatModel(chatApp.getChatModelConfig());
-                // 6. 创建流式解析器
+                // 使用流式专用模型配置
+                StreamingChatLanguageModel streamChatModel =
+                        getStreamChatModel(chatApp.getChatModelConfig());
+                // 创建流式解析器
                 StreamingSemanticParseExtractor extractor =
                         AiServices.create(StreamingSemanticParseExtractor.class, streamChatModel);
-                // 7. 生成prompt
+                // 生成prompt
                 SimpleStrategy simpleStrategy = new SimpleStrategy();
                 Prompt promptText = simpleStrategy.generateStreamPrompt(llmReq);
-                // 8. 获取响应流
-                Flux<String> thought = extractor.generateStreamingSemanticParse(promptText.toUserMessage().singleText());
-                // 订阅响应流
-                Disposable subscription = thought.subscribe(
-                        chunk -> {
+                // 获取响应流，设置背压为最大100个元素
+                Flux<String> thought = extractor
+                        .generateStreamingSemanticParse(promptText.toUserMessage().singleText())
+                        .onBackpressureBuffer(100);
+                // 订阅响应流，设置延迟为100毫秒，并行调度
+                Disposable subscription = thought.delayElements(Duration.ofMillis(100), Schedulers.parallel())
+                        .subscribe(chunk -> {
                             try {
                                 // 发送单个数据块
-                                emitter.send(SseEmitter.event()
-                                        .data(chunk)
-                                        .id(UUID.randomUUID().toString()));
+                                emitter.send(
+                                        SseEmitter.event().data(chunk));
                             } catch (IOException e) {
                                 log.error("SSE send error", e);
                                 emitter.completeWithError(e);
                             }
-                        },
-                        error -> {
+                        }, error -> {
                             log.error("Stream processing error", error);
                             emitter.completeWithError(error);
-                        },
-                        () -> {
+                        }, () -> {
                             log.info("Stream completed successfully");
                             emitter.complete();
-                        }
-                );
+                        });
                 // 添加取消订阅处理
                 emitter.onCompletion(subscription::dispose);
                 emitter.onTimeout(() -> {
@@ -189,14 +196,12 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
             } catch (Exception e) {
                 emitter.completeWithError(e);
             }
-        });
+        }, executor);
         return emitter;
     }
 
     private boolean isDirectLinkMode(LLMReq llmReq) {
-        return StringUtils.endsWithIgnoreCase(
-                llmReq.getSchema().getDataSetName(), "直连模式"
-        );
+        return StringUtils.endsWithIgnoreCase(llmReq.getSchema().getDataSetName(), "直连模式");
     }
 
     private LLMResp handleDirectLinkMode(LLMReq llmReq) {
@@ -232,9 +237,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
         List<Text2SQLExemplar> usedExemplars =
                 prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
-        llmResp.setSqlRespMap(
-                ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight())
-        );
+        llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight()));
 
         log.info("Simplified model SQL generation, SQL: {}", llmResp.getSqlOutput());
         return llmResp;
@@ -253,24 +256,20 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     /**
-     * 如果当前提问是“推荐问题”，则直接返回包含该 SQL 的 LLMResp；
-     * 若不是，返回 null。
+     * 如果当前提问是“推荐问题”，则直接返回包含该 SQL 的 LLMResp； 若不是，返回 null。
      */
     private LLMResp handleRecommendedQuestion(LLMReq llmReq) {
         if (llmReq.getAgentId() == null) {
             return null;
         }
         String querySql = recommendedQuestionsService.findQuerySqlByQuestion(
-                Math.toIntExact(llmReq.getAgentId()),
-                llmReq.getQueryText()
-        );
+                Math.toIntExact(llmReq.getAgentId()), llmReq.getQueryText());
         if (StringUtils.isNotEmpty(querySql)) {
             LLMResp resp = new LLMResp();
             resp.setQuery(llmReq.getQueryText());
             resp.setSqlOutput(querySql);
-            resp.setSqlRespMap(
-                    ResponseHelper.buildSqlRespMap(Collections.emptyList(), Collections.emptyMap())
-            );
+            resp.setSqlRespMap(ResponseHelper.buildSqlRespMap(Collections.emptyList(),
+                    Collections.emptyMap()));
             log.info("查到推荐问题对应的sql: {}", querySql);
             return resp;
         }
