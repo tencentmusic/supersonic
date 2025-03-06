@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.parser;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
-import com.tencent.supersonic.chat.server.config.NL2SQLParserConfig;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;

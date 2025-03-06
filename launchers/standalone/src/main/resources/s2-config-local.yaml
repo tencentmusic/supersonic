@@ -42,6 +42,7 @@ s2:
       min:
         threshold: 0.3
 
+#这个是测试环境通用管理配置，针对助理，模型，数据库，主题域，对非管理员用户展示通用数据。
   manage:
     chat:
       agent:
@@ -52,10 +53,11 @@ s2:
         ids: 1,2,3    # chatDatabaseIds
       domain:
         ids: 1,2,3    # chatDomainIds
+#这个是简易模型的助理id配置，针对红海app的简易模式，根据自己本地配置，简易模式直接通过大模型生成sql或自然语言回答
     parser:
       agent:
         ids: 11,12,13
-
+#这个配置是针对全场景活跃小助手，用于当用户问题没有匹配到1234级场景时，通过物理sql去查数据库拼接提示信息。
   dimension:
     mapping:
       pid1_2022: "28"
