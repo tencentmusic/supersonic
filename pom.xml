@@ -32,7 +32,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <file.encoding>UTF-8</file.encoding>
-        <jsqlparser.version>4.7</jsqlparser.version>
+        <jsqlparser.version>4.9</jsqlparser.version>
         <pagehelper.version>6.1.0</pagehelper.version>
         <pagehelper.spring.version>2.1.0</pagehelper.spring.version>
         <mybatis.version>3.5.3</mybatis.version>
