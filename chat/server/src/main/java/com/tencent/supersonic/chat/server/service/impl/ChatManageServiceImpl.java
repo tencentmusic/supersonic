@@ -15,8 +15,10 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.QueryDO;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatQueryRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatRepository;
+import com.tencent.supersonic.chat.server.pojo.ChatHistory;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -41,6 +43,8 @@ public class ChatManageServiceImpl implements ChatManageService {
     private ChatQueryRepository chatQueryRepository;
     @Autowired
     private MemoryService memoryService;
+    @Autowired
+    private HistoryService historyService;
 
     @Override
     public Long addChat(User user, String chatName, Integer agentId) {
@@ -77,15 +81,24 @@ public class ChatManageServiceImpl implements ChatManageService {
         // enable or disable memory based on user feedback
         if (score >= 5 || score <= 1) {
             ChatMemoryFilter memoryFilter = ChatMemoryFilter.builder().queryId(id).build();
+            ChatHistoryFilter historyFilter = ChatHistoryFilter.builder().queryId(id).build();
             List<ChatMemory> memories = memoryService.getMemories(memoryFilter);
+            List<ChatHistory> histories = historyService.getMemories(historyFilter);
+            MemoryStatus status = score >= 5 ? MemoryStatus.ENABLED : MemoryStatus.DISABLED;
+            MemoryReviewResult reviewResult =
+                    score >= 5 ? MemoryReviewResult.POSITIVE : MemoryReviewResult.NEGATIVE;
             memories.forEach(m -> {
-                MemoryStatus status = score >= 5 ? MemoryStatus.ENABLED : MemoryStatus.DISABLED;
-                MemoryReviewResult reviewResult =
-                        score >= 5 ? MemoryReviewResult.POSITIVE : MemoryReviewResult.NEGATIVE;
                 ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder().id(m.getId())
                         .status(status).humanReviewRet(reviewResult)
                         .humanReviewCmt("Reviewed as per user feedback").build();
                 memoryService.updateMemory(memoryUpdateReq, User.getDefaultUser());
+
+            });
+            histories.forEach(h -> {
+                ChatHistoryUpdateReq historyUpdateReq = ChatHistoryUpdateReq.builder().id(h.getId())
+                        .status(status).humanReviewRet(reviewResult)
+                        .humanReviewCmt("Reviewed as per user feedback").build();
+                historyService.updateHistory(historyUpdateReq, User.getDefaultUser());
             });
         }
 

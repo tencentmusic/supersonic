@@ -65,12 +65,5 @@ s2:
       dataSet: 4
     database:
       name: "supersonic"
-#      pid1_2022: "717"
-#      pid2_2022: "719"
-#      pid3_2022: "721"
-#      pid4_2022: "723"
-#      dataSet: 31
-#    database:
-#      name: "bvreport"
 
 

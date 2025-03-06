@@ -7,14 +7,14 @@ server:
 
 spring:
   profiles:
-#    active: ${S2_DB_TYPE:mysql}
-    active: ${S2_DB_TYPE:h2}
+    active: ${S2_DB_TYPE:mysql-local}
+#    active: ${S2_DB_TYPE:mysql-prod}
   application:
     name: chat
   config:
     import:
-      - classpath:s2-config-prod.yaml
-#      - classpath:s2-config.yaml
+#      - classpath:s2-config-prod.yaml
+      - classpath:s2-config-local.yaml
   main:
     allow-circular-references: true
   mvc:
@@ -59,3 +59,9 @@ knife4j:
       title: ChatBI API Documents
       description: ChatBI API Documents
 
+lingxiyun:
+  appId: aay2iuuc
+  secretKey: aecf0f0fcd7648b9bd06a5d4e5ac835b
+  host: https://hippo.migu.cn
+  iatUrl: /lingxiyun/api/iat/v1
+  ttsUrl: /lingxiyun/api/tts/v1

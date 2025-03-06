@@ -102,4 +102,5 @@ public class UserController {
     public void deleteUserToken(@RequestParam(name = "tokenId") Long tokenId) {
         userService.deleteUserToken(tokenId);
     }
+
 }

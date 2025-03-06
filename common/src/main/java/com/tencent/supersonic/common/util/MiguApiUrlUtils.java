@@ -1,5 +1,8 @@
 package com.tencent.supersonic.common.util;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -13,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 
 public class MiguApiUrlUtils {
@@ -38,7 +38,8 @@ public class MiguApiUrlUtils {
     private static SimpleDateFormat sdf = new SimpleDateFormat(TIME_STAMP_FORMAT);
 
 
-    public static String doSignature(String servletPath, String method, Map<String, Object> query, String appId, String secretKey) {
+    public static String doSignature(String servletPath, String method, Map<String, Object> query,
+            String appId, String secretKey) {
         try {
             servletPath = java.net.URLDecoder.decode(servletPath, ENCODING);
 
@@ -125,4 +126,3 @@ public class MiguApiUrlUtils {
     }
 
 }
-

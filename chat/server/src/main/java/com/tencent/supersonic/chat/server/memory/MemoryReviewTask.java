@@ -7,6 +7,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
@@ -53,6 +54,8 @@ public class MemoryReviewTask {
 
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private HistoryService historyService;
 
     public MemoryReviewTask() {
         ChatAppManager.register(APP_KEY,
@@ -125,10 +128,11 @@ public class MemoryReviewTask {
             if (MemoryReviewResult.POSITIVE.equals(m.getLlmReviewRet())) {
                 m.setStatus(MemoryStatus.ENABLED);
             }
-            ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder().id(m.getId())
+            ChatMemoryUpdateReq memoryUpdateReq = ChatMemoryUpdateReq.builder().id(m.getId()).queryId(m.getQueryId())
                     .status(m.getStatus()).llmReviewRet(m.getLlmReviewRet())
                     .llmReviewCmt(m.getLlmReviewCmt()).build();
             memoryService.updateMemory(memoryUpdateReq, User.getDefaultUser());
+            historyService.updateHistoryByQueryId(memoryUpdateReq, User.getDefaultUser());
         }
     }
 }
