@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,6 +66,7 @@ public class ChatWorkflowEngine {
                         parseResult.setState(ParseResp.ParseState.FAILED);
                         parseResult.setErrorMsg("No semantic queries can be parsed out.");
                         queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
+
                     } else {
                         List<SemanticParseInfo> parseInfos = queryCtx.getCandidateQueries().stream()
                                 .map(SemanticQuery::getParseInfo).collect(Collectors.toList());

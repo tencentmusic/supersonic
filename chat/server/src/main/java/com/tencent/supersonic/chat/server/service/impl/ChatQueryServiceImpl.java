@@ -18,6 +18,7 @@ import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
+import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.jsqlparser.*;
@@ -79,6 +80,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private SemanticLayerService semanticLayerService;
     @Autowired
     private AgentService agentService;
+    @Autowired
+    private HistoryService historyService;
 
     private final List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private final List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
@@ -108,6 +111,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
+        historyService.saveHistoryInfo(parseContext);
         if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
                 parseContext.getResponse().getSelectedParses().get(0).getSqlInfo().getResultType(),
                 "text")) {

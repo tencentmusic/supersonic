@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMemoryUpdateReq {
+public class ChatHistoryUpdateReq {
 
     @NotNull(message = "id不可为空")
     private Long id;
@@ -30,6 +30,4 @@ public class ChatMemoryUpdateReq {
     private MemoryReviewResult llmReviewRet;
 
     private String llmReviewCmt;
-
-    private Long queryId;
 }

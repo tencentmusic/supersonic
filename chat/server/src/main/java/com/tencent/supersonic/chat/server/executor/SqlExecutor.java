@@ -3,9 +3,11 @@ package com.tencent.supersonic.chat.server.executor;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
+import com.tencent.supersonic.chat.server.pojo.ChatHistory;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.ChatContextService;
+import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
@@ -33,12 +35,15 @@ public class SqlExecutor implements ChatQueryExecutor {
             return queryResult;
         }
         QueryResult queryResult = doExecute(executeContext);
-
         if (queryResult != null) {
-            String textResult = ResultFormatter.transform2TextNew(queryResult.getQueryColumns(),
-                    queryResult.getQueryResults());
-            queryResult.setTextResult(textResult);
-
+            if (queryResult.getQueryResults().isEmpty()){
+                queryResult.setQueryMode("PLAIN_TEXT");
+                queryResult.setTextResult("当前时间周期暂无数据，请换个指标或者时间周期查询");
+            }else {
+                String textResult = ResultFormatter.transform2TextNew(queryResult.getQueryColumns(),
+                        queryResult.getQueryResults());
+                queryResult.setTextResult(textResult);
+            }
             if (queryResult.getQueryState().equals(QueryState.SUCCESS)
                     && queryResult.getQueryMode().equals(LLMSqlQuery.QUERY_MODE)) {
                 Text2SQLExemplar exemplar =

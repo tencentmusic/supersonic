@@ -16,6 +16,7 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import lombok.Data;
@@ -89,7 +90,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     }
 
     interface StreamingSemanticParseExtractor {
-        @UserMessage("仅展示查询思路，不要表字段, 80字以内. {{it}}")
+        @SystemMessage("您的名字叫红海ChatBI, 您的职责是基于上下文给出查询思路.")
+        @UserMessage("仅展示查询思路，不要出现表字段, 60-80字以内. {{it}}")
         Flux<String> generateStreamingSemanticParse(String text);
     }
 
@@ -99,6 +101,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         // =================== 新增逻辑1：检查是否是推荐问题 ===================
         LLMResp recommendedResp = handleRecommendedQuestion(llmReq);
         if (recommendedResp != null) {
+            log.info("匹配到推荐问题:\n{}", llmReq.getQueryText());
             return recommendedResp;
         }
         // =================== 新增逻辑2：检查是否是简易模型(直连模式) ===================

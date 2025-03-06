@@ -114,6 +114,24 @@ public class HttpUtils {
         }
     }
 
+    public static Response postWithReponse(String url, Object body, Map<String, String> headers)
+            throws IOException {
+        Request request = postRequest(url, body, headers);
+        long beginTime = System.currentTimeMillis();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                return response;
+            } else {
+                throw new RuntimeException(
+                        "Http请求失败[" + response.code() + "]:" + response.body().string() + "...");
+            }
+        } finally {
+            logger.info("begin to request : {}, execute costs(ms) : {}", request.url(),
+                    System.currentTimeMillis() - beginTime);
+        }
+    }
+
     // public static <T> T post(String url, Object body, Map<String, String> headers,
     // TypeReference<T> type) throws IOException {
     // return doRequest(postRequest(url, body, headers), type);
@@ -174,6 +192,10 @@ public class HttpUtils {
                     (String) body);
         }
         
+        if (body instanceof byte[]) {
+            return RequestBody.create((byte[]) body);
+        }
+
         if (body instanceof byte[]) {
             return RequestBody.create((byte[]) body);
         }

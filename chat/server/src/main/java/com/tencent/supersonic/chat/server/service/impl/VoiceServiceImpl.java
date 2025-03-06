@@ -1,12 +1,6 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+
 import com.tencent.supersonic.chat.api.pojo.request.TextVoiceReq;
 import com.tencent.supersonic.chat.server.pojo.IATResult;
 import com.tencent.supersonic.chat.server.service.VoiceService;
@@ -16,10 +10,19 @@ import com.tencent.supersonic.common.util.MiguApiUrlUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 public class VoiceServiceImpl implements VoiceService {
-    
+
     @Value("${lingxiyun.appId:APP_ID}")
     private String appId;
     @Value("${lingxiyun.secretKey:SECRET_KEY}")
@@ -50,13 +53,15 @@ public class VoiceServiceImpl implements VoiceService {
                 log.warn("语音识别接口返回错误: {}", JsonUtil.toString(result));
                 return null;
             }
+
             return result.getBody().stream().map(IATResult.FrameResult::getAnsStr).collect(Collectors.joining(""));
+
         } catch (Exception e) {
             log.error("语音识别出错", e);
             return null;
         }
     }
-    
+
     @Override
     public byte[] textVoice(TextVoiceReq textVoiceReq) {
         Map<String, String> headers = new HashMap<>();
@@ -71,7 +76,9 @@ public class VoiceServiceImpl implements VoiceService {
         try {
             Map<String, Object> map = new HashMap<>();
             String urlpath = MiguApiUrlUtils.doSignature(ttsUrl, "post", map, appId, secretKey);
+
             Response response = HttpUtils.postWithReponse(host + urlpath, JsonUtil.toString(textVoiceReq), headers);
+
             if (!"application/octet-stream".equals(response.header("Content-Type"))) {
                 log.warn("语音合成出错:" + response.body().string());
                 return null;
@@ -82,5 +89,5 @@ public class VoiceServiceImpl implements VoiceService {
             return null;
         }
     }
-    
+
 }

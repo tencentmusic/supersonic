@@ -552,3 +552,26 @@ CREATE TABLE `recommended_questions` (
     UNIQUE KEY `uk_agent_question` (`agent_id`,`question`),
     KEY `idx_agent_status` (`agent_id`,`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='推荐问题配置表';
+
+CREATE TABLE `s2_chat_history` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `question` varchar(655) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户问题',
+    `side_info` text COLLATE utf8mb4_unicode_ci COMMENT '辅助信息',
+    `query_id` bigint DEFAULT NULL COMMENT '问答ID',
+    `agent_id` int DEFAULT NULL COMMENT '助理ID',
+    `db_schema` text COLLATE utf8mb4_unicode_ci COMMENT 'Schema映射',
+    `s2_sql` text COLLATE utf8mb4_unicode_ci COMMENT '大模型解析SQL',
+    `status` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '状态',
+    `llm_review` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '大模型评估结果',
+    `llm_comment` text COLLATE utf8mb4_unicode_ci COMMENT '大模型评估意见',
+    `human_review` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '管理员评估结果',
+    `human_comment` text COLLATE utf8mb4_unicode_ci COMMENT '管理员评估意见',
+    `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `created_by` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `updated_by` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_query_id` (`query_id`),
+    KEY `idx_agent_id` (`agent_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='存储所有问答记录的表';
