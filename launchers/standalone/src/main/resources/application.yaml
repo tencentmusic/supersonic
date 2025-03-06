@@ -59,9 +59,3 @@ knife4j:
       title: ChatBI API Documents
       description: ChatBI API Documents
 
-lingxiyun:
-  appId: aay2iuuc
-  secretKey: aecf0f0fcd7648b9bd06a5d4e5ac835b
-  host: https://hippo.migu.cn
-  iatUrl: /lingxiyun/api/iat/v1
-  ttsUrl: /lingxiyun/api/tts/v1
