@@ -37,7 +37,7 @@
         <pagehelper.spring.version>2.1.0</pagehelper.spring.version>
         <mybatis.version>3.5.3</mybatis.version>
         <guava.version>32.0.0-jre</guava.version>
-        <hanlp.version>portable-1.8.3</hanlp.version>
+        <hanlp.version>portable-1.8.4</hanlp.version>
         <hadoop.version>2.7.2</hadoop.version>
         <commons.lang.version>2.6</commons.lang.version>
         <commons.lang3.version>3.7</commons.lang3.version>
