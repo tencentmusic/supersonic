@@ -157,8 +157,11 @@ public class ModelConverter {
             modelDetail.setQueryType(ModelDefineType.TABLE_QUERY.getName());
             modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
         }
+        List<Field> fields = new ArrayList<>();
         for (ColumnSchema columnSchema : modelSchema.getColumnSchemas()) {
             FieldType fieldType = columnSchema.getFiledType();
+            fields.add(new Field(columnSchema.getName(), columnSchema.getDataType()));
+
             if (getIdentifyType(fieldType) != null) {
                 Identify identify = new Identify(columnSchema.getName(),
                         getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
@@ -174,6 +177,7 @@ public class ModelConverter {
                 modelDetail.getDimensions().add(dim);
             }
         }
+        modelDetail.setFields(fields);
         modelReq.setModelDetail(modelDetail);
         return modelReq;
     }
