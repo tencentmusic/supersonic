@@ -425,8 +425,12 @@ public class DictUtils {
                 .format(DateTimeFormatter.ofPattern(format));
         String end = LocalDate.now().minusDays(itemValueDateEnd)
                 .format(DateTimeFormatter.ofPattern(format));
-        return String.format("( %s >= '%s' and %s <= '%s' )", dateConf.getDateField(), start,
-                dateConf.getDateField(), end);
+        if (Objects.nonNull(dateConf)) {
+            return String.format("( %s >= '%s' and %s <= '%s' )", dateConf.getDateField(), start,
+                    dateConf.getDateField(), end);
+        } else {
+            return String.format("( %s >= '%s' and %s <= '%s' )", "dt", start, "dt", end);
+        }
     }
 
     private String generateDictDateFilter(DictItemResp dictItemResp) {
@@ -440,7 +444,7 @@ public class DictUtils {
         }
         // 未进行设置
         if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
-            return defaultDateFilter(config.getDateConf());
+            return defaultDateFilter(null);
         }
         // 全表扫描
         if (DateConf.DateMode.ALL.equals(config.getDateConf().getDateMode())) {
