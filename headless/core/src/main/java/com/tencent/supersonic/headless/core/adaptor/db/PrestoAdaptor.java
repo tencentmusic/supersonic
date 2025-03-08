@@ -83,6 +83,7 @@ public class PrestoAdaptor extends BaseDbAdaptor {
 
     @Override
     public String rewriteSql(String sql) {
+        sql = sql.replaceAll("`", "\"");
         return sql;
     }
 }
