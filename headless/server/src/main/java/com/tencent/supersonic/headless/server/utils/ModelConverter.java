@@ -167,9 +167,9 @@ public class ModelConverter {
                         getIdentifyType(fieldType).name(), semanticColumn.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure =
-                        new Measure(semanticColumn.getName(), semanticColumn.getColumnName(),
-                                semanticColumn.getExpr(), semanticColumn.getAgg().getOperator(), 1);
+                Measure measure = new Measure(semanticColumn.getName(),
+                        semanticColumn.getColumnName(), semanticColumn.getExpr(),
+                        semanticColumn.getAgg().getOperator(), semanticColumn.getUnit(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
                 Dimension dim = new Dimension(semanticColumn.getName(),

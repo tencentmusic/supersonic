@@ -21,4 +21,6 @@ public class SemanticColumn {
 
     private String expr;
 
+    private String unit;
+
 }
