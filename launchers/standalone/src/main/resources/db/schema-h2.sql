@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS s2_model_rela
     from_model_id    BIGINT,
     to_model_id      BIGINT,
     join_type       VARCHAR(255),
-    join_condition  VARCHAR(255),
+    join_condition  TEXT,
     PRIMARY KEY (`id`)
 );
 

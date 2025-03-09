@@ -465,7 +465,7 @@ CREATE TABLE IF NOT EXISTS s2_model_rela (
     from_model_id bigint,
     to_model_id bigint,
     join_type VARCHAR(255),
-    join_condition VARCHAR(255)
+    join_condition text
 );
 
 CREATE TABLE IF NOT EXISTS s2_collect (
