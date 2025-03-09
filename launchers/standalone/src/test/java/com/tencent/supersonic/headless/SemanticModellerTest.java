@@ -39,14 +39,14 @@ public class SemanticModellerTest extends BaseTest {
         Map<String, ModelSchema> modelSchemaMap = modelService.buildModelSchema(modelSchemaReq);
 
         ModelSchema userModelSchema = modelSchemaMap.get("s2_user_department");
-        Assertions.assertEquals(2, userModelSchema.getColumnSchemas().size());
+        Assertions.assertEquals(2, userModelSchema.getSemanticColumns().size());
         Assertions.assertEquals(FieldType.primary_key,
                 userModelSchema.getColumnByName("user_name").getFiledType());
         Assertions.assertEquals(FieldType.categorical,
                 userModelSchema.getColumnByName("department").getFiledType());
 
         ModelSchema stayTimeModelSchema = modelSchemaMap.get("s2_stay_time_statis");
-        Assertions.assertEquals(4, stayTimeModelSchema.getColumnSchemas().size());
+        Assertions.assertEquals(4, stayTimeModelSchema.getSemanticColumns().size());
         Assertions.assertEquals(FieldType.foreign_key,
                 stayTimeModelSchema.getColumnByName("user_name").getFiledType());
         Assertions.assertEquals(FieldType.partition_time,
@@ -72,7 +72,7 @@ public class SemanticModellerTest extends BaseTest {
         Map<String, ModelSchema> modelSchemaMap = modelService.buildModelSchema(modelSchemaReq);
 
         ModelSchema pvModelSchema = modelSchemaMap.values().iterator().next();
-        Assertions.assertEquals(5, pvModelSchema.getColumnSchemas().size());
+        Assertions.assertEquals(5, pvModelSchema.getSemanticColumns().size());
         Assertions.assertEquals(FieldType.partition_time,
                 pvModelSchema.getColumnByName("imp_date").getFiledType());
         Assertions.assertEquals(FieldType.categorical,
