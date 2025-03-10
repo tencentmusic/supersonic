@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.tencent.supersonic.common.pojo.ResultData;
 
 @Controller
 @RequestMapping("/api/chat/voice")
@@ -22,8 +23,8 @@ public class VoiceController {
 
     @PostMapping("/iat")
     @ResponseBody
-    public String voiceText(@RequestBody byte[] voice) {
-        return voiceService.voiceText(voice);
+    public ResultData<String> voiceText(@RequestBody byte[] voice) {
+        return ResultData.success(voiceService.voiceText(voice));
     }
 
     @PostMapping("/tts")
