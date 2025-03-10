@@ -14,12 +14,12 @@ public class NL2PluginParser implements ChatQueryParser {
     private final List<PluginRecognizer> pluginRecognizers =
             ComponentFactory.getPluginRecognizers();
 
+    public boolean accept(ParseContext parseContext) {
+        return parseContext.getAgent().containsPluginTool();
+    }
+
     @Override
     public void parse(ParseContext parseContext) {
-        if (!parseContext.getAgent().containsPluginTool()) {
-            return;
-        }
-
         pluginRecognizers.forEach(pluginRecognizer -> {
             pluginRecognizer.recognize(parseContext);
             log.info("{} recallResult:{}", pluginRecognizer.getClass().getSimpleName(),

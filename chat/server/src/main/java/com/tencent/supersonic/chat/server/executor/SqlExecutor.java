@@ -25,6 +25,11 @@ import java.util.Objects;
 
 public class SqlExecutor implements ChatQueryExecutor {
 
+    @Override
+    public boolean accept(ExecuteContext executeContext) {
+        return true;
+    }
+
     @SneakyThrows
     @Override
     public QueryResult execute(ExecuteContext executeContext) {

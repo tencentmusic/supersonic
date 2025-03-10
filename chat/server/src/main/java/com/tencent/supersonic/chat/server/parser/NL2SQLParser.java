@@ -73,12 +73,12 @@ public class NL2SQLParser implements ChatQueryParser {
                         .build());
     }
 
+    public boolean accept(ParseContext parseContext) {
+        return parseContext.enableNL2SQL();
+    }
+
     @Override
     public void parse(ParseContext parseContext) {
-        if (!parseContext.enableNL2SQL()) {
-            return;
-        }
-
         // first go with rule-based parsers unless the user has already selected one parse.
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);

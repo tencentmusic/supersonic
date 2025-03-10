@@ -5,5 +5,7 @@ import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 
 public interface ChatQueryExecutor {
 
+    boolean accept(ExecuteContext executeContext);
+
     QueryResult execute(ExecuteContext executeContext);
 }

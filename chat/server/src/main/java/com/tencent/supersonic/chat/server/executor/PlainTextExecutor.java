@@ -37,11 +37,12 @@ public class PlainTextExecutor implements ChatQueryExecutor {
     }
 
     @Override
-    public QueryResult execute(ExecuteContext executeContext) {
-        if (!"PLAIN_TEXT".equals(executeContext.getParseInfo().getQueryMode())) {
-            return null;
-        }
+    public boolean accept(ExecuteContext executeContext) {
+        return "PLAIN_TEXT".equals(executeContext.getParseInfo().getQueryMode());
+    }
 
+    @Override
+    public QueryResult execute(ExecuteContext executeContext) {
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
         ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);

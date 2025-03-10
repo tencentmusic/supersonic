@@ -25,12 +25,12 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
     @Override
     public List<ChatModel> getChatModels(User user) {
         return list().stream().map(this::convert).filter(chatModel -> {
-           if (chatModel.isPublic() || user.isSuperAdmin()
-                   || chatModel.getCreatedBy().equals(user.getName())
-                   || chatModel.getViewers().contains(user.getName())) {
-               return true;
-           }
-           return false;
+            if (chatModel.isPublic() || user.isSuperAdmin()
+                    || chatModel.getCreatedBy().equals(user.getName())
+                    || chatModel.getViewers().contains(user.getName())) {
+                return true;
+            }
+            return false;
         }).collect(Collectors.toList());
     }
 
