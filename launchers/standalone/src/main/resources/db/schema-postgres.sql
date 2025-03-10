@@ -147,7 +147,8 @@ CREATE TABLE IF NOT EXISTS s2_chat_model (
     updated_at timestamp NOT NULL,
     updated_by varchar(100) NOT NULL,
     admin varchar(500) DEFAULT NULL,
-    viewer varchar(500) DEFAULT NULL
+    viewer varchar(500) DEFAULT NULL,
+    is_open smallint DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS s2_database (
@@ -162,7 +163,8 @@ CREATE TABLE IF NOT EXISTS s2_database (
     updated_at timestamp NOT NULL,
     updated_by varchar(100) NOT NULL,
     admin varchar(500) DEFAULT NULL,
-    viewer varchar(500) DEFAULT NULL
+    viewer varchar(500) DEFAULT NULL,
+    is_open smallint DEFAULT NULL
 );
 
 

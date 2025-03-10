@@ -414,3 +414,7 @@ ALTER TABLE s2_agent add column `is_open` tinyint DEFAULT NULL COMMENT '是否�
 
 --20250309
 ALTER TABLE s2_model_rela alter column join_condition type text;
+
+--20250310
+ALTER TABLE s2_chat_model add column is_open tinyint DEFAULT NULL COMMENT '是否公开';
+ALTER TABLE s2_database add column is_open tinyint DEFAULT NULL COMMENT '是否公开';

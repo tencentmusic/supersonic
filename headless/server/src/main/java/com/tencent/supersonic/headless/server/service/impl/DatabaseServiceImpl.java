@@ -96,14 +96,16 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
                 databaseResp.setHasEditPermission(true);
                 databaseResp.setHasUsePermission(true);
             }
-            if (databaseResp.getViewers().contains(user.getName())) {
+            if (databaseResp.getViewers().contains(user.getName())
+                    || databaseResp.isPublic()) {
                 databaseResp.setHasUsePermission(true);
             }
         });
     }
 
     private boolean filterByAuth(DatabaseResp database, User user, AuthType authType) {
-        if (user.isSuperAdmin() || user.getName().equals(database.getCreatedBy())) {
+        if (database.isPublic() || user.isSuperAdmin()
+                || user.getName().equals(database.getCreatedBy())) {
             return true;
         }
         authType = authType == null ? AuthType.VIEWER : authType;

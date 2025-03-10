@@ -32,9 +32,12 @@ public class DatabaseReq extends RecordInfo {
     private String description;
 
     private String schema;
+
     private String url;
 
     private List<String> admins = Lists.newArrayList();
 
     private List<String> viewers = Lists.newArrayList();
+
+    private Integer isOpen = 0;
 }

@@ -1,9 +1,11 @@
 package com.tencent.supersonic.common.config;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class ChatModel {
@@ -25,5 +27,11 @@ public class ChatModel {
 
     private String admin;
 
-    private String viewer;
+    private List<String> viewers = Lists.newArrayList();
+
+    private Integer isOpen = 0;
+
+    public boolean isPublic() {
+        return isOpen != null && isOpen == 1;
+    }
 }

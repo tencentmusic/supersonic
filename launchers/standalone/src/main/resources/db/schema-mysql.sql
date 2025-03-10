@@ -161,6 +161,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_model` (
    `updated_by` varchar(100) NOT NULL COMMENT '更新人',
    `admin` varchar(500) DEFAULT NULL,
    `viewer` varchar(500) DEFAULT NULL,
+   `is_open` tinyint DEFAULT NULL COMMENT '是否公开',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='对话大模型实例表';
 
@@ -177,6 +178,7 @@ CREATE TABLE IF NOT EXISTS `s2_database` (
    `updated_by` varchar(100) NOT NULL COMMENT '更新人',
    `admin` varchar(500) DEFAULT NULL,
    `viewer` varchar(500) DEFAULT NULL,
+   `is_open` tinyint DEFAULT NULL COMMENT '是否公开',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据库实例表';
 
