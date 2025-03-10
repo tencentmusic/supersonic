@@ -175,8 +175,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                         .onBackpressureBuffer(100);
                 // 订阅响应流，设置延迟为100毫秒，并行调度
                 Disposable subscription =
-                        thought.delayElements(Duration.ofMillis(300), Schedulers.parallel())
-                                .subscribe(chunk -> {
+                        thought.subscribe(chunk -> {
                                     try {
                                         // 发送单个数据块
                                         emitter.send(SseEmitter.event().data(chunk));
