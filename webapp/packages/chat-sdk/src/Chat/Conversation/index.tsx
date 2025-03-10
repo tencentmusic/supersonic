@@ -121,7 +121,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   return (
     <div className={conversationClass}>
       <div className={styles.rightSection}>
-        <div className={styles.titleBar}>
+        {/* <div className={styles.titleBar}>
           <div className={styles.title}>历史对话</div>
           <div className={styles.rightOperation}>
             <div
@@ -144,7 +144,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
             onChange={onSearchValueChange}
             allowClear
           />
-        </div>
+        </div> */}
         <div className={styles.conversationList}>
           {conversations
             .filter(

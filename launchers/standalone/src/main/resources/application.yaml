@@ -15,6 +15,7 @@ spring:
     import:
 #      - classpath:s2-config-prod.yaml
       - classpath:s2-config-local.yaml
+      - optional:classpath:custom-config.yaml
   main:
     allow-circular-references: true
   mvc:
