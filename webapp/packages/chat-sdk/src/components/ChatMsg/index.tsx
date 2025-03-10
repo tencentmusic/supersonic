@@ -130,7 +130,9 @@ const ChatMsg: React.FC<Props> = ({
     }
     return MsgContentTypeEnum.TABLE;
   };
-
+  const getNormalStyle = () => {
+    return {  width: 'calc(100vw - 410px)', overflowX: 'scroll' as React.CSSProperties["overflowX"] };
+  }
   const getMsgStyle = (type: MsgContentTypeEnum) => {
     if (isMobile) {
       return { maxWidth: 'calc(100vw - 20px)' };
@@ -342,11 +344,11 @@ const ChatMsg: React.FC<Props> = ({
   const style = type ? getMsgStyle(type) : undefined;
 
   return (
-    <div className={chartMsgClass} style={style}>
+    <div className={chartMsgClass} style={getNormalStyle()}>
       {dataSource?.length === 0 ? (
         <div>暂无数据</div>
       ) : (
-        <div>
+        <div style={style}>
           {getMsgContent()}
           {(isMultipleMetric || existDrillDownDimension) && !isSimpleMode && (
             <div
