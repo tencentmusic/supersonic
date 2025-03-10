@@ -80,9 +80,9 @@ public class SqlExecutor implements ChatQueryExecutor {
         queryResult.setQueryId(executeContext.getRequest().getQueryId());
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
-        queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
         SemanticQueryResp queryResp =
                 semanticLayer.queryByReq(sqlReq, executeContext.getRequest().getUser());
+        queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
             queryResult.setQuerySql(queryResp.getSql());
