@@ -203,18 +203,17 @@ const FilterItem: React.FC<Props> = ({
             ID切换)
           </span>
         </>
-      ) : filter.bizName?.includes('_id') ? (
-        <span className={`${prefixCls}-filter-value`}>
-          <Input
-            disabled={disabled}
-            className={`${prefixCls}-input-number-control`}
-            value={filter.value}
-            onChange={(event)=>{onChange(event.target.value)}}
-          />
-        </span>
       ) : (
         <span className={`${prefixCls}-filter-value`}>
-          {typeof filter.value !== 'object' ? filter.value : ''}
+          {typeof filter.value !== 'object' ?         
+            <span className={`${prefixCls}-filter-value`}>
+              <Input
+                disabled={disabled}
+                className={`${prefixCls}-input-number-control`}
+                value={filter.value}
+                onChange={(event)=>{onChange(event.target.value)}}
+              />
+          </span> : ''}
         </span>
       )}
     </span>
