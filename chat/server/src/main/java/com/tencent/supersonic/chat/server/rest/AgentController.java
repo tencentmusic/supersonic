@@ -4,12 +4,16 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.service.AgentService;
+import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.pojo.ResultData;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.service.SystemConfigService;
+import com.tencent.supersonic.common.util.ContextUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,13 +62,18 @@ public class AgentController {
     }
 
 
-
     @GetMapping("/hasAgentRight")
     public ResultData hasAgentList(@RequestParam(value = "id", required = true) Integer agentId,
             @RequestParam(value = "userName", required = true) String userName) {
         Agent agent = agentService.getAgent(agentId);
+        SystemConfigService sysParameterService = ContextUtils.getBean(SystemConfigService.class);
+        SystemConfig systemConfig = sysParameterService.getSystemConfig();
+        if (!CollectionUtils.isEmpty(systemConfig.getAdmins())
+                && systemConfig.getAdmins().contains(userName)) {
+            return ResultData.success(true);
+        }
         return ResultData.success(
-                agent.getAdmins().contains(userName) || agent.getViewers().contains(userName));
+                agent.getAdmins().contains(userName) || agent.getViewers().contains(userName) );
 
     }
 

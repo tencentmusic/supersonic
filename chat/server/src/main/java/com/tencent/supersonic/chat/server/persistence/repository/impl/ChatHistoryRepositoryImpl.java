@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatHistoryDO;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.ChatHistoryMapper;
 import com.tencent.supersonic.chat.server.persistence.mapper.ChatMemoryMapper;
+import com.tencent.supersonic.chat.server.persistence.repository.ChatHistoryRepository;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatMemoryRepository;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -14,22 +15,22 @@ import java.util.List;
 
 @Repository
 @Primary
-public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
+public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
 
-    private final ChatMemoryMapper chatMemoryMapper;
+    private final ChatHistoryMapper chatHistoryMapper;
 
-    public ChatMemoryRepositoryImpl(ChatMemoryMapper chatMemoryMapper) {
-        this.chatMemoryMapper = chatMemoryMapper;
+    public ChatHistoryRepositoryImpl(ChatHistoryMapper chatHistoryMapper) {
+        this.chatHistoryMapper = chatHistoryMapper;
     }
 
     @Override
-    public void createMemory(ChatMemoryDO chatMemoryDO) {
-        chatMemoryMapper.insert(chatMemoryDO);
+    public void createHistory(ChatHistoryDO chatHistoryDO) {
+        chatHistoryMapper.insert(chatHistoryDO);
     }
 
     @Override
-    public void updateMemory(ChatMemoryDO chatMemoryDO) {
-        chatMemoryMapper.updateById(chatMemoryDO);
+    public void updateHistory(ChatHistoryDO chatHistoryDO) {
+        chatHistoryMapper.updateById(chatHistoryDO);
     }
 
     @Override
@@ -38,17 +39,17 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
             return;
         }
         for (Long id : ids) {
-            chatMemoryMapper.deleteById(id);
+            chatHistoryMapper.deleteById(id);
         }
     }
 
     @Override
-    public ChatMemoryDO getMemory(Long id) {
-        return chatMemoryMapper.selectById(id);
+    public ChatHistoryDO getHistory(Long id) {
+        return chatHistoryMapper.selectById(id);
     }
 
     @Override
-    public List<ChatMemoryDO> getMemories(QueryWrapper<ChatMemoryDO> queryWrapper) {
-        return chatMemoryMapper.selectList(queryWrapper);
+    public List<ChatHistoryDO> getHistories(QueryWrapper<ChatHistoryDO> queryWrapper) {
+        return chatHistoryMapper.selectList(queryWrapper);
     }
 }

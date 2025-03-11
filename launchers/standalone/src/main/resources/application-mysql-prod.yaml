@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    #生产数据库
+    url: jdbc:mysql://10.194.146.153:3322/supersonic?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true
+    username: supersonic
+    password: SePo6*8iNsC
+    driver-class-name: com.mysql.cj.jdbc.Driver

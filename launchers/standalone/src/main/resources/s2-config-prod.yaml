@@ -4,10 +4,6 @@ s2:
       enable: true
 
   parser:
-    chat:
-      history:
-        num: 10
-        seconds: 600
     strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:
       number: 10
@@ -58,23 +54,15 @@ s2:
         ids: 1,2,3    # chatDomainIds
     parser:
       agent:
-        ids: 9,11,12,13
+        ids: 43
 
   dimension:
     mapping:
-      pid1_2022: "28"
-      pid2_2022: "29"
-      pid3_2022: "30"
-      pid4_2022: "31"
-      dataSet: 4
+      pid1_2022: "717"
+      pid2_2022: "719"
+      pid3_2022: "721"
+      pid4_2022: "723"
+      dataSet: 31
     database:
-      name: "supersonic"
-#      pid1_2022: "717"
-#      pid2_2022: "719"
-#      pid3_2022: "721"
-#      pid4_2022: "723"
-#      dataSet: 31
-#    database:
-#      name: "bvreport"
-
+      name: "bvreport"
 

@@ -3,10 +3,12 @@ package com.tencent.supersonic.chat.server.rest;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
+import com.tencent.supersonic.chat.api.pojo.request.ChatHistoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryCreateReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
+import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
@@ -26,6 +28,8 @@ public class MemoryController {
 
     @Autowired
     private MemoryService memoryService;
+    @Autowired
+    private HistoryService historyService;
 
     @PostMapping("/createMemory")
     public Boolean createMemory(@RequestBody ChatMemoryCreateReq chatMemoryCreateReq,
@@ -44,6 +48,7 @@ public class MemoryController {
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         memoryService.updateMemory(chatMemoryUpdateReq, user);
+        historyService.updateHistoryByQueryId(chatMemoryUpdateReq, user);
         return true;
     }
 

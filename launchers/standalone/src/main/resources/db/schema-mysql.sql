@@ -539,3 +539,39 @@ CREATE TABLE IF NOT EXISTS `s2_user_token` (
      unique key name_username (`name`, `user_name`),
      PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin comment='用户令牌信息表';
+
+CREATE TABLE `recommended_questions` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `agent_id` int NOT NULL COMMENT '助理ID',
+    `question` varchar(500) NOT NULL COMMENT '推荐问题',
+    `query_sql` text NOT NULL COMMENT '对应的物理SQL',
+    `status` tinyint DEFAULT '1' COMMENT '启用状态: 1=启用, 0=禁用',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_agent_question` (`agent_id`,`question`),
+    KEY `idx_agent_status` (`agent_id`,`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='推荐问题配置表';
+
+CREATE TABLE `s2_chat_history` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `question` varchar(655) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户问题',
+    `side_info` text COLLATE utf8mb4_unicode_ci COMMENT '辅助信息',
+    `query_id` bigint DEFAULT NULL COMMENT '问答ID',
+    `agent_id` int DEFAULT NULL COMMENT '助理ID',
+    `db_schema` text COLLATE utf8mb4_unicode_ci COMMENT 'Schema映射',
+    `s2_sql` text COLLATE utf8mb4_unicode_ci COMMENT '大模型解析SQL',
+    `status` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '状态',
+    `llm_review` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '大模型评估结果',
+    `llm_comment` text COLLATE utf8mb4_unicode_ci COMMENT '大模型评估意见',
+    `human_review` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '管理员评估结果',
+    `human_comment` text COLLATE utf8mb4_unicode_ci COMMENT '管理员评估意见',
+    `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `created_by` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `updated_by` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_query_id` (`query_id`),
+    KEY `idx_agent_id` (`agent_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='存储所有问答记录的表';

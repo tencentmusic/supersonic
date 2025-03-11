@@ -1,4 +1,4 @@
-import { Select, Spin, InputNumber, DatePicker } from 'antd';
+import { Select, Spin, InputNumber, DatePicker, Input } from 'antd';
 import { PREFIX_CLS } from '../../common/constants';
 import { ChatContextType, FilterItemType } from '../../common/type';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -138,6 +138,12 @@ const FilterItem: React.FC<Props> = ({
     onFiltersChange(newFilters);
   };
 
+  const isDate = (bizName: string) => {
+    const dimension = chatContext?.dimensions?.find(item => item.bizName === bizName);
+    if( (dimension as any)?.extInfo?.dimension_type === 'time') {
+      return true;
+    }
+  };
   return (
     <span className={prefixCls}>
       <span className={`${prefixCls}-filter-name`}>{filter.name}：</span>
@@ -167,7 +173,7 @@ const FilterItem: React.FC<Props> = ({
           value={filter.value}
           onChange={onChange}
         />
-      ) : typeof filter.value === 'string' && dayjs(filter.value, 'YYYY-MM-DD').isValid() ? (
+      ) : isDate(filter.bizName) ? (
         <DatePicker value={dayjs(filter.value)} onChange={onDateChange} allowClear={false} />
       ) : (typeof filter.value === 'string' || isArray(filter.value)) &&
         !filter.bizName?.includes('_id') ? (
@@ -197,6 +203,15 @@ const FilterItem: React.FC<Props> = ({
             ID切换)
           </span>
         </>
+      ) : filter.bizName?.includes('_id') ? (
+        <span className={`${prefixCls}-filter-value`}>
+          <Input
+            disabled={disabled}
+            className={`${prefixCls}-input-number-control`}
+            value={filter.value}
+            onChange={(event)=>{onChange(event.target.value)}}
+          />
+        </span>
       ) : (
         <span className={`${prefixCls}-filter-value`}>
           {typeof filter.value !== 'object' ? filter.value : ''}

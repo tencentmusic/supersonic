@@ -83,8 +83,8 @@ public class NL2SQLParser implements ChatQueryParser {
             return;
         }
 
-        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
-        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
+        // NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
+        // List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
 
         // // 检查当前请求的 agentId 是否在 simpleModelAgentIds 列表中
         // if (simpleModelAgentIds.contains(parseContext.getRequest().getAgentId())) {

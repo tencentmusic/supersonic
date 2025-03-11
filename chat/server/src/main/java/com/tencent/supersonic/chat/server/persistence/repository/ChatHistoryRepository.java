@@ -6,14 +6,14 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 
 import java.util.List;
 
-public interface ChatMemoryRepository {
-    void createMemory(ChatMemoryDO chatMemoryDO);
+public interface ChatHistoryRepository {
+    void createHistory(ChatHistoryDO chatHistoryDO);
 
-    void updateMemory(ChatMemoryDO chatMemoryDO);
+    void updateHistory(ChatHistoryDO chatHistoryDO);
 
     void batchDelete(List<Long> ids);
 
-    ChatMemoryDO getMemory(Long id);
+    ChatHistoryDO getHistory(Long id);
 
-    List<ChatMemoryDO> getMemories(QueryWrapper<ChatMemoryDO> queryWrapper);
+    List<ChatHistoryDO> getHistories(QueryWrapper<ChatHistoryDO> queryWrapper);
 }
