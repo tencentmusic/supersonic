@@ -71,7 +71,7 @@ SuperSonicには、サンプルのセマンティックモデルとチャット�
 
 ## ビルドと開発
 
-プロジェクト[ドキュメント](https://supersonicbi.github.io/docs/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/%E7%BC%96%E8%AF%91%E6%9E%84%E5%BB%BA/)を参照してください。
+プロジェクト[ドキュメント](https://supersonicbi.github.io/docs/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E9%83%A8%E7%BD%B2/)を参照してください。
 
 ## WeChat連絡先
 

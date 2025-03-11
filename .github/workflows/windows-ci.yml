@@ -26,7 +26,7 @@ jobs:
           distribution: 'adopt'  # You might need to change this if 'adopt' doesn't support JDK 21
 
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~\.m2  # Windows uses a backslash for paths
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}

@@ -28,6 +28,8 @@ public class DatabaseResp extends RecordInfo {
 
     private List<String> viewers = Lists.newArrayList();
 
+    private Integer isOpen = 0;
+
     private String type;
 
     private String url;
@@ -47,6 +49,10 @@ public class DatabaseResp extends RecordInfo {
     private boolean hasUsePermission = false;
 
     private boolean hasEditPermission = false;
+
+    public boolean isPublic() {
+        return isOpen != null && isOpen == 1;
+    }
 
     public String getHost() {
         Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+).*");

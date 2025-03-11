@@ -100,6 +100,7 @@ public class SemanticSchemaManager {
         modelDetail.getIdentifiers().addAll(getIdentify(d.getIdentifiers()));
         modelDetail.getMeasures().addAll(getMeasureParams(d.getMeasures()));
         modelDetail.getDimensions().addAll(getDimensions(d.getDimensions()));
+        modelDetail.getFields().addAll(d.getFields());
 
         return dataModel;
     }

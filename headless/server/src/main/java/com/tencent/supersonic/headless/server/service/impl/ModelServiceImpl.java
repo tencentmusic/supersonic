@@ -277,8 +277,8 @@ public class ModelServiceImpl implements ModelService {
         dimensionService.createDimensionBatch(dimensionReqs, user);
     }
 
-    private void batchCreateMetric(ModelDO datasourceDO, User user) throws Exception {
-        List<MetricReq> metricReqs = ModelConverter.convertMetricList(datasourceDO);
+    private void batchCreateMetric(ModelDO modelDO, User user) throws Exception {
+        List<MetricReq> metricReqs = ModelConverter.convertMetricList(modelDO);
         metricService.createMetricBatch(metricReqs, user);
     }
 

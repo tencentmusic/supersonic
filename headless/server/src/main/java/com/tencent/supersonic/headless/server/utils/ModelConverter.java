@@ -157,23 +157,28 @@ public class ModelConverter {
             modelDetail.setQueryType(ModelDefineType.TABLE_QUERY.getName());
             modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
         }
-        for (ColumnSchema columnSchema : modelSchema.getColumnSchemas()) {
-            FieldType fieldType = columnSchema.getFiledType();
+        List<Field> fields = new ArrayList<>();
+        for (SemanticColumn semanticColumn : modelSchema.getSemanticColumns()) {
+            FieldType fieldType = semanticColumn.getFiledType();
+            fields.add(new Field(semanticColumn.getName(), semanticColumn.getDataType()));
+
             if (getIdentifyType(fieldType) != null) {
-                Identify identify = new Identify(columnSchema.getName(),
-                        getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
+                Identify identify = new Identify(semanticColumn.getName(),
+                        getIdentifyType(fieldType).name(), semanticColumn.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getColumnName(), columnSchema.getAgg().getOperator(), 1);
+                Measure measure = new Measure(semanticColumn.getName(),
+                        semanticColumn.getColumnName(), semanticColumn.getExpr(),
+                        semanticColumn.getAgg().getOperator(), semanticColumn.getUnit(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getColumnName(),
-                        DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
+                Dimension dim = new Dimension(semanticColumn.getName(),
+                        semanticColumn.getColumnName(), semanticColumn.getExpr(),
+                        DimensionType.valueOf(semanticColumn.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);
             }
         }
+        modelDetail.setFields(fields);
         modelReq.setModelDetail(modelDetail);
         return modelReq;
     }

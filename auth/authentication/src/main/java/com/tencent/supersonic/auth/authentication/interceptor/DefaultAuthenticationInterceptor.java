@@ -3,7 +3,7 @@ package com.tencent.supersonic.auth.authentication.interceptor;
 import com.tencent.supersonic.auth.api.authentication.annotation.AuthenticationIgnore;
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
-import com.tencent.supersonic.auth.authentication.service.UserService;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -16,12 +16,7 @@ import org.springframework.web.method.HandlerMethod;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_IS_ADMIN;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_DISPLAY_NAME;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_EMAIL;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_ID;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_NAME;
-import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.TOKEN_USER_PASSWORD;
+import static com.tencent.supersonic.auth.api.authentication.constant.UserConstants.*;
 
 @Slf4j
 public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor {

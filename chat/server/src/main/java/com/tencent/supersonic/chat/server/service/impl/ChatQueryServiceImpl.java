@@ -95,7 +95,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
-        chatQueryParsers.forEach(p -> p.parse(parseContext));
+        for (ChatQueryParser parser : chatQueryParsers) {
+            if (parser.accept(parseContext)) {
+                parser.parse(parseContext);
+            }
+        }
 
         for (ParseResultProcessor processor : parseResultProcessors) {
             if (processor.accept(parseContext)) {
@@ -116,9 +120,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         QueryResult queryResult = new QueryResult();
         ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
         for (ChatQueryExecutor chatQueryExecutor : chatQueryExecutors) {
-            queryResult = chatQueryExecutor.execute(executeContext);
-            if (queryResult != null) {
-                break;
+            if (chatQueryExecutor.accept(executeContext)) {
+                queryResult = chatQueryExecutor.execute(executeContext);
+                if (queryResult != null) {
+                    break;
+                }
             }
         }
 

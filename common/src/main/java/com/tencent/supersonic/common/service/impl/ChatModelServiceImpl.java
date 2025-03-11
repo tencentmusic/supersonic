@@ -23,8 +23,15 @@ import java.util.stream.Collectors;
 public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModelDO>
         implements ChatModelService {
     @Override
-    public List<ChatModel> getChatModels() {
-        return list().stream().map(this::convert).collect(Collectors.toList());
+    public List<ChatModel> getChatModels(User user) {
+        return list().stream().map(this::convert).filter(chatModel -> {
+            if (chatModel.isPublic() || user.isSuperAdmin()
+                    || chatModel.getCreatedBy().equals(user.getName())
+                    || chatModel.getViewers().contains(user.getName())) {
+                return true;
+            }
+            return false;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -41,12 +48,15 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         chatModelDO.setCreatedBy(user.getName());
         chatModelDO.setCreatedAt(new Date());
         chatModelDO.setUpdatedBy(user.getName());
-        chatModelDO.setUpdatedAt(new Date());
+        chatModelDO.setUpdatedAt(chatModelDO.getCreatedAt());
+        chatModelDO.setIsOpen(chatModel.getIsOpen());
         if (StringUtils.isBlank(chatModel.getAdmin())) {
             chatModelDO.setAdmin(user.getName());
         }
+        if (!chatModel.getViewers().isEmpty()) {
+            chatModelDO.setViewer(JsonUtil.toString(chatModel.getViewers()));
+        }
         save(chatModelDO);
-        chatModel.setId(chatModelDO.getId());
         return chatModel;
     }
 
@@ -55,8 +65,12 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         ChatModelDO chatModelDO = convert(chatModel);
         chatModelDO.setUpdatedBy(user.getName());
         chatModelDO.setUpdatedAt(new Date());
+        chatModelDO.setIsOpen(chatModel.getIsOpen());
         if (StringUtils.isBlank(chatModel.getAdmin())) {
             chatModel.setAdmin(user.getName());
+        }
+        if (!chatModel.getViewers().isEmpty()) {
+            chatModelDO.setViewer(JsonUtil.toString(chatModel.getViewers()));
         }
         updateById(chatModelDO);
         return chatModel;
@@ -74,6 +88,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         ChatModel chatModel = new ChatModel();
         BeanUtils.copyProperties(chatModelDO, chatModel);
         chatModel.setConfig(JsonUtil.toObject(chatModelDO.getConfig(), ChatModelConfig.class));
+        chatModel.setViewers(JsonUtil.toList(chatModelDO.getViewer(), String.class));
         return chatModel;
     }
 
