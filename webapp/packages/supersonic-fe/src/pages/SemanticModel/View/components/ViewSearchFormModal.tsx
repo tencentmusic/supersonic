@@ -87,6 +87,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
     setSaveLoading(false);
     if (code === 200) {
       onSubmit?.(queryData);
+      message.success('保存成功');
     } else {
       message.error(msg);
     }
