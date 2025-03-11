@@ -30,10 +30,12 @@ services:
     privileged: true
     container_name: supersonic_standalone
     environment:
-      DB_HOST: supersonic_postgres
-      DB_NAME: postgres
-      DB_USERNAME: supersonic_user
-      DB_PASSWORD: supersonic_password
+      S2_DB_TYPE: postgres
+      S2_DB_HOST: supersonic_postgres
+      S2_DB_PORT: 5432
+      S2_DB_DATABASE: postgres
+      S2_DB_USER: supersonic_user
+      S2_DB_PASSWORD: supersonic_password
     ports:
       - "9080:9080"
     depends_on:
