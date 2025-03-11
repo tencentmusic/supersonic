@@ -197,15 +197,19 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     private LLMResp handleDirectLinkMode(LLMReq llmReq) {
         LLMResp llmResp = new LLMResp();
         llmResp.setQuery(llmReq.getQueryText());
-        List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
-
         Map<Prompt, List<Text2SQLExemplar>> prompt2Exemplar = new HashMap<>();
-        for (List<Text2SQLExemplar> exemplars : exemplarsList) {
-            llmReq.setDynamicExemplars(exemplars);
-            SimpleStrategy simpleStrategy = new SimpleStrategy();
-            Prompt promptText = simpleStrategy.generatePrompt(llmReq, promptHelper);
-            prompt2Exemplar.put(promptText, exemplars);
+        try {
+            List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplars(llmReq);
+            for (List<Text2SQLExemplar> exemplars : exemplarsList) {
+                llmReq.setDynamicExemplars(exemplars);
+                SimpleStrategy simpleStrategy = new SimpleStrategy();
+                Prompt promptText = simpleStrategy.generatePrompt(llmReq, promptHelper);
+                prompt2Exemplar.put(promptText, exemplars);
+            }
+        } catch (Exception e) {
+            log.warn("few-shot召唤异常", e);
         }
+
 
         ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
         ChatLanguageModel languageModel = getChatLanguageModel(chatApp.getChatModelConfig());
