@@ -4,6 +4,10 @@ s2:
       enable: true
 
   parser:
+    chat:
+      history:
+        num: 10
+        seconds: 600
     strategy: ONE_PASS_SELF_CONSISTENCY
     exemplar-recall:
       number: 10

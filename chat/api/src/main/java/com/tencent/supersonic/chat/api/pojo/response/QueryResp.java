@@ -20,4 +20,5 @@ public class QueryResp {
     private List<SemanticParseInfo> parseInfos;
     private List<SimilarQueryRecallResp> similarQueries;
     private ParseTimeCostResp parseTimeCost = new ParseTimeCostResp();
+    private String userName;
 }

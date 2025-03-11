@@ -53,6 +53,14 @@ public class ParserConfig extends ParameterConfig {
             new Parameter("s2.parser.field.count.threshold", "3", "语义字段个数阈值",
                     "如果映射字段小于该阈值，则将数据集所有字段输入LLM", "number", "语义解析配置");
 
+    public static final Parameter CHAT_HISTORY_NUM = new Parameter("s2.parser.chat.history.num",
+            "10", "多轮对话时查询的历史对话个数", "多轮对话时查询的历史对话个数", "number", "语义解析配置");
+
+    public static final Parameter CHAT_HISTORY_SECONDS =
+            new Parameter("s2.parser.chat.history.seconds", "300", "多轮对话时的会话上线下文持续时间",
+                    "多轮对话时的会话上线下文持续时间秒", "number", "语义解析配置");
+
+
     @Override
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(PARSER_LINKING_VALUE_ENABLE, PARSER_FEW_SHOT_NUMBER,
