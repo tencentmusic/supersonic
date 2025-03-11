@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.Dimension;
@@ -29,10 +30,7 @@ import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import com.tencent.supersonic.headless.server.annotation.S2DataPermission;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.manager.SemanticSchemaManager;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
 import com.tencent.supersonic.headless.server.utils.QueryUtils;
 import com.tencent.supersonic.headless.server.utils.StatUtils;
@@ -59,6 +57,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
     private final MetricDrillDownChecker metricDrillDownChecker;
     private final KnowledgeBaseService knowledgeBaseService;
     private final MetricService metricService;
+    private final DomainService domainService;
     private final DimensionService dimensionService;
     private final TranslatorConfig translatorConfig;
     private final QueryCache queryCache = ComponentFactory.getQueryCache();
@@ -69,7 +68,8 @@ public class S2SemanticLayerService implements SemanticLayerService {
             SchemaService schemaService, SemanticTranslator semanticTranslator,
             MetricDrillDownChecker metricDrillDownChecker,
             KnowledgeBaseService knowledgeBaseService, MetricService metricService,
-            DimensionService dimensionService, TranslatorConfig translatorConfig) {
+            DimensionService dimensionService, DomainService domainService,
+            TranslatorConfig translatorConfig) {
         this.statUtils = statUtils;
         this.queryUtils = queryUtils;
         this.semanticSchemaManager = semanticSchemaManager;
@@ -80,6 +80,7 @@ public class S2SemanticLayerService implements SemanticLayerService {
         this.knowledgeBaseService = knowledgeBaseService;
         this.metricService = metricService;
         this.dimensionService = dimensionService;
+        this.domainService = domainService;
         this.translatorConfig = translatorConfig;
     }
 
@@ -262,8 +263,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
     }
 
     @Override
-    public List<ItemResp> getDomainDataSetTree() {
-        return schemaService.getDomainDataSetTree();
+    public List<ItemResp> getDomainDataSetTree(User user) {
+        List<Long> domainsWithAuth = domainService.getDomainAuthSet(user, AuthType.VIEWER).stream()
+                .map(DomainResp::getId).toList();
+        return schemaService.getDomainDataSetTree().stream()
+                .filter(item -> domainsWithAuth.contains(item.getId())).toList();
     }
 
     @Override
