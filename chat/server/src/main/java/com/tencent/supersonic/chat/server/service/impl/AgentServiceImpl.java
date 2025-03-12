@@ -161,9 +161,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
                 JsonUtil.toMap(agentDO.getChatModelConfig(), String.class, ChatApp.class));
         agent.setVisualConfig(JsonUtil.toObject(agentDO.getVisualConfig(), VisualConfig.class));
         agent.getChatAppConfig().values().forEach(c -> {
-            ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
-            if (Objects.nonNull(chatModel)) {
-                c.setChatModelConfig(chatModelService.getChatModel(c.getChatModelId()).getConfig());
+            if (c.isEnable()) {// 优化，减少访问数据库的次数
+                ChatModel chatModel = chatModelService.getChatModel(c.getChatModelId());
+                if (Objects.nonNull(chatModel)) {
+                    c.setChatModelConfig(chatModel.getConfig());
+                }
             }
         });
         agent.setAdmins(JsonUtil.toList(agentDO.getAdmin(), String.class));
