@@ -9,7 +9,6 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.MiguApiUrlUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +53,8 @@ public class VoiceServiceImpl implements VoiceService {
                 return null;
             }
 
-            return result.getBody().stream().map(IATResult.FrameResult::getAnsStr).collect(Collectors.joining(""));
+            return result.getBody().stream().map(IATResult.FrameResult::getAnsStr)
+                    .collect(Collectors.joining(""));
 
         } catch (Exception e) {
             log.error("语音识别出错", e);
@@ -77,7 +77,8 @@ public class VoiceServiceImpl implements VoiceService {
             Map<String, Object> map = new HashMap<>();
             String urlpath = MiguApiUrlUtils.doSignature(ttsUrl, "post", map, appId, secretKey);
 
-            Response response = HttpUtils.postWithReponse(host + urlpath, JsonUtil.toString(textVoiceReq), headers);
+            Response response = HttpUtils.postWithReponse(host + urlpath,
+                    JsonUtil.toString(textVoiceReq), headers);
 
             if (!"application/octet-stream".equals(response.header("Content-Type"))) {
                 log.warn("语音合成出错:" + response.body().string());

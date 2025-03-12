@@ -73,7 +73,7 @@ public class AgentController {
             return ResultData.success(true);
         }
         return ResultData.success(
-                agent.getAdmins().contains(userName) || agent.getViewers().contains(userName) );
+                agent.getAdmins().contains(userName) || agent.getViewers().contains(userName));
 
     }
 

@@ -95,9 +95,9 @@ public class HttpUtils {
             Class<T> classOfT) throws IOException {
         return doRequest(postRequest(url, body, headers), classOfT);
     }
-    
-    public static Response postWithReponse(String url, Object body, Map<String,
-            String> headers) throws IOException {
+
+    public static Response postWithReponse(String url, Object body, Map<String, String> headers)
+            throws IOException {
         Request request = postRequest(url, body, headers);
         long beginTime = System.currentTimeMillis();
         try {
@@ -173,7 +173,7 @@ public class HttpUtils {
             return RequestBody.create(MediaType.parse("application/x-www-form-urlencoded"),
                     (String) body);
         }
-        
+
         if (body instanceof byte[]) {
             return RequestBody.create((byte[]) body);
         }
