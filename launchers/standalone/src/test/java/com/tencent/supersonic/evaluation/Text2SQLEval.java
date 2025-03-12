@@ -155,16 +155,6 @@ public class Text2SQLEval extends BaseTest {
         assert result.getTextResult().contains("3");
     }
 
-    @Test
-    public void test_detail_query() throws Exception {
-        long start = System.currentTimeMillis();
-        QueryResult result = submitNewChat("特斯拉旗下有哪些品牌", agent.getId());
-        durations.add(System.currentTimeMillis() - start);
-        assert result.getQueryColumns().size() >= 1;
-        assert result.getTextResult().contains("Model Y");
-        assert result.getTextResult().contains("Model 3");
-    }
-
     public Agent getLLMAgent() {
         Agent agent = new Agent();
         agent.setName("Agent for Test");

@@ -333,7 +333,6 @@ public class S2VisitsDemo extends S2BaseDemo {
         metricReq.setSensitiveLevel(SensitiveLevelEnum.HIGH.getCode());
         metricReq.setDescription("每个用户平均访问的次数");
         metricReq.setClassifications(Collections.singletonList("核心指标"));
-        metricReq.setAlias("平均访问次数");
         MetricDefineByMetricParams metricTypeParams = new MetricDefineByMetricParams();
         metricTypeParams.setExpr("pv/uv");
         List<MetricParam> metrics = new ArrayList<>();
