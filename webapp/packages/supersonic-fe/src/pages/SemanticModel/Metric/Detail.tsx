@@ -107,20 +107,8 @@ const MetricDetail: React.FC<Props> = () => {
 
   return (
     <>
-      <Helmet
-        title={`${metircData?.id ? `[指标]${metircData?.name}-${BASE_TITLE}` : '新建指标'}`}
-      />
       <div className={styles.metricDetailWrapper}>
         <div className={styles.metricDetail}>
-          <div className={styles.siderContainer}>
-            <MetricInfoSider
-              relationDimensionOptions={relationDimensionOptions}
-              metircData={metircData}
-              onDimensionRelationBtnClick={() => {
-                setMetricRelationModalOpenState(true);
-              }}
-            />
-          </div>
           <div className={styles.tabContainer}>
             <Tabs
               defaultActiveKey="metricCaliberInput"
@@ -144,6 +132,15 @@ const MetricDetail: React.FC<Props> = () => {
               }}
               size="large"
               className={styles.metricDetailTab}
+            />
+          </div>
+          <div className={styles.siderContainer}>
+            <MetricInfoSider
+              relationDimensionOptions={relationDimensionOptions}
+              metircData={metircData}
+              onDimensionRelationBtnClick={() => {
+                setMetricRelationModalOpenState(true);
+              }}
             />
           </div>
         </div>

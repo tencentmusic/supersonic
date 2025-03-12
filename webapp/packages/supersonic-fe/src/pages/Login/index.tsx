@@ -41,8 +41,9 @@ const LoginPage: React.FC = () => {
       }
       history.push('/');
       return;
+    } else {
+      message.error(msg);
     }
-    message.success(msg);
   };
 
   // 处理登录按钮响应
@@ -55,12 +56,14 @@ const LoginPage: React.FC = () => {
   // 处理注册弹窗确定按钮
   const handleRegister = async (values: RegisterFormDetail) => {
     const enCodeValues = { ...values, password: encryptPassword(values.password, encryptKey) };
-    const { code } = await userRegister(enCodeValues);
+    const { code, msg } = await userRegister(enCodeValues);
     if (code === 200) {
       message.success('注册成功');
       setCreateModalVisible(false);
       // 注册完自动帮用户登录
       await loginDone(enCodeValues);
+    } else {
+      message.error(msg);
     }
   };
 
