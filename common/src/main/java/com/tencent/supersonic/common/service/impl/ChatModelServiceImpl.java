@@ -57,6 +57,7 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
             chatModelDO.setViewer(JsonUtil.toString(chatModel.getViewers()));
         }
         save(chatModelDO);
+        chatModel.setId(chatModelDO.getId());
         return chatModel;
     }
 
