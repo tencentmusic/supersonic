@@ -26,6 +26,8 @@ import com.tencent.supersonic.headless.api.pojo.response.MapResp;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
+import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
+import com.tencent.supersonic.headless.chat.service.RecommendedQuestionsService;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
 import dev.langchain4j.data.message.AiMessage;
@@ -38,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -185,14 +188,17 @@ public class NL2SQLParser implements ChatQueryParser {
 
     private void rewriteMultiTurn(ParseContext parseContext, QueryNLReq queryNLReq) {
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_MULTI_TURN);
-        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
+        RecommendedQuestionsService recommendedQuestionsService =
+                ContextUtils.getBean(RecommendedQuestionsService.class);
+        boolean isRecommendQuestion = recommendedQuestionsService.findQuerySqlByQuestion(
+                Math.toIntExact(queryNLReq.getAgentId()), queryNLReq.getQueryText()) != null;
+        if (Objects.isNull(chatApp) || !chatApp.isEnable() || isRecommendQuestion) {
             return;
         }
 
         // derive mapping result of current question and parsing result of last question.
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
         MapResp currentMapResult = chatLayerService.map(queryNLReq);
-
 
         List<QueryResp> historyQueries =
                 getHistoryQueries(parseContext.getRequest().getUser().getName(),
