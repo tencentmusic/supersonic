@@ -1,6 +1,9 @@
 package com.tencent.supersonic.common.util;
 
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -14,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 
 public class MiguApiUrlUtils {
@@ -130,4 +130,3 @@ public class MiguApiUrlUtils {
     }
 
 }
-

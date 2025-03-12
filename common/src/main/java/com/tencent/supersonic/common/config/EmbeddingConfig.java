@@ -31,9 +31,11 @@ public class EmbeddingConfig {
 
     @Value("${s2.embedding.memory.collection.prefix:history_}")
     private String historyCollectionPrefix;
+
     public String getMemoryCollectionName(Integer agentId) {
         return memoryCollectionPrefix + agentId;
     }
+
     public String getHistoryCollectionName(Integer agentId) {
         return historyCollectionPrefix + agentId;
     }

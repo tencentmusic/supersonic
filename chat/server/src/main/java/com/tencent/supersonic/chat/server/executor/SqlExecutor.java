@@ -36,10 +36,10 @@ public class SqlExecutor implements ChatQueryExecutor {
         }
         QueryResult queryResult = doExecute(executeContext);
         if (queryResult != null) {
-            if (queryResult.getQueryResults().isEmpty()){
+            if (queryResult.getQueryResults().isEmpty()) {
                 queryResult.setQueryMode("PLAIN_TEXT");
                 queryResult.setTextResult("当前时间周期暂无数据，请换个指标或者时间周期查询");
-            }else {
+            } else {
                 String textResult = ResultFormatter.transform2TextNew(queryResult.getQueryColumns(),
                         queryResult.getQueryResults());
                 queryResult.setTextResult(textResult);

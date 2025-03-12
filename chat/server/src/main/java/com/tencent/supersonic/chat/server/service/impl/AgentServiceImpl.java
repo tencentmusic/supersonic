@@ -166,10 +166,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         agent.setToolConfig(agentDO.getToolConfig());
         List<String> examples = JsonUtil.toList(agentDO.getExamples(), String.class);
         LinkedList<String> examplesLinked = Lists.newLinkedList(examples);
-         NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
-         List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
-         // 检查当前请求的 agentId 是否在 simpleModelAgentIds 列表中
-        if (!examplesLinked.contains("我能够查询的数据范围") && !simpleModelAgentIds.contains(agentDO.getId())) {
+        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
+        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
+        // 检查当前请求的 agentId 是否在 simpleModelAgentIds 列表中
+        if (!examplesLinked.contains("我能够查询的数据范围")
+                && !simpleModelAgentIds.contains(agentDO.getId())) {
             examplesLinked.addFirst("我能够查询的数据范围");
         }
         agent.setExamples(examplesLinked);

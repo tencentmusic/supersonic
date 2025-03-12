@@ -16,6 +16,7 @@ import com.tencent.supersonic.chat.server.persistence.mapper.ChatHistoryMapper;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatHistoryRepository;
 import com.tencent.supersonic.chat.server.pojo.ChatHistory;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
+import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
@@ -30,7 +31,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import com.tencent.supersonic.chat.server.pojo.ParseContext;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -56,26 +57,27 @@ public class HistoryServiceImpl implements HistoryService {
                     .question(exemplar.getQuestion()).sideInfo(exemplar.getSideInfo())
                     .dbSchema(exemplar.getDbSchema()).s2sql(exemplar.getSql())
                     .createdBy(parseContext.getRequest().getUser().getName())
-                    .updatedBy(parseContext.getRequest().getUser().getName())
-                    .createdAt(new Date()).build());
+                    .updatedBy(parseContext.getRequest().getUser().getName()).createdAt(new Date())
+                    .build());
         } else {
             createHistory(ChatHistory.builder().queryId(parseContext.getRequest().getQueryId())
                     .agentId(parseContext.getAgent().getId()).status(MemoryStatus.PENDING)
                     .question(parseContext.getRequest().getQueryText())
                     .createdBy(parseContext.getRequest().getUser().getName())
-                    .updatedBy(parseContext.getRequest().getUser().getName())
-                    .createdAt(new Date()).build());
+                    .updatedBy(parseContext.getRequest().getUser().getName()).createdAt(new Date())
+                    .build());
         }
         log.info("saveHistoryInfo");
     }
+
     public Text2SQLExemplar getExemplar(ParseContext parseContext) {
-        Text2SQLExemplar exemplar =
-                JsonUtil.toObject(
-                        JsonUtil.toString(parseContext.getResponse().getSelectedParses().get(0).getProperties()
-                                .get(Text2SQLExemplar.PROPERTY_KEY)),
-                        Text2SQLExemplar.class);
+        Text2SQLExemplar exemplar = JsonUtil.toObject(
+                JsonUtil.toString(parseContext.getResponse().getSelectedParses().get(0)
+                        .getProperties().get(Text2SQLExemplar.PROPERTY_KEY)),
+                Text2SQLExemplar.class);
         return exemplar;
     }
+
     @Override
     public void createHistory(ChatHistory history) {
         // if an existing enabled history has the same question, just skip
@@ -90,7 +92,8 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public void updateHistory(ChatHistoryUpdateReq chatHistoryUpdateReq, User user) {
-        ChatHistoryDO chatHistoryDO = chatHistoryRepository.getHistory(chatHistoryUpdateReq.getId());
+        ChatHistoryDO chatHistoryDO =
+                chatHistoryRepository.getHistory(chatHistoryUpdateReq.getId());
 
         LambdaUpdateWrapper<ChatHistoryDO> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(ChatHistoryDO::getId, chatHistoryDO.getId());
@@ -102,7 +105,8 @@ public class HistoryServiceImpl implements HistoryService {
                     chatHistoryUpdateReq.getLlmReviewRet().toString());
         }
         if (Objects.nonNull(chatHistoryUpdateReq.getLlmReviewCmt())) {
-            updateWrapper.set(ChatHistoryDO::getLlmReviewCmt, chatHistoryUpdateReq.getLlmReviewCmt());
+            updateWrapper.set(ChatHistoryDO::getLlmReviewCmt,
+                    chatHistoryUpdateReq.getLlmReviewCmt());
         }
         if (Objects.nonNull(chatHistoryUpdateReq.getHumanReviewRet())) {
             updateWrapper.set(ChatHistoryDO::getHumanReviewRet,
@@ -170,13 +174,14 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public void updateHistoryByQueryId(ChatMemoryUpdateReq chatMemoryUpdateReq, User user) {
-        ChatHistoryFilter historyFilter = ChatHistoryFilter.builder().queryId(chatMemoryUpdateReq.getQueryId()).build();
+        ChatHistoryFilter historyFilter =
+                ChatHistoryFilter.builder().queryId(chatMemoryUpdateReq.getQueryId()).build();
         List<ChatHistory> histories = getMemories(historyFilter);
         ChatHistoryUpdateReq chatHistoryUpdateReq = new ChatHistoryUpdateReq();
         histories.forEach(h -> {
             BeanUtils.copyProperties(chatMemoryUpdateReq, chatHistoryUpdateReq);
             chatHistoryUpdateReq.setId(h.getId());
-        updateHistory(chatHistoryUpdateReq, user);
+            updateHistory(chatHistoryUpdateReq, user);
         });
     }
 
