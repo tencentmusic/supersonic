@@ -72,7 +72,7 @@ public class SimpleStrategy {
                 + "2. 如果问题与提供的上下文无关，请礼貌引导用户提问与当前表及数据的相关问题。例：\n"
                 + "您好~这里是红海ChatBI，您的问题不在我的业务知识范围内，我可以帮你查询咪咕重点产品相关指标，比如上月咪咕视频APP活跃用户数。\n"
                 + "3. 只需要查询思路，不需要写出物理sql和数据库的英文字段，用中文名称代替。\n"
-                + "4. 输出内容请尽量格式清晰，思路正确，字数控制在60-80字以内。\n";
+                + "4. 输出内容请尽量格式清晰，思路正确，字数控制在80-100字左右。\n";
         Map<String, Object> variable = new HashMap<>();
         StringBuilder exemplars = new StringBuilder();
         variable.put("exemplar", exemplars);

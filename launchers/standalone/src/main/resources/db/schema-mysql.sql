@@ -574,4 +574,4 @@ CREATE TABLE `s2_chat_history` (
     KEY `idx_query_id` (`query_id`),
     KEY `idx_agent_id` (`agent_id`),
     KEY `idx_created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='存储所有问答记录的表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='存储所有问答记录的表';

@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.enums.JsqlParserType;
+import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
@@ -10,6 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
+import com.tencent.supersonic.chat.server.pojo.ChatHistory;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.processor.execute.DataInterpretProcessor;
@@ -111,7 +113,13 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
-        historyService.saveHistoryInfo(parseContext);
+        // 来闲聊这里不存历史记录
+        if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
+                parseContext.getResponse().getSelectedParses().get(0).getQueryMode(),
+                "PLAIN_TEXT")) {
+            historyService.saveHistoryInfo(parseContext);
+        }
+        // 不是简易模式的自然语言回答才走后续逻辑
         if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
                 parseContext.getResponse().getSelectedParses().get(0).getSqlInfo().getResultType(),
                 "text")) {
@@ -140,9 +148,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 break;
             }
         }
-
         executeContext.setResponse(queryResult);
         if (queryResult != null) {
+            savePlainText(queryResult, executeContext);
             for (ExecuteResultProcessor processor : executeResultProcessors) {
                 if (processor.accept(executeContext)) {
                     processor.process(executeContext);
@@ -152,6 +160,19 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         return queryResult;
+    }
+
+    private void savePlainText(QueryResult queryResult, ExecuteContext executeContext) {
+        if (!queryResult.getQueryMode().isEmpty()
+                && executeContext.getParseInfo().getSqlInfo().getResultType().isEmpty()
+                && "PLAIN_TEXT".equals(queryResult.getQueryMode())){
+            historyService.createHistory(ChatHistory.builder().queryId(executeContext.getRequest().getQueryId())
+                    .agentId(executeContext.getAgent().getId()).status(MemoryStatus.PENDING)
+                    .question(executeContext.getRequest().getQueryText()).s2sql(queryResult.getTextResult())
+                    .createdBy(executeContext.getRequest().getUser().getName())
+                    .updatedBy(executeContext.getRequest().getUser().getName()).createdAt(new Date())
+                    .build());
+        }
     }
 
     @Override

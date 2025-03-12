@@ -91,7 +91,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     interface StreamingSemanticParseExtractor {
         @SystemMessage("您的名字叫红海ChatBI, 您的职责是基于上下文给出查询思路.")
-        @UserMessage("仅展示查询思路，不要出现表字段, 60-80字以内. {{it}}")
+        @UserMessage("仅展示查询思路，不要出现表字段, 80-100字左右. {{it}}")
         Flux<String> generateStreamingSemanticParse(String text);
     }
 
@@ -168,14 +168,14 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                 // 生成prompt
                 SimpleStrategy simpleStrategy = new SimpleStrategy();
                 Prompt promptText = simpleStrategy.generateStreamPrompt(llmReq);
+
                 // 获取响应流，设置背压为最大100个元素
                 Flux<String> thought = extractor
                         .generateStreamingSemanticParse(promptText.toUserMessage().singleText())
                         .onBackpressureBuffer(100);
                 // 订阅响应流，设置延迟为100毫秒，并行调度
                 Disposable subscription =
-                        thought.delayElements(Duration.ofMillis(100), Schedulers.parallel())
-                                .subscribe(chunk -> {
+                        thought.subscribe(chunk -> {
                                     try {
                                         // 发送单个数据块
                                         emitter.send(SseEmitter.event().data(chunk));
