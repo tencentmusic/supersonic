@@ -27,4 +27,4 @@ WORKDIR /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION}
 EXPOSE 9080
 # Command to run the supersonic daemon
 RUN chmod +x bin/supersonic-daemon.sh
-CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone docker && tail -f /dev/null"]
+CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone ${S2_DB_TYPE} && tail -f /dev/null"]

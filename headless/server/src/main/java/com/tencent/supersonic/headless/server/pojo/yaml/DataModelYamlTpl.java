@@ -21,6 +21,8 @@ public class DataModelYamlTpl {
 
     private String tableQuery;
 
+    private String filterSql;
+
     private List<IdentifyYamlTpl> identifiers;
 
     private List<DimensionYamlTpl> dimensions;

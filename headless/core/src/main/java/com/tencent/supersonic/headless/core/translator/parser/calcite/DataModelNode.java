@@ -40,11 +40,23 @@ public class DataModelNode extends SemanticNode {
                     .equalsIgnoreCase(EngineType.POSTGRESQL.getName())) {
                 String fullTableName = String.join(".public.",
                         dataModel.getModelDetail().getTableQuery().split("\\."));
-                sqlTable = "select * from " + fullTableName;
+                sqlTable = "SELECT * FROM " + fullTableName;
             } else {
-                sqlTable = "select * from " + dataModel.getModelDetail().getTableQuery();
+                sqlTable = "SELECT * FROM " + dataModel.getModelDetail().getTableQuery();
             }
         }
+
+        // String filterSql = dataModel.getFilterSql();
+        String filterSql = dataModel.getModelDetail().getFilterSql();
+        if (filterSql != null && !filterSql.isEmpty()) {
+            boolean sqlContainWhere = sqlTable.toUpperCase().matches("(?s).*\\bWHERE\\b.*");
+            if (sqlContainWhere) {
+                sqlTable = String.format("%s AND %s", sqlTable, filterSql);
+            } else {
+                sqlTable = String.format("%s WHERE %s", sqlTable, filterSql);
+            }
+        }
+
         if (sqlTable.isEmpty()) {
             throw new Exception("DataModelNode build error [tableSqlNode not found]");
         }

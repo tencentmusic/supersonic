@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Modal, Input } from 'antd';
+import { Form, Button, Modal, Input, message } from 'antd';
 
 import type { RegisterFormDetail } from './types';
 
@@ -37,8 +37,9 @@ const RegisterForm: React.FC<RegisterFormProps> = (props) => {
     try {
       await handleUpdate(formValus);
       setSaveLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       setSaveLoading(false);
+      message.error(error.message);
     }
   };
 
