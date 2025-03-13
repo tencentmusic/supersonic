@@ -17,6 +17,9 @@ public class DbParameterFactory {
         parametersBuilder.put(EngineType.POSTGRESQL.getName(), new PostgresqlParametersBuilder());
         parametersBuilder.put(EngineType.HANADB.getName(), new HanadbParametersBuilder());
         parametersBuilder.put(EngineType.STARROCKS.getName(), new StarrocksParametersBuilder());
+        parametersBuilder.put(EngineType.KYUUBI.getName(), new KyuubiParametersBuilder());
+        parametersBuilder.put(EngineType.PRESTO.getName(), new PrestoParametersBuilder());
+        parametersBuilder.put(EngineType.TRINO.getName(), new TrinoParametersBuilder());
         parametersBuilder.put(EngineType.OTHER.getName(), new OtherParametersBuilder());
     }
 

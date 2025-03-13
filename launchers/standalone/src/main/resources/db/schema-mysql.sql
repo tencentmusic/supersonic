@@ -5,18 +5,21 @@ CREATE TABLE IF NOT EXISTS `s2_agent` (
     `examples` TEXT COLLATE utf8_unicode_ci DEFAULT NULL,
     `status` tinyint DEFAULT NULL,
     `model` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-    `tool_config` varchar(6000) COLLATE utf8_unicode_ci DEFAULT NULL,
-    `llm_config` varchar(2000) COLLATE utf8_unicode_ci DEFAULT NULL,
+    `tool_config` TEXT COLLATE utf8_unicode_ci DEFAULT NULL,
+    `llm_config` TEXT COLLATE utf8_unicode_ci DEFAULT NULL,
     `chat_model_config` text COLLATE utf8_unicode_ci DEFAULT NULL,
-    `visual_config` varchar(2000)  COLLATE utf8_unicode_ci DEFAULT NULL,
+    `visual_config` TEXT  COLLATE utf8_unicode_ci DEFAULT NULL,
     `enable_search` tinyint DEFAULT 1,
     `enable_feedback` tinyint DEFAULT 1,
     `created_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `created_at` datetime DEFAULT NULL,
     `updated_by` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
     `updated_at` datetime DEFAULT NULL,
-    `admin` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
-    `viewer` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
+     `admin` varchar(1000) DEFAULT NULL COMMENT '管理员',
+     `admin_org` varchar(1000) DEFAULT NULL COMMENT '管理员组织',
+     `is_open` tinyint DEFAULT NULL COMMENT '是否公开',
+     `viewer` varchar(1000) DEFAULT NULL COMMENT '可用用户',
+     `view_org` varchar(1000) DEFAULT NULL COMMENT '可用组织',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -158,6 +161,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_model` (
    `updated_by` varchar(100) NOT NULL COMMENT '更新人',
    `admin` varchar(500) DEFAULT NULL,
    `viewer` varchar(500) DEFAULT NULL,
+   `is_open` tinyint DEFAULT NULL COMMENT '是否公开',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='对话大模型实例表';
 
@@ -174,6 +178,7 @@ CREATE TABLE IF NOT EXISTS `s2_database` (
    `updated_by` varchar(100) NOT NULL COMMENT '更新人',
    `admin` varchar(500) DEFAULT NULL,
    `viewer` varchar(500) DEFAULT NULL,
+   `is_open` tinyint DEFAULT NULL COMMENT '是否公开',
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='数据库实例表';
 
@@ -401,7 +406,7 @@ CREATE TABLE IF NOT EXISTS s2_model_rela
     from_model_id    bigint,
     to_model_id      bigint,
     join_type       VARCHAR(255),
-    join_condition  VARCHAR(255)
+    join_condition  text
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `s2_collect` (

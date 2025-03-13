@@ -26,7 +26,7 @@
     </parent>
 
     <properties>
-        <revision>0.9.10-SNAPSHOT</revision>
+        <revision>1.0.0-SNAPSHOT</revision>
         <java.source.version>21</java.source.version>
         <java.target.version>21</java.target.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -47,6 +47,9 @@
         <jjwt.version>0.12.3</jjwt.version>
         <alibaba.druid.version>1.2.24</alibaba.druid.version>
         <mysql.connector.java.version>5.1.46</mysql.connector.java.version>
+        <kyuubi.version>1.10.1</kyuubi.version>
+        <presto.version>0.291</presto.version>
+        <trino.version>471</trino.version>
         <mybatis.plus.version>3.5.7</mybatis.plus.version>
         <httpclient5.version>5.4.1</httpclient5.version>
 <!--        <httpcore.version>4.4.16</httpcore.version>-->
@@ -79,6 +82,7 @@
         <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.1</stax2.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
+        <jgrapht.version>1.5.2</jgrapht.version>
     </properties>
 
     <dependencyManagement>
@@ -214,6 +218,21 @@
                 <version>${mysql.connector.java.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.kyuubi</groupId>
+                <artifactId>kyuubi-hive-jdbc</artifactId>
+                <version>${kyuubi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.facebook.presto</groupId>
+                <artifactId>presto-jdbc</artifactId>
+                <version>${presto.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.trino</groupId>
+                <artifactId>trino-jdbc</artifactId>
+                <version>${trino.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-inline</artifactId>
                 <version>${mockito-inline.version}</version>
@@ -222,6 +241,11 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk</artifactId>
                 <version>${aws-java-sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jgrapht</groupId>
+                <artifactId>jgrapht-core</artifactId>
+                <version>${jgrapht.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

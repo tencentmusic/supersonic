@@ -6,12 +6,12 @@ import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 
 public class PlainTextParser implements ChatQueryParser {
 
+    public boolean accept(ParseContext parseContext) {
+        return !parseContext.getAgent().containsAnyTool();
+    }
+
     @Override
     public void parse(ParseContext parseContext) {
-        if (parseContext.getAgent().containsAnyTool()) {
-            return;
-        }
-
         SemanticParseInfo parseInfo = new SemanticParseInfo();
         parseInfo.setQueryMode("PLAIN_TEXT");
         parseInfo.setId(1);

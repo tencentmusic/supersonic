@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
@@ -51,6 +52,7 @@ public class DataSetController {
     public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId) {
         MetaFilter metaFilter = new MetaFilter();
         metaFilter.setDomainId(domainId);
+        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
         return dataSetService.getDataSetList(metaFilter);
     }
 

@@ -15,12 +15,19 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMultiStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -97,15 +104,16 @@ public class QueryReqBuilder {
      * convert to QueryS2SQLReq
      *
      * @param querySql
-     * @param dataSetId
+     * @param dataSet
      * @return
      */
-    public static QuerySqlReq buildS2SQLReq(String querySql, Long dataSetId) {
+    public static QuerySqlReq buildS2SQLReq(String querySql, DataSetResp dataSet) {
         QuerySqlReq querySQLReq = new QuerySqlReq();
         if (Objects.nonNull(querySql)) {
             querySQLReq.setSql(querySql);
         }
-        querySQLReq.setDataSetId(dataSetId);
+        querySQLReq.setDataSetId(dataSet.getId());
+        querySQLReq.setDataSetName(dataSet.getName());
         return querySQLReq;
     }
 

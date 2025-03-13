@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.config.GeneralManageConfig;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.enums.DataType;
@@ -83,33 +84,65 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
 
     @Override
     public List<DatabaseResp> getDatabaseList(User user) {
-        List<DatabaseResp> databaseResps =
-                list().stream().map(DatabaseConverter::convert).collect(Collectors.toList());
-        fillPermission(databaseResps, user);
-        return databaseResps.stream().filter(DatabaseResp::isHasPermission)
+        List<DatabaseResp> databaseResps = list().stream().map(DatabaseConverter::convert)
+                .filter(database -> filterByAuth(database, user, AuthType.VIEWER))
                 .collect(Collectors.toList());
+        fillPermission(databaseResps, user);
+        return databaseResps;
     }
 
     private void fillPermission(List<DatabaseResp> databaseResps, User user) {
-        List<Long> chatDatabaseIds = generalManageConfig.getChatDatabaseIds();
-        boolean hasCommonDatabases = chatDatabaseIds != null && !chatDatabaseIds.isEmpty();
         databaseResps.forEach(databaseResp -> {
-            if (hasCommonDatabases && chatDatabaseIds.contains(databaseResp.getId())) {
+            if (databaseResp.getAdmins().contains(user.getName())
+                    || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
+                    || user.isSuperAdmin()) {
+                databaseResp.setHasPermission(true);
+                databaseResp.setHasEditPermission(true);
+                databaseResp.setHasUsePermission(true);
+            }
+            if (databaseResp.getViewers().contains(user.getName()) || databaseResp.isPublic()) {
                 databaseResp.setHasPermission(true);
                 databaseResp.setHasUsePermission(true);
-            } else {
-                if (databaseResp.getAdmins().contains(user.getName())
-                        || user.getName().equalsIgnoreCase(databaseResp.getCreatedBy())
-                        || user.isSuperAdmin()) {
-                    databaseResp.setHasPermission(true);
-                    databaseResp.setHasEditPermission(true);
-                    databaseResp.setHasUsePermission(true);
-                } else if (databaseResp.getViewers().contains(user.getName())) {
-                    databaseResp.setHasPermission(true);
-                    databaseResp.setHasUsePermission(true);
-                }
             }
         });
+    }
+
+    private boolean filterByAuth(DatabaseResp database, User user, AuthType authType) {
+        if (database.isPublic() || user.isSuperAdmin()
+                || user.getName().equals(database.getCreatedBy())) {
+            return true;
+        }
+        authType = authType == null ? AuthType.VIEWER : authType;
+        switch (authType) {
+            case ADMIN:
+                return checkAdminPermission(user, database);
+            case VIEWER:
+            default:
+                return checkViewPermission(user, database);
+        }
+    }
+
+    private boolean checkAdminPermission(User user, DatabaseResp database) {
+        List<String> admins = database.getAdmins();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        if (admins.contains(user.getName()) || database.getCreatedBy().equals(user.getName())) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkViewPermission(User user, DatabaseResp database) {
+        if (checkAdminPermission(user, database)) {
+            return true;
+        }
+        List<String> viewers = database.getViewers();
+
+        if (viewers.contains(user.getName())) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -226,10 +259,10 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public List<String> getTables(Long id, String db) throws SQLException {
+    public List<String> getTables(Long id, String catalog, String db) throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
         DbAdaptor dbAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        return dbAdaptor.getTables(DatabaseConverter.getConnectInfo(databaseResp), db);
+        return dbAdaptor.getTables(DatabaseConverter.getConnectInfo(databaseResp), catalog, db);
     }
 
     @Override
@@ -245,8 +278,8 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
             dbColumnMap.put(modelBuildReq.getSql(), columns);
         } else {
             for (String table : modelBuildReq.getTables()) {
-                List<DBColumn> columns =
-                        getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getDb(), table);
+                List<DBColumn> columns = getColumns(modelBuildReq.getDatabaseId(),
+                        modelBuildReq.getCatalog(), modelBuildReq.getDb(), table);
                 dbColumnMap.put(table, columns);
             }
         }
@@ -254,15 +287,17 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public List<DBColumn> getColumns(Long id, String db, String table) throws SQLException {
+    public List<DBColumn> getColumns(Long id, String catalog, String db, String table)
+            throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
-        return getColumns(databaseResp, db, table);
+        return getColumns(databaseResp, catalog, db, table);
     }
 
-    public List<DBColumn> getColumns(DatabaseResp databaseResp, String db, String table)
-            throws SQLException {
+    public List<DBColumn> getColumns(DatabaseResp databaseResp, String catalog, String db,
+            String table) throws SQLException {
         DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
-        return engineAdaptor.getColumns(DatabaseConverter.getConnectInfo(databaseResp), db, table);
+        return engineAdaptor.getColumns(DatabaseConverter.getConnectInfo(databaseResp), catalog, db,
+                table);
     }
 
     @Override

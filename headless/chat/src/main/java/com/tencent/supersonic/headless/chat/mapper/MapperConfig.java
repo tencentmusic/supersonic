@@ -57,4 +57,12 @@ public class MapperConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_MAPPER_ROUND_NUMBER =
             new Parameter("s2.mapper.embedding.round.number", "10", "向量召回最小相似度阈值",
                     "向量召回相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
+
+    public static final Parameter EMBEDDING_MAPPER_USE_LLM =
+            new Parameter("s2.mapper.embedding.use-llm-enhance", "false", "使用LLM对召回的向量进行二次判断开关",
+                    "embedding的结果再通过一次LLM来筛选，这时候忽略各个向量阀值", "bool", "Mapper相关配置");
+
+    public static final Parameter EMBEDDING_MAPPER_ALLOWED_SEGMENT_NATURE =
+            new Parameter("s2.mapper.embedding.allowed-segment-nature", "['v', 'd', 'a']",
+                    "使用LLM召回二次处理时对问题分词词性的控制", "分词后允许的词性才会进行向量召回", "list", "Mapper相关配置");
 }

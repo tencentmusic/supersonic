@@ -11,6 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 public class DbSchema {
 
+    private String catalog;
+
     private String db;
 
     private String table;

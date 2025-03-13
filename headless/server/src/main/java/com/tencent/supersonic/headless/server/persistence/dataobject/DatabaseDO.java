@@ -44,6 +44,8 @@ public class DatabaseDO {
     /** */
     private String viewer;
 
+    private Integer isOpen = 0;
+
     /** 配置信息 */
     private String config;
 

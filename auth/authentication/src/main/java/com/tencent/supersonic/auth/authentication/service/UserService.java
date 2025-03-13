@@ -27,14 +27,15 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserService
+        implements com.tencent.supersonic.auth.api.authentication.service.UserService {
 
     private SystemConfigService sysParameterService;
 
     @Autowired
     private AuthenticationConfig authenticationConfig;
 
-    public UserServiceImpl(SystemConfigService sysParameterService) {
+    public UserService(SystemConfigService sysParameterService) {
         this.sysParameterService = sysParameterService;
     }
 
@@ -130,6 +131,4 @@ public class UserServiceImpl implements UserService {
     public void deleteUserToken(Long id) {
         ComponentFactory.getUserAdaptor().deleteUserToken(id);
     }
-
-
 }

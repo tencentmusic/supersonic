@@ -44,4 +44,10 @@ public class AgentDO {
     private String admin;
 
     private String viewer;
+
+    private String adminOrg;
+
+    private String viewOrg;
+
+    private Integer isOpen;
 }

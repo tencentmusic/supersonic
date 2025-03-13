@@ -97,9 +97,11 @@ public class SemanticSchemaManager {
         modelDetail.setDbType(d.getType());
         modelDetail.setSqlQuery(d.getSqlQuery());
         modelDetail.setTableQuery(d.getTableQuery());
+        modelDetail.setFilterSql(d.getFilterSql());
         modelDetail.getIdentifiers().addAll(getIdentify(d.getIdentifiers()));
         modelDetail.getMeasures().addAll(getMeasureParams(d.getMeasures()));
         modelDetail.getDimensions().addAll(getDimensions(d.getDimensions()));
+        modelDetail.getFields().addAll(d.getFields());
 
         return dataModel;
     }

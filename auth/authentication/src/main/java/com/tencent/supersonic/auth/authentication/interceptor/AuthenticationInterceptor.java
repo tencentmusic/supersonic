@@ -1,7 +1,7 @@
 package com.tencent.supersonic.auth.authentication.interceptor;
 
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
-import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +16,7 @@ public abstract class AuthenticationInterceptor implements HandlerInterceptor {
 
     protected AuthenticationConfig authenticationConfig;
 
-    protected UserServiceImpl userServiceImpl;
+    protected UserService userService;
 
     protected TokenService tokenService;
 

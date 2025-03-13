@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.core.translator;
 
 import com.tencent.supersonic.common.calcite.SqlMergeWithUtils;
+import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
@@ -73,7 +74,7 @@ public class DefaultSemanticTranslator implements SemanticTranslator {
         String finalSql = null;
         if (sqlQuery.isSupportWith()) {
             EngineType engineType = queryStatement.getOntology().getDatabaseType();
-            if (!SqlMergeWithUtils.hasWith(engineType, ontologyOuterSql)) {
+            if (!SqlSelectHelper.hasWith(ontologyOuterSql)) {
                 finalSql = "with " + tables.stream()
                         .map(t -> String.format("%s as (%s)", t.getLeft(), t.getRight()))
                         .collect(Collectors.joining(",")) + "\n" + ontologyOuterSql;

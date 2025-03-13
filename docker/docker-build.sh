@@ -2,8 +2,8 @@
 
 # Function to execute the build script
 execute_build_script() {
-  echo "Executing build script: assembly/bin/supersonic-build.sh"
-  assembly/bin/supersonic-build.sh
+  echo "Executing build script: sh assembly/bin/supersonic-build.sh"
+  sh assembly/bin/supersonic-build.sh
 }
 
 # Function to build the Docker image

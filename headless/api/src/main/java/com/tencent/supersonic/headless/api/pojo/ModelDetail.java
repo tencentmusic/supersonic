@@ -24,6 +24,8 @@ public class ModelDetail {
 
     private String tableQuery;
 
+    private String filterSql;
+
     private List<Identify> identifiers = Lists.newArrayList();
 
     private List<Dimension> dimensions = Lists.newArrayList();
@@ -49,27 +51,4 @@ public class ModelDetail {
                 .collect(Collectors.toList());
     }
 
-    public List<Field> getFields() {
-        if (!CollectionUtils.isEmpty(fields)) {
-            return fields;
-        }
-        List<Field> fieldList = Lists.newArrayList();
-        // Compatible with older versions
-        if (!CollectionUtils.isEmpty(identifiers)) {
-            fieldList.addAll(identifiers.stream()
-                    .map(identify -> Field.builder().fieldName(identify.getFieldName()).build())
-                    .collect(Collectors.toSet()));
-        }
-        if (!CollectionUtils.isEmpty(dimensions)) {
-            fieldList.addAll(dimensions.stream()
-                    .map(dim -> Field.builder().fieldName(dim.getFieldName()).build())
-                    .collect(Collectors.toSet()));
-        }
-        if (!CollectionUtils.isEmpty(measures)) {
-            fieldList.addAll(measures.stream()
-                    .map(measure -> Field.builder().fieldName(measure.getFieldName()).build())
-                    .collect(Collectors.toSet()));
-        }
-        return fieldList;
-    }
 }

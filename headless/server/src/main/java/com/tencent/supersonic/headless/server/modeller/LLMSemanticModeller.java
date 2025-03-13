@@ -75,6 +75,7 @@ public class LLMSemanticModeller implements SemanticModeller {
         if (!chatApp.isPresent() || !chatApp.get().isEnable()) {
             return;
         }
+
         List<DbSchema> otherDbSchema = getOtherDbSchema(dbSchema, dbSchemas);
         ModelSchemaExtractor extractor =
                 AiServices.create(ModelSchemaExtractor.class, getChatModel(modelBuildReq));

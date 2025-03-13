@@ -52,8 +52,9 @@ public class ChatModelController {
     }
 
     @RequestMapping("/getModelList")
-    public List<ChatModel> getModelList(HttpServletRequest request, HttpServletResponse response) {
-        User user = UserHolder.findUser(request, response);
+    public List<ChatModel> getModelList(HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) {
+        User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return chatModelService.getChatModels(user);
     }
 

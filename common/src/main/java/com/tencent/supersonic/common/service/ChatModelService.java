@@ -9,8 +9,6 @@ import java.util.List;
 public interface ChatModelService {
     List<ChatModel> getChatModels(User user);
 
-    List<ChatModel> getChatModels();
-
     ChatModel getChatModel(Integer id);
 
     ChatModel createChatModel(ChatModel chatModel, User user);

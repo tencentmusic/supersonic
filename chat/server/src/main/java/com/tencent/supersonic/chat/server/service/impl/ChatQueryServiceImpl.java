@@ -112,7 +112,11 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
-        chatQueryParsers.forEach(p -> p.parse(parseContext));
+        for (ChatQueryParser parser : chatQueryParsers) {
+            if (parser.accept(parseContext)) {
+                parser.parse(parseContext);
+            }
+        }
         // 来闲聊这里不存历史记录
         if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
                 parseContext.getResponse().getSelectedParses().get(0).getQueryMode(),
@@ -129,7 +133,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 }
             }
         }
-
         if (!parseContext.needFeedback()) {
             chatManageService.batchAddParse(chatParseReq, parseContext.getResponse());
             chatManageService.updateParseCostTime(parseContext.getResponse());
@@ -143,11 +146,14 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         QueryResult queryResult = new QueryResult();
         ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
         for (ChatQueryExecutor chatQueryExecutor : chatQueryExecutors) {
-            queryResult = chatQueryExecutor.execute(executeContext);
-            if (queryResult != null) {
-                break;
+            if (chatQueryExecutor.accept(executeContext)) {
+                queryResult = chatQueryExecutor.execute(executeContext);
+                if (queryResult != null) {
+                    break;
+                }
             }
         }
+
         executeContext.setResponse(queryResult);
         if (queryResult != null) {
             savePlainText(queryResult, executeContext);
@@ -269,7 +275,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleLLMQueryMode(ChatQueryDataReq chatQueryDataReq, SemanticQuery semanticQuery,
-            DataSetSchema dataSetSchema, User user) throws Exception {
+                                    DataSetSchema dataSetSchema, User user) throws Exception {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         String rebuiltS2SQL;
         if (checkMetricReplace(chatQueryDataReq, parseInfo)) {
@@ -290,7 +296,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleRuleQueryMode(SemanticQuery semanticQuery, DataSetSchema dataSetSchema,
-            User user) {
+                                     User user) {
         log.info("rule begin replace metrics and revise filters!");
         validFilter(semanticQuery.getParseInfo().getDimensionFilters());
         validFilter(semanticQuery.getParseInfo().getMetricFilters());
@@ -307,7 +313,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private boolean checkMetricReplace(ChatQueryDataReq chatQueryDataReq,
-            SemanticParseInfo parseInfo) {
+                                       SemanticParseInfo parseInfo) {
         List<String> oriFields = getFieldsFromSql(parseInfo);
         Set<SchemaElement> metrics = chatQueryDataReq.getMetrics();
         if (CollectionUtils.isEmpty(oriFields) || CollectionUtils.isEmpty(metrics)) {
@@ -319,7 +325,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private String replaceFilters(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema) {
+                                  DataSetSchema dataSetSchema) {
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         JsqlParserType jsqlParserType = checkJsqlParserType(correctorSql);
@@ -711,8 +717,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private Set<String> updateDateInfo(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
-            List<FieldExpression> fieldExpressionList, List<Expression> addConditions) {
+                                       DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
+                                       List<FieldExpression> fieldExpressionList, List<Expression> addConditions) {
         Set<String> removeFieldNames = new HashSet<>();
         if (Objects.isNull(queryData.getDateInfo())) {
             return removeFieldNames;
@@ -741,7 +747,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
                 if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
                         && FilterOperatorEnum.LIKE.getValue()
-                                .equalsIgnoreCase(fieldExpression.getOperator())) {
+                        .equalsIgnoreCase(fieldExpression.getOperator())) {
                     Map<String, String> replaceMap = new HashMap<>();
                     String preValue = fieldExpression.getFieldValue().toString();
                     String curValue = queryFilter.getValue().toString();
@@ -762,7 +768,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private <T extends ComparisonOperator> void addTimeFilters(String date, T comparisonExpression,
-            List<Expression> addConditions, SchemaElement partitionDimension) {
+                                                               List<Expression> addConditions, SchemaElement partitionDimension) {
         Column column = new Column(partitionDimension.getName());
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
@@ -771,8 +777,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private Set<String> updateFilters(List<FieldExpression> fieldExpressionList,
-            Set<QueryFilter> metricFilters, Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                                      Set<QueryFilter> metricFilters, Set<QueryFilter> contextMetricFilters,
+                                      List<Expression> addConditions) {
         Set<String> removeFieldNames = new HashSet<>();
         if (CollectionUtils.isEmpty(metricFilters)) {
             return removeFieldNames;
@@ -792,7 +798,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleFilter(QueryFilter dslQueryFilter, Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                              List<Expression> addConditions) {
         FilterOperatorEnum operator = dslQueryFilter.getOperator();
 
         if (operator == FilterOperatorEnum.IN) {
@@ -808,7 +814,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add in condition to sql where condition
     private void addWhereInFilters(QueryFilter dslQueryFilter, InExpression inExpression,
-            Set<QueryFilter> contextMetricFilters, List<Expression> addConditions) {
+                                   Set<QueryFilter> contextMetricFilters, List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
         ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
         List<String> valueList =
@@ -833,8 +839,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add where filter
     private void addWhereFilters(QueryFilter dslQueryFilter,
-            ComparisonOperator comparisonExpression, Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                                 ComparisonOperator comparisonExpression, Set<QueryFilter> contextMetricFilters,
+                                 List<Expression> addConditions) {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
             columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";
