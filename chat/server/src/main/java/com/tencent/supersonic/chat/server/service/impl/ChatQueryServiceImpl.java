@@ -11,6 +11,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
+import com.tencent.supersonic.chat.server.parser.NL2SQLParser;
 import com.tencent.supersonic.chat.server.pojo.ChatHistory;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
@@ -24,8 +25,10 @@ import com.tencent.supersonic.chat.server.service.HistoryService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.jsqlparser.*;
+import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -68,6 +71,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.chat.server.parser.NL2SQLParser.APP_KEY_MULTI_TURN;
 import static com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq.SqlGenType.ONE_PASS_SELF_CONSISTENCY;
 
 @Slf4j
@@ -165,19 +169,21 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private void savePlainText(QueryResult queryResult, ExecuteContext executeContext) {
         if (!queryResult.getQueryMode().isEmpty()
                 && executeContext.getParseInfo().getSqlInfo().getResultType().isEmpty()
-                && "PLAIN_TEXT".equals(queryResult.getQueryMode())){
-            historyService.createHistory(ChatHistory.builder().queryId(executeContext.getRequest().getQueryId())
-                    .agentId(executeContext.getAgent().getId()).status(MemoryStatus.PENDING)
-                    .question(executeContext.getRequest().getQueryText()).s2sql(queryResult.getTextResult())
-                    .createdBy(executeContext.getRequest().getUser().getName())
-                    .updatedBy(executeContext.getRequest().getUser().getName()).createdAt(new Date())
-                    .build());
+                && "PLAIN_TEXT".equals(queryResult.getQueryMode())
+                && executeContext.getParseInfo().getSqlInfo().getCorrectedS2SQL() == null) {
+            historyService.createHistory(
+                    ChatHistory.builder().queryId(executeContext.getRequest().getQueryId())
+                            .agentId(executeContext.getAgent().getId()).status(MemoryStatus.PENDING)
+                            .question(executeContext.getRequest().getQueryText())
+                            .s2sql(queryResult.getTextResult())
+                            .createdBy(executeContext.getRequest().getUser().getName())
+                            .updatedBy(executeContext.getRequest().getUser().getName())
+                            .createdAt(new Date()).build());
         }
     }
 
     @Override
     public QueryResult dataInterpret(ChatExecuteReq chatExecuteReq) {
-
         ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
         QueryResult queryResult = new QueryResult();
         queryResult.setTextResult(chatExecuteReq.getTextResult());
@@ -192,10 +198,33 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     @Override
     public SseEmitter streamParse(ChatParseReq chatParseReq) {
-        LLMReq llmReq = new LLMReq();
-        llmReq.setQueryText(chatParseReq.getQueryText());
+        // 获取Agent配置
         AgentService agentService = ContextUtils.getBean(AgentService.class);
         Agent chatAgent = agentService.getAgent(chatParseReq.getAgentId());
+        // 检查是否开启多轮对话
+        ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY_MULTI_TURN);
+        if (chatApp != null && chatApp.isEnable()) {
+            Long queryId = chatParseReq.getQueryId();
+            if (Objects.isNull(queryId)) {
+                queryId = chatManageService.createChatQuery(chatParseReq);
+                chatParseReq.setQueryId(queryId);
+            }
+            ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
+            QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
+            queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
+            parseContext.setResponse(new ChatParseResp(parseContext.getResponse().getQueryId()));
+            // 遍历 chatQueryParsers，找到 NL2SQLParser 并调用 rewriteQuery 方法
+            for (ChatQueryParser parser : chatQueryParsers) {
+                if (parser instanceof NL2SQLParser) {
+                    ((NL2SQLParser) parser).rewriteMultiTurn(parseContext, queryNLReq);
+                    // 更新 chatParseReq 中的问题文本为改写后的文本
+                    chatParseReq.setQueryText(queryNLReq.getQueryText());
+                    break;
+                }
+            }
+        }
+        LLMReq llmReq = new LLMReq();
+        llmReq.setQueryText(chatParseReq.getQueryText());
         llmReq.setChatAppConfig(chatAgent.getChatAppConfig());
         OnePassSCSqlGenStrategy sqlGenStrategy =
                 (OnePassSCSqlGenStrategy) SqlGenStrategyFactory.get(ONE_PASS_SELF_CONSISTENCY);
@@ -269,7 +298,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleLLMQueryMode(ChatQueryDataReq chatQueryDataReq, SemanticQuery semanticQuery,
-            DataSetSchema dataSetSchema, User user) throws Exception {
+                                    DataSetSchema dataSetSchema, User user) throws Exception {
         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
         String rebuiltS2SQL;
         if (checkMetricReplace(chatQueryDataReq, parseInfo)) {
@@ -290,7 +319,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleRuleQueryMode(SemanticQuery semanticQuery, DataSetSchema dataSetSchema,
-            User user) {
+                                     User user) {
         log.info("rule begin replace metrics and revise filters!");
         validFilter(semanticQuery.getParseInfo().getDimensionFilters());
         validFilter(semanticQuery.getParseInfo().getMetricFilters());
@@ -307,7 +336,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private boolean checkMetricReplace(ChatQueryDataReq chatQueryDataReq,
-            SemanticParseInfo parseInfo) {
+                                       SemanticParseInfo parseInfo) {
         List<String> oriFields = getFieldsFromSql(parseInfo);
         Set<SchemaElement> metrics = chatQueryDataReq.getMetrics();
         if (CollectionUtils.isEmpty(oriFields) || CollectionUtils.isEmpty(metrics)) {
@@ -319,7 +348,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private String replaceFilters(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema) {
+                                  DataSetSchema dataSetSchema) {
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
         JsqlParserType jsqlParserType = checkJsqlParserType(correctorSql);
@@ -365,8 +394,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private String replaceFiltersByJsqlParserType(ChatQueryDataReq queryData,
-            SemanticParseInfo parseInfo, DataSetSchema dataSetSchema,
-            JsqlParserType jsqlParserType) {
+                                                  SemanticParseInfo parseInfo, DataSetSchema dataSetSchema,
+                                                  JsqlParserType jsqlParserType) {
 
         String correctorSql = parseInfo.getSqlInfo().getCorrectedS2SQL();
         log.info("correctorSql before replacing:{}", correctorSql);
@@ -466,7 +495,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private String rebuildCorrectorSql(String correctorSql, List<String> modifiedSubQueries,
-            JsqlParserType jsqlParserType) {
+                                       JsqlParserType jsqlParserType) {
         Select selectStatement = SqlSelectHelper.getSelect(correctorSql);
         if (!(selectStatement instanceof PlainSelect)) {
             throw new IllegalArgumentException("修正S2SQL的结构有误！");
@@ -555,7 +584,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void extractDateRangeFromExpression(Expression expression,
-            Map<String, String> dateRange) {
+                                                Map<String, String> dateRange) {
         if (expression instanceof EqualsTo equalsTo) {
             if (equalsTo.getLeftExpression() instanceof Column
                     && "数据日期".equals(((Column) equalsTo.getLeftExpression()).getColumnName())) {
@@ -609,9 +638,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
 
     private Set<String> updateDateInfoTest(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
-            List<FieldExpression> fieldExpressionList, List<Expression> addConditions,
-            Map<String, String> dateRange) {
+                                           DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
+                                           List<FieldExpression> fieldExpressionList, List<Expression> addConditions,
+                                           Map<String, String> dateRange) {
         Set<String> removeFieldNames = new HashSet<>();
         if (Objects.isNull(queryData.getDateInfo())) {
             return removeFieldNames;
@@ -655,7 +684,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
                 if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
                         && FilterOperatorEnum.LIKE.getValue()
-                                .equalsIgnoreCase(fieldExpression.getOperator())) {
+                        .equalsIgnoreCase(fieldExpression.getOperator())) {
                     Map<String, String> replaceMap = new HashMap<>();
                     String preValue = fieldExpression.getFieldValue().toString();
                     String curValue = queryFilter.getValue().toString();
@@ -711,8 +740,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private Set<String> updateDateInfo(ChatQueryDataReq queryData, SemanticParseInfo parseInfo,
-            DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
-            List<FieldExpression> fieldExpressionList, List<Expression> addConditions) {
+                                       DataSetSchema dataSetSchema, Map<String, Map<String, String>> filedNameToValueMap,
+                                       List<FieldExpression> fieldExpressionList, List<Expression> addConditions) {
         Set<String> removeFieldNames = new HashSet<>();
         if (Objects.isNull(queryData.getDateInfo())) {
             return removeFieldNames;
@@ -741,7 +770,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
                 if (queryFilter.getOperator().equals(FilterOperatorEnum.LIKE)
                         && FilterOperatorEnum.LIKE.getValue()
-                                .equalsIgnoreCase(fieldExpression.getOperator())) {
+                        .equalsIgnoreCase(fieldExpression.getOperator())) {
                     Map<String, String> replaceMap = new HashMap<>();
                     String preValue = fieldExpression.getFieldValue().toString();
                     String curValue = queryFilter.getValue().toString();
@@ -762,7 +791,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private <T extends ComparisonOperator> void addTimeFilters(String date, T comparisonExpression,
-            List<Expression> addConditions, SchemaElement partitionDimension) {
+                                                               List<Expression> addConditions, SchemaElement partitionDimension) {
         Column column = new Column(partitionDimension.getName());
         StringValue stringValue = new StringValue(date);
         comparisonExpression.setLeftExpression(column);
@@ -771,8 +800,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private Set<String> updateFilters(List<FieldExpression> fieldExpressionList,
-            Set<QueryFilter> metricFilters, Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                                      Set<QueryFilter> metricFilters, Set<QueryFilter> contextMetricFilters,
+                                      List<Expression> addConditions) {
         Set<String> removeFieldNames = new HashSet<>();
         if (CollectionUtils.isEmpty(metricFilters)) {
             return removeFieldNames;
@@ -792,7 +821,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     }
 
     private void handleFilter(QueryFilter dslQueryFilter, Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                              List<Expression> addConditions) {
         FilterOperatorEnum operator = dslQueryFilter.getOperator();
 
         if (operator == FilterOperatorEnum.IN) {
@@ -808,7 +837,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add in condition to sql where condition
     private void addWhereInFilters(QueryFilter dslQueryFilter, InExpression inExpression,
-            Set<QueryFilter> contextMetricFilters, List<Expression> addConditions) {
+                                   Set<QueryFilter> contextMetricFilters, List<Expression> addConditions) {
         Column column = new Column(dslQueryFilter.getName());
         ParenthesedExpressionList parenthesedExpressionList = new ParenthesedExpressionList<>();
         List<String> valueList =
@@ -833,8 +862,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     // add where filter
     private void addWhereFilters(QueryFilter dslQueryFilter,
-            ComparisonOperator comparisonExpression, Set<QueryFilter> contextMetricFilters,
-            List<Expression> addConditions) {
+                                 ComparisonOperator comparisonExpression, Set<QueryFilter> contextMetricFilters,
+                                 List<Expression> addConditions) {
         String columnName = dslQueryFilter.getName();
         if (StringUtils.isNotBlank(dslQueryFilter.getFunction())) {
             columnName = dslQueryFilter.getFunction() + "(" + dslQueryFilter.getName() + ")";
