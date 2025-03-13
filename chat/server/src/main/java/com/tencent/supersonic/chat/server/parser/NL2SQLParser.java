@@ -84,20 +84,6 @@ public class NL2SQLParser implements ChatQueryParser {
         if (!parseContext.enableNL2SQL()) {
             return;
         }
-
-        // NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
-        // List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
-
-        // // 检查当前请求的 agentId 是否在 simpleModelAgentIds 列表中
-        // if (simpleModelAgentIds.contains(parseContext.getRequest().getAgentId())) {
-        // QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
-        // queryNLReq.setText2SQLType(Text2SQLType.LLM_OR_RULE);
-        // queryNLReq.setSelectedParseInfo(null);
-        // queryNLReq.setMapModeEnum(MapModeEnum.ALL);
-        // addDynamicExemplars(parseContext, queryNLReq);
-        // doParse(queryNLReq, parseContext.getResponse());
-        // return;
-        // }
         // first go with rule-based parsers unless the user has already selected one parse.
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
@@ -186,7 +172,7 @@ public class NL2SQLParser implements ChatQueryParser {
         resp.setErrorMsg(parseResp.getErrorMsg());
     }
 
-    private void rewriteMultiTurn(ParseContext parseContext, QueryNLReq queryNLReq) {
+    public void rewriteMultiTurn(ParseContext parseContext, QueryNLReq queryNLReq) {
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_MULTI_TURN);
         RecommendedQuestionsService recommendedQuestionsService =
                 ContextUtils.getBean(RecommendedQuestionsService.class);
