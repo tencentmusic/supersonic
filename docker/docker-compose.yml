@@ -38,6 +38,11 @@ services:
       S2_DB_PASSWORD: supersonic_password
     ports:
       - "9080:9080"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
     depends_on:
       supersonic_postgres:
         condition: service_healthy
