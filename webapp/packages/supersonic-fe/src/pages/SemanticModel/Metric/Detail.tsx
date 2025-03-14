@@ -107,6 +107,9 @@ const MetricDetail: React.FC<Props> = () => {
 
   return (
     <>
+      <Helmet
+        title={`${metircData?.id ? `[指标]${metircData?.name}-${BASE_TITLE}` : '新建指标'}`}
+      />
       <div className={styles.metricDetailWrapper}>
         <div className={styles.metricDetail}>
           <div className={styles.tabContainer}>
