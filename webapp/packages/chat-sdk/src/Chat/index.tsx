@@ -237,9 +237,6 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
     /* 需求：无论是否有聊天记录都要有招呼消息————end */
     setHasNextPage(hasNextPage);
     if (page === 1) {
-      if (list.length === 0) {
-        sendHelloRsp();
-      }
       updateMessageContainerScroll();
       setHistoryInited(true);
       inputFocus();
