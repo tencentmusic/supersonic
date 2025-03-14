@@ -6,6 +6,6 @@ public interface VoiceService {
 
     String voiceText(byte[] data);
 
-    byte[] textVoice(TextVoiceReq textVoiceReq);
+    String textVoice(TextVoiceReq textVoiceReq);
 
 }

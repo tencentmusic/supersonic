@@ -60,3 +60,7 @@ knife4j:
       title: ChatBI API Documents
       description: ChatBI API Documents
 
+bi:
+  tts:
+    base-path: /data/nfs/easybi/elephant-screen/upload/video/tts
+    base-url: https://dc.migu.cn/elephant-screen/upload/video/tts
