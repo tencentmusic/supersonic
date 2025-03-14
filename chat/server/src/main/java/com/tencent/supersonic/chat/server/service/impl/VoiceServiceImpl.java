@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import org.springframework.util.FileCopyUtils;
+import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +35,10 @@ public class VoiceServiceImpl implements VoiceService {
     private String iatUrl;
     @Value("${lingxiyun.ttsUrl:TTS_URL}")
     private String ttsUrl;
+    @Value("${bi.tts.base-path}")
+    private String basePath;
+    @Value("${bi.tts.base-url}")
+    private String baseUrl;
 
     @Override
     public String voiceText(byte[] data) {
@@ -63,7 +70,7 @@ public class VoiceServiceImpl implements VoiceService {
     }
 
     @Override
-    public byte[] textVoice(TextVoiceReq textVoiceReq) {
+    public String textVoice(TextVoiceReq textVoiceReq) {
         Map<String, String> headers = new HashMap<>();
         String sid = UUID.randomUUID().toString().replace("-", "");
         headers.put("sid", sid);
@@ -84,7 +91,14 @@ public class VoiceServiceImpl implements VoiceService {
                 log.warn("语音合成出错:" + response.body().string());
                 return null;
             }
-            return response.body().bytes();
+            byte[] data = response.body().bytes();
+            String day = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+            String uuid = UUID.randomUUID().toString().replace("-", "");
+            String path = "/" + day + "/" + uuid + ".mp3";
+            File file = new File(basePath + path);
+            file.getParentFile().mkdirs();
+            FileCopyUtils.copy(data, file);
+            return baseUrl + path;
         } catch (Exception e) {
             log.error("语音合成出错", e);
             return null;
