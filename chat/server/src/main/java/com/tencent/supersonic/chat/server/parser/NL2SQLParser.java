@@ -173,7 +173,7 @@ public class NL2SQLParser implements ChatQueryParser {
         resp.setErrorMsg(parseResp.getErrorMsg());
     }
 
-    private void rewriteMultiTurn(ParseContext parseContext, QueryNLReq queryNLReq) {
+    public void rewriteMultiTurn(ParseContext parseContext, QueryNLReq queryNLReq) {
         ChatApp chatApp = parseContext.getAgent().getChatAppConfig().get(APP_KEY_MULTI_TURN);
         RecommendedQuestionsService recommendedQuestionsService =
                 ContextUtils.getBean(RecommendedQuestionsService.class);

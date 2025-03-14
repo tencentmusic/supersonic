@@ -108,8 +108,6 @@ public class ChatWorkflowEngine {
         }
     }
 
-    private final QueryCache queryCache = ComponentFactory.getQueryCache();
-
     private void performParsing(ChatQueryContext queryCtx) {
         semanticParsers.forEach(parser -> {
             parser.parse(queryCtx);

@@ -174,22 +174,21 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                         .generateStreamingSemanticParse(promptText.toUserMessage().singleText())
                         .onBackpressureBuffer(100);
                 // 订阅响应流，设置延迟为100毫秒，并行调度
-                Disposable subscription =
-                        thought.subscribe(chunk -> {
-                                    try {
-                                        // 发送单个数据块
-                                        emitter.send(SseEmitter.event().data(chunk));
-                                    } catch (IOException e) {
-                                        log.error("SSE send error", e);
-                                        emitter.completeWithError(e);
-                                    }
-                                }, error -> {
-                                    log.error("Stream processing error", error);
-                                    emitter.completeWithError(error);
-                                }, () -> {
-                                    log.info("Stream completed successfully");
-                                    emitter.complete();
-                                });
+                Disposable subscription = thought.subscribe(chunk -> {
+                    try {
+                        // 发送单个数据块
+                        emitter.send(SseEmitter.event().data(chunk));
+                    } catch (IOException e) {
+                        log.error("SSE send error", e);
+                        emitter.completeWithError(e);
+                    }
+                }, error -> {
+                    log.error("Stream processing error", error);
+                    emitter.completeWithError(error);
+                }, () -> {
+                    log.info("Stream completed successfully");
+                    emitter.complete();
+                });
                 // 添加取消订阅处理
                 emitter.onCompletion(subscription::dispose);
                 emitter.onTimeout(() -> {
@@ -269,8 +268,10 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         if (llmReq.getAgentId() == null) {
             return null;
         }
+        // 去掉用户输入问题末尾的符号
+        String queryText = llmReq.getQueryText().replaceAll("[。？！.,?！]+$", "");
         String querySql = recommendedQuestionsService.findQuerySqlByQuestion(
-                Math.toIntExact(llmReq.getAgentId()), llmReq.getQueryText());
+                Math.toIntExact(llmReq.getAgentId()), queryText);
         if (StringUtils.isNotEmpty(querySql)) {
             LLMResp resp = new LLMResp();
             resp.setQuery(llmReq.getQueryText());
