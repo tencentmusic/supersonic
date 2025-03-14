@@ -32,6 +32,7 @@ public class SchemaElement implements Serializable {
     private Long useCnt;
     private SchemaElementType type;
     private List<String> alias;
+    private List<DimValueMap> dimValueMaps;
     private List<SchemaValueMap> schemaValueMaps;
     private List<RelatedSchemaElement> relatedSchemaElements;
     private String defaultAgg;
