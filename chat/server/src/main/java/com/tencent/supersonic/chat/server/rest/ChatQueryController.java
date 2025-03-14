@@ -95,8 +95,8 @@ public class ChatQueryController {
     }
 
     @PostMapping("streamParse")
-    public SseEmitter streamParse(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
-                                  HttpServletResponse response) {
+    public SseEmitter streamParse(@RequestBody ChatParseReq chatParseReq,
+            HttpServletRequest request, HttpServletResponse response) {
         chatParseReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.streamParse(chatParseReq);
     }
