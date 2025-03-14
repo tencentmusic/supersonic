@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.request.TextVoiceReq;
 import com.tencent.supersonic.chat.server.service.VoiceService;
 import com.tencent.supersonic.common.pojo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,10 @@ public class VoiceController {
     @PostMapping("/tts")
     public ResponseEntity<byte[]> textVoice(@RequestBody TextVoiceReq textVoiceReq) {
         byte[] voice = voiceService.textVoice(textVoiceReq);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(voice);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"audio.mp3\"")
+                .contentType(MediaType.parseMediaType("audio/mpeg"))
+                .body(voice);
     }
 
 }
