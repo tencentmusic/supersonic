@@ -373,12 +373,6 @@ export async function executeSql(params: ExcuteSqlParams) {
   return request.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
 }
 
-export async function listColumnsBySql(data: { databaseId: number; sql: string }) {
-  return request.post(`${process.env.API_BASE_URL}database/listColumnsBySql`, {
-    data,
-  });
-}
-
 export function getCatalogs(dbId: number): Promise<any> {
   return request(`${process.env.API_BASE_URL}database/getCatalogs`, {
     method: 'GET',
@@ -409,7 +403,12 @@ export function getTables(databaseId: number, catalog: string, dbName: string): 
   });
 }
 
-export function getColumns(databaseId: number, catalog: string, dbName: string, tableName: string): Promise<any> {
+export function getColumns(
+  databaseId: number,
+  catalog: string,
+  dbName: string,
+  tableName: string,
+): Promise<any> {
   return request(`${process.env.API_BASE_URL}database/getColumnsByName`, {
     method: 'GET',
     params: {

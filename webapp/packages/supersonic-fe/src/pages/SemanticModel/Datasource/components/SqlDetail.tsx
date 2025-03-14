@@ -18,7 +18,7 @@ import { isFunction } from 'lodash';
 import FullScreen from '@/components/FullScreen';
 import SqlEditor from '@/components/SqlEditor';
 import type { TaskResultItem, TaskResultColumn } from '../data';
-import { executeSql, listColumnsBySql } from '@/pages/SemanticModel/service';
+import { executeSql } from '@/pages/SemanticModel/service';
 
 import SqlParams from './SqlParams';
 import styles from '../style.less';
@@ -248,19 +248,12 @@ const SqlDetail: React.FC<IProps> = ({
       id: currentDatabaseItem.key,
       sqlVariables: sqlParams,
     });
-
-    const { code: getColumnCode, data: getColumnData } = await listColumnsBySql({
-      sql: value,
-      databaseId: currentDatabaseItem.key,
-    });
-
     setResultTableLoading(false);
-    if (code === 200 && getColumnCode === 200) {
-      const columnData = getColumnData.map((item) => {
+    if (code === 200) {
+      const columnData = (data.columns || []).map((item: any) => {
         return {
           ...item,
-          nameEn: item.columnName,
-          type: item.dataType,
+          columnName: item.nameEn,
         };
       });
       fetchTaskResult(data, columnData);
