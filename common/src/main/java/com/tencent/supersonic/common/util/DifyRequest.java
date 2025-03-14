@@ -10,6 +10,7 @@ import java.util.Map;
 public class DifyRequest {
     private String query;
     private Map<String, String> inputs = new HashMap<>();
+    @JsonProperty("response_mode")
     private String responseMode = "blocking";
     private String user;
     @JsonProperty("conversation_id")
