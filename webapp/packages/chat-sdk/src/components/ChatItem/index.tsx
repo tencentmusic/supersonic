@@ -420,7 +420,7 @@ const ChatItem: React.FC<Props> = ({
     if (!!queryResults) {
       const exportData = queryResults.map(item => {
         return Object.keys(item).reduce((result, key) => {
-          const columnName = queryColumns?.find(column => column.nameEn === key)?.name || key;
+          const columnName = queryColumns?.find(column => column.name === key)?.name || key;
           result[columnName] = item[key];
           return result;
         }, {});
