@@ -50,7 +50,8 @@ public class HistoryServiceImpl implements HistoryService {
     @Override
     public void saveHistoryInfo(ParseContext parseContext) {
         Text2SQLExemplar exemplar = getExemplar(parseContext);
-        if (parseContext.getResponse().getState() == ParseResp.ParseState.COMPLETED && exemplar != null) {
+        if (parseContext.getResponse().getState() == ParseResp.ParseState.COMPLETED
+                && exemplar != null) {
             createHistory(ChatHistory.builder().queryId(parseContext.getRequest().getQueryId())
                     .agentId(parseContext.getAgent().getId()).status(MemoryStatus.PENDING)
                     .question(exemplar.getQuestion()).sideInfo(exemplar.getSideInfo())
