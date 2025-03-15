@@ -12,8 +12,8 @@
     <artifactId>launchers-headless</artifactId>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <start-class>com.tencent.supersonic.HeadlessLauncher</start-class>
     </properties>
 
@@ -71,7 +71,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.4.2</version>
                 <configuration>
                     <excludes>
                         <exclude>*.*</exclude>
@@ -81,7 +81,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.7.1</version>
                 <configuration>
                     <tarLongFileMode>gnu</tarLongFileMode>
                     <skipAssembly>false</skipAssembly>

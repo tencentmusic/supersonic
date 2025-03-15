@@ -64,7 +64,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>transmittable-thread-local</artifactId>
-            <version>${transmittable.thread.local.version}</version>
+            <version>${transmittable.version}</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
