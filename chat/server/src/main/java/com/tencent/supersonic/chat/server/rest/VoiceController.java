@@ -25,5 +25,5 @@ public class VoiceController {
     public String textVoice(@RequestBody TextVoiceReq textVoiceReq) {
         return voiceService.textVoice(textVoiceReq);
     }
-    
+
 }

@@ -270,8 +270,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         }
         // 去掉用户输入问题末尾的符号
         String queryText = llmReq.getQueryText().replaceAll("[。？！.,?！]+$", "");
-        String querySql = recommendedQuestionsService.findQuerySqlByQuestion(
-                Math.toIntExact(llmReq.getAgentId()), queryText);
+        String querySql = recommendedQuestionsService
+                .findQuerySqlByQuestion(Math.toIntExact(llmReq.getAgentId()), queryText);
         if (StringUtils.isNotEmpty(querySql)) {
             LLMResp resp = new LLMResp();
             resp.setQuery(llmReq.getQueryText());
