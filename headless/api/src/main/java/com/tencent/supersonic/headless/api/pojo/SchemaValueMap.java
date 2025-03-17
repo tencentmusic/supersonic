@@ -17,4 +17,5 @@ public class SchemaValueMap implements Serializable {
 
     /** dimension value for user query */
     private List<String> alias = new ArrayList<>();
+    private String value ;
 }
