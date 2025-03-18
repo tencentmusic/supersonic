@@ -29,6 +29,7 @@ public class SemanticParseInfo implements Serializable {
     private String queryMode = "";
     private QueryConfig queryConfig;
     private QueryType queryType;
+    private boolean stream = false;
 
     private SchemaElement dataSet;
     private Set<SchemaElement> metrics = Sets.newTreeSet(new SchemaNameLengthComparator());
