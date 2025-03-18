@@ -8,6 +8,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,7 +22,11 @@ public class RestExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     public ResultData<String> exception(Exception e) {
         log.error("default global exception", e);
-        return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), e.getMessage());
+        if (e instanceof BadSqlGrammarException)  {
+            return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), ReturnCode.SYSTEM_ERROR.getMessage());
+        } else{
+            return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), e.getMessage());
+        }
     }
 
     @ExceptionHandler(AccessException.class)
