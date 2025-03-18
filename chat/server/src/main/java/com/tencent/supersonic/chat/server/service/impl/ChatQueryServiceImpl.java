@@ -52,6 +52,8 @@ import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.service.TokenStream;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -67,7 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -164,6 +166,56 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         return queryResult;
+    }
+
+    @Override
+    public SseEmitter streamExecute(ChatExecuteReq chatExecuteReq) throws Exception {
+        TokenStream stream = null;
+        ExecuteContext executeContext = buildExecuteContext(chatExecuteReq);
+        for (ChatQueryExecutor chatQueryExecutor : chatQueryExecutors) {
+            stream = chatQueryExecutor.streamExecute(executeContext);
+            if (stream != null) {
+                break;
+            }
+        }
+
+        // 1. 创建SSE发射器（1分钟超时）
+        SseEmitter emitter = new SseEmitter(60_000L);
+        if (stream == null) {
+            emitter.complete();
+        }
+        stream.onNext(chunk -> {
+            try {
+                // 发送单个数据块
+                emitter.send(SseEmitter.event().data(chunk));
+            } catch (IOException e) {
+                log.error("SSE send error", e);
+                emitter.completeWithError(e);
+            }
+        }).onComplete(response -> {
+            processStreamResult(chatExecuteReq, executeContext, response.content());
+            emitter.complete();
+        }).onError(ex -> {
+            emitter.completeWithError(ex);
+        }).start();
+        emitter.onTimeout(() -> {
+            emitter.complete();
+        });
+        return emitter;
+    }
+
+    private void processStreamResult(ChatExecuteReq chatExecuteReq, ExecuteContext executeContext, AiMessage message) {
+        QueryResult result = new QueryResult();
+        result.setQueryState(QueryState.SUCCESS);
+        result.setQueryMode(executeContext.getParseInfo().getQueryMode());
+        result.setTextResult(message.text());
+        savePlainText(result, executeContext);
+        for (ExecuteResultProcessor processor : executeResultProcessors) {
+            if (processor.accept(executeContext)) {
+                processor.process(executeContext);
+            }
+        }
+        saveQueryResult(chatExecuteReq, result);
     }
 
     private void savePlainText(QueryResult queryResult, ExecuteContext executeContext) {

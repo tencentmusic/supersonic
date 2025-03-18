@@ -20,6 +20,8 @@ public interface ChatQueryService {
 
     QueryResult execute(ChatExecuteReq chatExecuteReq) throws Exception;
 
+    SseEmitter streamExecute(ChatExecuteReq chatExecuteReq) throws Exception;
+
     QueryResult parseAndExecute(ChatParseReq chatParseReq);
 
     Object queryData(ChatQueryDataReq chatQueryDataReq, User user) throws Exception;

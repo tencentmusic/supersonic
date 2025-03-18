@@ -16,10 +16,15 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.provider.ModelProvider;
+import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.UserMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -28,6 +33,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class PlainTextExecutor implements ChatQueryExecutor {
 
     public static final String APP_KEY = "SMALL_TALK";
@@ -69,6 +75,30 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         return result;
     }
 
+    @Override
+    public TokenStream streamExecute(ExecuteContext executeContext) {
+        if (!"PLAIN_TEXT".equals(executeContext.getParseInfo().getQueryMode())) {
+            return null;
+        }
+        AgentService agentService = ContextUtils.getBean(AgentService.class);
+        Agent chatAgent = agentService.getAgent(executeContext.getAgent().getId());
+        ChatApp chatApp = chatAgent.getChatAppConfig().get(APP_KEY);
+        if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
+            return null;
+        }
+
+        String promptStr = String.format(chatApp.getPrompt(), getHistoryInputs(executeContext),
+                executeContext.getRequest().getQueryText());
+        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.emptyMap());
+        StreamingChatLanguageModel streamChatModel =
+                ModelProvider.getStreamingChatModel(chatApp.getChatModelConfig());
+        // 创建流式解析器
+        StreamingSemanticParseExtractor extractor =
+                AiServices.create(StreamingSemanticParseExtractor.class, streamChatModel);
+        
+        return extractor.generateStreamingSemanticParse(prompt.toUserMessage().singleText());
+    }
+
     private String getHistoryInputs(ExecuteContext executeContext) {
         StringBuilder historyInput = new StringBuilder();
         List<QueryResp> queryResps = getHistoryQueries(executeContext.getRequest().getChatId(), 5);
@@ -93,5 +123,10 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         Collections.reverse(contextualList);
 
         return contextualList;
+    }
+
+    interface StreamingSemanticParseExtractor {
+        @UserMessage("{{it}}")
+        TokenStream generateStreamingSemanticParse(String text);
     }
 }

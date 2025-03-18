@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import dev.langchain4j.model.output.Response;
 
 @Slf4j
 public class DifyClient {
@@ -83,16 +84,28 @@ public class DifyClient {
         request.setUser(user);
         request.setResponseMode("streaming");
         EventSourceListener eventSourceListener = new EventSourceListener() {
-
+            
+            final StringBuffer contentBuilder = new StringBuffer();
+            
             @Override
             public void onEvent(EventSource eventSource, String id, String type, String data) {
                 JSONObject object = JSON.parseObject(data);
                 String event = object.getString("event");
                 if ("message".equals(event)) {
-                    handler.onNext(object.getString("answer"));
+                    String chunk = object.getString("answer");
+                    contentBuilder.append(chunk);
+                    handler.onNext(chunk);
+                } else if ("message_end".equals(event)) {
+                    // token消耗和引用元数据暂不处理
+                    handler.onComplete(Response.from(AiMessage.from(contentBuilder.toString())));
                 }
             }
 
+            @Override
+            public void onFailure(EventSource eventSource, Throwable t, okhttp3.Response response) {
+                handler.onError(t);
+            }
+            
         };
         Request.Builder builder = new Request.Builder();
         builder.url(difyURL).headers(Headers.of(headers))
