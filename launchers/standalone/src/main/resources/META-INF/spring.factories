@@ -57,11 +57,13 @@ com.tencent.supersonic.headless.server.modeller.SemanticModeller=\
 
 com.tencent.supersonic.chat.server.parser.ChatQueryParser=\
     com.tencent.supersonic.chat.server.parser.NL2PluginParser, \
+    com.tencent.supersonic.chat.server.parser.AttributionParser, \
     com.tencent.supersonic.chat.server.parser.NL2SQLParser,\
     com.tencent.supersonic.chat.server.parser.PlainTextParser
 
 com.tencent.supersonic.chat.server.executor.ChatQueryExecutor=\
     com.tencent.supersonic.chat.server.executor.PluginExecutor, \
+    com.tencent.supersonic.chat.server.executor.AttributionExecutor, \
     com.tencent.supersonic.chat.server.executor.SqlExecutor,\
     com.tencent.supersonic.chat.server.executor.PlainTextExecutor
 

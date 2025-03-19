@@ -119,6 +119,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         for (ChatQueryParser parser : chatQueryParsers) {
             if (parser.accept(parseContext)) {
                 parser.parse(parseContext);
+                break;
             }
         }
         // 来闲聊这里不存历史记录
