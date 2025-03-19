@@ -2,10 +2,7 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DimValuesConstants;
-import com.tencent.supersonic.common.pojo.QueryColumn;
-import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -260,7 +257,11 @@ public class S2SemanticLayerService implements SemanticLayerService {
         DimensionResp dimensionResp = getDimension(dimensionValueReq);
         Set<Long> dataSetIds = dimensionValueReq.getDataSetIds();
         dimensionValueReq.setModelId(dimensionResp.getModelId());
-
+        if (StringUtils.isNotBlank(dimensionValueReq.getValue())) {
+            if(!checkDimValueParam(dimensionValueReq,user)){
+                throw new RuntimeException("参数有误");
+            }
+        }
         List<String> dimensionValues = getDimensionValuesFromDict(dimensionValueReq, dataSetIds);
 
         // try to query dimensionValue from the database.
@@ -276,12 +277,31 @@ public class S2SemanticLayerService implements SemanticLayerService {
         return semanticQueryResp;
     }
 
+    /**
+     * distinct返查库中的值是否包含在value中
+     * @param dimensionValueReq
+     * @param user
+     * @return
+     */
+    private boolean checkDimValueParam(DimensionValueReq dimensionValueReq, User user){
+        DimensionValueReq dimensionValueReqNew=new DimensionValueReq();
+        BeanUtils.copyProperties(dimensionValueReq,dimensionValueReqNew);
+        dimensionValueReqNew.setValue(null);
+        List<Map<String, Object>> resultList = getDimensionValuesFromDb(dimensionValueReqNew, user).getResultList();
+        //取所有和list map的vaule 值
+        Set<Object> setList = resultList.stream().flatMap(map -> map.values().stream())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if(!setList.contains(dimensionValueReq.getValue())){
+            return false;
+        }
+        return true;
+    }
     private List<String> getDimensionValuesFromDict(DimensionValueReq dimensionValueReq,
             Set<Long> dataSetIds) {
         if (StringUtils.isBlank(dimensionValueReq.getValue())) {
             return SearchService.getDimensionValue(dimensionValueReq);
         }
-
         Map<Long, List<Long>> modelIdToDataSetIds = new HashMap<>();
         modelIdToDataSetIds.put(dimensionValueReq.getModelId(), new ArrayList<>(dataSetIds));
 

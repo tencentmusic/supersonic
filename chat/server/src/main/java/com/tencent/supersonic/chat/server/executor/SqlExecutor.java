@@ -19,6 +19,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import dev.langchain4j.service.TokenStream;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
@@ -70,6 +71,11 @@ public class SqlExecutor implements ChatQueryExecutor {
         }
 
         return queryResult;
+    }
+
+    @Override
+    public TokenStream streamExecute(ExecuteContext executeContext) {
+        return null;
     }
 
     @SneakyThrows

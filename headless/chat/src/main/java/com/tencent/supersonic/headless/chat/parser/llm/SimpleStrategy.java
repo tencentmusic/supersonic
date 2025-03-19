@@ -121,7 +121,7 @@ public class SimpleStrategy {
                 replacement.append(fieldsMap.get(dimension));
             }
         });
-        if (null != dimensionsDetected) {
+        if (!CollectionUtils.isEmpty(dimensionsDetected)) {
             promptText = promptText.replace(dimensionWordsDetected, replacement.toString());
         }
 

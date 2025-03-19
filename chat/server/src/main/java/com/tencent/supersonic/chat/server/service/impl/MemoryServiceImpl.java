@@ -30,7 +30,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
@@ -47,7 +49,7 @@ public class MemoryServiceImpl implements MemoryService , CommandLineRunner {
 
     @Autowired
     private EmbeddingConfig embeddingConfig;
-
+    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id", "status", "created_at", "updated_at","llm_comment","human_comment");
     @Override
     public void createMemory(ChatMemory memory) {
         // if an existing enabled memory has the same question, just skip
@@ -137,11 +139,13 @@ public class MemoryServiceImpl implements MemoryService , CommandLineRunner {
             queryWrapper.lambda().eq(ChatMemoryDO::getLlmReviewRet,
                     chatMemoryFilter.getLlmReviewRet());
         }
-        if (StringUtils.isBlank(chatMemoryFilter.getOrderCondition())) {
-            queryWrapper.orderByDesc("id");
-        } else {
-            queryWrapper.orderBy(true, chatMemoryFilter.isAsc(),
-                    chatMemoryFilter.getOrderCondition());
+        // 获取排序字段，进行白名单校验
+        String orderField = StringUtils.defaultIfBlank(chatMemoryFilter.getOrderCondition(), "id");
+        if (!allowedSortFields.contains(orderField.toLowerCase())) {
+            orderField = "id";
+            queryWrapper.orderByDesc(orderField);
+        }else {
+            queryWrapper.orderBy(true, chatMemoryFilter.isAsc(), orderField);
         }
         List<ChatMemoryDO> chatMemoryDOS = chatMemoryRepository.getMemories(queryWrapper);
         return chatMemoryDOS.stream().map(this::getMemory).collect(Collectors.toList());

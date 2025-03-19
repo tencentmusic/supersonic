@@ -35,6 +35,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,7 +47,7 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Autowired
     private ChatHistoryMapper chatHistoryMapper;
-
+    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id", "status", "created_at", "updated_at","llm_comment","human_comment");
     @Override
     public void saveHistoryInfo(ParseContext parseContext) {
         Text2SQLExemplar exemplar = getExemplar(parseContext);
@@ -162,11 +163,13 @@ public class HistoryServiceImpl implements HistoryService {
             queryWrapper.lambda().eq(ChatHistoryDO::getLlmReviewRet,
                     chatHistoryFilter.getLlmReviewRet());
         }
-        if (StringUtils.isBlank(chatHistoryFilter.getOrderCondition())) {
-            queryWrapper.orderByDesc("id");
-        } else {
-            queryWrapper.orderBy(true, chatHistoryFilter.isAsc(),
-                    chatHistoryFilter.getOrderCondition());
+        // 获取排序字段，进行白名单校验
+        String orderField = StringUtils.defaultIfBlank(chatHistoryFilter.getOrderCondition(), "id");
+        if (!allowedSortFields.contains(orderField.toLowerCase())) {
+            orderField = "id";
+            queryWrapper.orderByDesc(orderField);
+        }else {
+            queryWrapper.orderBy(true, chatHistoryFilter.isAsc(), orderField);
         }
         List<ChatHistoryDO> chatHistoryDOS = chatHistoryRepository.getHistories(queryWrapper);
         return chatHistoryDOS.stream().map(this::getHistory).collect(Collectors.toList());

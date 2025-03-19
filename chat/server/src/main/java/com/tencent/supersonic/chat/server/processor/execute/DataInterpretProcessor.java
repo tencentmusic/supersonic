@@ -2,11 +2,13 @@ package com.tencent.supersonic.chat.server.processor.execute;
 
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
+import com.tencent.supersonic.chat.server.config.NL2SQLParserConfig;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.DimValuesConstants;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.core.cache.QueryCache;
 import com.tencent.supersonic.headless.core.utils.ComponentFactory;
 import dev.langchain4j.data.message.AiMessage;
@@ -54,6 +56,11 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
     public boolean accept(ExecuteContext executeContext) {
         Agent agent = executeContext.getAgent();
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
+        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
+        if (simpleModelAgentIds.contains(agent.getId())){
+            return false;
+        }
         return Objects.nonNull(chatApp) && chatApp.isEnable();
     }
 
