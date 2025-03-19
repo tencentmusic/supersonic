@@ -170,6 +170,9 @@ public class QueryStructReq extends SemanticQueryReq {
         // 5. Set the limit clause
         plainSelect.setLimit(buildLimit(queryStructReq));
 
+        // 6. Set having clause
+        plainSelect.setHaving(buildHavingClause(queryStructReq));
+
         select.setSelect(plainSelect);
 
         // 6. Set where clause
@@ -239,7 +242,8 @@ public class QueryStructReq extends SemanticQueryReq {
 
     private GroupByElement buildGroupByElement(QueryStructReq queryStructReq) {
         List<String> groups = queryStructReq.getGroups();
-        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getAggregators().isEmpty()) {
+        if ((!CollectionUtils.isEmpty(groups) && !queryStructReq.getAggregators().isEmpty())
+                || !queryStructReq.getMetricFilters().isEmpty()) {
             GroupByElement groupByElement = new GroupByElement();
             for (String group : groups) {
                 groupByElement.addGroupByExpression(new Column(group));
@@ -289,4 +293,23 @@ public class QueryStructReq extends SemanticQueryReq {
         }
         return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }
+
+    public Expression buildHavingClause(QueryStructReq queryStructReq) {
+        if (queryStructReq.getMetricFilters().isEmpty()) {
+            return null;
+        }
+
+        List<Filter> filters = queryStructReq.getMetricFilters();
+        SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
+        String havingClause = sqlFilterUtils.getWhereClause(filters, false);
+        if (StringUtils.isNotBlank(havingClause)) {
+            try {
+                return CCJSqlParserUtil.parseCondExpression(havingClause);
+            } catch (JSQLParserException e) {
+                log.error("Failed to parse having clause", e);
+            }
+        }
+        return null;
+    }
+
 }
