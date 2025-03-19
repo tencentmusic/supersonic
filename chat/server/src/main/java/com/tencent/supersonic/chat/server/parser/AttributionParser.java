@@ -33,7 +33,7 @@ import java.util.Set;
 
 @Slf4j
 public class AttributionParser implements ChatQueryParser{
-
+    private Boolean enableAttr = false;
     private static final Set<String> ATTRIBUTION_KEYWORDS =
             Set.of("为什么", "原因", "因素", "归因", "下降原因", "增长来源");
     public static final String APP_KEY = "S2SQL_PARSER";
@@ -51,7 +51,7 @@ public class AttributionParser implements ChatQueryParser{
     public boolean accept(ParseContext parseContext) {
         //1.意图识别是否是归因分析
         IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
-        if (intentType == IntentType.ATTRIBUTION) {
+        if (intentType == IntentType.ATTRIBUTION && enableAttr) {
             return true;
         }
         return false;
