@@ -84,6 +84,10 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionDO dimensionDO = DimensionConverter.convert2DimensionDO(dimensionReq);
         dimensionRepository.createDimension(dimensionDO);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.ADD);
+
+        // should update modelDetail
+        modelService.updateDimension(dimensionReq, user);
+
         return DimensionConverter.convert2DimensionResp(dimensionDO);
     }
 
@@ -136,6 +140,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         String oldName = dimensionDO.getName();
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
+        // should update modelDetail as well
+        modelService.updateDimension(dimensionReq, user);
+
         if (!oldName.equals(dimensionDO.getName())) {
             sendEvent(getDataItem(dimensionDO), EventType.UPDATE);
         }

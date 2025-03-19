@@ -36,7 +36,8 @@ public class SqlVariableParseUtilsTest {
 
     @Test
     void testParseSql_if() {
-        String sql = "select * from t_$interval$ where id = $id$ $if(name)$and name = $name$$endif$";
+        String sql =
+                "select * from t_$interval$ where id = $id$ $if(name)$and name = $name$$endif$";
         List<SqlVariable> variables = Lists.newArrayList(mockNumSqlVariable(),
                 mockExprSqlVariable(), mockStrSqlVariable());
         List<Param> params =
