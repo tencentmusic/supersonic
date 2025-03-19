@@ -3,13 +3,11 @@ package com.tencent.supersonic.headless.server.service;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.ModelSchema;
-import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
-import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
+import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
@@ -54,4 +52,6 @@ public interface ModelService {
     DatabaseResp getDatabaseByModelId(Long modelId);
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
+
+    Dimension updateDimension(DimensionReq dimensionReq, User user);
 }
