@@ -28,6 +28,7 @@ type Props = {
     isRefresh?: boolean
   ) => void;
   onSendMsg: (value: string) => void;
+  onCouldNotAnswer: () => void;
 };
 
 const MessageContainer: React.FC<Props> = ({
@@ -42,8 +43,8 @@ const MessageContainer: React.FC<Props> = ({
   isSimpleMode,
   isDebugMode,
   onMsgDataLoaded,
-  onSendMsg,
-}) => {
+  onSendMsg, onCouldNotAnswer
+                                           }) => {
   const [triggerResize, setTriggerResize] = useState(false);
   const onResize = useCallback(() => {
     setTriggerResize(true);
@@ -88,13 +89,14 @@ const MessageContainer: React.FC<Props> = ({
             <div key={msgId} id={`${msgId}`} className={styles.messageItem}>
               {type === MessageTypeEnum.TEXT && <Text position="left" data={msg} />}
               {type === MessageTypeEnum.AGENT_LIST && (
-                <AgentTip currentAgent={currentAgent} onSendMsg={onSendMsg} />
+                  <AgentTip currentAgent={currentAgent} onSendMsg={onSendMsg} id={msgId}/>
               )}
               {type === MessageTypeEnum.QUESTION && (
                 <>
                   <Text position="right" data={msg} />
                   {identityMsg && <Text position="left" data={identityMsg} />}
                   <ChatItem
+                    msgId={msgId}
                     questionId={questionId}
                     currentAgent={currentAgent}
                     isSimpleMode={isSimpleMode}
@@ -117,6 +119,7 @@ const MessageContainer: React.FC<Props> = ({
                     onUpdateMessageScroll={updateMessageContainerScroll}
                     onSendMsg={onSendMsg}
                     isLastMessage={index === messageList.length - 1}
+                    onCouldNotAnswer={onCouldNotAnswer}
                   />
                 </>
               )}

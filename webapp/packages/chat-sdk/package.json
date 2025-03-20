@@ -7,6 +7,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@ant-design/icons": "^4.8.3",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@uiw/react-watermark": "^0.0.5",
     "ahooks": "^3.8.4",
     "antd": "^5.24.1",
