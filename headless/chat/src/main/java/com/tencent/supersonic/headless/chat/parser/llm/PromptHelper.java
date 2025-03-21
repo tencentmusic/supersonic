@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
@@ -30,6 +31,10 @@ public class PromptHelper {
 
     @Autowired
     private ExemplarService exemplarService;
+
+    @Autowired
+    private EmbeddingConfig embeddingConfig;
+
 
     public List<List<Text2SQLExemplar>> getFewShotExemplars(LLMReq llmReq) {
         int exemplarRecallNumber =
@@ -196,5 +201,34 @@ public class PromptHelper {
             return false;
         }
         return true;
+    }
+
+    public List<List<Text2SQLExemplar>> getFewShotExemplarsByHistory(LLMReq llmReq) {
+        int exemplarRecallNumber =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
+        int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
+        int selfConsistencyNumber =
+                Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
+
+        List<Text2SQLExemplar> exemplars = Lists.newArrayList();
+        llmReq.getDynamicExemplars().stream().forEach(e -> {
+            exemplars.add(e);
+        });
+
+        int recallSize = exemplarRecallNumber - llmReq.getDynamicExemplars().size();
+        if (recallSize > 0) {
+            exemplars.addAll(exemplarService.recallExemplars(this.embeddingConfig.getMemoryCollectionName(llmReq.getAgentId())
+                    ,llmReq.getQueryText(), recallSize));
+        }
+
+        List<List<Text2SQLExemplar>> results = new ArrayList<>();
+        // use random collection of exemplars for each self-consistency inference
+        for (int i = 0; i < selfConsistencyNumber; i++) {
+            List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
+            Collections.shuffle(shuffledList);
+            results.add(shuffledList.subList(0, Math.min(shuffledList.size(), fewShotNumber)));
+        }
+
+        return results;
     }
 }

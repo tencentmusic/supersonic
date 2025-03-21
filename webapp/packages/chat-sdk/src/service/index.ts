@@ -8,7 +8,8 @@ import {
   SearchRecommendItem,
 } from '../common/type';
 import { isMobile } from '../utils/utils';
-
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { getToken } from '../utils/utils';
 const DEFAULT_CHAT_ID = 0;
 
 const prefix = isMobile ? '/openapi' : '/api';
@@ -147,5 +148,39 @@ export function queryDimensionValues(
     agentId,
     elementID,
     value,
+  });
+}
+
+export function queryThoughtsInSSE(queryText: string, agentId: number | undefined, messageFunc: ((arg0: any) => void), errorFunc: ((arg0: any) => void), closeFunc: (() => void) ) {
+  const ctrl = new AbortController();
+  return fetchEventSource(`${prefix}/chat/query/streamParse`, {
+    method: 'POST',
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + getToken()
+    },
+    body: JSON.stringify({
+      queryText,
+      agentId,
+    }),
+    signal: ctrl.signal,
+    onopen: async (res) => {
+      if (res.ok) {
+        return;
+      } else {
+        errorFunc(new Error('连接不成功'))
+        ctrl.abort();
+      }
+    },
+    onmessage: messageFunc,
+    onerror: (error) => {
+      errorFunc(error)
+      ctrl.abort();
+    },
+    onclose: () => {
+      closeFunc()
+      ctrl.abort();
+    }
   });
 }

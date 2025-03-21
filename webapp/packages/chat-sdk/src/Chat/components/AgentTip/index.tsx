@@ -5,11 +5,12 @@ import { AgentType } from '../../type';
 import { isMobile } from '../../../utils/utils';
 
 type Props = {
+  id: string | number;
   currentAgent?: AgentType;
   onSendMsg: (value: string) => void;
 };
 
-const AgentTip: React.FC<Props> = ({ currentAgent, onSendMsg }) => {
+const AgentTip: React.FC<Props> = ({ id,currentAgent, onSendMsg }) => {
   if (!currentAgent) {
     return null;
   }
@@ -17,10 +18,17 @@ const AgentTip: React.FC<Props> = ({ currentAgent, onSendMsg }) => {
     <div className={styles.agentTip}>
       {!isMobile && <LeftAvatar />}
       <Message position="left" bubbleClassName={styles.agentTipMsg}>
-        <div className={styles.title}>
-          您好，智能助理【{currentAgent.name}
-          】将与您对话，试着问：
-        </div>
+        {
+          (''+id).endsWith('-CouldNotAnswer') ?
+              <div className={styles.title}>
+                您的问题我已记录，努力学习中…<br/>
+                或许您可以问：
+              </div> :
+              <div className={styles.title}>
+                您好，智能助理【{currentAgent.name}】
+                将与您对话，试着问：
+              </div>
+        }
         <div className={styles.content}>
           <div className={styles.examples}>
             {currentAgent.examples?.length > 0 ? (

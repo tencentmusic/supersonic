@@ -9,10 +9,11 @@ import {
   RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
-import { createContext, useEffect, useState } from 'react';
-import { chatExecute, chatParse, queryData, deleteQuery, switchEntity } from '../../service';
+import { createContext, useEffect, useRef, useState, ReactNode } from 'react';
+import { chatExecute, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
 import IconFont from '../IconFont';
 import ExpandParseTip from './ExpandParseTip';
 import ParseTip from './ParseTip';
@@ -25,9 +26,11 @@ import SimilarQuestionItem from './SimilarQuestionItem';
 import { AgentType } from '../../Chat/type';
 import dayjs, { Dayjs } from 'dayjs';
 import { exportCsvFile } from '../../utils/utils';
+import Loading from './Loading';
 import { useMethodRegister } from '../../hooks';
 
 type Props = {
+  msgId?: string | number;
   msg: string;
   conversationId?: number;
   questionId?: number;
@@ -50,6 +53,7 @@ type Props = {
   onMsgDataLoaded?: (data: MsgDataType, valid: boolean, isRefresh?: boolean) => void;
   onUpdateMessageScroll?: () => void;
   onSendMsg?: (msg: string) => void;
+  onCouldNotAnswer?: () => void;
 };
 
 export const ChartItemContext = createContext({
@@ -58,6 +62,7 @@ export const ChartItemContext = createContext({
 });
 
 const ChatItem: React.FC<Props> = ({
+  msgId = '',
   msg,
   conversationId,
   questionId,
@@ -79,9 +84,10 @@ const ChatItem: React.FC<Props> = ({
   isLastMessage,
   onMsgDataLoaded,
   onUpdateMessageScroll,
-  onSendMsg,
+  onCouldNotAnswer = () => {},
 }) => {
   const [parseLoading, setParseLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
   const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
@@ -103,6 +109,8 @@ const ChatItem: React.FC<Props> = ({
   );
   const [isParserError, setIsParseError] = useState<boolean>(false);
   const [isGoRefresh , setIsGoRefresh] = useState<boolean>(false);
+  const [thinkingContent, setThinkingContent] = useState<string>('');
+  const isThinkingRef = useRef(isThinking);
   const resetState = () => {
     setParseLoading(false);
     setParseTimeCost(undefined);
@@ -123,6 +131,21 @@ const ChatItem: React.FC<Props> = ({
   };
 
   const prefixCls = `${PREFIX_CLS}-item`;
+
+  const getNodeTip = (title: ReactNode, tip?: string | ReactNode) => {
+    return (
+        <>
+          <div className={`${prefixCls}-title-bar`}>
+            <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+            <div className={`${prefixCls}-step-title`}>
+              {title}
+              {!tip && <Loading />}
+            </div>
+          </div>
+          {tip && <div className={`${prefixCls}-content-container`}>{tip}</div>}
+        </>
+    );
+  };
 
   const updateData = (res: Result<MsgDataType>) => {
     let tip: string = '';
@@ -171,10 +194,6 @@ const ChatItem: React.FC<Props> = ({
     }
     try {
       const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
-      // todo 
-      // 判断res.data.queryResults是否长度为1 且 res.data.resultType为true 
-      // 如果是则setDimensionFitlers将dimensionFilters里对应的value设置为res.data.queryResults[0]里的值
-      // 然后调用onRefresh根据新条件重新查询
       if(res.data.queryResults?.length === 1 && res.data.resultType){
         setDimensionFilters(filters => {
           const newFilters = filters.map(item => {  
@@ -201,7 +220,16 @@ const ChatItem: React.FC<Props> = ({
         valid,
         isRefresh
       );
+      console.log(res?.data?.chatContext?.sqlInfo?.resultType + '~~~~', 'resultType~~~~')
+      // 没有回答上会显示一遍推荐问题
+      if(res?.data?.chatContext?.sqlInfo?.resultType === 'text'
+          || !(res?.data?.queryResults)
+          || res?.data?.queryResults?.length === 0
+      ) {
+        onCouldNotAnswer()
+      }
     } catch (e) {
+      onCouldNotAnswer()
       const tip = SEARCH_EXCEPTION_TIP;
       setExecuteTip(SEARCH_EXCEPTION_TIP);
       setDataCache({ ...dataCache, [parseInfoValue!.id!]: { tip } });
@@ -228,6 +256,32 @@ const ChatItem: React.FC<Props> = ({
   };
 
   const sendMsg = async () => {
+    const responseDiv = document.getElementById('thoughts-response-'+msgId)
+    if (responseDiv) {
+      responseDiv.textContent = ''
+      let time = 0;
+      const messageFunc = (event) => {
+        setTimeout(() => {
+          responseDiv.textContent += event.data
+          setThinkingContent('' + responseDiv.textContent)
+          responseDiv.scrollTop = responseDiv.scrollHeight;
+        },time)
+        time += 200
+      }
+      const errorFunc = (error) => {
+        setIsThinking(false)
+        console.error('SSE 错误:', error);
+        throw error
+      };
+      const closeFunc = () => {
+        setTimeout(() => {
+          setIsThinking(false)
+        },time)
+        console.log('SSE 连接已关闭');
+      };
+      setIsThinking(true)
+      queryThoughtsInSSE(msg,agentId,messageFunc,errorFunc,closeFunc)
+    }
     setParseLoading(true);
     const parseData: any = await chatParse({
       queryText: msg,
@@ -236,6 +290,24 @@ const ChatItem: React.FC<Props> = ({
       agentId,
       filters: filter,
     });
+    // 预设问题如果包含该提问，让其结果在思考后才出结果
+    if (currentAgent?.examples.includes(msg)) {
+      await new Promise(resolve => {
+        let step = 0
+        let timer = setInterval(() => {
+          step ++
+          if (!isThinkingRef.current) {
+            resolve(true)
+            clearInterval(timer)
+          } else {
+            if (step >= 50) {
+              resolve(true)
+              clearInterval(timer)
+            }
+          }
+        }, 200)
+      });
+    }
     setParseLoading(false);
     const { code, data } = parseData || {};
     console.log(data,'data')
@@ -301,6 +373,10 @@ const ChatItem: React.FC<Props> = ({
     }
     initChatItem(msg, msgData);
   }, [msg, msgData]);
+
+  useEffect(() => {
+    isThinkingRef.current = isThinking;
+  }, [isThinking]);
 
   const onSwitchEntity = async (entityId: string) => {
     setEntitySwitchLoading(true);
@@ -492,6 +568,21 @@ const ChatItem: React.FC<Props> = ({
                   />
                 </div>
               )}
+
+              {isThinking ? getNodeTip('深度思考中') :
+                  thinkingContent ?
+                  <div className={`${prefixCls}-parse-tip`}>
+                    <div className={`${prefixCls}-title-bar`}>
+                      <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+                      <div className={`${prefixCls}-step-title`}>
+                        思考过程
+                      </div>
+                    </div>
+                  </div> : ''
+              }
+              <div className={`${prefixCls}-content-container`} style={{ display: thinkingContent ? 'block' : 'none' }}>
+                <div id={'thoughts-response-' + msgId} className='thoughts-container'></div>
+              </div>
 
               {!preParseMode && (
                 <ParseTip
