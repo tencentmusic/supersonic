@@ -10,7 +10,7 @@ import {
   SimilarQuestionType,
 } from '../../common/type';
 import { createContext, useEffect, useRef, useState, ReactNode } from 'react';
-import { chatExecute, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE } from '../../service';
+import { chatExecute, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE, chatStreamExecute } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
@@ -193,51 +193,121 @@ const ChatItem: React.FC<Props> = ({
       setExecuteLoading(true);
     }
     try {
-      const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
-      if(res.data.queryResults?.length === 1 && res.data.resultType){
-        setDimensionFilters(filters => {
-          const newFilters = filters.map(item => {  
-            const nameEn = res.data.queryColumns?.find((queryColumnsItem:{ name: string; nameEn: string }) => {
-              return queryColumnsItem.name === item.name
-            })?.nameEn
-            if(nameEn){
-              item.value = res.data.queryResults[0][nameEn];
-            }
-            return item;
+      if (true) {
+        /* 流式-start */
+        let time = 0;
+        let textResult = ''
+        const messageFunc = (event) => {
+          setTimeout(() => {
+            textResult += event.data
+            onMsgDataLoaded?.(
+              {
+                queryMode: "PLAIN_TEXT",
+                queryState: "SUCCESS",
+                resultType: false,
+                textResult,
+                parseInfos,
+                queryId: parseInfoValue.queryId!,
+              } as MsgDataType,
+              true,
+              isRefresh
+            );
+          },time)
+          time += 200
+        }
+        const errorFunc = (error) => {
+          onMsgDataLoaded?.(
+            {
+              queryMode: "PLAIN_TEXT",
+              queryState: "SUCCESS",
+              resultType: false,
+              textResult: '无法获取结果~~~~',
+              parseInfos,
+              queryId: parseInfoValue.queryId!,
+            } as MsgDataType,
+            true,
+            isRefresh
+          );
+          if (isSwitchParseInfo) {
+            setEntitySwitchLoading(false);
+          } else {
+            setExecuteLoading(false);
+          }
+          console.error('(result)SSE 错误:', error);
+          // throw error
+        };
+        const closeFunc = () => {
+          if (isSwitchParseInfo) {
+            setEntitySwitchLoading(false);
+          } else {
+            setExecuteLoading(false);
+          }
+          console.log('(result)SSE 连接已关闭');
+        };
+        chatStreamExecute (
+          {
+            queryText: msg,
+            chatId: conversationId!,
+            parseInfo: parseInfoValue,
+            agentId
+          },
+          messageFunc,errorFunc,closeFunc
+        )
+        return
+        /* 流式-end */
+      } else {
+        /* 非流式-start */
+        const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
+        if(res.data.queryResults?.length === 1 && res.data.resultType){
+          setDimensionFilters(filters => {
+            const newFilters = filters.map(item => {  
+              const nameEn = res.data.queryColumns?.find((queryColumnsItem:{ name: string; nameEn: string }) => {
+                return queryColumnsItem.name === item.name
+              })?.nameEn
+              if(nameEn){
+                item.value = res.data.queryResults[0][nameEn];
+              }
+              return item;
+            })
+            return newFilters;
           })
-          return newFilters;
-        })
-        // 通知ParseTip触发onRefresh
-        setIsGoRefresh(true)
-      }
-      const valid = updateData(res);
-      onMsgDataLoaded?.(
-        {
-          ...res.data,
-          parseInfos,
-          queryId: parseInfoValue.queryId,
-        },
-        valid,
-        isRefresh
-      );
-      console.log(res?.data?.chatContext?.sqlInfo?.resultType + '~~~~', 'resultType~~~~')
-      // 没有回答上会显示一遍推荐问题
-      if(res?.data?.chatContext?.sqlInfo?.resultType === 'text'
-          || !(res?.data?.queryResults)
-          || res?.data?.queryResults?.length === 0
-      ) {
-        onCouldNotAnswer()
+          // 通知ParseTip触发onRefresh
+          setIsGoRefresh(true)
+        }
+        const valid = updateData(res);
+        onMsgDataLoaded?.(
+          {
+            ...res.data,
+            parseInfos,
+            queryId: parseInfoValue.queryId,
+          },
+          valid,
+          isRefresh
+        );
+        // 没有回答上会显示一遍推荐问题
+        if(res?.data?.chatContext?.sqlInfo?.resultType === 'text'
+            || !(res?.data?.queryResults)
+            || res?.data?.queryResults?.length === 0
+        ) {
+          onCouldNotAnswer()
+        }
+        if (isSwitchParseInfo) {
+          setEntitySwitchLoading(false);
+        } else {
+          setExecuteLoading(false);
+        }
+        /* 非流式-end */
       }
     } catch (e) {
       onCouldNotAnswer()
       const tip = SEARCH_EXCEPTION_TIP;
       setExecuteTip(SEARCH_EXCEPTION_TIP);
       setDataCache({ ...dataCache, [parseInfoValue!.id!]: { tip } });
-    }
-    if (isSwitchParseInfo) {
-      setEntitySwitchLoading(false);
-    } else {
-      setExecuteLoading(false);
+      if (isSwitchParseInfo) {
+        setEntitySwitchLoading(false);
+      } else {
+        setExecuteLoading(false);
+      }
     }
   };
 
@@ -271,7 +341,7 @@ const ChatItem: React.FC<Props> = ({
       const errorFunc = (error) => {
         setIsThinking(false)
         console.error('SSE 错误:', error);
-        throw error
+        // throw error
       };
       const closeFunc = () => {
         setTimeout(() => {
@@ -283,6 +353,7 @@ const ChatItem: React.FC<Props> = ({
       queryThoughtsInSSE(msg,agentId,messageFunc,errorFunc,closeFunc)
     }
     setParseLoading(true);
+
     const parseData: any = await chatParse({
       queryText: msg,
       chatId: conversationId,
@@ -611,6 +682,8 @@ const ChatItem: React.FC<Props> = ({
                 />
               )}
             </>
+            
+            <div id={'result-response-' + msgId} className='result-container'></div>
 
             {executeMode && (
               <Spin spinning={entitySwitchLoading}>
@@ -633,6 +706,7 @@ const ChatItem: React.FC<Props> = ({
                         executeErrorMsg={executeErrorMsg}
                       />
                     )}
+                  
                   <ExecuteItem
                     isSimpleMode={isSimpleMode}
                     queryId={parseInfo?.queryId}
