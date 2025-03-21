@@ -498,5 +498,6 @@ CREATE TABLE IF NOT EXISTS s2_user (
     salt varchar(256) DEFAULT NULL,
     email varchar(100) NULL,
     is_admin smallint NULL,
+    last_login timestamp NULL,
     UNIQUE(name)
 );

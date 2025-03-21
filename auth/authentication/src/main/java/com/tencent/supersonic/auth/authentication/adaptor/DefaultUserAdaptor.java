@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -102,7 +103,9 @@ public class DefaultUserAdaptor implements UserAdaptor {
         TokenService tokenService = ContextUtils.getBean(TokenService.class);
         try {
             UserWithPassword user = getUserWithPassword(userReq);
-            return tokenService.generateToken(UserWithPassword.convert(user), appKey);
+            String token = tokenService.generateToken(UserWithPassword.convert(user), appKey);
+            updateLastLogin(userReq.getName());
+            return token;
         } catch (Exception e) {
             log.error("", e);
             throw new RuntimeException("password encrypt error, please try again");
@@ -266,5 +269,12 @@ public class DefaultUserAdaptor implements UserAdaptor {
         userToken.setCreateDate(userTokenDO.getCreateTime());
         userToken.setExpireDate(userTokenDO.getExpireDateTime());
         return userToken;
+    }
+
+    private void updateLastLogin(String userName) {
+        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+        UserDO userDO = userRepository.getUser(userName);
+        userDO.setLastLogin(new Timestamp(System.currentTimeMillis()));
+        userRepository.updateUser(userDO);
     }
 }

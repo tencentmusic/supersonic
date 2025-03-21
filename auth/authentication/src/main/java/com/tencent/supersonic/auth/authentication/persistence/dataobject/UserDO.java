@@ -3,7 +3,11 @@ package com.tencent.supersonic.auth.authentication.persistence.dataobject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
+import java.sql.Timestamp;
+
+@Data
 @TableName("s2_user")
 public class UserDO {
 
@@ -27,29 +31,11 @@ public class UserDO {
     /** */
     private Integer isAdmin;
 
-    /** @return id */
-    public Long getId() {
-        return id;
-    }
-
-    /** @param id */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /** @return name */
-    public String getName() {
-        return name;
-    }
+    private Timestamp lastLogin;
 
     /** @param name */
     public void setName(String name) {
         this.name = name == null ? null : name.trim();
-    }
-
-    /** @return password */
-    public String getPassword() {
-        return password;
     }
 
     /** @param password */
@@ -57,27 +43,8 @@ public class UserDO {
         this.password = password == null ? null : password.trim();
     }
 
-    public String getSalt() {
-        return salt;
-    }
-
     public void setSalt(String salt) {
         this.salt = salt == null ? null : salt.trim();
-    }
-
-    /** @return display_name */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /** @param displayName */
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName == null ? null : displayName.trim();
-    }
-
-    /** @return email */
-    public String getEmail() {
-        return email;
     }
 
     /** @param email */
@@ -85,13 +52,4 @@ public class UserDO {
         this.email = email == null ? null : email.trim();
     }
 
-    /** @return is_admin */
-    public Integer getIsAdmin() {
-        return isAdmin;
-    }
-
-    /** @param isAdmin */
-    public void setIsAdmin(Integer isAdmin) {
-        this.isAdmin = isAdmin;
-    }
 }

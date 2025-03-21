@@ -388,6 +388,7 @@ CREATE TABLE IF NOT EXISTS s2_user
     salt varchar(256) DEFAULT NULL COMMENT 'md5密码盐',
     email varchar(100) null,
     is_admin tinyint null,
+    last_login datetime DEFAULT NULL,
     UNIQUE (`name`),
     PRIMARY KEY (`id`)
 );

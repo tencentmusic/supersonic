@@ -129,6 +129,7 @@ create table IF NOT EXISTS s2_user
     salt varchar(256)  NULL,
     email varchar(100) null,
     is_admin INT null,
+    last_login TIMESTAMP NULL,
     PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_user IS 'user information table';
