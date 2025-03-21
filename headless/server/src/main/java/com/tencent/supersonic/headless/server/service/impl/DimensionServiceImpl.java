@@ -426,6 +426,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
             dimValueMapList = JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class);
         }
         DimValueMap dimValueMaps = req.getDimValueMaps();
+        if (StringUtils.isEmpty(dimValueMaps.getTechName())) {
+            dimValueMaps.setTechName(dimValueMaps.getValue());
+        }
         Map<String, DimValueMap> valeAndMapInfo = dimValueMapList.stream()
                 .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
         String value = dimValueMaps.getValue();
