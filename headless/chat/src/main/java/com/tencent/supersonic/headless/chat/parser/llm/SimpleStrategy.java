@@ -76,6 +76,9 @@ public class SimpleStrategy {
         Map<String, Object> variable = new HashMap<>();
         StringBuilder exemplars = new StringBuilder();
         variable.put("exemplar", exemplars);
+        variable.put("question", llmReq.getQueryText());
+        variable.put("schema", "");
+        variable.put("information", "");
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
                 .toString();
         // 拼接完整的prompt
