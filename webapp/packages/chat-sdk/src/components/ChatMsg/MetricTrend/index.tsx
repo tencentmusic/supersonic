@@ -48,12 +48,13 @@ const MetricTrend: React.FC<Props> = ({
   const { queryColumns, queryResults, aggregateInfo, entityInfo, chatContext } = data;
   const [chartType, setChartType] = useState('line');
 
-  const dateField: any = queryColumns?.find(
+  const dateField = queryColumns?.find(
     (column: any) => column.showType === 'DATE' || column.type === 'DATE'
   );
   const dateColumnName = dateField?.bizName || '';
-  const categoryColumnName =
-    queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.bizName || '';
+  let categoryColumnName =
+      queryColumns?.find((column: any) => column.showType === 'CATEGORY')?.bizName || '';
+  categoryColumnName = categoryColumnName === dateColumnName ? '' : categoryColumnName;
   const metricFields = queryColumns?.filter((column: any) => column.showType === 'NUMBER');
 
   const currentMetricField = queryColumns?.find((column: any) => column.showType === 'NUMBER');
@@ -80,11 +81,11 @@ const MetricTrend: React.FC<Props> = ({
                 <MetricInfo aggregateInfo={aggregateInfo} currentMetricField={currentMetricField} />
               )}
             <div className={`${prefixCls}-select-options`}>
-              <DateOptions
-                chatContext={chatContext}
-                currentDateOption={currentDateOption}
-                onSelectDateOption={onSelectDateOption}
-              />
+              {/*<DateOptions*/}
+              {/*  chatContext={chatContext}*/}
+              {/*  currentDateOption={currentDateOption}*/}
+              {/*  onSelectDateOption={onSelectDateOption}*/}
+              {/*/>*/}
               <div>
                 <Select
                   defaultValue="line"
