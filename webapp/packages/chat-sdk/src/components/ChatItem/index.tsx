@@ -88,6 +88,7 @@ const ChatItem: React.FC<Props> = ({
 }) => {
   const [parseLoading, setParseLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [isStreamResult, setIsStreamResult] = useState(false);
   const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
   const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
@@ -110,7 +111,9 @@ const ChatItem: React.FC<Props> = ({
   const [isParserError, setIsParseError] = useState<boolean>(false);
   const [isGoRefresh , setIsGoRefresh] = useState<boolean>(false);
   const [thinkingContent, setThinkingContent] = useState<string>('');
+  const [streamResultContent, setStreamResultContent] = useState<string>('');
   const isThinkingRef = useRef(isThinking);
+  const isStreamResultRef = useRef(isStreamResult)
   const resetState = () => {
     setParseLoading(false);
     setParseTimeCost(undefined);
@@ -186,77 +189,48 @@ const ChatItem: React.FC<Props> = ({
     isSwitchParseInfo?: boolean,
     isRefresh = false
   ) => {
-    setExecuteMode(true);
-    if (isSwitchParseInfo) {
-      setEntitySwitchLoading(true);
-    } else {
-      setExecuteLoading(true);
-    }
     try {
-      if (true) {
-        /* 流式-start */
-        let time = 0;
-        let textResult = ''
-        const messageFunc = (event) => {
-          setTimeout(() => {
-            textResult += event.data
-            onMsgDataLoaded?.(
-              {
-                queryMode: "PLAIN_TEXT",
-                queryState: "SUCCESS",
-                resultType: false,
-                textResult,
-                parseInfos,
-                queryId: parseInfoValue.queryId!,
-              } as MsgDataType,
-              true,
-              isRefresh
-            );
-          },time)
-          time += 200
-        }
-        const errorFunc = (error) => {
-          onMsgDataLoaded?.(
+      if (parseInfos?.length === 1 && parseInfos[0]?.stream) {
+        const resultDiv = document.getElementById('result-response-'+msgId)
+        if(resultDiv) {
+          let time = 0
+          resultDiv.textContent = ''
+          const messageFunc = (event) => {
+            setTimeout(() => {
+              resultDiv.textContent += event.data
+              setStreamResultContent('' + resultDiv.textContent)
+            },time)
+            time += 200
+          }
+          const errorFunc = (error) => {
+            setIsStreamResult(false)
+            console.error('(result)SSE 错误:', error);
+            // throw error
+          };
+          const closeFunc = () => {
+            setTimeout(()=>{
+              setIsStreamResult(false)
+            },time)
+            console.log('(result)SSE 连接已关闭');
+          };
+          setIsStreamResult(true)
+          chatStreamExecute (
             {
-              queryMode: "PLAIN_TEXT",
-              queryState: "SUCCESS",
-              resultType: false,
-              textResult: '无法获取结果~~~~',
-              parseInfos,
-              queryId: parseInfoValue.queryId!,
-            } as MsgDataType,
-            true,
-            isRefresh
-          );
-          if (isSwitchParseInfo) {
-            setEntitySwitchLoading(false);
-          } else {
-            setExecuteLoading(false);
-          }
-          console.error('(result)SSE 错误:', error);
-          // throw error
-        };
-        const closeFunc = () => {
-          if (isSwitchParseInfo) {
-            setEntitySwitchLoading(false);
-          } else {
-            setExecuteLoading(false);
-          }
-          console.log('(result)SSE 连接已关闭');
-        };
-        chatStreamExecute (
-          {
-            queryText: msg,
-            chatId: conversationId!,
-            parseInfo: parseInfoValue,
-            agentId
-          },
-          messageFunc,errorFunc,closeFunc
-        )
-        return
-        /* 流式-end */
+              queryText: msg,
+              chatId: conversationId!,
+              parseInfo: parseInfoValue,
+              agentId
+            },
+            messageFunc,errorFunc,closeFunc
+          )
+        }
       } else {
-        /* 非流式-start */
+        setExecuteMode(true);
+        if (isSwitchParseInfo) {
+          setEntitySwitchLoading(true);
+        } else {
+          setExecuteLoading(true);
+        }
         const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
         if(res.data.queryResults?.length === 1 && res.data.resultType){
           setDimensionFilters(filters => {
@@ -296,7 +270,6 @@ const ChatItem: React.FC<Props> = ({
         } else {
           setExecuteLoading(false);
         }
-        /* 非流式-end */
       }
     } catch (e) {
       onCouldNotAnswer()
@@ -448,6 +421,10 @@ const ChatItem: React.FC<Props> = ({
   useEffect(() => {
     isThinkingRef.current = isThinking;
   }, [isThinking]);
+
+  useEffect(() => {
+    isStreamResultRef.current = isStreamResult;
+  }, [isStreamResult]);
 
   const onSwitchEntity = async (entityId: string) => {
     setEntitySwitchLoading(true);
@@ -682,9 +659,22 @@ const ChatItem: React.FC<Props> = ({
                 />
               )}
             </>
-            
-            <div id={'result-response-' + msgId} className='result-container'></div>
 
+            {isStreamResult ? getNodeTip('问答查询中') :
+              streamResultContent ?
+              <div className={`${prefixCls}-parse-tip`}>
+                <div className={`${prefixCls}-title-bar`}>
+                  <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+                  <div className={`${prefixCls}-step-title`}>
+                    问答查询
+                  </div>
+                </div>
+              </div> : ''
+            }
+            <div className={`${prefixCls}-content-container`} style={{ display: streamResultContent ? 'block' : 'none' }}>
+              <div id={'result-response-' + msgId} className='result-container'></div>
+            </div>
+          
             {executeMode && (
               <Spin spinning={entitySwitchLoading}>
                 <div style={{ minHeight: 50 }}>

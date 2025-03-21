@@ -101,6 +101,7 @@ export type ChatContextType = {
   properties: any;
   sqlInfo: SqlInfoType;
   textInfo: string;
+  stream?: boolean;
 };
 
 export enum MsgValidTypeEnum {
