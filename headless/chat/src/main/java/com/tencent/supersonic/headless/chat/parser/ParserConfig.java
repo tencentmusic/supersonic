@@ -17,6 +17,10 @@ public class ParserConfig extends ParameterConfig {
                     "ONE_PASS_SELF_CONSISTENCY: 通过投票方式一步生成sql", "list", "语义解析配置",
                     Lists.newArrayList("ONE_PASS_SELF_CONSISTENCY"));
 
+    public static final Parameter PARSER_RULE_CORRECTOR_ENABLE =
+            new Parameter("s2.parser.rule.corrector.enable", "false", "是否开启规则修正器",
+                    "规则修正器灵活度有限，在大模型能力足够情况下，不必强制做规则修正", "bool", "语义解析配置");
+
     public static final Parameter PARSER_LINKING_VALUE_ENABLE =
             new Parameter("s2.parser.linking.value.enable", "true", "是否将Mapper探测识别到的维度值提供给大模型",
                     "为了数据安全考虑, 这里可进行开关选择", "bool", "语义解析配置");
@@ -55,7 +59,7 @@ public class ParserConfig extends ParameterConfig {
 
     @Override
     public List<Parameter> getSysParameters() {
-        return Lists.newArrayList(PARSER_LINKING_VALUE_ENABLE, PARSER_FEW_SHOT_NUMBER,
+        return Lists.newArrayList(PARSER_LINKING_VALUE_ENABLE, PARSER_RULE_CORRECTOR_ENABLE, PARSER_FEW_SHOT_NUMBER,
                 PARSER_SELF_CONSISTENCY_NUMBER, PARSER_SHOW_COUNT, PARSER_FIELDS_COUNT_THRESHOLD);
     }
 }
