@@ -10,7 +10,7 @@ import {
   SimilarQuestionType,
 } from '../../common/type';
 import { createContext, useEffect, useRef, useState, ReactNode } from 'react';
-import { chatExecute, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE } from '../../service';
+import { chatExecute, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE, chatStreamExecute } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
@@ -88,6 +88,7 @@ const ChatItem: React.FC<Props> = ({
 }) => {
   const [parseLoading, setParseLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [isStreamResult, setIsStreamResult] = useState(false);
   const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
   const [parseInfoOptions, setParseInfoOptions] = useState<ChatContextType[]>([]);
@@ -110,7 +111,9 @@ const ChatItem: React.FC<Props> = ({
   const [isParserError, setIsParseError] = useState<boolean>(false);
   const [isGoRefresh , setIsGoRefresh] = useState<boolean>(false);
   const [thinkingContent, setThinkingContent] = useState<string>('');
+  const [streamResultContent, setStreamResultContent] = useState<string>('');
   const isThinkingRef = useRef(isThinking);
+  const isStreamResultRef = useRef(isStreamResult)
   const resetState = () => {
     setParseLoading(false);
     setParseTimeCost(undefined);
@@ -186,58 +189,98 @@ const ChatItem: React.FC<Props> = ({
     isSwitchParseInfo?: boolean,
     isRefresh = false
   ) => {
-    setExecuteMode(true);
-    if (isSwitchParseInfo) {
-      setEntitySwitchLoading(true);
-    } else {
-      setExecuteLoading(true);
-    }
     try {
-      const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
-      if(res.data.queryResults?.length === 1 && res.data.resultType){
-        setDimensionFilters(filters => {
-          const newFilters = filters.map(item => {  
-            const nameEn = res.data.queryColumns?.find((queryColumnsItem:{ name: string; nameEn: string }) => {
-              return queryColumnsItem.name === item.name
-            })?.nameEn
-            if(nameEn){
-              item.value = res.data.queryResults[0][nameEn];
-            }
-            return item;
+      if (parseInfos?.length === 1 && parseInfos[0]?.stream) {
+        const resultDiv = document.getElementById('result-response-'+msgId)
+        if(resultDiv) {
+          let time = 0
+          resultDiv.textContent = ''
+          const messageFunc = (event) => {
+            setTimeout(() => {
+              resultDiv.textContent += event.data
+              setStreamResultContent('' + resultDiv.textContent)
+            },time)
+            time += 200
+          }
+          const errorFunc = (error) => {
+            setIsStreamResult(false)
+            console.error('(result)SSE 错误:', error);
+            // throw error
+          };
+          const closeFunc = () => {
+            setTimeout(()=>{
+              setIsStreamResult(false)
+            },time)
+            console.log('(result)SSE 连接已关闭');
+          };
+          setIsStreamResult(true)
+          chatStreamExecute (
+            {
+              queryText: msg,
+              chatId: conversationId!,
+              parseInfo: parseInfoValue,
+              agentId
+            },
+            messageFunc,errorFunc,closeFunc
+          )
+        }
+      } else {
+        setExecuteMode(true);
+        if (isSwitchParseInfo) {
+          setEntitySwitchLoading(true);
+        } else {
+          setExecuteLoading(true);
+        }
+        const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
+        if(res.data.queryResults?.length === 1 && res.data.resultType){
+          setDimensionFilters(filters => {
+            const newFilters = filters.map(item => {  
+              const nameEn = res.data.queryColumns?.find((queryColumnsItem:{ name: string; nameEn: string }) => {
+                return queryColumnsItem.name === item.name
+              })?.nameEn
+              if(nameEn){
+                item.value = res.data.queryResults[0][nameEn];
+              }
+              return item;
+            })
+            return newFilters;
           })
-          return newFilters;
-        })
-        // 通知ParseTip触发onRefresh
-        setIsGoRefresh(true)
-      }
-      const valid = updateData(res);
-      onMsgDataLoaded?.(
-        {
-          ...res.data,
-          parseInfos,
-          queryId: parseInfoValue.queryId,
-        },
-        valid,
-        isRefresh
-      );
-      console.log(res?.data?.chatContext?.sqlInfo?.resultType + '~~~~', 'resultType~~~~')
-      // 没有回答上会显示一遍推荐问题
-      if(res?.data?.chatContext?.sqlInfo?.resultType === 'text'
-          || !(res?.data?.queryResults)
-          || res?.data?.queryResults?.length === 0
-      ) {
-        onCouldNotAnswer()
+          // 通知ParseTip触发onRefresh
+          setIsGoRefresh(true)
+        }
+        const valid = updateData(res);
+        onMsgDataLoaded?.(
+          {
+            ...res.data,
+            parseInfos,
+            queryId: parseInfoValue.queryId,
+          },
+          valid,
+          isRefresh
+        );
+        // 没有回答上会显示一遍推荐问题
+        if(res?.data?.chatContext?.sqlInfo?.resultType === 'text'
+            || !(res?.data?.queryResults)
+            || res?.data?.queryResults?.length === 0
+        ) {
+          onCouldNotAnswer()
+        }
+        if (isSwitchParseInfo) {
+          setEntitySwitchLoading(false);
+        } else {
+          setExecuteLoading(false);
+        }
       }
     } catch (e) {
       onCouldNotAnswer()
       const tip = SEARCH_EXCEPTION_TIP;
       setExecuteTip(SEARCH_EXCEPTION_TIP);
       setDataCache({ ...dataCache, [parseInfoValue!.id!]: { tip } });
-    }
-    if (isSwitchParseInfo) {
-      setEntitySwitchLoading(false);
-    } else {
-      setExecuteLoading(false);
+      if (isSwitchParseInfo) {
+        setEntitySwitchLoading(false);
+      } else {
+        setExecuteLoading(false);
+      }
     }
   };
 
@@ -271,7 +314,7 @@ const ChatItem: React.FC<Props> = ({
       const errorFunc = (error) => {
         setIsThinking(false)
         console.error('SSE 错误:', error);
-        throw error
+        // throw error
       };
       const closeFunc = () => {
         setTimeout(() => {
@@ -283,6 +326,7 @@ const ChatItem: React.FC<Props> = ({
       queryThoughtsInSSE(msg,agentId,messageFunc,errorFunc,closeFunc)
     }
     setParseLoading(true);
+
     const parseData: any = await chatParse({
       queryText: msg,
       chatId: conversationId,
@@ -377,6 +421,10 @@ const ChatItem: React.FC<Props> = ({
   useEffect(() => {
     isThinkingRef.current = isThinking;
   }, [isThinking]);
+
+  useEffect(() => {
+    isStreamResultRef.current = isStreamResult;
+  }, [isStreamResult]);
 
   const onSwitchEntity = async (entityId: string) => {
     setEntitySwitchLoading(true);
@@ -612,6 +660,21 @@ const ChatItem: React.FC<Props> = ({
               )}
             </>
 
+            {isStreamResult ? getNodeTip('问答查询中') :
+              streamResultContent ?
+              <div className={`${prefixCls}-parse-tip`}>
+                <div className={`${prefixCls}-title-bar`}>
+                  <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+                  <div className={`${prefixCls}-step-title`}>
+                    问答查询
+                  </div>
+                </div>
+              </div> : ''
+            }
+            <div className={`${prefixCls}-content-container`} style={{ display: streamResultContent ? 'block' : 'none' }}>
+              <div id={'result-response-' + msgId} className='result-container'></div>
+            </div>
+          
             {executeMode && (
               <Spin spinning={entitySwitchLoading}>
                 <div style={{ minHeight: 50 }}>
@@ -633,6 +696,7 @@ const ChatItem: React.FC<Props> = ({
                         executeErrorMsg={executeErrorMsg}
                       />
                     )}
+                  
                   <ExecuteItem
                     isSimpleMode={isSimpleMode}
                     queryId={parseInfo?.queryId}
