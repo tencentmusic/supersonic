@@ -11,8 +11,8 @@ services:
       POSTGRES_PASSWORD: supersonic_password
     ports:
       - "15432:5432"
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
+    volumes:
+       - ./supersonic_pg/data:/var/lib/postgresql/data
     networks:
       - supersonic_network
     dns:
@@ -65,7 +65,6 @@ services:
       #          propagation: rprivate
       #          create_host_path: true
 #volumes:
-#  postgres_data:
 #  supersonic_data:
 
 networks:
