@@ -633,6 +633,9 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     private DataItem getDataItem(MetricDO metricDO) {
         ModelResp modelResp = modelService.getModel(metricDO.getModelId());
+        if (modelResp == null) {
+            return null;
+        }
         MetricResp metricResp = MetricConverter.convert2MetricResp(metricDO,
                 ImmutableMap.of(modelResp.getId(), modelResp), Lists.newArrayList());
         fillDefaultAgg(metricResp);
