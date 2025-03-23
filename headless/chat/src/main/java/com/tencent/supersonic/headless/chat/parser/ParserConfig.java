@@ -59,7 +59,8 @@ public class ParserConfig extends ParameterConfig {
 
     @Override
     public List<Parameter> getSysParameters() {
-        return Lists.newArrayList(PARSER_LINKING_VALUE_ENABLE, PARSER_RULE_CORRECTOR_ENABLE, PARSER_FEW_SHOT_NUMBER,
-                PARSER_SELF_CONSISTENCY_NUMBER, PARSER_SHOW_COUNT, PARSER_FIELDS_COUNT_THRESHOLD);
+        return Lists.newArrayList(PARSER_LINKING_VALUE_ENABLE, PARSER_RULE_CORRECTOR_ENABLE,
+                PARSER_FEW_SHOT_NUMBER, PARSER_SELF_CONSISTENCY_NUMBER, PARSER_SHOW_COUNT,
+                PARSER_FIELDS_COUNT_THRESHOLD);
     }
 }

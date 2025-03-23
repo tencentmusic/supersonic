@@ -25,7 +25,7 @@ public class RuleSqlCorrector extends BaseSemanticCorrector {
     @Override
     public void doCorrect(ChatQueryContext chatQueryContext, SemanticParseInfo semanticParseInfo) {
         ParserConfig parserConfig = ContextUtils.getBean(ParserConfig.class);
-        if(!Boolean.parseBoolean(parserConfig.getParameterValue(PARSER_RULE_CORRECTOR_ENABLE))) {
+        if (!Boolean.parseBoolean(parserConfig.getParameterValue(PARSER_RULE_CORRECTOR_ENABLE))) {
             return;
         }
 
