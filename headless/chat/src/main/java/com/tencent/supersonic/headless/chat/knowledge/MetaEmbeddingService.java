@@ -75,6 +75,8 @@ public class MetaEmbeddingService {
             return dataSetIds.stream().map(dataSetId -> {
                 Retrieval newRetrieval = new Retrieval();
                 BeanUtils.copyProperties(retrieval, newRetrieval);
+                HashMap<String, Object> newMetadata = new HashMap<>(retrieval.getMetadata());
+                newRetrieval.setMetadata(newMetadata);
                 newRetrieval.getMetadata().putIfAbsent("dataSetId",
                         dataSetId + Constants.UNDERLINE);
                 return newRetrieval;

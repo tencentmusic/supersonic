@@ -56,7 +56,7 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
         for (T oneRoundResult : oneRoundResults) {
             if (existResults.contains(oneRoundResult)) {
                 boolean isDeleted = existResults.removeIf(existResult -> {
-                    boolean delete = existResult.lessSimilar(oneRoundResult);
+                    boolean delete = existResult.lessOrEqualSimilar(oneRoundResult);
                     if (delete) {
                         log.debug("deleted existResult:{}", existResult);
                     }

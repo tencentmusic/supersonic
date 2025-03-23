@@ -24,7 +24,7 @@ public class UserWithPassword extends User {
 
     public UserWithPassword(Long id, String name, String displayName, String email, String password,
             Integer isAdmin) {
-        super(id, name, displayName, email, isAdmin);
+        super(id, name, displayName, email, isAdmin, null);
         this.password = password;
     }
 
