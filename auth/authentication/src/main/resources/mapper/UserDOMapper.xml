@@ -136,6 +136,9 @@
       <if test="isAdmin != null">
         is_admin = #{isAdmin,jdbcType=INTEGER},
       </if>
+      <if test="lastLogin != null">
+        last_login = #{lastLogin,jdbcType=TIMESTAMP},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>

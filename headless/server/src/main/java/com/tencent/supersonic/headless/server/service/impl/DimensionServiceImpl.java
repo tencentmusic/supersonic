@@ -84,6 +84,10 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionDO dimensionDO = DimensionConverter.convert2DimensionDO(dimensionReq);
         dimensionRepository.createDimension(dimensionDO);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.ADD);
+
+        // should update modelDetail
+        modelService.updateDimension(dimensionReq, user);
+
         return DimensionConverter.convert2DimensionResp(dimensionDO);
     }
 
@@ -136,6 +140,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         String oldName = dimensionDO.getName();
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
+        // should update modelDetail as well
+        modelService.updateDimension(dimensionReq, user);
+
         if (!oldName.equals(dimensionDO.getName())) {
             sendEvent(getDataItem(dimensionDO), EventType.UPDATE);
         }
@@ -419,6 +426,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
             dimValueMapList = JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class);
         }
         DimValueMap dimValueMaps = req.getDimValueMaps();
+        if (StringUtils.isEmpty(dimValueMaps.getTechName())) {
+            dimValueMaps.setTechName(dimValueMaps.getValue());
+        }
         Map<String, DimValueMap> valeAndMapInfo = dimValueMapList.stream()
                 .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
         String value = dimValueMaps.getValue();
