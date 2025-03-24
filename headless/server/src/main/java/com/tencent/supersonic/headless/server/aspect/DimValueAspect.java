@@ -141,7 +141,7 @@ public class DimValueAspect {
             List<String> values = JsonUtil.toList(fieldValue, String.class);
             List<String> revisedValues = new ArrayList<>();
             for (int i = 0; i < values.size(); i++) {
-                Boolean flag = new Boolean(false);
+                Boolean flag = false;
                 for (DimValueMap dimValueMap : dimension.getDimValueMaps()) {
                     if (!CollectionUtils.isEmpty(dimValueMap.getAlias())
                             && dimValueMap.getAlias().contains(values.get(i))) {

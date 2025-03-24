@@ -81,7 +81,9 @@ public class KeywordMapper extends BaseMapper {
                             .add(hanlpMapResult.getName() + nature);
                 }
                 Long elementID = NatureHelper.getElementID(nature);
-                if (elementID == null)continue; //  判空优化
+                if (elementID == null) {
+                    continue;
+                }
                 SchemaElement element = getSchemaElement(dataSetId, elementType, elementID,
                         chatQueryContext.getSemanticSchema());
                 if (Objects.isNull(element)) {

@@ -22,6 +22,7 @@ public abstract class MapResult implements Serializable {
         return this.getMapKey().equals(otherResult.getMapKey())
                 && this.similarity < otherResult.similarity;
     }
+
     public Boolean lessOrEqualSimilar(MapResult otherResult) {
         return this.getMapKey().equals(otherResult.getMapKey())
                 && this.similarity <= otherResult.similarity;

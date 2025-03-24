@@ -45,7 +45,7 @@ public class SelectCorrector extends BaseSemanticCorrector {
         }
         needAddFields.removeAll(selectFields);
 
-        if (!SqlSelectHelper.hasSubSelect(correctS2SQL)) { //优化内容 ， 如果sql 条件包含了这个字段，而且是全等，则不再查询该字段
+        if (!SqlSelectHelper.hasSubSelect(correctS2SQL)) { // 优化内容 ， 如果sql 条件包含了这个字段，而且是全等，则不再查询该字段
             List<FieldExpression> tmp4 = SqlSelectHelper.getWhereExpressions(correctS2SQL);
             Iterator<String> it = needAddFields.iterator();
             while (it.hasNext()) {
