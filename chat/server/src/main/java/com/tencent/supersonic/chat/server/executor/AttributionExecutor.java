@@ -4,15 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.server.parser.AttributionParser;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
-import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.utils.SqlUtils;
@@ -21,6 +18,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.provider.ModelProvider;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import jdk.jfr.Description;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +42,12 @@ public class AttributionExecutor  implements ChatQueryExecutor{
         queryResult.setTextResult(explanation);
         return queryResult;
     }
+
+    @Override
+    public TokenStream streamExecute(ExecuteContext executeContext) {
+        return null;
+    }
+
     private static String executeSqlAndRecord(ExecuteContext executeContext, QueryResult queryResult) {
         try {
             // 构造查询环境

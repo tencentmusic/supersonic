@@ -134,6 +134,9 @@ public class DataSetSchemaBuilder {
                     }
                 }
             }
+            if (CollectionUtils.isEmpty(dimValueMaps)){
+                dimValueMaps = new ArrayList<>();
+            }
             SchemaElement dimValueToAdd = SchemaElement.builder().dataSetId(resp.getId())
                     .dataSetName(resp.getName()).model(dim.getModelId()).id(dim.getId())
                     .name(dim.getName()).bizName(dim.getBizName()).type(SchemaElementType.VALUE)

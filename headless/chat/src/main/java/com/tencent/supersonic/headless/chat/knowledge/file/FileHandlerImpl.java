@@ -178,8 +178,8 @@ public class FileHandlerImpl implements FileHandler {
             String[] itemArray = lineStr.split("\\s+");
             if (Objects.nonNull(itemArray) && itemArray.length >= 3) {
                 dictValueResp.setValue(itemArray[0].replace("#", " "));
-                dictValueResp.setNature(itemArray[1]);
-                dictValueResp.setFrequency(Long.parseLong(itemArray[2]));
+                dictValueResp.setNature(itemArray[itemArray.length - 2]);
+                dictValueResp.setFrequency(Long.parseLong(itemArray[itemArray.length - 1]));
             }
         }
         return dictValueResp;

@@ -55,6 +55,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
                 }
                 embeddingStore.add(embedding, query);
                 cache.put(TextSegmentConvert.getQueryId(query), true);
+
             } catch (Exception e) {
                 log.error("embeddingModel embed error question: {}, embeddingStore: {}", question,
                         embeddingStore.getClass().getSimpleName(), e);
@@ -142,7 +143,7 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         EmbeddingSearchResult<TextSegment> result = embeddingStore.search(request);
 
         List<Retrieval> retrievals = result.matches().stream().map(this::convertToRetrieval)
-                .sorted(Comparator.comparingDouble(Retrieval::getSimilarity)).limit(num)
+                .sorted(Comparator.comparingDouble(Retrieval::getSimilarity).reversed()).limit(num)
                 .collect(Collectors.toList());
 
         RetrieveQueryResult retrieveQueryResult = new RetrieveQueryResult();

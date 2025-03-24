@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
@@ -21,22 +22,20 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.chat.knowledge.DictWord;
 import com.tencent.supersonic.headless.chat.knowledge.file.FileHandler;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DictTaskDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionValueDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DictRepository;
 import com.tencent.supersonic.headless.server.service.DictTaskService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.utils.DictUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,8 +61,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DimensionService dimensionService;
 
     public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
-            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
-            DimensionService dimensionService) {
+                               DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
+                               DimensionService dimensionService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
@@ -102,6 +101,9 @@ public class DictTaskServiceImpl implements DictTaskService {
         return null;
     }
 
+    @Autowired
+    private DimensionServiceImpl dimensionServiceImpl;
+
     private void runDictTask(DictItemResp dictItemResp, User user) {
         if (Objects.isNull(dictItemResp)) {
             return;
@@ -130,6 +132,35 @@ public class DictTaskServiceImpl implements DictTaskService {
         dictTaskDO.setStatus(status);
         dictTaskDO.setElapsedMs(DateUtils.calculateDiffMs(dictTaskDO.getCreatedAt()));
         dictRepository.editDictTask(dictTaskDO);
+
+
+        if (!data.isEmpty()) {
+            //维度值存向量库
+            List<DimensionValueDO> dimensionValueDOS;
+            dimensionValueDOS = data.stream().map(this::convert2DimValueDO).filter(line -> Objects.nonNull(line))
+                    .toList();
+            dimensionValueDOS.forEach(
+                    dimensionValueDO -> {
+                        dimensionValueDO.setDimBizName(dictItemResp.getBizName());
+                        dimensionValueDO.setModelId(dictItemResp.getModelId());
+                        dimensionValueDO.setDimId(dictItemResp.getItemId());
+                    }
+            );
+            dimensionServiceImpl.sendDimensionValueEventBatch(dimensionValueDOS, EventType.ADD);
+        }
+    }
+
+    private DimensionValueDO convert2DimValueDO(String lineStr) {
+        DimensionValueDO dimensionValueDO = new DimensionValueDO();
+        if (StringUtils.isNotEmpty(lineStr)) {
+            String[] itemArray = lineStr.split("\\s+");
+            if (Objects.nonNull(itemArray) && itemArray.length >= 3) {
+                dimensionValueDO.setDimValue(itemArray[0].replace("#", " "));
+                dimensionValueDO.setNature(itemArray[itemArray.length - 2]);
+                dimensionValueDO.setFrequency(Long.parseLong(itemArray[itemArray.length - 1]));
+            }
+        }
+        return dimensionValueDO;
     }
 
     @Override

@@ -24,6 +24,10 @@ public class DataItem {
 
     private String defaultAgg;
 
+    private String dimValue;
+
+    private Long dimId;
+
     public String getNewName() {
         return newName == null ? name : newName;
     }

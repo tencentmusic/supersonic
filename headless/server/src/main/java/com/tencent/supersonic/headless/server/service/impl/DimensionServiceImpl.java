@@ -24,6 +24,7 @@ import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionValueDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
@@ -404,6 +405,10 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DataEvent dataEvent = getDataEvent(dimensionDOS, eventType);
         eventPublisher.publishEvent(dataEvent);
     }
+    public void sendDimensionValueEventBatch(List<DimensionValueDO> dimensionValueDOS, EventType type) {
+        DataEvent event = getDimValueDataEvent(dimensionValueDOS, type);
+        eventPublisher.publishEvent(event);
+    }
 
     public DataEvent getAllDataEvents() {
         DimensionFilter dimensionFilter = new DimensionFilter();
@@ -449,17 +454,37 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         ModelResp modelResp = modelService.getModel(dimensionDO.getModelId());
         DimensionResp dimensionResp = DimensionConverter.convert2DimensionResp(dimensionDO,
                 ImmutableMap.of(modelResp.getId(), modelResp));
-        return DataItem.builder().id(dimensionResp.getId().toString()).name(dimensionResp.getName())
-                .bizName(dimensionResp.getBizName()).modelId(dimensionResp.getModelId().toString())
-                .domainId(dimensionResp.getDomainId().toString()).type(TypeEnums.DIMENSION).build();
+        return DataItem.builder()
+                .id(dimensionResp.getId().toString())
+                .name(dimensionResp.getName())
+                .bizName(dimensionResp.getBizName())
+                .modelId(dimensionResp.getModelId().toString())
+                .domainId(dimensionResp.getDomainId().toString())
+                .type(TypeEnums.DIMENSION).build();
     }
-
+    private DataItem getDataItem(DimensionValueDO dimensionValueDO) {
+        ModelResp modelResp = modelService.getModel(dimensionValueDO.getModelId());
+        return DataItem.builder()
+                .id(dimensionValueDO.getId())
+                .dimId(dimensionValueDO.getDimId())
+                .name(dimensionValueDO.getDimName())
+                .bizName(dimensionValueDO.getDimBizName())
+                .modelId(dimensionValueDO.getModelId().toString())
+                .domainId(modelResp.getDomainId().toString())
+                .type(TypeEnums.VALUE)
+                .dimValue(dimensionValueDO.getDimValue())
+                .build();
+    }
     private DataEvent getDataEvent(List<DimensionDO> dimensionDOS, EventType eventType) {
         List<DataItem> dataItems =
                 dimensionDOS.stream().map(this::getDataItem).collect(Collectors.toList());
         return new DataEvent(this, dataItems, eventType);
     }
-
+    private DataEvent getDimValueDataEvent(List<DimensionValueDO> dimensionValueDOS, EventType eventType) {
+        List<DataItem> dataItems =
+                dimensionValueDOS.stream().map(this::getDataItem).collect(Collectors.toList());
+        return new DataEvent(this, dataItems, eventType);
+    }
     private void sendEvent(DataItem dataItem, EventType eventType) {
         eventPublisher.publishEvent(new DataEvent(this, Lists.newArrayList(dataItem), eventType));
     }

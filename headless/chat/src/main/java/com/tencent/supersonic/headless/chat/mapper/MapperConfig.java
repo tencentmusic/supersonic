@@ -51,7 +51,7 @@ public class MapperConfig extends ParameterConfig {
                     "每个文本进行向量语义召回的文本结果个数", "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_THRESHOLD =
-            new Parameter("s2.mapper.embedding.threshold", "0.9", "向量召回相似度阈值", "相似度小于该阈值的则舍弃",
+            new Parameter("s2.mapper.embedding.threshold", "0.75", "向量召回相似度阈值", "相似度小于该阈值的则舍弃",
                     "number", "Mapper相关配置");
 
     public static final Parameter EMBEDDING_MAPPER_ROUND_NUMBER =
