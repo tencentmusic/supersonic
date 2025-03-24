@@ -31,7 +31,7 @@
     "prettier": "prettier -c --write \"src/**/*\"",
     "start": "npm run start:osdev",
     "start:dev": "cross-env PORT=8002 REACT_APP_ENV=dev MOCK=none APP_TARGET=inner max dev",
-    "start:osdev": "cross-env REACT_APP_ENV=dev PORT=9000 MOCK=none APP_TARGET=opensource max dev",
+    "start:osdev": "cross-env REACT_APP_ENV=dev PORT=9000 MOCK=none UMI_DEV_SERVER_COMPRESS=none APP_TARGET=opensource max dev",
     "start:no-mock": "cross-env MOCK=none max dev",
     "start:no-ui": "cross-env UMI_UI=none max dev",
     "start:pre": "cross-env REACT_APP_ENV=pre max dev",

@@ -41,15 +41,15 @@ public class SimpleStrategy {
         StringBuilder exemplars = new StringBuilder();
         if (Objects.nonNull(llmReq.getDynamicExemplars())) {
             for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
-                String exemplarStr = String.format("\nQuestion:%s,Schema:%s,SideInfo:%s,SQL:%s",
-                        exemplar.getQuestion(), exemplar.getDbSchema(), exemplar.getSideInfo(),
+                String exemplarStr = String.format("问题:%s\n回答:%s\n",
+                        exemplar.getQuestion(),
                         exemplar.getSql());
                 exemplars.append(exemplarStr);
             }
         }
 
         Map<String, Object> variable = new HashMap<>();
-        variable.put("exemplar", exemplars);
+        variable.put("exemplar-recall", exemplars);
 
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
                 .toString();

@@ -101,6 +101,7 @@ export type ChatContextType = {
   properties: any;
   sqlInfo: SqlInfoType;
   textInfo: string;
+  stream?: boolean;
 };
 
 export enum MsgValidTypeEnum {
@@ -150,6 +151,7 @@ export type MsgDataType = {
   textResult: string;
   errorMsg: string;
   textSummary: string;
+  resultType?: any;
 };
 
 export enum ParseStateEnum {
