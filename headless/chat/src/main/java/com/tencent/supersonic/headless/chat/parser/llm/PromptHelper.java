@@ -217,8 +217,9 @@ public class PromptHelper {
 
         int recallSize = exemplarRecallNumber - llmReq.getDynamicExemplars().size();
         if (recallSize > 0) {
-            exemplars.addAll(exemplarService.recallExemplars(this.embeddingConfig.getMemoryCollectionName(llmReq.getAgentId())
-                    ,llmReq.getQueryText(), recallSize));
+            exemplars.addAll(exemplarService.recallExemplars(
+                    this.embeddingConfig.getMemoryCollectionName(llmReq.getAgentId()),
+                    llmReq.getQueryText(), recallSize));
         }
 
         List<List<Text2SQLExemplar>> results = new ArrayList<>();

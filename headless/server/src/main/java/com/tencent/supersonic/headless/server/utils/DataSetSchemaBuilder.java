@@ -134,7 +134,7 @@ public class DataSetSchemaBuilder {
                     }
                 }
             }
-            if (CollectionUtils.isEmpty(dimValueMaps)){
+            if (CollectionUtils.isEmpty(dimValueMaps)) {
                 dimValueMaps = new ArrayList<>();
             }
             SchemaElement dimValueToAdd = SchemaElement.builder().dataSetId(resp.getId())
@@ -142,8 +142,8 @@ public class DataSetSchemaBuilder {
                     .name(dim.getName()).bizName(dim.getBizName()).type(SchemaElementType.VALUE)
                     .useCnt(dim.getUseCnt())
                     .alias(new ArrayList<>(Arrays.asList(dimValueAlias.toArray(new String[0]))))
-                    .dimValueMaps(dimValueMaps)
-                    .isTag(dim.getIsTag()).description(dim.getDescription()).build();
+                    .dimValueMaps(dimValueMaps).isTag(dim.getIsTag())
+                    .description(dim.getDescription()).build();
             dimensionValues.add(dimValueToAdd);
         }
         return dimensionValues;

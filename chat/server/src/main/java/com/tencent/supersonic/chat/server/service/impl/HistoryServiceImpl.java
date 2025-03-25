@@ -47,7 +47,9 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Autowired
     private ChatHistoryMapper chatHistoryMapper;
-    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id", "status", "created_at", "updated_at","llm_comment","human_comment");
+    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id",
+            "status", "created_at", "updated_at", "llm_comment", "human_comment");
+
     @Override
     public void saveHistoryInfo(ParseContext parseContext) {
         Text2SQLExemplar exemplar = getExemplar(parseContext);
@@ -168,7 +170,7 @@ public class HistoryServiceImpl implements HistoryService {
         if (!allowedSortFields.contains(orderField.toLowerCase())) {
             orderField = "id";
             queryWrapper.orderByDesc(orderField);
-        }else {
+        } else {
             queryWrapper.orderBy(true, chatHistoryFilter.isAsc(), orderField);
         }
         List<ChatHistoryDO> chatHistoryDOS = chatHistoryRepository.getHistories(queryWrapper);

@@ -22,9 +22,10 @@ public class RestExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     public ResultData<String> exception(Exception e) {
         log.error("default global exception", e);
-        if (e instanceof BadSqlGrammarException)  {
-            return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), ReturnCode.SYSTEM_ERROR.getMessage());
-        } else{
+        if (e instanceof BadSqlGrammarException) {
+            return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(),
+                    ReturnCode.SYSTEM_ERROR.getMessage());
+        } else {
             return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), e.getMessage());
         }
     }
