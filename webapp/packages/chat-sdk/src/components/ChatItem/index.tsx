@@ -266,8 +266,8 @@ const ChatItem: React.FC<Props> = ({
         ) {
           onCouldNotAnswer()
         }
-      // 如果开启了数据解读功能，会调用数据解释接口，获取数据解释结果
-      if (currentAgent?.chatAppConfig?.DATA_INTERPRETER?.enable) {
+      // 如果开启了数据解读功能（且没开启闲聊的情况下），会调用数据解释接口，获取数据解释结果
+      if (currentAgent?.chatAppConfig?.DATA_INTERPRETER?.enable && !currentAgent?.chatAppConfig?.SMALL_TALK?.enable) {
         setIsDataInterpret(true);
         setTimeout(async()=>{
           try{
@@ -334,7 +334,7 @@ const ChatItem: React.FC<Props> = ({
 
   const sendMsg = async () => {
     const responseDiv = document.getElementById('thoughts-response-'+msgId)
-    if (responseDiv) {
+    if (responseDiv && !currentAgent?.chatAppConfig?.SMALL_TALK?.enable) {
       responseDiv.textContent = ''
       let time = 0;
       const messageFunc = (event) => {
