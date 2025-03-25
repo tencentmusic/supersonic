@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
+import com.tencent.supersonic.chat.api.pojo.request.TextVoiceReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
@@ -22,6 +23,7 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.HistoryService;
+import com.tencent.supersonic.chat.server.service.VoiceService;
 import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.jsqlparser.*;
@@ -88,6 +90,8 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     private AgentService agentService;
     @Autowired
     private HistoryService historyService;
+    @Autowired
+    private VoiceService voiceService;
 
     private final List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private final List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
@@ -249,7 +253,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         if (queryResult.getTextResult() != null) {
             dataInterpretProcessor.dataInterpret(executeContext);
         }
-
+        TextVoiceReq ttsReq = new TextVoiceReq();
+        ttsReq.setText("智能洞察：" + queryResult.getTextSummary());
+        queryResult.setTtsUrl(voiceService.textVoice(ttsReq));
         return queryResult;
     }
 
