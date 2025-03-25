@@ -151,7 +151,7 @@ export function queryDimensionValues(
   });
 }
 
-export function queryThoughtsInSSE(queryText: string,chatId: number|undefined, agentId: number | undefined, messageFunc: ((arg0: any) => void), errorFunc: ((arg0: any) => void), closeFunc: (() => void) ) {
+export function queryThoughtsInSSE(queryText: string, chatId: number | undefined, agentId: number | undefined, messageFunc: ((arg0: any) => void), errorFunc: ((arg0: any) => void), closeFunc: (() => void) ) {
   const ctrl = new AbortController();
   return fetchEventSource(`${prefix}/chat/query/streamParse`, {
     method: 'POST',
@@ -236,4 +236,21 @@ export function chatStreamExecute(
       ctrl.abort();
     }
   })
+}
+
+export function dataInterpret(
+  textResult: string,
+  queryText: string,
+  chatId: number,
+  parseInfo: ChatContextType,
+  agentId?: number,
+) {
+  return axios.post<MsgDataType>(`${prefix}/chat/query/dataInterpret`, {
+    textResult,
+    queryText,
+    agentId,
+    chatId: chatId || DEFAULT_CHAT_ID,
+    queryId: parseInfo.queryId,
+    parseId: parseInfo.id,
+  });
 }

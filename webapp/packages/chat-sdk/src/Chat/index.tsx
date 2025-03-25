@@ -378,6 +378,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   };
 
   const onAddConversation = () => {
+    sendHelloRsp()
     conversationRef.current?.onAddConversation();
     inputFocus();
   };
@@ -463,7 +464,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
                     integrateSystem={integrateSystem}
                     onMsgDataLoaded={onMsgDataLoaded}
                     onSendMsg={onSendMsg}
-                    onCouldNotAnswer={pushHelloRep}
+                    onCouldNotAnswer={()=>{updateMessageContainerScroll();pushHelloRep()}}
                   />
                   {!noInput && (
                     <ChatFooter
