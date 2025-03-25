@@ -54,14 +54,14 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
 
     @Override
     public boolean accept(ExecuteContext executeContext) {
-//        Agent agent = executeContext.getAgent();
-//        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
-//        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
-//        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
-//        if (simpleModelAgentIds.contains(agent.getId())) {
-//            return false;
-//        }
-//        return Objects.nonNull(chatApp) && chatApp.isEnable();
+        // Agent agent = executeContext.getAgent();
+        // ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+        // NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
+        // List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
+        // if (simpleModelAgentIds.contains(agent.getId())) {
+        // return false;
+        // }
+        // return Objects.nonNull(chatApp) && chatApp.isEnable();
         return false;
     }
 
@@ -93,8 +93,8 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
                 ModelProvider.getChatModel(chatApp.getChatModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String anwser = response.content().text();
-        keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}",
-                prompt.text(), anwser);
+        keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}", prompt.text(),
+                anwser);
         if (StringUtils.isNotBlank(anwser)) {
             queryResult.setTextSummary(anwser);
         }
