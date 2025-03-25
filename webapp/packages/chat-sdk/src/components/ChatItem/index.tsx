@@ -10,7 +10,7 @@ import {
   SimilarQuestionType,
 } from '../../common/type';
 import { createContext, useEffect, useRef, useState, ReactNode } from 'react';
-import { chatExecute, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE, chatStreamExecute } from '../../service';
+import { chatExecute,dataInterpret, chatParse, queryData, deleteQuery, switchEntity, queryThoughtsInSSE, chatStreamExecute } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
@@ -88,6 +88,7 @@ const ChatItem: React.FC<Props> = ({
 }) => {
   const [parseLoading, setParseLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [isDataInterpret, setIsDataInterpret] = useState(false);
   const [isStreamResult, setIsStreamResult] = useState(false);
   const [parseTimeCost, setParseTimeCost] = useState<ParseTimeCostType>();
   const [parseInfo, setParseInfo] = useState<ChatContextType>();
@@ -265,6 +266,39 @@ const ChatItem: React.FC<Props> = ({
         ) {
           onCouldNotAnswer()
         }
+      // 如果开启了数据解读功能，会调用数据解释接口，获取数据解释结果
+      if (currentAgent?.chatAppConfig?.DATA_INTERPRETER?.enable) {
+        setIsDataInterpret(true);
+        setTimeout(async()=>{
+          try{
+            const resOfSummary:any = await dataInterpret(res?.data?.textResult || '' ,msg, conversationId!, parseInfoValue, agentId)
+            if(res?.data){
+              res.data.textSummary = resOfSummary?.data?.textSummary
+            }
+            onMsgDataLoaded?.(
+              {
+                ...res.data,
+                parseInfos,
+                queryId: parseInfoValue.queryId,
+              },
+              valid,
+              isRefresh
+            );
+            onUpdateMessageScroll?.()
+            // 这里需要再执行一遍显示推荐问题，不然推荐问题会消失
+            if(res?.data?.chatContext?.sqlInfo?.resultType === 'text' 
+              || !(res?.data?.queryResults)
+              || res?.data?.queryResults?.length === 0
+            ) {
+              onCouldNotAnswer()
+            }
+          } catch(err) {
+
+          } finally {
+            setIsDataInterpret(false)
+          }
+        },0)
+      }
         if (isSwitchParseInfo) {
           setEntitySwitchLoading(false);
         } else {
@@ -323,17 +357,25 @@ const ChatItem: React.FC<Props> = ({
         console.log('SSE 连接已关闭');
       };
       setIsThinking(true)
-      queryThoughtsInSSE(msg,agentId,messageFunc,errorFunc,closeFunc)
+      queryThoughtsInSSE(msg,conversationId,agentId,messageFunc,errorFunc,closeFunc)
     }
     setParseLoading(true);
-
-    const parseData: any = await chatParse({
-      queryText: msg,
-      chatId: conversationId,
-      modelId,
-      agentId,
-      filters: filter,
-    });
+    let parseData: any = {};
+    try {
+      parseData = await chatParse({
+        queryText: msg,
+        chatId: conversationId,
+        modelId,
+        agentId,
+        filters: filter,
+      });
+      if(!(parseData?.data?.state === 'COMPLETED')) {
+        onCouldNotAnswer()
+      }
+    } catch (error) {
+      onCouldNotAnswer()
+      return
+    }
     // 预设问题如果包含该提问，让其结果在思考后才出结果
     if (currentAgent?.examples.includes(msg)) {
       await new Promise(resolve => {
@@ -575,7 +617,7 @@ const ChatItem: React.FC<Props> = ({
   };
 
   const onSelectQuestion = (question: SimilarQuestionType) => {
-    onSendMsg?.(question.queryText);
+    // onSendMsg?.(question.queryText);
   };
 
   const contentClass = classNames(`${prefixCls}-content`, {
@@ -711,10 +753,25 @@ const ChatItem: React.FC<Props> = ({
                     executeItemNode={executeItemNode}
                     isDeveloper={isDeveloper}
                     renderCustomExecuteNode={renderCustomExecuteNode}
+                    isDataInterpret={isDataInterpret}
                   />
                 </div>
               </Spin>
             )}
+            {isDataInterpret ? getNodeTip('智能洞察中') :
+              data?.textSummary && (<div className={`${prefixCls}-parse-tip`}>
+                <div className={`${prefixCls}-title-bar`}>
+                  <CheckCircleFilled className={`${prefixCls}-step-icon`} />
+                  <div className={`${prefixCls}-step-title`}>
+                    智能洞察
+                  </div>
+                </div>
+              </div>)
+            }
+            <div className={`${prefixCls}-content-container`} style={{ display: data?.textSummary ? 'block' : 'none' }}>
+              {data?.textSummary}
+            </div>
+            
             {executeMode &&
               !executeLoading &&
               !isSimpleMode &&

@@ -24,6 +24,7 @@ type Props = {
   triggerResize?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
+  isDataInterpret?: boolean;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -41,6 +42,7 @@ const ExecuteItem: React.FC<Props> = ({
   triggerResize,
   isDeveloper,
   isSimpleMode,
+  isDataInterpret
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
@@ -148,13 +150,6 @@ const ExecuteItem: React.FC<Props> = ({
           {data.queryAuthorization?.message && (
             <div className={`${prefixCls}-auth-tip`}>提示：{data.queryAuthorization.message}</div>
           )}
-          {data.textSummary && (
-            <p className={`${prefixCls}-step-title`}>
-              <span style={{ marginRight: 5 }}>总结:</span>
-              {data.textSummary}
-            </p>
-          )}
-
           {renderCustomExecuteNode && executeItemNode ? (
             executeItemNode
           ) : data?.queryMode === 'PLAIN_TEXT' || data?.queryMode === 'WEB_SERVICE' ? (
