@@ -190,6 +190,17 @@ public class HistoryServiceImpl implements HistoryService {
         });
     }
 
+    @Override
+    public void saveHistoryErrorInfo(ParseContext parseContext) {
+        createHistory(ChatHistory.builder().queryId(parseContext.getRequest().getQueryId())
+                .agentId(parseContext.getAgent().getId()).status(MemoryStatus.PENDING)
+                .question(parseContext.getRequest().getQueryText())
+                .s2sql(parseContext.getResponse().getErrorMsg())
+                .createdBy(parseContext.getRequest().getUser().getName())
+                .updatedBy(parseContext.getRequest().getUser().getName()).createdAt(new Date())
+                .build());
+    }
+
     private ChatHistoryDO getHistoryDO(ChatHistory history) {
         ChatHistoryDO historyDO = new ChatHistoryDO();
         BeanUtils.copyProperties(history, historyDO);

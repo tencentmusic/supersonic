@@ -42,10 +42,7 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
-import com.tencent.supersonic.headless.api.pojo.response.QueryState;
-import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
 import com.tencent.supersonic.headless.chat.parser.llm.SqlGenStrategyFactory;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -124,12 +121,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
         ParseContext parseContext = buildParseContext(chatParseReq, new ChatParseResp(queryId));
         chatQueryParsers.forEach(p -> p.parse(parseContext));
-        // 来闲聊这里不存历史记录
-        if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
-                parseContext.getResponse().getSelectedParses().get(0).getQueryMode(),
-                "PLAIN_TEXT")) {
-            historyService.saveHistoryInfo(parseContext);
-        }
+        saveHistoryInfo(parseContext);
         // 不是简易模式的自然语言回答才走后续逻辑
         if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
                 parseContext.getResponse().getSelectedParses().get(0).getSqlInfo().getResultType(),
@@ -147,6 +139,17 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         return parseContext.getResponse();
+    }
+
+    private void saveHistoryInfo(ParseContext parseContext) {
+        // 来闲聊这里不存历史记录
+        if (!parseContext.getResponse().getSelectedParses().isEmpty() && !Objects.equals(
+                parseContext.getResponse().getSelectedParses().get(0).getQueryMode(),
+                "PLAIN_TEXT")) {
+            historyService.saveHistoryInfo(parseContext);
+        }else if (parseContext.getResponse().getState() == ParseResp.ParseState.FAILED) {
+            historyService.saveHistoryErrorInfo(parseContext);
+        }
     }
 
     @Override

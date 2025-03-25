@@ -23,4 +23,6 @@ public interface HistoryService {
     List<ChatHistory> getMemories(ChatHistoryFilter chatHistoryFilter);
 
     void updateHistoryByQueryId(ChatMemoryUpdateReq chatMemoryUpdateReq, User user);
+
+    void saveHistoryErrorInfo(ParseContext parseContext);
 }

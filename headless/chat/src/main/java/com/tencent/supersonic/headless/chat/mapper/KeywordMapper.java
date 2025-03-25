@@ -101,87 +101,90 @@ public class KeywordMapper extends BaseMapper {
         dimensionValuesMatchUtils.processDimensions(elementTypeToNatureMap, chatQueryContext);
     }
 
-    private Map<String, Object> dimValues(List<HanlpMapResult> mapResults, ChatQueryContext chatQueryContext, List<S2Term> terms){
-        List<HanlpMapResult> hanlpMapList=new ArrayList<>();
-        Map<String,Object> map=new HashMap<>();
+    private Map<String, Object> dimValues(List<HanlpMapResult> mapResults,
+            ChatQueryContext chatQueryContext, List<S2Term> terms) {
+        List<HanlpMapResult> hanlpMapList = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>();
         for (HanlpMapResult hanlpMapResult : mapResults) {
             for (String nature : hanlpMapResult.getNatures()) {
                 SchemaElementType elementType = NatureHelper.convertToElementType(nature);
                 if (SchemaElementType.VALUE.equals(elementType)) {
                     Long elementID = NatureHelper.getElementID(nature);
-                    SchemaElement elementDb = chatQueryContext.getSemanticSchema()
-                            .getElement(elementType, elementID);
-                    if(Objects.isNull(elementDb)){
+                    SchemaElement elementDb =
+                            chatQueryContext.getSemanticSchema().getElement(elementType, elementID);
+                    if (Objects.isNull(elementDb)) {
                         hanlpMapList.add(hanlpMapResult);
                         continue;
                     }
                     List<DimValueMap> valueMapList = elementDb.getDimValueMaps();
-                    if(CollectionUtils.isEmpty(valueMapList)){
+                    if (CollectionUtils.isEmpty(valueMapList)) {
                         hanlpMapList.add(hanlpMapResult);
                         continue;
                     }
                     boolean find = false;
                     for (DimValueMap dimValueMap : valueMapList) {
                         for (String alias : dimValueMap.getAlias()) {
-                            if(alias.equals(hanlpMapResult.getDetectWord())){
+                            if (alias.equals(hanlpMapResult.getDetectWord())) {
                                 HanlpMapResult hanlpMapResultN = new HanlpMapResult(
-                                        hanlpMapResult.getName(),hanlpMapResult.getNatures(),hanlpMapResult.getDetectWord(),hanlpMapResult.getSimilarity());
+                                        hanlpMapResult.getName(), hanlpMapResult.getNatures(),
+                                        hanlpMapResult.getDetectWord(),
+                                        hanlpMapResult.getSimilarity());
                                 BeanUtils.copyProperties(hanlpMapResult, hanlpMapResultN);
                                 hanlpMapResultN.setDetectWord(dimValueMap.getValue());
                                 hanlpMapResultN.setName(dimValueMap.getValue());
                                 hanlpMapList.add(hanlpMapResultN);
-                                find=true;
+                                find = true;
                                 break;
                             }
                         }
                     }
-                    if(!find){
+                    if (!find) {
                         hanlpMapList.add(hanlpMapResult);
                     }
-                }else{
+                } else {
                     hanlpMapList.add(hanlpMapResult);
                 }
             }
         }
-        List<S2Term> termList=new ArrayList<>();
-        for ( S2Term term : terms) {
+        List<S2Term> termList = new ArrayList<>();
+        for (S2Term term : terms) {
             String nature = term.getNature().toString();
             SchemaElementType elementType = NatureHelper.convertToElementType(nature);
             if (SchemaElementType.VALUE.equals(elementType)) {
                 Long elementID = NatureHelper.getElementID(nature);
-                SchemaElement elementDb = chatQueryContext.getSemanticSchema()
-                        .getElement(elementType, elementID);
-                if(Objects.isNull(elementDb)){
+                SchemaElement elementDb =
+                        chatQueryContext.getSemanticSchema().getElement(elementType, elementID);
+                if (Objects.isNull(elementDb)) {
                     termList.add(term);
                     continue;
                 }
                 List<DimValueMap> valueMapList = elementDb.getDimValueMaps();
-                if(CollectionUtils.isEmpty(valueMapList)){
+                if (CollectionUtils.isEmpty(valueMapList)) {
                     termList.add(term);
                     continue;
                 }
                 boolean find = false;
                 for (DimValueMap dimValueMap : valueMapList) {
                     for (String alias : dimValueMap.getAlias()) {
-                        if(alias.equals(term.getWord())){
+                        if (alias.equals(term.getWord())) {
                             S2Term s2TermN = new S2Term();
                             BeanUtils.copyProperties(term, s2TermN);
                             s2TermN.setWord(dimValueMap.getValue());
                             termList.add(s2TermN);
-                            find=true;
+                            find = true;
                             break;
                         }
                     }
                 }
-                if(!find){
+                if (!find) {
                     termList.add(term);
                 }
-            }else{
+            } else {
                 termList.add(term);
             }
         }
-        map.put("hanlpMapResult",hanlpMapList);
-        map.put("term",termList);
+        map.put("hanlpMapResult", hanlpMapList);
+        map.put("term", termList);
         return map;
     }
 
