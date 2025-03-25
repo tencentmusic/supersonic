@@ -45,7 +45,9 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Autowired
     private EmbeddingConfig embeddingConfig;
-    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id", "status", "created_at", "updated_at","llm_comment","human_comment");
+    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id",
+            "status", "created_at", "updated_at", "llm_comment", "human_comment");
+
     @Override
     public void createMemory(ChatMemory memory) {
         // if an existing enabled memory has the same question, just skip
@@ -140,7 +142,7 @@ public class MemoryServiceImpl implements MemoryService {
         if (!allowedSortFields.contains(orderField.toLowerCase())) {
             orderField = "id";
             queryWrapper.orderByDesc(orderField);
-        }else {
+        } else {
             queryWrapper.orderBy(true, chatMemoryFilter.isAsc(), orderField);
         }
         List<ChatMemoryDO> chatMemoryDOS = chatMemoryRepository.getMemories(queryWrapper);

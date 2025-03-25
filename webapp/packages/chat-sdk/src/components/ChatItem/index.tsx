@@ -323,7 +323,8 @@ const ChatItem: React.FC<Props> = ({
         console.log('SSE 连接已关闭');
       };
       setIsThinking(true)
-      queryThoughtsInSSE(msg,agentId,messageFunc,errorFunc,closeFunc)
+      console.log(conversationId,'conversationId')
+      queryThoughtsInSSE(msg,conversationId,agentId,messageFunc,errorFunc,closeFunc)
     }
     setParseLoading(true);
 

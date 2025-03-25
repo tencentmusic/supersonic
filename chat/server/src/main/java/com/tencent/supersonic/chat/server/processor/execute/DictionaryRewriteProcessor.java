@@ -28,7 +28,7 @@ import java.util.*;
 public class DictionaryRewriteProcessor implements ExecuteResultProcessor {
     @Override
     public boolean accept(ExecuteContext executeContext) {
-        return true;
+        return false;
     }
 
     @Override

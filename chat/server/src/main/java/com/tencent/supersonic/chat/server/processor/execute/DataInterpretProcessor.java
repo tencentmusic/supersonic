@@ -54,14 +54,15 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
 
     @Override
     public boolean accept(ExecuteContext executeContext) {
-        Agent agent = executeContext.getAgent();
-        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
-        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
-        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
-        if (simpleModelAgentIds.contains(agent.getId())){
-            return false;
-        }
-        return Objects.nonNull(chatApp) && chatApp.isEnable();
+//        Agent agent = executeContext.getAgent();
+//        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+//        NL2SQLParserConfig nl2SqlParserConfig = ContextUtils.getBean(NL2SQLParserConfig.class);
+//        List<Integer> simpleModelAgentIds = nl2SqlParserConfig.getSimpleModelAgentIds();
+//        if (simpleModelAgentIds.contains(agent.getId())) {
+//            return false;
+//        }
+//        return Objects.nonNull(chatApp) && chatApp.isEnable();
+        return false;
     }
 
     @Override
@@ -74,23 +75,28 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
             String text = getTipString(queryResult);
             queryResult.setTextSummary(text);
         } else {
-            Agent agent = executeContext.getAgent();
-            ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
+            dataInterpret(executeContext);
+        }
+    }
 
-            Map<String, Object> variable = new HashMap<>();
-            variable.put("question", executeContext.getRequest().getQueryText());
-            variable.put("data", queryResult.getTextResult());
+    public void dataInterpret(ExecuteContext executeContext) {
+        QueryResult queryResult = executeContext.getResponse();
+        Agent agent = executeContext.getAgent();
+        ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
 
-            Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);
-            ChatLanguageModel chatLanguageModel =
-                    ModelProvider.getChatModel(chatApp.getChatModelConfig());
-            Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
-            String anwser = response.content().text();
-            keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}",
-                    prompt.text(), anwser);
-            if (StringUtils.isNotBlank(anwser)) {
-                queryResult.setTextSummary(anwser);
-            }
+        Map<String, Object> variable = new HashMap<>();
+        variable.put("question", executeContext.getRequest().getQueryText());
+        variable.put("data", queryResult.getTextResult());
+
+        Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);
+        ChatLanguageModel chatLanguageModel =
+                ModelProvider.getChatModel(chatApp.getChatModelConfig());
+        Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
+        String anwser = response.content().text();
+        keyPipelineLog.info("DataInterpretProcessor modelReq:\n{} \nmodelResp:\n{}",
+                prompt.text(), anwser);
+        if (StringUtils.isNotBlank(anwser)) {
+            queryResult.setTextSummary(anwser);
         }
     }
 

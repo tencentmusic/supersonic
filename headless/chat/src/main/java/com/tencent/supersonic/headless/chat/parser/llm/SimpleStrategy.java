@@ -41,9 +41,8 @@ public class SimpleStrategy {
         StringBuilder exemplars = new StringBuilder();
         if (Objects.nonNull(llmReq.getDynamicExemplars())) {
             for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
-                String exemplarStr = String.format("问题:%s\n回答:%s\n",
-                        exemplar.getQuestion(),
-                        exemplar.getSql());
+                String exemplarStr =
+                        String.format("问题:%s\n回答:%s\n", exemplar.getQuestion(), exemplar.getSql());
                 exemplars.append(exemplarStr);
             }
         }

@@ -1,12 +1,12 @@
 package com.tencent.supersonic.chat.server.parser;
 
-import org.apache.commons.lang3.StringUtils;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
+import org.apache.commons.lang3.StringUtils;
 
 public class PlainTextParser implements ChatQueryParser {
 
@@ -29,7 +29,7 @@ public class PlainTextParser implements ChatQueryParser {
                 && "DIFY".equalsIgnoreCase(modelConfig.getProvider())) {
             parseInfo.setStream(true);
         }
-        
+
         parseContext.getResponse().getSelectedParses().add(parseInfo);
         parseContext.getResponse().setState(ParseResp.ParseState.COMPLETED);
     }

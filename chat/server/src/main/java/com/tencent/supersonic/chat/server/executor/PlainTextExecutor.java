@@ -95,7 +95,7 @@ public class PlainTextExecutor implements ChatQueryExecutor {
         // 创建流式解析器
         StreamingSemanticParseExtractor extractor =
                 AiServices.create(StreamingSemanticParseExtractor.class, streamChatModel);
-        
+
         return extractor.generateStreamingSemanticParse(prompt.toUserMessage().singleText());
     }
 

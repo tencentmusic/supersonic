@@ -151,7 +151,7 @@ export function queryDimensionValues(
   });
 }
 
-export function queryThoughtsInSSE(queryText: string, agentId: number | undefined, messageFunc: ((arg0: any) => void), errorFunc: ((arg0: any) => void), closeFunc: (() => void) ) {
+export function queryThoughtsInSSE(queryText: string,chatId: number|undefined, agentId: number | undefined, messageFunc: ((arg0: any) => void), errorFunc: ((arg0: any) => void), closeFunc: (() => void) ) {
   const ctrl = new AbortController();
   return fetchEventSource(`${prefix}/chat/query/streamParse`, {
     method: 'POST',
@@ -162,6 +162,7 @@ export function queryThoughtsInSSE(queryText: string, agentId: number | undefine
     },
     body: JSON.stringify({
       queryText,
+      chatId,
       agentId,
     }),
     signal: ctrl.signal,
