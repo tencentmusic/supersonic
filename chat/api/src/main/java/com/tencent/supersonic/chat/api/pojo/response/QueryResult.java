@@ -24,6 +24,7 @@ public class QueryResult {
     private List<Map<String, Object>> queryResults;
     private String textResult;
     private String textSummary;
+    private String ttsUrl;
     private Long queryTimeCost;
     private List<SchemaElement> recommendedDimensions;
     private AggregateInfo aggregateInfo;
