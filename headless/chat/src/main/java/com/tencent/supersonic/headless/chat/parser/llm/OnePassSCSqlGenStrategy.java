@@ -211,7 +211,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         llmResp.setQuery(llmReq.getQueryText());
         Map<Prompt, List<Text2SQLExemplar>> prompt2Exemplar = new HashMap<>();
         try {
-            List<List<Text2SQLExemplar>> exemplarsList = promptHelper.getFewShotExemplarsByHistory(llmReq);
+            List<List<Text2SQLExemplar>> exemplarsList =
+                    promptHelper.getFewShotExemplarsByHistory(llmReq);
             for (List<Text2SQLExemplar> exemplars : exemplarsList) {
                 llmReq.setDynamicExemplars(exemplars);
                 SimpleStrategy simpleStrategy = new SimpleStrategy();

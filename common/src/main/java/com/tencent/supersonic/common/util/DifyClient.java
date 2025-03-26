@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
+import dev.langchain4j.model.output.Response;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import dev.langchain4j.model.output.Response;
 
 @Slf4j
 public class DifyClient {
@@ -84,9 +84,9 @@ public class DifyClient {
         request.setUser(user);
         request.setResponseMode("streaming");
         EventSourceListener eventSourceListener = new EventSourceListener() {
-            
+
             final StringBuffer contentBuilder = new StringBuffer();
-            
+
             @Override
             public void onEvent(EventSource eventSource, String id, String type, String data) {
                 JSONObject object = JSON.parseObject(data);
@@ -105,7 +105,7 @@ public class DifyClient {
             public void onFailure(EventSource eventSource, Throwable t, okhttp3.Response response) {
                 handler.onError(t);
             }
-            
+
         };
         Request.Builder builder = new Request.Builder();
         builder.url(difyURL).headers(Headers.of(headers))

@@ -47,7 +47,9 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Autowired
     private ChatHistoryMapper chatHistoryMapper;
-    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id", "status", "created_at", "updated_at","llm_comment","human_comment");
+    private static final Set<String> allowedSortFields = Set.of("id", "query_id", "agent_id",
+            "status", "created_at", "updated_at", "llm_comment", "human_comment");
+
     @Override
     public void saveHistoryInfo(ParseContext parseContext) {
         Text2SQLExemplar exemplar = getExemplar(parseContext);
@@ -81,14 +83,8 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public void createHistory(ChatHistory history) {
-        // if an existing enabled history has the same question, just skip
-        List<ChatHistory> memories =
-                getMemories(ChatHistoryFilter.builder().agentId(history.getAgentId())
-                        .question(history.getQuestion()).status(MemoryStatus.ENABLED).build());
-        if (memories.isEmpty()) {
-            ChatHistoryDO historyDO = getHistoryDO(history);
-            chatHistoryRepository.createHistory(historyDO);
-        }
+        ChatHistoryDO historyDO = getHistoryDO(history);
+        chatHistoryRepository.createHistory(historyDO);
     }
 
     @Override
@@ -168,7 +164,7 @@ public class HistoryServiceImpl implements HistoryService {
         if (!allowedSortFields.contains(orderField.toLowerCase())) {
             orderField = "id";
             queryWrapper.orderByDesc(orderField);
-        }else {
+        } else {
             queryWrapper.orderBy(true, chatHistoryFilter.isAsc(), orderField);
         }
         List<ChatHistoryDO> chatHistoryDOS = chatHistoryRepository.getHistories(queryWrapper);
@@ -186,6 +182,17 @@ public class HistoryServiceImpl implements HistoryService {
             chatHistoryUpdateReq.setId(h.getId());
             updateHistory(chatHistoryUpdateReq, user);
         });
+    }
+
+    @Override
+    public void saveHistoryErrorInfo(ParseContext parseContext) {
+        createHistory(ChatHistory.builder().queryId(parseContext.getRequest().getQueryId())
+                .agentId(parseContext.getAgent().getId()).status(MemoryStatus.PENDING)
+                .question(parseContext.getRequest().getQueryText())
+                .s2sql(parseContext.getResponse().getErrorMsg())
+                .createdBy(parseContext.getRequest().getUser().getName())
+                .updatedBy(parseContext.getRequest().getUser().getName()).createdAt(new Date())
+                .build());
     }
 
     private ChatHistoryDO getHistoryDO(ChatHistory history) {

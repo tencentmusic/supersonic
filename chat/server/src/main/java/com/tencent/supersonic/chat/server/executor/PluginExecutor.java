@@ -24,7 +24,7 @@ public class PluginExecutor implements ChatQueryExecutor {
         query.setParseInfo(parseInfo);
         return query.build();
     }
-    
+
     @Override
     public TokenStream streamExecute(ExecuteContext executeContext) {
         return null;

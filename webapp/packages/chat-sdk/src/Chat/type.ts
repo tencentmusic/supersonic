@@ -104,4 +104,5 @@ export type AgentType = {
     enableMultiTurn: boolean;
   };
   dataSetIds: number[];
+  chatAppConfig: any
 };
