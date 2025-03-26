@@ -44,12 +44,10 @@ public class AttributionParser implements ChatQueryParser{
                     "7. 不要使用with和over语法，mysql版本不支持";
     @Override
     public boolean accept(ParseContext parseContext) {
-        //1.意图识别是否是归因分析
-        IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
-        if (intentType == IntentType.ATTRIBUTION && enableAttr) {
-            return true;
-        }
-        return true;
+//        //1.意图识别是否是归因分析
+//        IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
+//        return intentType == IntentType.ATTRIBUTION && enableAttr;
+return false;
     }
 
     @Override
@@ -62,10 +60,15 @@ public class AttributionParser implements ChatQueryParser{
         // 3. 调用大模型生成SQL
         LLMResp llmResp = generate(llmReq);
 
+
         SemanticParseInfo parseInfo = new SemanticParseInfo();
         parseInfo.setQueryMode("Attribution_Analysis");
         parseInfo.setId(1);
-        parseInfo.getSqlInfo().setCorrectedS2SQL(llmResp.getSqlOutput());
+        if (!llmResp.getSqlList().isEmpty()){
+            parseInfo.getSqlList().addAll(llmResp.getSqlList());
+        }else {
+            parseInfo.getSqlInfo().setCorrectedS2SQL(llmResp.getSqlOutput());
+        }
         parseInfo.getSqlInfo().setResultType("text");
         parseContext.getResponse().getSelectedParses().add(parseInfo);
         parseContext.getResponse().setState(ParseResp.ParseState.COMPLETED);
@@ -131,8 +134,8 @@ public class AttributionParser implements ChatQueryParser{
 
         while (matcher.find()) {
             String cleanSql = matcher.group(2)
-                    .replaceAll("\\s+", " ")  // 压缩空格
-                    .replaceAll(";$", "")     // 去除末尾分号
+                    .replaceAll("\\s+", " ")
+                    .replaceAll(";$", "")
                     .trim();
             steps.add(cleanSql);
         }
