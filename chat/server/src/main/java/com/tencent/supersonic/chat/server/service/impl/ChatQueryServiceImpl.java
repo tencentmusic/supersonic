@@ -147,7 +147,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                 parseContext.getResponse().getSelectedParses().get(0).getQueryMode(),
                 "PLAIN_TEXT")) {
             historyService.saveHistoryInfo(parseContext);
-        }else if (parseContext.getResponse().getState() == ParseResp.ParseState.FAILED) {
+        } else if (parseContext.getResponse().getState() == ParseResp.ParseState.FAILED) {
             historyService.saveHistoryErrorInfo(parseContext);
         }
     }

@@ -83,14 +83,8 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public void createHistory(ChatHistory history) {
-        // if an existing enabled history has the same question, just skip
-        List<ChatHistory> memories =
-                getMemories(ChatHistoryFilter.builder().agentId(history.getAgentId())
-                        .question(history.getQuestion()).status(MemoryStatus.ENABLED).build());
-        if (memories.isEmpty()) {
-            ChatHistoryDO historyDO = getHistoryDO(history);
-            chatHistoryRepository.createHistory(historyDO);
-        }
+        ChatHistoryDO historyDO = getHistoryDO(history);
+        chatHistoryRepository.createHistory(historyDO);
     }
 
     @Override
