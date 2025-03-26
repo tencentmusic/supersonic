@@ -94,7 +94,7 @@ const BarChart: React.FC<Props> = ({
             return value === 0
               ? 0
               : metricField.dataFormatType === 'percent'
-              ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
+              ? `${formatByDecimalPlaces(metricField.dataFormat?.needMultiply100 ? +value * 100 : value, metricField.dataFormat?.decimalPlaces || 2)}%`
               : getFormattedValue(value);
           },
         },
@@ -116,7 +116,7 @@ const BarChart: React.FC<Props> = ({
                     : metricField.dataFormatType === 'percent' ||
                       metricField.dataFormatType === 'decimal'
                     ? `${formatByDecimalPlaces(
-                        item.value,
+                        metricField.dataFormat?.needMultiply100 ? +item.value * 100 : item.value,
                         metricField.dataFormat?.decimalPlaces || 2
                       )}${metricField.dataFormatType === 'percent' ? '%' : ''}`
                     : getFormattedValue(item.value)
@@ -151,7 +151,7 @@ const BarChart: React.FC<Props> = ({
             return value === 0
               ? 0
               : metricField.dataFormatType === 'percent'
-              ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
+              ? `${formatByDecimalPlaces(metricField.dataFormat?.needMultiply100 ? +value * 100 : value, metricField.dataFormat?.decimalPlaces || 2)}%`
               : getFormattedValue(value);
           },
         },

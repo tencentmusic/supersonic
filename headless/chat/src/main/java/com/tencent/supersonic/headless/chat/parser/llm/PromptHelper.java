@@ -33,15 +33,13 @@ public class PromptHelper {
 
     public List<List<Text2SQLExemplar>> getFewShotExemplars(LLMReq llmReq) {
         int exemplarRecallNumber =
-                Integer.valueOf(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
-        int fewShotNumber = Integer.valueOf(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
+                Integer.parseInt(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
+        int fewShotNumber = Integer.parseInt(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
         int selfConsistencyNumber =
-                Integer.valueOf(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
+                Integer.parseInt(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
         List<Text2SQLExemplar> exemplars = Lists.newArrayList();
-        llmReq.getDynamicExemplars().stream().forEach(e -> {
-            exemplars.add(e);
-        });
+        exemplars.addAll(llmReq.getDynamicExemplars());
 
         int recallSize = exemplarRecallNumber - llmReq.getDynamicExemplars().size();
         if (recallSize > 0) {
@@ -85,60 +83,63 @@ public class PromptHelper {
         String tableStr = llmReq.getSchema().getDataSetName();
 
         List<String> metrics = Lists.newArrayList();
-        llmReq.getSchema().getMetrics().stream().forEach(metric -> {
+        llmReq.getSchema().getMetrics().forEach(metric -> {
             StringBuilder metricStr = new StringBuilder();
             metricStr.append("<");
             metricStr.append(metric.getName());
             if (!CollectionUtils.isEmpty(metric.getAlias())) {
                 StringBuilder alias = new StringBuilder();
-                metric.getAlias().stream().forEach(a -> alias.append(a + ","));
-                metricStr.append(" ALIAS '" + alias + "'");
+                metric.getAlias().forEach(a -> alias.append(a).append(","));
+                metricStr.append(" ALIAS '").append(alias).append("'");
             }
             if (StringUtils.isNotEmpty(metric.getDataFormatType())) {
                 String dataFormatType = metric.getDataFormatType();
                 if (DataFormatTypeEnum.DECIMAL.getName().equalsIgnoreCase(dataFormatType)
                         || DataFormatTypeEnum.PERCENT.getName().equalsIgnoreCase(dataFormatType)) {
-                    metricStr.append(" FORMAT '" + dataFormatType + "'");
+                    metricStr.append(" FORMAT '").append(dataFormatType).append("'");
                 }
             }
             if (StringUtils.isNotEmpty(metric.getDescription())) {
-                metricStr.append(" COMMENT '" + metric.getDescription() + "'");
+                metricStr.append(" COMMENT '").append(metric.getDescription()).append("'");
             }
             if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
-                metricStr.append(" AGGREGATE '" + metric.getDefaultAgg().toUpperCase() + "'");
+                metricStr.append(" AGGREGATE '").append(metric.getDefaultAgg().toUpperCase()).append("'");
             }
             metricStr.append(">");
             metrics.add(metricStr.toString());
         });
 
         List<String> dimensions = Lists.newArrayList();
-        llmReq.getSchema().getDimensions().stream().forEach(dimension -> {
+        llmReq.getSchema().getDimensions().forEach(dimension -> {
             StringBuilder dimensionStr = new StringBuilder();
             dimensionStr.append("<");
             dimensionStr.append(dimension.getName());
             if (!CollectionUtils.isEmpty(dimension.getAlias())) {
                 StringBuilder alias = new StringBuilder();
-                dimension.getAlias().stream().forEach(a -> alias.append(a + ";"));
-                dimensionStr.append(" ALIAS '" + alias + "'");
+                dimension.getAlias().forEach(a -> alias.append(a).append(";"));
+                dimensionStr.append(" ALIAS '").append(alias).append("'");
             }
             if (StringUtils.isNotEmpty(dimension.getTimeFormat())) {
-                dimensionStr.append(" FORMAT '" + dimension.getTimeFormat() + "'");
+                dimensionStr.append(" FORMAT '").append(dimension.getTimeFormat()).append("'");
             }
             if (StringUtils.isNotEmpty(dimension.getDescription())) {
-                dimensionStr.append(" COMMENT '" + dimension.getDescription() + "'");
+                dimensionStr.append(" COMMENT '").append(dimension.getDescription()).append("'");
             }
             dimensionStr.append(">");
             dimensions.add(dimensionStr.toString());
         });
 
         List<String> values = Lists.newArrayList();
-        llmReq.getSchema().getValues().stream().forEach(value -> {
-            StringBuilder valueStr = new StringBuilder();
-            String fieldName = value.getFieldName();
-            String fieldValue = value.getFieldValue();
-            valueStr.append(String.format("<%s='%s'>", fieldName, fieldValue));
-            values.add(valueStr.toString());
-        });
+        List<LLMReq.ElementValue> elementValueList = llmReq.getSchema().getValues();
+        if (elementValueList != null) {
+            elementValueList.forEach(value -> {
+                StringBuilder valueStr = new StringBuilder();
+                String fieldName = value.getFieldName();
+                String fieldValue = value.getFieldValue();
+                valueStr.append(String.format("<%s='%s'>", fieldName, fieldValue));
+                values.add(valueStr.toString());
+            });
+        }
 
         String partitionTimeStr = "";
         if (llmReq.getSchema().getPartitionTime() != null) {
@@ -172,14 +173,14 @@ public class PromptHelper {
     private String buildTermStr(LLMReq llmReq) {
         List<LLMReq.Term> terms = llmReq.getTerms();
         List<String> termStr = Lists.newArrayList();
-        terms.stream().forEach(term -> {
+        terms.forEach(term -> {
             StringBuilder termsDesc = new StringBuilder();
             String description = term.getDescription();
             termsDesc.append(String.format("<%s COMMENT '%s'>", term.getName(), description));
             termStr.add(termsDesc.toString());
         });
         String ret = "";
-        if (termStr.size() > 0) {
+        if (!termStr.isEmpty()) {
             ret = String.join(",", termStr);
         }
 
