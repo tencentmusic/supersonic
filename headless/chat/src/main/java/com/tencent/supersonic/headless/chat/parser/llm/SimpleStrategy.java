@@ -78,7 +78,7 @@ public class SimpleStrategy {
                 + "您好~这里是红海ChatBI，您的问题不在我的业务知识范围内，我可以帮您查询咪咕重点产品的核心指标数据、分省、分渠道、分场景的活跃数据，咪咕视频的内容播放数据，比如您可以查询咪咕视频上月的全场景活跃用户，最近一周最火的体育赛事。\n"
                 + "3. 只需要查询思考思路，**严格禁止在思考过程中出现任何SQL代码片段或英文字段名**，必须使用中文描述查询逻辑。\n"
                 + "4. 输出内容请尽量格式清晰，思路正确，字数控制在80-100字左右。\n"
-                + "5. 如果问题提及集团考核/考核相关，那么在输出的思路中增加如下的提示：暂时以24年考核目标作为参照，待25年考核指标下达后再更新。\n";
+                + "5. 如果问题提及集团考核/考核/考核指标，那么在输出的思路中增加提示：\"暂时以24年考核目标作为参照，待25年考核指标下达后再更新\",其他任何情况请不要添加如上的提示\n";
 
 
 
@@ -88,6 +88,9 @@ public class SimpleStrategy {
         variable.put("question", llmReq.getQueryText());
         variable.put("schema", "");
         variable.put("information", "");
+        String currentDayRule=new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是").append(DateFormatUtils.format(new Date(), "yyyyMMdd"))
+                .append("\n").toString();
+        variable.put("current-day-rule", currentDayRule);
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
                 .toString();
         // 拼接完整的prompt
