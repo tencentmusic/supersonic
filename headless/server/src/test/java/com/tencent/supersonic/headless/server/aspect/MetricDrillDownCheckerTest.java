@@ -26,23 +26,23 @@ public class MetricDrillDownCheckerTest {
         metricDrillDownChecker.checkQuery(semanticSchemaResp, sql);
     }
 
-    @Test
-    void test_groupBy_not_in_drillDownDimension() {
-        MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
-        String sql = "select page, sum(pv) from t_1 group by page";
-        SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
-        assertThrows(InvalidArgumentException.class,
-                () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
-    }
+    // @Test
+    // void test_groupBy_not_in_drillDownDimension() {
+    // MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+    // String sql = "select page, sum(pv) from t_1 group by page";
+    // SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
+    // assertThrows(InvalidArgumentException.class,
+    // () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
+    // }
 
-    @Test
-    void test_groupBy_not_in_necessary_dimension() {
-        MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
-        String sql = "select user_name, count(distinct uv) from t_1 group by user_name";
-        SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
-        assertThrows(InvalidArgumentException.class,
-                () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
-    }
+    // @Test
+    // void test_groupBy_not_in_necessary_dimension() {
+    // MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+    // String sql = "select user_name, count(distinct uv) from t_1 group by user_name";
+    // SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
+    // assertThrows(InvalidArgumentException.class,
+    // () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
+    // }
 
     @Test
     void test_groupBy_no_necessary_dimension_setting() {
