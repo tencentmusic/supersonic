@@ -58,4 +58,6 @@ public interface FileHandler {
     PageInfo<DictValueResp> queryDictValue(String fileName, DictValueReq dictValueReq);
 
     String queryDictFilePath(String fileName);
+
+    List<String> readFile(String fileName);
 }

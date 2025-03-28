@@ -37,6 +37,7 @@ public class TextSegmentConvert {
             if (item.getType()== TypeEnums.VALUE){
                 newItem.setDimValue(item.getDimValue());
                 text = item.getDimValue();
+                newItem.setDimId(item.getDimId());
             }
             Map meta = JSONObject.parseObject(JSONObject.toJSONString(newItem), Map.class);
             TextSegment textSegment = TextSegment.from(text, new Metadata(meta));

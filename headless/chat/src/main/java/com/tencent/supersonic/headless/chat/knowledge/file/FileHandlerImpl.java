@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -262,5 +263,20 @@ public class FileHandlerImpl implements FileHandler {
                     StandardOpenOption.APPEND);
         }
         return Files.newBufferedWriter(Paths.get(filePath), StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public List<String> readFile(String fileName) {
+        try {
+            String filePath = localFileConfig.getDictDirectoryLatest() + FILE_SPILT + fileName;
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                return Files.readAllLines(path, StandardCharsets.UTF_8);
+            }
+            return Collections.emptyList();
+        } catch (IOException e) {
+            log.error("readFile error, fileName:{}", fileName, e);
+            return Collections.emptyList();
+        }
     }
 }

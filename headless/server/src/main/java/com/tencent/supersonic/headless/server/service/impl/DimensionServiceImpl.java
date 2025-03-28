@@ -66,7 +66,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
+    @Autowired
+    private DictTaskServiceImpl dictTaskService;
     public DimensionServiceImpl(DimensionRepository dimensionRepository, ModelService modelService,
             AliasGenerateHelper aliasGenerateHelper, DatabaseService databaseService,
             ModelRelaService modelRelaService, DataSetService dataSetService) {
@@ -169,6 +170,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
                 || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
             sendEventBatch(dimensionDOS, EventType.DELETE);
+            deleteDimensionValue(dimensionDOS);
         } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
             sendEventBatch(dimensionDOS, EventType.ADD);
         }
@@ -201,6 +203,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         dimensionDO.setUpdatedBy(user.getName());
         dimensionRepository.updateDimension(dimensionDO);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.DELETE);
+        deleteDimensionValue(Lists.newArrayList(dimensionDO));
     }
 
     @Override
@@ -417,6 +420,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         eventPublisher.publishEvent(event);
     }
 
+
     public DataEvent getAllDataEvents() {
         DimensionFilter dimensionFilter = new DimensionFilter();
         List<DimensionDO> dimensionDOS = queryDimension(dimensionFilter);
@@ -506,5 +510,17 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         boolean isTypeParamChange =
                 !Objects.equals(dimensionReq.getTypeParams(), dimensionResp.getTypeParams());
         return isNameChange || isExtChange || isTypeParamChange;
+    }
+
+    private void deleteDimensionValue(List<DimensionDO> dimensionDOS) {
+        dimensionDOS.forEach(dimensionDO -> {
+            DictItemResp dictItemResp = new DictItemResp();
+            dictItemResp.setModelId(dimensionDO.getModelId());
+            dictItemResp.setItemId(dimensionDO.getId());
+            dictItemResp.setType(TypeEnums.DIMENSION);
+            dictItemResp.setBizName(dimensionDO.getBizName());
+            String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + "txt";
+            dictTaskService.deleteEmbedding(dictItemResp, fileName);
+        });
     }
 }

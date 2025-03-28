@@ -167,8 +167,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     public Long deleteDictTask(DictSingleTaskReq taskReq, User user) {
         DictItemResp dictItemResp = fetchDictItemResp(taskReq);
         String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + dictFileType;
+        deleteEmbedding(dictItemResp,fileName);
         fileHandler.deleteDictFile(fileName);
-
         try {
             dictWordService.loadDictWord();
         } catch (Exception e) {
@@ -180,6 +180,24 @@ public class DictTaskServiceImpl implements DictTaskService {
         log.info("[addDictTask] dictTaskDO:{}", dictTaskDO);
         dictRepository.addDictTask(dictTaskDO);
         return 0L;
+    }
+
+    public void deleteEmbedding(DictItemResp dictItemResp, String fileName) {
+        List<DimensionValueDO> dimensionValueDOS;
+        //TODO，直接从文件中读取所有维度值不妥，后续待优化
+        List<String> data = fileHandler.readFile(fileName);
+        if (!CollectionUtils.isEmpty(data)) {
+            dimensionValueDOS = data.stream()
+                    .map(this::convert2DimValueDO)
+                    .filter(Objects::nonNull)
+                    .peek(dimensionValueDO -> {
+                        dimensionValueDO.setModelId(dictItemResp.getModelId());
+                        dimensionValueDO.setDimId(dictItemResp.getItemId());
+                        dimensionValueDO.setDimBizName(dictItemResp.getBizName());
+                    })
+                    .collect(Collectors.toList());
+            dimensionServiceImpl.sendDimensionValueEventBatch(dimensionValueDOS, EventType.DELETE);
+        }
     }
 
     @Override
