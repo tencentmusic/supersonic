@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -49,6 +50,10 @@ public class SimpleStrategy {
 
         Map<String, Object> variable = new HashMap<>();
         variable.put("exemplar-recall", exemplars);
+
+        String currentDayRule=new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是").append(DateFormatUtils.format(new Date(), "yyyyMMdd"))
+                .append("\n").toString();
+        variable.put("current-day-rule", currentDayRule);
 
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
                 .toString();
