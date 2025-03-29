@@ -34,7 +34,8 @@ public class PromptHelper {
     public List<List<Text2SQLExemplar>> getFewShotExemplars(LLMReq llmReq) {
         int exemplarRecallNumber =
                 Integer.parseInt(parserConfig.getParameterValue(PARSER_EXEMPLAR_RECALL_NUMBER));
-        int fewShotNumber = Integer.parseInt(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
+        int fewShotNumber =
+                Integer.parseInt(parserConfig.getParameterValue(PARSER_FEW_SHOT_NUMBER));
         int selfConsistencyNumber =
                 Integer.parseInt(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
@@ -103,7 +104,8 @@ public class PromptHelper {
                 metricStr.append(" COMMENT '").append(metric.getDescription()).append("'");
             }
             if (StringUtils.isNotEmpty(metric.getDefaultAgg())) {
-                metricStr.append(" AGGREGATE '").append(metric.getDefaultAgg().toUpperCase()).append("'");
+                metricStr.append(" AGGREGATE '").append(metric.getDefaultAgg().toUpperCase())
+                        .append("'");
             }
             metricStr.append(">");
             metrics.add(metricStr.toString());
