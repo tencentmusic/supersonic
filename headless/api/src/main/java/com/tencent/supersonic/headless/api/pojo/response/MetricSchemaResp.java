@@ -13,14 +13,4 @@ public class MetricSchemaResp extends MetricResp {
     private Long useCnt = 0L;
     private Set<String> fields = Sets.newHashSet();
 
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
 }

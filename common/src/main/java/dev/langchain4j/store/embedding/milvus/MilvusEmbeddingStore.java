@@ -81,13 +81,13 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
         // Define the field structure for the collection
         this.fieldDefinition = new FieldDefinition(ID_FIELD_NAME, TEXT_FIELD_NAME,
-            METADATA_FIELD_NAME, VECTOR_FIELD_NAME);
+                METADATA_FIELD_NAME, VECTOR_FIELD_NAME);
 
         if (!hasCollection(this.milvusClient, this.collectionName)) {
             createCollection(this.milvusClient, this.collectionName, fieldDefinition,
-            ensureNotNull(dimension, "dimension"));
+                    ensureNotNull(dimension, "dimension"));
             createIndex(this.milvusClient, this.collectionName, VECTOR_FIELD_NAME,
-            getOrDefault(indexType, FLAT), this.metricType);
+                    getOrDefault(indexType, FLAT), this.metricType);
         }
 
         loadCollectionInMemory(this.milvusClient, collectionName);

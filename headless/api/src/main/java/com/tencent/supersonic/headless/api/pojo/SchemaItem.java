@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.api.pojo;
 
-import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
@@ -10,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @ToString(callSuper = true)
@@ -40,13 +40,13 @@ public class SchemaItem extends RecordInfo {
             return false;
         }
         SchemaItem that = (SchemaItem) o;
-        return Objects.equal(id, that.id) && Objects.equal(name, that.name)
-                && Objects.equal(bizName, that.bizName) && typeEnum == that.typeEnum;
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name)
+                && Objects.equals(bizName, that.bizName) && typeEnum == that.typeEnum;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, name, bizName, typeEnum);
+        return Objects.hash(id, name, bizName, typeEnum);
     }
 
     public static List<String> getAliasList(String alias) {

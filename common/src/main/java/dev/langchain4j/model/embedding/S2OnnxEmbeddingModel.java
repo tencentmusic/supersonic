@@ -66,8 +66,8 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
 
     static OnnxBertBiEncoder loadFromFileSystem(Path pathToModel, URL vocabularyFile) {
         try {
-            return new OnnxBertBiEncoder(Files.newInputStream(pathToModel), vocabularyFile.openStream(),
-                    PoolingMode.MEAN);
+            return new OnnxBertBiEncoder(Files.newInputStream(pathToModel),
+                    vocabularyFile.openStream(), PoolingMode.MEAN);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
