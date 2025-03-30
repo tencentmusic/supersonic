@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: quay.io/centos/centos:stream8  # 使用 CentOS Stream 8 容器
+      image: almalinux:9  # maven >=3.6.3
 
     strategy:
       matrix:
@@ -28,9 +28,10 @@ jobs:
 
       - name: Reset DNF repositories
         run: |
-          cd /etc/yum.repos.d/
-          sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-          sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+          sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+            -e 's|^# baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
+            /etc/yum.repos.d/almalinux*.repo
+
 
       - name: Update DNF package index
         run: dnf makecache
