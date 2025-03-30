@@ -9,6 +9,7 @@
     <result column="display_name" jdbcType="VARCHAR" property="displayName" />
     <result column="email" jdbcType="VARCHAR" property="email" />
     <result column="is_admin" jdbcType="INTEGER" property="isAdmin" />
+    <result column="last_login" jdbcType="TIMESTAMP" property="lastLogin" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -40,7 +41,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, name, password, salt, display_name, email, is_admin
+    id, name, password, salt, display_name, email, is_admin, last_login
   </sql>
   <select id="selectByExample" parameterType="com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDOExample" resultMap="BaseResultMap">
     select

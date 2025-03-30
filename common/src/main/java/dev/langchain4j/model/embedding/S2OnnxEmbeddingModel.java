@@ -1,5 +1,8 @@
 package dev.langchain4j.model.embedding;
 
+import dev.langchain4j.model.embedding.onnx.AbstractInProcessEmbeddingModel;
+import dev.langchain4j.model.embedding.onnx.OnnxBertBiEncoder;
+import dev.langchain4j.model.embedding.onnx.PoolingMode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -9,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 
 /**
  * An embedding model that runs within your Java application's process. Any BERT-based model (e.g.,
@@ -25,6 +29,7 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
     private static volatile String cachedVocabularyPath;
 
     public S2OnnxEmbeddingModel(String pathToModel, String vocabularyPath) {
+        super(Executors.newSingleThreadExecutor());
         if (shouldReloadModel(pathToModel, vocabularyPath)) {
             synchronized (S2OnnxEmbeddingModel.class) {
                 if (shouldReloadModel(pathToModel, vocabularyPath)) {
@@ -61,8 +66,8 @@ public class S2OnnxEmbeddingModel extends AbstractInProcessEmbeddingModel {
 
     static OnnxBertBiEncoder loadFromFileSystem(Path pathToModel, URL vocabularyFile) {
         try {
-            return new OnnxBertBiEncoder(Files.newInputStream(pathToModel), vocabularyFile,
-                    PoolingMode.MEAN);
+            return new OnnxBertBiEncoder(Files.newInputStream(pathToModel),
+                    vocabularyFile.openStream(), PoolingMode.MEAN);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

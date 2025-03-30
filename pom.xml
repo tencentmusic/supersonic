@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.4</version>
+        <version>3.3.9</version>
     </parent>
 
     <properties>
@@ -32,55 +32,54 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <file.encoding>UTF-8</file.encoding>
-        <jsqlparser.version>4.7</jsqlparser.version>
+        <jsqlparser.version>4.9</jsqlparser.version>
         <pagehelper.version>6.1.0</pagehelper.version>
         <pagehelper.spring.version>2.1.0</pagehelper.spring.version>
-        <mybatis.version>3.5.3</mybatis.version>
+        <mybatis.version>3.5.19</mybatis.version>
         <guava.version>32.0.0-jre</guava.version>
-        <hanlp.version>portable-1.8.3</hanlp.version>
+        <hanlp.version>portable-1.8.4</hanlp.version>
         <hadoop.version>2.7.2</hadoop.version>
         <commons.lang.version>2.6</commons.lang.version>
         <commons.lang3.version>3.7</commons.lang3.version>
         <org.testng.version>6.13.1</org.testng.version>
         <yaml.utils.version>2.14.1</yaml.utils.version>
-        <transmittable.thread.local.version>2.12.1</transmittable.thread.local.version>
-        <jjwt.version>0.12.3</jjwt.version>
+        <jjwt.version>0.12.6</jjwt.version>
         <alibaba.druid.version>1.2.24</alibaba.druid.version>
-        <mysql.connector.java.version>5.1.46</mysql.connector.java.version>
+        <mysql.connector.java.version>9.2.0</mysql.connector.java.version>
         <kyuubi.version>1.10.1</kyuubi.version>
         <presto.version>0.291</presto.version>
         <trino.version>471</trino.version>
-        <mybatis.plus.version>3.5.7</mybatis.plus.version>
-        <httpclient5.version>5.4.1</httpclient5.version>
+        <mybatis.plus.version>3.5.10.1</mybatis.plus.version>
+        <httpclient5.version>5.4.2</httpclient5.version>
 <!--        <httpcore.version>4.4.16</httpcore.version>-->
-        <httpcore5.version>5.3.1</httpcore5.version>
+        <httpcore5.version>5.3.3</httpcore5.version>
         <clickhouse.jdbc.version>0.4.6</clickhouse.jdbc.version>
-        <fastjson.version>2.0.40</fastjson.version>
+        <fastjson.version>2.0.56</fastjson.version>
         <dozer.verson>7.0.0</dozer.verson>
 <!--        <httpmime.version>4.5.6</httpmime.version>-->
-        <transmittable.version>2.12.1</transmittable.version>
-        <commons.compress.version>1.26.0</commons.compress.version>
+        <transmittable.version>2.14.5</transmittable.version>
+        <commons.compress.version>1.27.1</commons.compress.version>
         <jetty.util.version>6.1.26</jetty.util.version>
         <!--<spring.version>2.7.2</spring.version>-->
         <jsonpath.version>2.8.0</jsonpath.version>
-        <calcite.version>1.37.0</calcite.version>
-        <calcite.avatica.version>1.23.0</calcite.avatica.version>
+        <calcite.version>1.38.0</calcite.version>
+        <calcite.avatica.version>1.26.0</calcite.avatica.version>
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
-        <easyexcel.version>2.2.6</easyexcel.version>
+        <easyexcel.version>2.2.11</easyexcel.version>
         <poi.version>3.17</poi.version>
-        <langchain4j.version>0.35.0</langchain4j.version>
-        <langchain4j.embedding.version>0.27.1</langchain4j.embedding.version>
+        <langchain4j.version>0.36.2</langchain4j.version>
+        <langchain4j.embedding.version>0.36.2</langchain4j.embedding.version>
 <!--        <postgresql.version>42.7.1</postgresql.version>-->
         <st.version>4.0.8</st.version>
         <duckdb_jdbc.version>0.10.0</duckdb_jdbc.version>
         <flight-sql.version>15.0.2</flight-sql.version>
         <arrow-jdbc.version>15.0.2</arrow-jdbc.version>
         <flight-sql-jdbc-driver.version>15.0.2</flight-sql-jdbc-driver.version>
-        <gson.version>2.10.1</gson.version>
+        <gson.version>2.12.1</gson.version>
         <spotless.version>2.27.1</spotless.version>
         <spotless.skip>false</spotless.skip>
-        <stax2.version>4.2.1</stax2.version>
+        <stax2.version>4.2.2</stax2.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
         <jgrapht.version>1.5.2</jgrapht.version>
     </properties>
@@ -208,8 +207,8 @@
                 <version>${stax2.version}</version>
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.connector.java.version}</version>
             </dependency>
             <dependency>
@@ -324,12 +323,24 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.6.0.1398</version>
+                    <version>3.6.1.1688</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.2</version>
+                    <version>3.5.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter</artifactId>
+                            <version>5.11.4</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-launcher</artifactId>
+                            <version>1.11.4</version>
+                        </dependency>
+                    </dependencies>
                     <configuration>
                         <systemPropertyVariables>
                             <net.bytebuddy.experimental>true</net.bytebuddy.experimental>

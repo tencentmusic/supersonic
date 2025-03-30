@@ -44,10 +44,8 @@ public class MetaEmbeddingTask implements CommandLineRunner {
 
     private void embeddingStorePersistFile() {
         EmbeddingStoreFactory embeddingStoreFactory = EmbeddingStoreFactoryProvider.getFactory();
-        if (embeddingStoreFactory instanceof InMemoryEmbeddingStoreFactory) {
+        if (embeddingStoreFactory instanceof InMemoryEmbeddingStoreFactory inMemoryFactory) {
             long startTime = System.currentTimeMillis();
-            InMemoryEmbeddingStoreFactory inMemoryFactory =
-                    (InMemoryEmbeddingStoreFactory) embeddingStoreFactory;
             inMemoryFactory.persistFile();
             long duration = System.currentTimeMillis() - startTime;
             log.info("Embedding file has been regularly persisted in {} milliseconds", duration);
