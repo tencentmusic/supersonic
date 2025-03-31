@@ -3,5 +3,5 @@ spring:
     #本地数据库
     url: jdbc:mysql://127.0.0.1:3306/supersonic?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
     username: root
-    password: 123456
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver

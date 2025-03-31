@@ -134,7 +134,7 @@ public class DictTaskServiceImpl implements DictTaskService {
         dictRepository.editDictTask(dictTaskDO);
 
 
-        if (!data.isEmpty()) {
+        if (!data.isEmpty() && user != null ) {
             //维度值存向量库
             List<DimensionValueDO> dimensionValueDOS;
             dimensionValueDOS = data.stream().map(this::convert2DimValueDO).filter(line -> Objects.nonNull(line))

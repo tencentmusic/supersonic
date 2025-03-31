@@ -39,15 +39,13 @@ public class AttributionParser implements ChatQueryParser{
                     "2. 再进行维度下钻（如地区维度分解）\n" +
                     "3. 最后计算贡献度\n" +
                     "4. 每个步骤生成独立可执行的SQL\n" +
-                    "5. 步骤间通过中间结果关联\n" +
-                    "6. 使用临时表需命名规范（tmp_step1）\n" +
-                    "7. 不要使用with和over语法，mysql版本不支持";
+                    "5. 不要使用with和over语法，mysql版本不支持";
     @Override
     public boolean accept(ParseContext parseContext) {
-//        //1.意图识别是否是归因分析
-//        IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
-//        return intentType == IntentType.ATTRIBUTION && enableAttr;
-return false;
+        //1.意图识别是否是归因分析
+        IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
+        return intentType == IntentType.ATTRIBUTION && enableAttr;
+//return false;
     }
 
     @Override
