@@ -172,12 +172,14 @@ export function queryThoughtsInSSE(queryText: string, chatId: number | undefined
       } else {
         errorFunc(new Error('连接不成功'))
         ctrl.abort();
+        throw new Error('连接不成功')
       }
     },
     onmessage: messageFunc,
     onerror: (error) => {
       errorFunc(error)
       ctrl.abort();
+      throw error
     },
     onclose: () => {
       closeFunc()
@@ -224,12 +226,14 @@ export function chatStreamExecute(
       } else {
         errorFunc(new Error('连接不成功'))
         ctrl.abort();
+        throw new Error('连接不成功')
       }
     },
     onmessage: messageFunc,
     onerror: (error) => {
       errorFunc(error)
       ctrl.abort();
+      throw error
     },
     onclose: () => {
       closeFunc()
