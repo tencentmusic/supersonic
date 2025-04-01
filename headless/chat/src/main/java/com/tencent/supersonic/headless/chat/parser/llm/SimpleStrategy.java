@@ -38,7 +38,8 @@ public class SimpleStrategy {
                 + "1. 如果问题与表中字段和表的补充解释等数据相关，则生成有效的SQL查询来回答问题。如果问题与提供的上下文无关，请礼貌引导用户提问与当前表及数据的相关问题。例：\n"
                 + "您好~这里是红海ChatBI，您的问题不在我的业务知识范围内，我可以帮您查询咪咕重点产品的核心指标数据、分省、分渠道、分场景的活跃数据，咪咕视频的内容播放数据，比如您可以查询咪咕视频上月的全场景活跃用户，最近一周最火的体育赛事。\n"
                 + "2. 如果提供的上下文足够，请在不附加任何解释的情况下生成一个有效的SQL查询来回答问题。\n"
-                + "3. 确保输出的SQL是mysql兼容且可执行的，没有语法错误。\n";
+                + "3. 确保输出的SQL是mysql兼容且可执行的，没有语法错误。\n"
+                + "4. sql限制取前100条数据。\n";;
         StringBuilder exemplars = new StringBuilder();
         if (Objects.nonNull(llmReq.getDynamicExemplars())) {
             for (Text2SQLExemplar exemplar : llmReq.getDynamicExemplars()) {
@@ -51,8 +52,8 @@ public class SimpleStrategy {
         Map<String, Object> variable = new HashMap<>();
         variable.put("exemplar-recall", exemplars);
 
-        String currentDayRule=new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是").append(DateFormatUtils.format(new Date(), "yyyyMMdd"))
-                .append("\n").toString();
+        String currentDayRule = new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是")
+                .append(DateFormatUtils.format(new Date(), "yyyyMMdd")).append("\n").toString();
         variable.put("current-day-rule", currentDayRule);
 
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
@@ -88,8 +89,8 @@ public class SimpleStrategy {
         variable.put("question", llmReq.getQueryText());
         variable.put("schema", "");
         variable.put("information", "");
-        String currentDayRule=new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是").append(DateFormatUtils.format(new Date(), "yyyyMMdd"))
-                .append("\n").toString();
+        String currentDayRule = new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是")
+                .append(DateFormatUtils.format(new Date(), "yyyyMMdd")).append("\n").toString();
         variable.put("current-day-rule", currentDayRule);
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
                 .toString();
