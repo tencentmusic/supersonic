@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.jsqlparser.FieldExpression;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -20,6 +21,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -188,6 +194,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
         FieldExpression firstExpression = dateExpressions.get(0);
+        dateInfo.setPeriod(extractDatePeriod(firstExpression.getFieldValue().toString()));
 
         FilterOperatorEnum firstOperator =
                 FilterOperatorEnum.getSqlOperator(firstExpression.getOperator());
@@ -215,12 +222,56 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
         return dateInfo;
     }
 
+    private DatePeriodEnum extractDatePeriod(String fieldValue) {
+        // 定义月份格式的DateTimeFormatter列表，使用严格解析
+        List<DateTimeFormatter> monthFormatters = Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyy-MM"),
+                DateTimeFormatter.ofPattern("yyyyMM")
+        );
+
+        // 尝试解析为月份格式
+        for (DateTimeFormatter formatter : monthFormatters) {
+            try {
+                YearMonth.parse(fieldValue, formatter);
+                return DatePeriodEnum.MONTH; // 解析成功，返回月份类型
+            } catch (DateTimeParseException ignored) {
+                // 继续尝试下一个格式
+            }
+        }
+
+        // 定义日期格式的DateTimeFormatter列表，使用严格解析
+        List<DateTimeFormatter> dateFormatters = Arrays.asList(
+                DateTimeFormatter.ofPattern("yyyyMMdd"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        );
+
+        // 尝试解析为日期格式
+        for (DateTimeFormatter formatter : dateFormatters) {
+            try {
+                LocalDate.parse(fieldValue, formatter);
+                return DatePeriodEnum.DAY; // 解析成功，返回日期类型
+            } catch (DateTimeParseException ignored) {
+                // 继续尝试下一个格式
+            }
+        }
+
+        return DatePeriodEnum.DAY; // 都不匹配
+
+
+    }
+
     private static boolean isPartitionDimension(DataSetSchema dataSetSchema, String sqlFieldName) {
+//        处理直连模式，period_id字段作为数据日期，不走语义建模阶段
+        if(StringUtils.endsWithIgnoreCase(sqlFieldName,"period_id")){
+            return true;
+        }
+
         if (Objects.isNull(dataSetSchema) || Objects.isNull(dataSetSchema.getPartitionDimension())
                 || Objects.isNull(dataSetSchema.getPartitionDimension().getName())) {
             return false;
         }
         return sqlFieldName.equalsIgnoreCase(dataSetSchema.getPartitionDimension().getName());
+
     }
 
     private boolean containOperators(FieldExpression expression, FilterOperatorEnum firstOperator,
