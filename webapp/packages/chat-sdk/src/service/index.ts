@@ -155,6 +155,7 @@ export function queryThoughtsInSSE(queryText: string, chatId: number | undefined
   const ctrl = new AbortController();
   return fetchEventSource(`${prefix}/chat/query/streamParse`, {
     method: 'POST',
+    openWhenHidden: true, // 允许后台运行
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
@@ -207,6 +208,7 @@ export function chatStreamExecute(
   const ctrl = new AbortController();
   return fetchEventSource(`${prefix}/chat/query/streamExecute`, {
     method: 'POST',
+    openWhenHidden: true, // 允许后台运行
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
