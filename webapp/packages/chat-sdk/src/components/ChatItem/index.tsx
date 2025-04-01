@@ -194,14 +194,10 @@ const ChatItem: React.FC<Props> = ({
       if (parseInfos?.length === 1 && parseInfos[0]?.stream) {
         const resultDiv = document.getElementById('result-response-'+msgId)
         if(resultDiv) {
-          let time = 0
           resultDiv.textContent = ''
           const messageFunc = (event) => {
-            setTimeout(() => {
-              resultDiv.textContent += event.data
-              setStreamResultContent('' + resultDiv.textContent)
-            },time)
-            time += 200
+            resultDiv.textContent += event.data
+            setStreamResultContent('' + resultDiv.textContent)
           }
           const errorFunc = (error) => {
             setIsStreamResult(false)
@@ -209,9 +205,7 @@ const ChatItem: React.FC<Props> = ({
             // throw error
           };
           const closeFunc = () => {
-            setTimeout(()=>{
-              setIsStreamResult(false)
-            },time)
+            setIsStreamResult(false)
             console.log('(result)SSE 连接已关闭');
           };
           setIsStreamResult(true)
