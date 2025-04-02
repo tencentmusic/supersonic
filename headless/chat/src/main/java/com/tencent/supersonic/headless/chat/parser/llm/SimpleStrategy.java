@@ -39,7 +39,7 @@ public class SimpleStrategy {
                 + "您好~这里是红海ChatBI，您的问题不在我的业务知识范围内，我可以帮您查询咪咕重点产品的核心指标数据、分省、分渠道、分场景的活跃数据，咪咕视频的内容播放数据，比如您可以查询咪咕视频上月的全场景活跃用户，最近一周最火的体育赛事。\n"
                 + "2. 如果提供的上下文足够，请在不附加任何解释的情况下生成一个有效的SQL查询来回答问题。\n"
                 + "3. 确保输出的SQL是mysql兼容且可执行的，没有语法错误。\n"
-                + "4. 为了防止输出的SQL在使用后返回数据量太大，确保输出的SQL都是限制了最大返回条数的，要求生成的SQL的返回条数都为100条，即SQL的最后都必须有LIMIT 100，没有语法错误。\n";
+                + "4. 为了防止输出的SQL在使用后返回数据量太大，确保输出的SQL都是限制了最大返回条数的，按照用户问题最后生成的SQL没有LIMIT结尾的时候，要求生成的SQL的最后必须加上LIMIT 100，按照用户问题最后生成的SQL有LIMIT结尾的时候不用再加LIMIT，没有语法错误。\n";
 
         StringBuilder exemplars = new StringBuilder();
         if (Objects.nonNull(llmReq.getDynamicExemplars())) {
