@@ -184,7 +184,6 @@ export function queryThoughtsInSSE(queryText: string, chatId: number | undefined
     },
     onclose: () => {
       closeFunc()
-      ctrl.abort();
     }
   });
 }
@@ -206,7 +205,7 @@ export function chatStreamExecute(
     closeFunc: (() => void)
 ) {
   const ctrl = new AbortController();
-  return fetchEventSource(`${prefix}/chat/query/streamExecute`, {
+  return fetchEventSource(`${prefix}/stream/chat/query/streamExecute`, {
     method: 'POST',
     openWhenHidden: true, // 允许后台运行
     headers: {
@@ -239,7 +238,6 @@ export function chatStreamExecute(
     },
     onclose: () => {
       closeFunc()
-      ctrl.abort();
     }
   })
 }
