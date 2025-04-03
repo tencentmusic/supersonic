@@ -88,7 +88,7 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         List<String> tablesAndViews = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectionInfo);
         try (ResultSet resultSet =
-                metaData.getTables(null, null, null, new String[] {"TABLE", "VIEW"})) {
+                metaData.getTables(null, schemaName, null, new String[] {"TABLE", "VIEW"})) {
             while (resultSet.next()) {
                 String name = resultSet.getString("TABLE_NAME");
                 tablesAndViews.add(name);
@@ -103,7 +103,7 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
             String tableName) throws SQLException {
         List<DBColumn> dbColumns = Lists.newArrayList();
         DatabaseMetaData metaData = getDatabaseMetaData(connectInfo);
-        ResultSet columns = metaData.getColumns(null, null, tableName, null);
+        ResultSet columns = metaData.getColumns(null, schemaName, tableName, null);
         while (columns.next()) {
             String columnName = columns.getString("COLUMN_NAME");
             String dataType = columns.getString("TYPE_NAME");
