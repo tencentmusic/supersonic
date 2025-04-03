@@ -54,7 +54,6 @@ import com.tencent.supersonic.headless.server.facade.service.SemanticLayerServic
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.service.TokenStream;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
@@ -65,6 +64,7 @@ import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -195,7 +195,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         stream.onNext(chunk -> {
             try {
                 // 发送单个数据块
-                emitter.send(SseEmitter.event().data(chunk));
+                Map<String, String> data = new HashMap<>();
+                data.put("text", chunk);
+                emitter.send(SseEmitter.event().data(data, MediaType.APPLICATION_JSON));
             } catch (IOException e) {
                 log.error("SSE send error", e);
                 emitter.completeWithError(e);
