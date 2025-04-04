@@ -39,3 +39,32 @@
 div, p, span {
     white-space: pre-line;
 }
+
+/* 代码块容器 */
+.code-block {
+    position: relative;
+    border: 1px solid #eaeefb; /* 浅灰色边框 */
+    border-radius: 6px;
+    margin: 16px 0;
+    background: #f6f8fa; /* 浅灰色背景 */
+  }
+  
+  /* 语言标签 */
+  .code-language {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #eaeefb;
+    color: #666;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-bottom-left-radius: 6px;
+    font-family: monospace;
+  }
+  
+  /* 代码内容区域 */
+  pre code {
+    display: block;
+    padding: 16px !important;
+    overflow-x: auto;
+  }

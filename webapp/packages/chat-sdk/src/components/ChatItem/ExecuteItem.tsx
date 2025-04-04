@@ -8,6 +8,11 @@ import Loading from './Loading';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import React, { ReactNode, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github.css'; // 浅灰色背景主题
 
 type Props = {
   queryId?: number;
@@ -153,7 +158,26 @@ const ExecuteItem: React.FC<Props> = ({
           {renderCustomExecuteNode && executeItemNode ? (
             executeItemNode
           ) : data?.queryMode === 'PLAIN_TEXT' || data?.queryMode === 'WEB_SERVICE' ? (
-            data?.textResult
+            
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeKatex, rehypeHighlight]}
+              components={{
+                code: ({ className, children }) => {
+                  const language = className?.replace('hljs language-', '') || 'text';
+                  return (
+                    <div className="code-block">
+                      <div className="code-language">{language}</div>
+                      <pre className={className}>
+                        <code>{children}</code>
+                      </pre>
+                    </div>
+                  )
+                }
+              }}
+            >
+              { data?.textResult }
+            </ReactMarkdown>
           ) : data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
           ) : (
