@@ -91,6 +91,12 @@ public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
             updateWrapper.set(ChatMemoryDO::getHumanReviewCmt,
                     chatMemoryUpdateReq.getHumanReviewCmt());
         }
+        if (Objects.nonNull(chatMemoryUpdateReq.getDbSchema())) {
+            updateWrapper.set(ChatMemoryDO::getDbSchema, chatMemoryUpdateReq.getDbSchema());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getS2sql())) {
+            updateWrapper.set(ChatMemoryDO::getS2sql, chatMemoryUpdateReq.getS2sql());
+        }
         updateWrapper.set(ChatMemoryDO::getUpdatedAt, new Date());
         updateWrapper.set(ChatMemoryDO::getUpdatedBy, user.getName());
 
