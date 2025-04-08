@@ -38,7 +38,7 @@ public class ModelClusterBuilder {
     }
 
     private static ModelCluster getModelCluster(Map<Long, ModelSchemaResp> modelIdToModelSchema,
-            Set<Long> modelIds) {
+                                                Set<Long> modelIds) {
         boolean containsPartitionDimensions = modelIds.stream().map(modelIdToModelSchema::get)
                 .filter(Objects::nonNull).anyMatch(modelSchemaResp -> CollectionUtils
                         .isNotEmpty(modelSchemaResp.getTimeDimension()));
@@ -47,7 +47,10 @@ public class ModelClusterBuilder {
     }
 
     private static void dfs(ModelSchemaResp model, Map<Long, ModelSchemaResp> modelMap,
-            Set<Long> visited, Set<Long> modelCluster) {
+                            Set<Long> visited, Set<Long> modelCluster) {
+        if (Objects.isNull(model)) {
+            return;
+        }
         visited.add(model.getId());
         modelCluster.add(model.getId());
         for (Long neighborId : model.getModelClusterSet()) {
