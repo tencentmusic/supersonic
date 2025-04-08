@@ -22,11 +22,10 @@ public class ChatController {
     private ChatManageService chatService;
 
     @PostMapping("/save")
-    public Boolean save(@RequestParam(value = "chatName") String chatName,
+    public Long save(@RequestParam(value = "chatName") String chatName,
             @RequestParam(value = "agentId", required = false) Integer agentId,
             HttpServletRequest request, HttpServletResponse response) {
-        chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
-        return true;
+        return chatService.addChat(UserHolder.findUser(request, response), chatName, agentId);
     }
 
     @GetMapping("/getAll")

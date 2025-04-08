@@ -273,12 +273,14 @@ public class ModelConverter {
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
         List<Identify> identifiers = modelReq.getModelDetail().getIdentifiers();
+        List<Field> fields = modelReq.getModelDetail().getFields();
 
         if (measures != null) {
             for (Measure measure : measures) {
                 if (StringUtils.isNotBlank(measure.getBizName())
                         && StringUtils.isBlank(measure.getExpr())) {
                     measure.setExpr(measure.getBizName());
+                    fields.add(new Field(measure.getBizName(), ""));
                 }
             }
         }
@@ -287,6 +289,7 @@ public class ModelConverter {
                 if (StringUtils.isNotBlank(dimension.getBizName())
                         && StringUtils.isBlank(dimension.getExpr())) {
                     dimension.setExpr(dimension.getBizName());
+                    fields.add(new Field(dimension.getBizName(), ""));
                 }
             }
         }
@@ -297,6 +300,7 @@ public class ModelConverter {
                     identify.setName(identify.getBizName());
                 }
                 identify.setIsCreateDimension(1);
+                fields.add(new Field(identify.getBizName(), ""));
             }
         }
 
