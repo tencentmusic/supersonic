@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class AttributionParser implements ChatQueryParser{
-    private Boolean enableAttr = false;
+    private Boolean enableAttr = true;
     private static final Set<String> ATTRIBUTION_KEYWORDS =
             Set.of("为什么", "原因", "因素", "归因", "下降原因", "增长来源");
     public static final String APP_KEY = "S2SQL_PARSER";
@@ -63,7 +63,7 @@ public class AttributionParser implements ChatQueryParser{
         parseInfo.setQueryMode("Attribution_Analysis");
         parseInfo.setId(1);
         if (!llmResp.getSqlList().isEmpty()){
-            parseInfo.getSqlList().addAll(llmResp.getSqlList());
+            parseInfo.setSqlList(llmResp.getSqlList());
         }else {
             parseInfo.getSqlInfo().setCorrectedS2SQL(llmResp.getSqlOutput());
         }
@@ -150,37 +150,93 @@ public class AttributionParser implements ChatQueryParser{
     }
     private String generatePrompt(LLMReq llmReq, ChatApp chatApp) {
         StringBuilder context = new StringBuilder();
-        context.append(INSTRUCTION.replace("单一SQL", "多步骤SQL"))
-                .append("\n\n新增规则：")
-                .append("\n7. 将复杂问题拆分为多个分析步骤")
-                .append("\n8. 每个步骤生成简单且独立的SQL")
-                .append("\n9. 明确步骤间的逻辑顺序")
-                .append("\n10. 最终给出汇总逻辑\n\n");
-        if (chatApp != null) {
-            String fullPrompt = chatApp.getPrompt();
-            // 查找“示例：”在字符串中的位置
-            int exampleIndex = fullPrompt.indexOf("示例：");
+//        context.append(INSTRUCTION.replace("单一SQL", "多步骤SQL"))
+//                .append("\n\n新增规则：")
+//                .append("\n7. 将复杂问题拆分为多个分析步骤")
+//                .append("\n8. 每个步骤生成简单且独立的SQL")
+//                .append("\n9. 明确步骤间的逻辑顺序")
+//                .append("\n10. 最终给出汇总逻辑\n\n");
+//        if (chatApp != null) {
+//            String fullPrompt = chatApp.getPrompt();
+//            // 查找“示例：”在字符串中的位置
+//            int exampleIndex = fullPrompt.indexOf("示例：");
+//
+//            // 如果找到“示例：”，则截取该位置之前的内容
+//            if (exampleIndex != -1) {
+//                context.append("### 业务背景信息：\n")
+//                        .append(fullPrompt.substring(0, exampleIndex).trim()).append("\n\n");
+//            }else {
+//                // 如果没有找到“示例：”，则返回完整内容
+//                context.append("### 业务背景信息：\n").append(fullPrompt).append("\n\n");
+//            }
+//        }
+//        context.append("\n请严格按以下格式返回：")
+//                .append("\n思考过程：<分析思路>")
+//                .append("\n步骤1-SQL: SELECT...;")
+//                .append("\n步骤2-SQL: SELECT...;")
+//                .append("\n汇总逻辑：<结果组合方式>")
+//                .append("\n\n示例：")
+//                .append("\n思考过程：先分析整体趋势，再拆解维度")
+//                .append("\n步骤1-SQL: SELECT date, SUM(sales) FROM tbl GROUP BY date;")
+//                .append("\n步骤2-SQL: SELECT region, SUM(sales) FROM tbl GROUP BY region;")
+//                .append("\n汇总逻辑：结合时间和地域维度分析销售变化");
 
-            // 如果找到“示例：”，则截取该位置之前的内容
-            if (exampleIndex != -1) {
-                context.append("### 业务背景信息：\n")
-                        .append(fullPrompt.substring(0, exampleIndex).trim()).append("\n\n");
-            }else {
-                // 如果没有找到“示例：”，则返回完整内容
-                context.append("### 业务背景信息：\n").append(fullPrompt).append("\n\n");
-            }
-        }
-        context.append("\n请严格按以下格式返回：")
-                .append("\n思考过程：<分析思路>")
-                .append("\n步骤1-SQL: SELECT...;")
-                .append("\n步骤2-SQL: SELECT...;")
-                .append("\n汇总逻辑：<结果组合方式>")
-                .append("\n\n示例：")
-                .append("\n思考过程：先分析整体趋势，再拆解维度")
-                .append("\n步骤1-SQL: SELECT date, SUM(sales) FROM tbl GROUP BY date;")
-                .append("\n步骤2-SQL: SELECT region, SUM(sales) FROM tbl GROUP BY region;")
-                .append("\n汇总逻辑：结合时间和地域维度分析销售变化");
-
+        context.append("#Role: 资深归因分析专家\n" +
+                "#Task: \n" +
+                "1.根据数据情况与问题，拆解成多个sql语句查询各方面的数据\n" +
+                "2.根据各方面的数据结果，分析原因，形成分析报告\n" +
+                "#规则：\n" +
+                "1. 将复杂问题拆分为多个分析步骤\n" +
+                "2. 每个步骤生成独立可执行的SQL\n" +
+                "3. 明确步骤间的逻辑顺序\n" +
+                "\n" +
+                "\n" +
+                "### 业务背景信息：\n" +
+                "\n" +
+                "渠道场景库：\n" +
+                "CREATE TABLE hhapp_2025_chatbi_active1_m(\n" +
+                "  province_name   COMMENT 省份, \n" +
+                " period_id  COMMENT 日期,\n" +
+                "data_type COMMENT 日期类型,\n" +
+                "product_name   COMMENT 产品名称,\n" +
+                " channel_level2 COMMENT 渠道 ,\n" +
+                " pid2_2022 COMMENT 场景,\n" +
+                " active_users COMMENT 活跃用户数,\n" +
+                " idx_mm_rate COMMENT 环比\n" +
+                ") \n" +
+                "\n" +
+                "\n" +
+                "# 维度可选值如下，所有的维度查询，必须命中如下维度中的可选值，不能随意发挥。\n" +
+                "1.以上表的省份维度：\n" +
+                "-可选值：湖南，安徽，广西，山东，河北，天津，新疆，上海，浙江，江苏，未知，辽宁，四川，青海，云南，宁夏，广东，贵州，黑龙江，海南，西藏，吉林，湖北，福建，陕西，甘肃，北京，内蒙古，重庆，山西，江西，河南，全国\n" +
+                "2.渠道场景库产品维度：\n" +
+                "-可选值：咪咕视频,咪咕阅读,云游戏,咪咕音乐\n" +
+                "3.渠道场景库的渠道维度：\n" +
+                "-可选值：终端预装,运营类渠道,公共池,复合型渠道,省专渠道,互联网公域流量运营,广宣及MCN,外部导流\n" +
+                "4.渠道场景库的场景维度:\n" +
+                "-可选值：APP,小程序,家庭,SDK,网页/H5,公网,政企,其他\n" +
+                "\n" +
+                "# 查询规则\n" +
+                "[基本规则]\n" +
+                "所有查询都只能在单个表里进行，不能进行跨表，请根据mysql5.7版本生成查询语句\n" +
+                "\n" +
+                "[渠道场景库规则]\n" +
+                "表名：hhapp_2025_chatbi_active1_m\n" +
+                "渠道/场景处理：\n" +
+                "√ 未提及维度 → 赋\"全部\"\n" +
+                "√ 具体值 → 精准匹配\n" +
+                "√ \"分渠道/分场景\" → 维度!='全部'\n" +
+                "√ TOP N查询 → 自动排除\"全部\"值\n" +
+                "[时间规则]\n" +
+                "√渠道场景库的日期字段包含月(yyyyMM)和日(yyyyMMdd)两种格式，查询日数据需要指定日期类型字段取值为day,查询月数据指定日期类型字段取值为month：\n" +
+                "√渠道场景库未指定日期/提及当前/最新/最近时，默认查上月。当提及年时按月查询，当提及周时按日查询\n" +
+                "√今年=2025(未指定年时，默认使用,去年=当前年-1,例如去年10月为202410，今年1月为202501\n" +
+                "[优先级规则]\n" +
+                "\n" +
+                "请严格按以下格式返回：\n" +
+                "思考过程：\n" +
+                "<思路1的查询SQL>: SELECT...;\n" +
+                "<思路2的查询SQL>: SELECT...;");
         return context.toString();
     }
 
