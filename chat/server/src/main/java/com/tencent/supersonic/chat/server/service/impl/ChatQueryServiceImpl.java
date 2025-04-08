@@ -28,6 +28,7 @@ import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.jsqlparser.*;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.FileInfo;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.Text2SQLType;
@@ -226,7 +227,23 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         saveQueryResult(chatExecuteReq, result);
     }
-
+    public void saveFinalResult(ChatExecuteReq chatExecuteReq, String finalContent) {
+        QueryResult result = new QueryResult();
+        result.setTextResult(finalContent);
+        result.setQueryState(QueryState.SUCCESS);
+        result.setQueryMode("PLAIN_TEXT");
+        ExecuteContext executeContext =buildExecuteContext(chatExecuteReq);
+        savePlainText(result, executeContext);
+        List<FileInfo> fileInfos = new ArrayList<>();
+        // 如果有文件内容，也存储
+        if (chatExecuteReq.getFileInfoList() != null && !chatExecuteReq.getFileInfoList().isEmpty()) {
+            fileInfos.addAll(chatExecuteReq.getFileInfoList());
+            result.setHasFile(true);
+            result.setFileInfoList(fileInfos);
+        }
+        // 调用你的存储逻辑
+        saveQueryResult(chatExecuteReq, result);
+    }
     private void savePlainText(QueryResult queryResult, ExecuteContext executeContext) {
         if (!queryResult.getQueryMode().isEmpty()
                 && executeContext.getParseInfo().getSqlInfo().getResultType().isEmpty()

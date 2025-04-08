@@ -1,15 +1,13 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.tencent.supersonic.chat.api.pojo.request.FileReq;
-import com.tencent.supersonic.chat.api.pojo.request.FileUpLoadReq;
 import com.tencent.supersonic.chat.api.pojo.response.FileBaseResponse;
 import com.tencent.supersonic.chat.api.pojo.response.FileParseResponse;
 import com.tencent.supersonic.chat.api.pojo.response.FileStatusResponse;
 import com.tencent.supersonic.chat.api.pojo.response.FileUpLoadResponse;
 import com.tencent.supersonic.chat.server.config.CrabConfig;
-import com.tencent.supersonic.chat.server.pojo.FileInfo;
+import com.tencent.supersonic.common.pojo.FileInfo;
 import com.tencent.supersonic.chat.server.service.FileService;
 import com.tencent.supersonic.common.util.HttpUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -18,17 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okio.ByteString;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -62,8 +54,8 @@ public class FileServiceImpl implements FileService {
             String signedUrl = MiguApiUrlUtils.doSignature(crabConfig.getStatusUrl(), "GET",
                     queryParams, crabConfig.getAppId(), crabConfig.getSecretKey());
             String fullUrl = crabConfig.getHost() + signedUrl + "&taskId=" + fileReq.getTaskId()
-                    + "&serviceName=" + crabConfig.getServiceName() + "&serviceType="
-                    + crabConfig.getServiceType();
+                    + "&serviceName=" + crabConfig.getFileServiceName() + "&serviceType="
+                    + crabConfig.getFileServiceType();
             String response = HttpUtils.get(fullUrl);
             return JsonUtil.toObject(response,
                     new TypeReference<FileBaseResponse<FileStatusResponse>>() {});
@@ -85,8 +77,8 @@ public class FileServiceImpl implements FileService {
     private Map<String, Object> buildTaskParams(FileInfo fileInfo) {
         Map<String, Object> params = new HashMap<>();
         params.put("fileInfoList", List.of(fileInfo));
-        return Map.of("serviceName", crabConfig.getServiceName(), "serviceType",
-                crabConfig.getServiceType(), "requestId", UUID.randomUUID().toString(), "params",
+        return Map.of("serviceName", crabConfig.getFileServiceName(), "serviceType",
+                crabConfig.getFileServiceType(), "requestId", UUID.randomUUID().toString(), "params",
                 params);
     }
 
@@ -97,8 +89,8 @@ public class FileServiceImpl implements FileService {
                             RequestBody.create(MediaType.parse("application/octet-stream"),
                                     file.getBytes()))
                     .addFormDataPart("fileType", fileType)
-                    .addFormDataPart("serviceName", crabConfig.getServiceName())
-                    .addFormDataPart("serviceType", crabConfig.getServiceType()).build();
+                    .addFormDataPart("serviceName", crabConfig.getFileServiceName())
+                    .addFormDataPart("serviceType", crabConfig.getFileServiceType()).build();
 
             Map<String, Object> queryParams = new HashMap<>();
             String signedUrl = MiguApiUrlUtils.doSignature(crabConfig.getUploadUrl(), "POST",

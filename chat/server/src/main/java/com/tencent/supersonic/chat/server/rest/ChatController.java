@@ -2,20 +2,15 @@ package com.tencent.supersonic.chat.server.rest;
 
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.chat.api.pojo.request.ChatRequest;
 import com.tencent.supersonic.chat.api.pojo.request.PageQueryInfoReq;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.ShowCaseResp;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
-import com.tencent.supersonic.chat.server.service.DeepSeekService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -25,9 +20,6 @@ public class ChatController {
 
     @Autowired
     private ChatManageService chatService;
-
-    @Autowired
-    private DeepSeekService deepSeekService;
 
     @PostMapping("/save")
     public Boolean save(@RequestParam(value = "chatName") String chatName,
@@ -98,16 +90,4 @@ public class ChatController {
         return chatService.queryShowCase(pageQueryInfoCommand, agentId);
     }
 
-    @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> streamChat(@RequestBody ChatRequest chatRequest) {
-        return deepSeekService.streamChat(chatRequest.getQuestion(), chatRequest.getSessionId())
-                .map(response -> {
-                    // 优先返回content，如果content为空则返回reasonContent
-                    String data = response.getContent() != null ? response.getContent()
-                            : response.getReasonContent();
-
-                    return ServerSentEvent.<String>builder().event("message").data(data)
-                            .id(response.getMessageId()).build();
-                });
-    }
 }

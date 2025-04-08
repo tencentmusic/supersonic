@@ -26,13 +26,13 @@ public class CrabConfig {
     @Value("${crab.api.deepseek.url:/crab/api/aigc/task/bigmodel/deepseek}")
     private String deepseekUrl;
     @Value("${crab.api.file.serviceName:deepseek_whole}")
-    private String serviceName;
+    private String fileServiceName;
     @Value("${crab.api.file.serviceType:file_parse}")
-    private String serviceType;
-    @Value("${crab.api.deepseek.serviceName:deepseek_V3}")
-    private String dsModel;
+    private String fileServiceType;
+    @Value("${crab.api.deepseek.serviceName:deepseek_14B}")
+    private String dsServiceName;
     @Value("${crab.api.deepseek.serviceType:text_to_text}")
-    private String dsType;
+    private String dsServiceType;
     public static final String VIDEO = "VIDEO";
     public static final String IMAGE = "IMAGE";
     public static final String AUDIO = "AUDIO";
@@ -61,5 +61,17 @@ public class CrabConfig {
         }
         String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
         return EXTENSION_TYPE_MAP.getOrDefault(ext, ext);
+    }
+    public String getDsModel(String serviceName) {
+        // 根据文档中的对应关系设置
+        return switch (serviceName) {
+            case "deepseek_14B" -> "default";
+            case "deepseek_70B" -> "DeepSeek70";
+            case "deepseek_whole" -> "DeepSeekR1";
+            case "deepseek_whole_quantify" -> "DeepSeekR1";
+            case "deepseek_32B" -> "DeepSeek32";
+            case "deepseek_V3" -> "DeepSeekV3";
+            default -> "default";
+        };
     }
 }

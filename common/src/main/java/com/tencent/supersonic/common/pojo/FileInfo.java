@@ -1,4 +1,4 @@
-package com.tencent.supersonic.chat.server.pojo;
+package com.tencent.supersonic.common.pojo;
 
 import lombok.Data;
 
@@ -9,4 +9,5 @@ public class FileInfo {
     private String fileName;
     private String fileSize;
     private String fileType;
+    private String fileContent;
 }
