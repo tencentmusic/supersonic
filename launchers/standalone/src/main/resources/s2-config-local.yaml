@@ -45,8 +45,10 @@ s2:
       threshold: 0.5
       min:
         threshold: 0.3
+    embedding:
+        use-llm-words-segement: false
 
-#这个是测试环境通用管理配置，针对助理，模型，数据库，主题域，对非管理员用户展示通用数据。
+  #这个是测试环境通用管理配置，针对助理，模型，数据库，主题域，对非管理员用户展示通用数据。
   manage:
     chat:
       agent:

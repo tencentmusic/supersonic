@@ -29,8 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class AttributionExecutor  implements ChatQueryExecutor{
+public class AttributionExecutor implements ChatQueryExecutor {
     public static final String APP_KEY = "S2SQL_PARSER";
+
     @Override
     public boolean accept(ExecuteContext executeContext) {
         return "Attribution_Analysis".equals(executeContext.getParseInfo().getQueryMode());
@@ -41,8 +42,8 @@ public class AttributionExecutor  implements ChatQueryExecutor{
         QueryResult queryResult = new QueryResult();
 
         // 判断是否多步骤分析
-        if (executeContext.getParseInfo().getSqlList() != null &&
-                !executeContext.getParseInfo().getSqlList().isEmpty()) {
+        if (executeContext.getParseInfo().getSqlList() != null
+                && !executeContext.getParseInfo().getSqlList().isEmpty()) {
 
             // 多步骤执行模式
             return executeMultiStepAnalysis(executeContext, queryResult);
@@ -56,22 +57,25 @@ public class AttributionExecutor  implements ChatQueryExecutor{
     public TokenStream streamExecute(ExecuteContext executeContext) {
         return null;
     }
+
     // 原有单SQL执行方法（保持兼容）
-    private QueryResult executeSingleStepAnalysis(ExecuteContext executeContext, QueryResult queryResult) {
+    private QueryResult executeSingleStepAnalysis(ExecuteContext executeContext,
+            QueryResult queryResult) {
         String sql = executeContext.getParseInfo().getSqlInfo().getCorrectedS2SQL();
-        String sqlResult = executeSqlAndRecord(executeContext,sql, queryResult);
+        String sqlResult = executeSqlAndRecord(executeContext, sql, queryResult);
         String explanation = generateExplanation(sqlResult, executeContext);
         queryResult.setTextResult(explanation);
         return queryResult;
     }
-    private static String executeSqlAndRecord(ExecuteContext executeContext, String querySql, QueryResult queryResult) {
+
+    private static String executeSqlAndRecord(ExecuteContext executeContext, String querySql,
+            QueryResult queryResult) {
         try {
             // 构造查询环境
             SqlUtils sqlUtils = ContextUtils.getBean(SqlUtils.class);
             QueryStatement queryStatement = new QueryStatement();
             ModelService modelService = ContextUtils.getBean(ModelService.class);
-            DatabaseResp database =
-                    modelService.getDatabaseByModelId(19L);
+            DatabaseResp database = modelService.getDatabaseByModelId(19L);
             Ontology ontology = new Ontology();
             ontology.setDatabase(database);
             queryStatement.setOntology(ontology);
@@ -105,6 +109,7 @@ public class AttributionExecutor  implements ChatQueryExecutor{
             throw new RuntimeException("SQL执行失败: " + e.getMessage(), e);
         }
     }
+
     // 数据结构定义
     @Data
     public static class StepExecutionResult {
@@ -115,7 +120,9 @@ public class AttributionExecutor  implements ChatQueryExecutor{
         private String analysis;
         private String error;
     }
-    private QueryResult executeMultiStepAnalysis(ExecuteContext executeContext, QueryResult finalResult) {
+
+    private QueryResult executeMultiStepAnalysis(ExecuteContext executeContext,
+            QueryResult finalResult) {
         List<String> sqlList = executeContext.getParseInfo().getSqlList();
         List<StepExecutionResult> stepResults = new ArrayList<>();
         StringBuilder combinedAnalysis = new StringBuilder();
@@ -132,78 +139,75 @@ public class AttributionExecutor  implements ChatQueryExecutor{
                 String sqlResult = executeSqlAndRecord(executeContext, sql, queryResult);
 
                 // 生成步骤分析报告
-                String stepAnalysis = generateStepExplanation(
-                        executeContext,
-                        sqlResult,
-                        i + 1,
-                        sqlList.size()
-                );
+                String stepAnalysis =
+                        generateStepExplanation(executeContext, sqlResult, i + 1, sqlList.size());
 
                 stepResult.setAnalysis(stepAnalysis);
                 stepResults.add(stepResult);
 
                 // 合并到总分析
-                combinedAnalysis.append("## 步骤").append(i+1).append("分析:\n")
-                        .append(stepAnalysis).append("\n\n");
+                combinedAnalysis.append("## 步骤").append(i + 1).append("分析:\n").append(stepAnalysis)
+                        .append("\n\n");
 
             } catch (Exception e) {
                 stepResult.setError(e.getMessage());
                 stepResults.add(stepResult);
-                log.error("步骤{}执行失败", i+1, e);
+                log.error("步骤{}执行失败", i + 1, e);
             }
         }
 
         // 2. 生成综合分析报告
         if (!stepResults.isEmpty()) {
-            String fullAnalysis = generateFinalAnalysis(
-                    executeContext,
-                    sqlList.size(),
-                    combinedAnalysis.toString()
-            );
+            String fullAnalysis = generateFinalAnalysis(executeContext, sqlList.size(),
+                    combinedAnalysis.toString());
 
-//            // 3. 构建最终结果
-//            MultiStepQueryResult result = new MultiStepQueryResult();
-//            result.setStepResults(stepResults);
-//            result.setFinalAnalysis(fullAnalysis);
-//            result.setQueryMode(executeContext.getParseInfo().getQueryMode());
-//
-//            finalResult.setObjectResult(result);
+            // // 3. 构建最终结果
+            // MultiStepQueryResult result = new MultiStepQueryResult();
+            // result.setStepResults(stepResults);
+            // result.setFinalAnalysis(fullAnalysis);
+            // result.setQueryMode(executeContext.getParseInfo().getQueryMode());
+            //
+            // finalResult.setObjectResult(result);
             finalResult.setTextResult(fullAnalysis);
         }
 
         finalResult.setQueryMode(executeContext.getParseInfo().getQueryMode());
         return finalResult;
     }
-    private String generateStepExplanation(ExecuteContext executeContext,String resultJson, int step, int totalSteps) {
+
+    private String generateStepExplanation(ExecuteContext executeContext, String resultJson,
+            int step, int totalSteps) {
         String prompt = String.format("""
-            #步骤分析任务 (%d/%d)
-            原始问题：%s
-            当前步骤数据：%s
-            请分析：
-            1. 本步骤数据的关键发现
-            2. 与问题的关联性
-            3. 用简洁的3-5句话总结
-            """, step, totalSteps, executeContext.getRequest().getQueryText(), resultJson);
+                #步骤分析任务 (%d/%d)
+                原始问题：%s
+                当前步骤数据：%s
+                请分析：
+                1. 本步骤数据的关键发现
+                2. 与问题的关联性
+                3. 用简洁的3-5句话总结
+                """, step, totalSteps, executeContext.getRequest().getQueryText(), resultJson);
 
         AttributionAnalyzer analyzer = createAnalyzer(executeContext);
         return analyzer.analyze(prompt);
     }
-    private String generateFinalAnalysis(ExecuteContext executeContext, int totalSteps, String stepAnalyses) {
+
+    private String generateFinalAnalysis(ExecuteContext executeContext, int totalSteps,
+            String stepAnalyses) {
         String prompt = String.format("""
-            #综合分析报告生成
-            原始问题：%s
-            已完成分析步骤：%d个
-            各步骤摘要：
-            %s
-            请生成：
-            1. 关键结论总结
-            2. 主要影响因素排序
-            3. 可行动建议
-            格式要求：
-            ## 关键结论
-            ## 因素分析
-            ## 建议措施
-            """, executeContext.getRequest().getQueryText(), totalSteps, stepAnalyses);
+                #综合分析报告生成
+                原始问题：%s
+                已完成分析步骤：%d个
+                各步骤摘要：
+                %s
+                请生成：
+                1. 关键结论总结
+                2. 主要影响因素排序
+                3. 可行动建议
+                格式要求：
+                ## 关键结论
+                ## 因素分析
+                ## 建议措施
+                """, executeContext.getRequest().getQueryText(), totalSteps, stepAnalyses);
 
         AttributionAnalyzer analyzer = createAnalyzer(executeContext);
         return analyzer.analyze(prompt);
@@ -221,6 +225,7 @@ public class AttributionExecutor  implements ChatQueryExecutor{
         @Description("生成归因分析结果")
         String analyze(String prompt);
     }
+
     public String generateExplanation(String result, ExecuteContext executeContext) {
         try {
             // 1. 检查结果是否为空
@@ -232,7 +237,8 @@ public class AttributionExecutor  implements ChatQueryExecutor{
             // 2. 构建提示词
             StringBuilder prompt = new StringBuilder();
             prompt.append("请对以下数据进行归因分析:\n\n");
-            prompt.append("用户的问题是:").append(executeContext.getRequest().getQueryText()).append("\n");
+            prompt.append("用户的问题是:").append(executeContext.getRequest().getQueryText())
+                    .append("\n");
             prompt.append("查询的数据结果是:").append(result).append("\n\n");
             prompt.append("要求:\n");
             prompt.append("1. 分析数据中的关键指标变化\n");
@@ -251,6 +257,7 @@ public class AttributionExecutor  implements ChatQueryExecutor{
             return "归因分析生成失败:" + e.getMessage();
         }
     }
+
     protected ChatLanguageModel getChatLanguageModel(ChatModelConfig modelConfig) {
         return ModelProvider.getChatModel(modelConfig);
     }

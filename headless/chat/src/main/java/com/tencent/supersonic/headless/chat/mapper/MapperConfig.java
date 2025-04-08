@@ -34,6 +34,11 @@ public class MapperConfig extends ParameterConfig {
             new Parameter("s2.mapper.value.min.threshold", "0.1", "维度值最小文本相似度阈值",
                     "维度值相似度阈值在动态调整中的最低值", "number", "Mapper相关配置");
 
+//    依靠大模型分词，与按步长切分词语，进行向量召回互斥
+    public static final Parameter EMBEDDING_MATCH_USE_LLM_WORDS_SEGMENT=
+            new Parameter("s2.mapper.embedding.use-llm-words-segement", "false", "使用LLM进行分词后再进行词语的向量召回",
+                    "依靠大模型分词，与按步长切分词语，进行向量召回互斥", "bool", "Mapper相关配置");
+
     public static final Parameter EMBEDDING_MAPPER_TEXT_SIZE =
             new Parameter("s2.mapper.embedding.word.size", "3", "用于向量召回文本长度",
                     "为提高向量召回效率, 按指定长度进行向量语义召回", "number", "Mapper相关配置");
@@ -65,4 +70,6 @@ public class MapperConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_MAPPER_ALLOWED_SEGMENT_NATURE =
             new Parameter("s2.mapper.embedding.allowed-segment-nature", "['v', 'd', 'a']",
                     "使用LLM召回二次处理时对问题分词词性的控制", "分词后允许的词性才会进行向量召回", "list", "Mapper相关配置");
+
+
 }

@@ -144,7 +144,6 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         List<Text2SQLExemplar> usedExemplars =
                 prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
         llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight()));
-
         return llmResp;
     }
 

@@ -46,7 +46,8 @@ s2:
       min:
         threshold: 0.3
     embedding:
-      use-llm-enhance: true
+      use-llm-enhance: false
+      use-llm-words-segement: true
 
   manage:
     chat:
