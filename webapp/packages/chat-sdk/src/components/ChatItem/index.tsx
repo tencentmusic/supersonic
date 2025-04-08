@@ -28,6 +28,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { exportCsvFile } from '../../utils/utils';
 import Loading from './Loading';
 import { useMethodRegister } from '../../hooks';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github.css'; // 浅灰色背景主题
 
 type Props = {
   msgId?: string | number;
@@ -194,14 +199,14 @@ const ChatItem: React.FC<Props> = ({
       if (parseInfos?.length === 1 && parseInfos[0]?.stream) {
         const resultDiv = document.getElementById('result-response-'+msgId)
         if(resultDiv) {
-          let time = 0
-          resultDiv.textContent = ''
+          let textContent = ''
           const messageFunc = (event) => {
-            setTimeout(() => {
-              resultDiv.textContent += event.data
-              setStreamResultContent('' + resultDiv.textContent)
-            },time)
-            time += 200
+            try {
+              textContent += JSON.parse(event.data)?.text
+            } catch {
+              textContent += event.data?.text
+            }
+            setStreamResultContent('' + textContent)
           }
           const errorFunc = (error) => {
             setIsStreamResult(false)
@@ -209,9 +214,7 @@ const ChatItem: React.FC<Props> = ({
             // throw error
           };
           const closeFunc = () => {
-            setTimeout(()=>{
-              setIsStreamResult(false)
-            },time)
+            setIsStreamResult(false)
             console.log('(result)SSE 连接已关闭');
           };
           setIsStreamResult(true)
@@ -714,9 +717,29 @@ const ChatItem: React.FC<Props> = ({
               </div> : ''
             }
             <div className={`${prefixCls}-content-container`} style={{ display: streamResultContent ? 'block' : 'none' }}>
-              <div id={'result-response-' + msgId} className='result-container'></div>
+              <div id={'result-response-' + msgId} className='result-container'>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeKatex, rehypeHighlight]}
+                  components={{
+                    code: ({ className, children }) => {
+                      const language = className?.replace('hljs language-', '') || 'text';
+                      return (
+                        <div className="code-block">
+                          <div className="code-language">{language}</div>
+                          <pre className={className}>
+                            <code>{children}</code>
+                          </pre>
+                        </div>
+                      )
+                    }
+                  }}
+                >
+                  { streamResultContent }
+                </ReactMarkdown>
+              </div>
             </div>
-          
+
             {executeMode && (
               <Spin spinning={entitySwitchLoading}>
                 <div style={{ minHeight: 50 }}>

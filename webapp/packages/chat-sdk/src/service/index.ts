@@ -155,6 +155,7 @@ export function queryThoughtsInSSE(queryText: string, chatId: number | undefined
   const ctrl = new AbortController();
   return fetchEventSource(`${prefix}/chat/query/streamParse`, {
     method: 'POST',
+    openWhenHidden: true, // 允许后台运行
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
@@ -172,16 +173,17 @@ export function queryThoughtsInSSE(queryText: string, chatId: number | undefined
       } else {
         errorFunc(new Error('连接不成功'))
         ctrl.abort();
+        throw new Error('连接不成功')
       }
     },
     onmessage: messageFunc,
     onerror: (error) => {
       errorFunc(error)
       ctrl.abort();
+      throw error
     },
     onclose: () => {
       closeFunc()
-      ctrl.abort();
     }
   });
 }
@@ -203,8 +205,9 @@ export function chatStreamExecute(
     closeFunc: (() => void)
 ) {
   const ctrl = new AbortController();
-  return fetchEventSource(`${prefix}/chat/query/streamExecute`, {
+  return fetchEventSource(`${prefix}/stream/chat/query/streamExecute`, {
     method: 'POST',
+    openWhenHidden: true, // 允许后台运行
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
@@ -224,16 +227,17 @@ export function chatStreamExecute(
       } else {
         errorFunc(new Error('连接不成功'))
         ctrl.abort();
+        throw new Error('连接不成功')
       }
     },
     onmessage: messageFunc,
     onerror: (error) => {
       errorFunc(error)
       ctrl.abort();
+      throw error
     },
     onclose: () => {
       closeFunc()
-      ctrl.abort();
     }
   })
 }

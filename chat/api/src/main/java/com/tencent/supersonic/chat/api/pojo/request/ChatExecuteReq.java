@@ -1,10 +1,13 @@
 package com.tencent.supersonic.chat.api.pojo.request;
 
+import com.tencent.supersonic.common.pojo.FileInfo;
 import com.tencent.supersonic.common.pojo.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -19,4 +22,6 @@ public class ChatExecuteReq {
     private String queryText;
     private boolean saveAnswer;
     private String textResult;
+    private String sessionId;
+    private List<FileInfo> fileInfoList;
 }

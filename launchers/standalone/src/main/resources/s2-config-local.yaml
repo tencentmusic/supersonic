@@ -28,7 +28,7 @@ s2:
     enableLLM: true
 
   authentication:
-    enable: true
+    enable: false
     exclude:
       path: /api/auth/user/register,/api/auth/user/login,/api/chat/agent/hasAgentRight
     token:
@@ -74,4 +74,19 @@ s2:
     database:
       name: "supersonic"
 
-
+crab:
+  api:
+    appId: qjt2geuo
+    secretKey: 4a1116f439b941f5bc5ea77e9777c2c4
+    host: http://10.191.38.16:8080
+    file:
+      serviceName: deepseek_whole
+      serviceType: file_parse
+      urls:
+        upload: /crab/api/resource/aimanager/task/upload
+        parse: /crab/api/aigc/task/bigmodel/deep/file/aysn/parse
+        status: /crab/api/aigc/task/bigmodel/deep/file/aysn/status
+    deepseek:
+      url: /crab/api/aigc/task/bigmodel/deepseek
+      serviceName: deepseek_32B
+      serviceType: text_to_text

@@ -3,7 +3,6 @@ package com.tencent.supersonic.chat.server.rest;
 import com.tencent.supersonic.chat.api.pojo.request.FileReq;
 import com.tencent.supersonic.chat.server.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
