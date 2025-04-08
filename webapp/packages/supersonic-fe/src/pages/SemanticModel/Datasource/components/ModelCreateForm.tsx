@@ -268,7 +268,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
     if (!saveState && currentStep < 1) {
       forward();
     } else {
-      const { dbName, tableName } = submitForm;
+      const { catalog ,dbName, tableName } = submitForm;
       const queryParams = {
         ...submitForm,
         databaseId: databaseId || modelItem?.databaseId || formDatabaseId,
@@ -278,7 +278,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
         modelDetail: {
           ...submitForm,
           queryType: basicInfoFormMode === 'fast' ? 'table_query' : 'sql_query',
-          tableQuery: dbName && tableName ? `${dbName}.${tableName}` : '',
+          tableQuery: catalog && dbName && tableName ? `${catalog}.${dbName}.${tableName}` : (dbName && tableName ? `${dbName}.${tableName}` : ''),
           sqlQuery: sql,
           sqlVariables: sqlParams,
         },
