@@ -25,6 +25,7 @@
     "react-spinners": "^0.13.8",
     "react-syntax-highlighter": "^15.6.1",
     "rehype-highlight": "^7.0.2",
+    "rehype-katex": "7.0.1",
     "remark-gfm": "^4.0.1",
     "sql-formatter": "^15.4.10",
     "tslib": "^2.8.1"
