@@ -25,12 +25,13 @@ public class SchemaDictUpdateListener {
             return;
         }
         dataEvent.getDataItems().forEach(dataItem -> {
-            if (isDimValue(dataItem)){
+            if (isDimValue(dataItem)) {
                 DictWord dictWord = new DictWord();
                 dictWord.setWord(dataItem.getName());
                 String sign = DictWordType.NATURE_SPILT;
                 String suffixNature = DictWordType.getSuffixNature(dataItem.getType());
-                String nature = sign + dataItem.getModelId() + sign + dataItem.getId() + suffixNature;
+                String nature =
+                        sign + dataItem.getModelId() + sign + dataItem.getId() + suffixNature;
                 String natureWithFrequency = nature + " " + Constants.DEFAULT_FREQUENCY;
                 dictWord.setNature(nature);
                 dictWord.setNatureWithFrequency(natureWithFrequency);
@@ -48,7 +49,7 @@ public class SchemaDictUpdateListener {
     }
 
     private Boolean isDimValue(DataItem dataItem) {
-        if (dataItem.getType().equals(TypeEnums.VALUE)){
+        if (dataItem.getType().equals(TypeEnums.VALUE)) {
             return false;
         }
         return true;

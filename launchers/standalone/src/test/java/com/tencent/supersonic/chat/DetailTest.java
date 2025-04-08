@@ -17,6 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
 public class DetailTest extends BaseTest {
@@ -52,6 +56,8 @@ public class DetailTest extends BaseTest {
 
         assertQueryResult(expectedResult, actualResult);
     }
+
+
 
     @Test
     public void test_detail_filter() throws Exception {

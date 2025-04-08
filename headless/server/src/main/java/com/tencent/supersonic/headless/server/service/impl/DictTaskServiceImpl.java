@@ -61,8 +61,8 @@ public class DictTaskServiceImpl implements DictTaskService {
     private final DimensionService dimensionService;
 
     public DictTaskServiceImpl(DictRepository dictRepository, DictUtils dictConverter,
-                               DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
-                               DimensionService dimensionService) {
+            DictUtils dictUtils, FileHandler fileHandler, DictWordService dictWordService,
+            DimensionService dimensionService) {
         this.dictRepository = dictRepository;
         this.dictConverter = dictConverter;
         this.dictUtils = dictUtils;
@@ -134,18 +134,16 @@ public class DictTaskServiceImpl implements DictTaskService {
         dictRepository.editDictTask(dictTaskDO);
 
 
-        if (!data.isEmpty() && user != null ) {
-            //维度值存向量库
+        if (!data.isEmpty() && user != null) {
+            // 维度值存向量库
             List<DimensionValueDO> dimensionValueDOS;
-            dimensionValueDOS = data.stream().map(this::convert2DimValueDO).filter(line -> Objects.nonNull(line))
-                    .toList();
-            dimensionValueDOS.forEach(
-                    dimensionValueDO -> {
-                        dimensionValueDO.setDimBizName(dictItemResp.getBizName());
-                        dimensionValueDO.setModelId(dictItemResp.getModelId());
-                        dimensionValueDO.setDimId(dictItemResp.getItemId());
-                    }
-            );
+            dimensionValueDOS = data.stream().map(this::convert2DimValueDO)
+                    .filter(line -> Objects.nonNull(line)).toList();
+            dimensionValueDOS.forEach(dimensionValueDO -> {
+                dimensionValueDO.setDimBizName(dictItemResp.getBizName());
+                dimensionValueDO.setModelId(dictItemResp.getModelId());
+                dimensionValueDO.setDimId(dictItemResp.getItemId());
+            });
             dimensionServiceImpl.sendDimensionValueEventBatch(dimensionValueDOS, EventType.ADD);
         }
     }
@@ -167,7 +165,7 @@ public class DictTaskServiceImpl implements DictTaskService {
     public Long deleteDictTask(DictSingleTaskReq taskReq, User user) {
         DictItemResp dictItemResp = fetchDictItemResp(taskReq);
         String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + dictFileType;
-        deleteEmbedding(dictItemResp,fileName);
+        deleteEmbedding(dictItemResp, fileName);
         fileHandler.deleteDictFile(fileName);
         try {
             dictWordService.loadDictWord();
@@ -184,18 +182,15 @@ public class DictTaskServiceImpl implements DictTaskService {
 
     public void deleteEmbedding(DictItemResp dictItemResp, String fileName) {
         List<DimensionValueDO> dimensionValueDOS;
-        //TODO，直接从文件中读取所有维度值不妥，后续待优化
+        // TODO，直接从文件中读取所有维度值不妥，后续待优化
         List<String> data = fileHandler.readFile(fileName);
         if (!CollectionUtils.isEmpty(data)) {
-            dimensionValueDOS = data.stream()
-                    .map(this::convert2DimValueDO)
-                    .filter(Objects::nonNull)
+            dimensionValueDOS = data.stream().map(this::convert2DimValueDO).filter(Objects::nonNull)
                     .peek(dimensionValueDO -> {
                         dimensionValueDO.setModelId(dictItemResp.getModelId());
                         dimensionValueDO.setDimId(dictItemResp.getItemId());
                         dimensionValueDO.setDimBizName(dictItemResp.getBizName());
-                    })
-                    .collect(Collectors.toList());
+                    }).collect(Collectors.toList());
             dimensionServiceImpl.sendDimensionValueEventBatch(dimensionValueDOS, EventType.DELETE);
         }
     }

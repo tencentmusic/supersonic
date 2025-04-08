@@ -57,8 +57,7 @@ public class KeywordMapper extends BaseMapper {
         }
 
         HanlpHelper.transLetterOriginal(mapResults);
-        Map<String, Object> transitionVauleAlias =
-                dimValues(mapResults, chatQueryContext, terms);
+        Map<String, Object> transitionVauleAlias = dimValues(mapResults, chatQueryContext, terms);
         mapResults = (List<HanlpMapResult>) transitionVauleAlias.get("hanlpMapResult");
         terms = (List<S2Term>) transitionVauleAlias.get("term");
         Map<String, Long> wordNatureToFrequency =

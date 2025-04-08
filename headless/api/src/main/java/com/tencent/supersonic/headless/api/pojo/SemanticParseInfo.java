@@ -50,6 +50,7 @@ public class SemanticParseInfo implements Serializable {
     private SqlEvaluation sqlEvaluation = new SqlEvaluation();
     private Map<String, Object> properties = Maps.newHashMap();
     private List<String> sqlList;
+
     @Data
     @Builder
     public static class DataSetMatchResult {

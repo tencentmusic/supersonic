@@ -26,31 +26,26 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class AttributionParser implements ChatQueryParser{
+public class AttributionParser implements ChatQueryParser {
     private Boolean enableAttr = false;
     private static final Set<String> ATTRIBUTION_KEYWORDS =
             Set.of("为什么", "原因", "因素", "归因", "下降原因", "增长来源");
     public static final String APP_KEY = "S2SQL_PARSER";
-    public static final String INSTRUCTION =
-            "#Role: 资深归因分析专家\n" +
-                    "#Task: 将复杂分析拆解为多步骤SQL\n" +
-                    "#规则：\n" +
-                    "1. 先进行数据探查（如趋势分析）\n" +
-                    "2. 再进行维度下钻（如地区维度分解）\n" +
-                    "3. 最后计算贡献度\n" +
-                    "4. 每个步骤生成独立可执行的SQL\n" +
-                    "5. 不要使用with和over语法，mysql版本不支持";
+    public static final String INSTRUCTION = "#Role: 资深归因分析专家\n" + "#Task: 将复杂分析拆解为多步骤SQL\n"
+            + "#规则：\n" + "1. 先进行数据探查（如趋势分析）\n" + "2. 再进行维度下钻（如地区维度分解）\n" + "3. 最后计算贡献度\n"
+            + "4. 每个步骤生成独立可执行的SQL\n" + "5. 不要使用with和over语法，mysql版本不支持";
+
     @Override
     public boolean accept(ParseContext parseContext) {
-        //1.意图识别是否是归因分析
+        // 1.意图识别是否是归因分析
         IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
         return intentType == IntentType.ATTRIBUTION && enableAttr;
-//return false;
+        // return false;
     }
 
     @Override
     public void parse(ParseContext parseContext) {
-//2. 准备相关配置
+        // 2. 准备相关配置
         LLMReq llmReq = new LLMReq();
 
         llmReq.setQueryText(parseContext.getRequest().getQueryText());
@@ -62,9 +57,9 @@ public class AttributionParser implements ChatQueryParser{
         SemanticParseInfo parseInfo = new SemanticParseInfo();
         parseInfo.setQueryMode("Attribution_Analysis");
         parseInfo.setId(1);
-        if (!llmResp.getSqlList().isEmpty()){
+        if (!llmResp.getSqlList().isEmpty()) {
             parseInfo.getSqlList().addAll(llmResp.getSqlList());
-        }else {
+        } else {
             parseInfo.getSqlInfo().setCorrectedS2SQL(llmResp.getSqlOutput());
         }
         parseInfo.getSqlInfo().setResultType("text");
@@ -75,10 +70,10 @@ public class AttributionParser implements ChatQueryParser{
     private IntentType parseUserIntent(String question) {
         // TODO: 使用LLM解析用户查询意图
         // 使用大模型进行意图分类
-//        String prompt = "判断问题类型：\n问题：" + question + "\n选项：数据查询、归因分析";
-//        String response = LLMClient.query(prompt);
-//        return response.contains("归因分析") ?
-//               IntentType.ATTRIBUTION : IntentType.NORMAL_QUERY;
+        // String prompt = "判断问题类型：\n问题：" + question + "\n选项：数据查询、归因分析";
+        // String response = LLMClient.query(prompt);
+        // return response.contains("归因分析") ?
+        // IntentType.ATTRIBUTION : IntentType.NORMAL_QUERY;
         // 如果包含归因关键词则认为是归因分析，否则返回 NORMAL_QUERY
         if (ATTRIBUTION_KEYWORDS.stream().anyMatch(question::contains)) {
             return IntentType.ATTRIBUTION;
@@ -97,7 +92,8 @@ public class AttributionParser implements ChatQueryParser{
         }
         return llmResp;
     }
-    private  List<String> generateAttributionSql(LLMReq llmReq) {
+
+    private List<String> generateAttributionSql(LLMReq llmReq) {
         // 1. 获取基础信息
         ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
         // 2. 构建归因分析提示语
@@ -108,7 +104,7 @@ public class AttributionParser implements ChatQueryParser{
         SemanticSqlExtractor extractor = AiServices.create(SemanticSqlExtractor.class, model);
 
         // 4. 解析LLM返回结果
-        SemanticAnalysisSteps steps  = extractor.generateSemanticSql(prompt);
+        SemanticAnalysisSteps steps = extractor.generateSemanticSql(prompt);
         if (StringUtils.isBlank(steps.getSqlStepsStr())) {
             throw new RuntimeException("未生成有效分析步骤");
         }
@@ -123,6 +119,7 @@ public class AttributionParser implements ChatQueryParser{
         return sqlSteps;
 
     }
+
     private List<String> parseSqlSteps(String stepsStr) {
         List<String> steps = new ArrayList<>();
 
@@ -131,31 +128,24 @@ public class AttributionParser implements ChatQueryParser{
         Matcher matcher = pattern.matcher(stepsStr.replace("\n", " "));
 
         while (matcher.find()) {
-            String cleanSql = matcher.group(2)
-                    .replaceAll("\\s+", " ")
-                    .replaceAll(";$", "")
-                    .trim();
+            String cleanSql = matcher.group(2).replaceAll("\\s+", " ").replaceAll(";$", "").trim();
             steps.add(cleanSql);
         }
 
         // 保底处理：分号分割
         if (steps.isEmpty()) {
-            steps = Arrays.stream(stepsStr.split(";"))
-                    .filter(StringUtils::isNotBlank)
-                    .map(String::trim)
-                    .collect(Collectors.toList());
+            steps = Arrays.stream(stepsStr.split(";")).filter(StringUtils::isNotBlank)
+                    .map(String::trim).collect(Collectors.toList());
         }
 
         return steps;
     }
+
     private String generatePrompt(LLMReq llmReq, ChatApp chatApp) {
         StringBuilder context = new StringBuilder();
-        context.append(INSTRUCTION.replace("单一SQL", "多步骤SQL"))
-                .append("\n\n新增规则：")
-                .append("\n7. 将复杂问题拆分为多个分析步骤")
-                .append("\n8. 每个步骤生成简单且独立的SQL")
-                .append("\n9. 明确步骤间的逻辑顺序")
-                .append("\n10. 最终给出汇总逻辑\n\n");
+        context.append(INSTRUCTION.replace("单一SQL", "多步骤SQL")).append("\n\n新增规则：")
+                .append("\n7. 将复杂问题拆分为多个分析步骤").append("\n8. 每个步骤生成简单且独立的SQL")
+                .append("\n9. 明确步骤间的逻辑顺序").append("\n10. 最终给出汇总逻辑\n\n");
         if (chatApp != null) {
             String fullPrompt = chatApp.getPrompt();
             // 查找“示例：”在字符串中的位置
@@ -163,19 +153,15 @@ public class AttributionParser implements ChatQueryParser{
 
             // 如果找到“示例：”，则截取该位置之前的内容
             if (exampleIndex != -1) {
-                context.append("### 业务背景信息：\n")
-                        .append(fullPrompt.substring(0, exampleIndex).trim()).append("\n\n");
-            }else {
+                context.append("### 业务背景信息：\n").append(fullPrompt.substring(0, exampleIndex).trim())
+                        .append("\n\n");
+            } else {
                 // 如果没有找到“示例：”，则返回完整内容
                 context.append("### 业务背景信息：\n").append(fullPrompt).append("\n\n");
             }
         }
-        context.append("\n请严格按以下格式返回：")
-                .append("\n思考过程：<分析思路>")
-                .append("\n步骤1-SQL: SELECT...;")
-                .append("\n步骤2-SQL: SELECT...;")
-                .append("\n汇总逻辑：<结果组合方式>")
-                .append("\n\n示例：")
+        context.append("\n请严格按以下格式返回：").append("\n思考过程：<分析思路>").append("\n步骤1-SQL: SELECT...;")
+                .append("\n步骤2-SQL: SELECT...;").append("\n汇总逻辑：<结果组合方式>").append("\n\n示例：")
                 .append("\n思考过程：先分析整体趋势，再拆解维度")
                 .append("\n步骤1-SQL: SELECT date, SUM(sales) FROM tbl GROUP BY date;")
                 .append("\n步骤2-SQL: SELECT region, SUM(sales) FROM tbl GROUP BY region;")

@@ -9,6 +9,9 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.HanlpHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,5 +39,14 @@ public class HanlpTest {
         mapResults.add(addMapResult);
         HanlpHelper.transLetterOriginal(mapResults);
         Assert.assertEquals(mapResults.size(), 2);
+    }
+
+    @Test
+    public  void  test_123() throws Exception {
+        Path path;
+        path = Paths.get("C:\\Users\\roylin\\.djl.ai\\tokenizers\\test.txt");
+        Files.write(path, "test".getBytes());
+        Files.delete(path);
+        System.out.println("操作成功！");
     }
 }

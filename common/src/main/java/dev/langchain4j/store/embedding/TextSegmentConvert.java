@@ -22,19 +22,15 @@ public class TextSegmentConvert {
     public static List<TextSegment> convertToEmbedding(List<DataItem> dataItems) {
         return dataItems.stream().map(item -> {
             // suffix with underscore to avoid embedding issue
-            DataItem newItem = DataItem.builder()
-                    .domainId(item.getDomainId())
-                    .bizName(item.getBizName())
-                    .type(item.getType())
-                    .newName(item.getNewName())
-                    .defaultAgg(item.getDefaultAgg())
-                    .name(item.getName())
+            DataItem newItem = DataItem.builder().domainId(item.getDomainId())
+                    .bizName(item.getBizName()).type(item.getType()).newName(item.getNewName())
+                    .defaultAgg(item.getDefaultAgg()).name(item.getName())
                     .id(item.getId() + Constants.UNDERLINE)
                     .modelId(item.getModelId() + Constants.UNDERLINE)
                     .domainId(item.getDomainId() + Constants.UNDERLINE).build();
 
             String text = newItem.getName();
-            if (item.getType()== TypeEnums.VALUE){
+            if (item.getType() == TypeEnums.VALUE) {
                 newItem.setDimValue(item.getDimValue());
                 text = item.getDimValue();
                 newItem.setDimId(item.getDimId());

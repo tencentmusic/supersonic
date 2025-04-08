@@ -75,6 +75,7 @@ public class QueryUtils {
         });
         return reverseNamePair;
     }
+
     private void processColumn(QueryColumn column, Map<String, String> namePair,
             Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap,
             Map<String, DimensionResp> dimensionRespMap) {
@@ -115,7 +116,8 @@ public class QueryUtils {
         } else {
             // if column nameEn contains metric name, use metric dataFormatType
             metricRespMap.values().forEach(metric -> {
-                if (finalNameEn.contains(metric.getName()) || finalNameEn.contains(metric.getBizName())) {
+                if (finalNameEn.contains(metric.getName())
+                        || finalNameEn.contains(metric.getBizName())) {
                     column.setDataFormatType(metric.getDataFormatType());
                     column.setDataFormat(metric.getDataFormat());
                     column.setModelId(metric.getModelId());

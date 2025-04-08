@@ -14,8 +14,6 @@ import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.pojo.QueryStatement;
-import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
-import com.tencent.supersonic.headless.core.pojo.QueryStatement;
 import com.tencent.supersonic.headless.core.translator.parser.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.*;
