@@ -171,6 +171,7 @@ public class AttributionExecutor  implements ChatQueryExecutor{
             finalResult.setTextResult(fullAnalysis);
         }
 
+        finalResult.setQueryMode(executeContext.getParseInfo().getQueryMode());
         return finalResult;
     }
     private String generateStepExplanation(ExecuteContext executeContext,String resultJson, int step, int totalSteps) {
