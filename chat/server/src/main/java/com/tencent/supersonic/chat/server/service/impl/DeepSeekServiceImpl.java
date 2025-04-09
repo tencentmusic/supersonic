@@ -10,6 +10,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.server.config.CrabConfig;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.chat.server.service.DeepSeekService;
+import com.tencent.supersonic.common.pojo.FileInfo;
 import com.tencent.supersonic.common.util.MiguApiUrlUtils;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class DeepSeekServiceImpl implements DeepSeekService {
     private final CrabConfig crabConfig;
     private final ChatQueryServiceImpl chatQueryService;
     private final ChatManageService chatManageService;
-
+    private static final String FILE_ID = "fileId";
     @Autowired
     public DeepSeekServiceImpl(WebClient.Builder webClientBuilder,
                                ObjectMapper objectMapper,
@@ -57,8 +58,15 @@ public class DeepSeekServiceImpl implements DeepSeekService {
     @Override
     public SseEmitter streamChat(ChatExecuteReq chatExecuteReq) {
         // 初始化请求
-        if (chatExecuteReq.getQueryText() == null && chatExecuteReq.getFileInfoList() != null && !chatExecuteReq.getFileInfoList().isEmpty()) {
-            chatExecuteReq.setQueryText("请解析文本内容：");
+        String fileIds = "";
+        if (chatExecuteReq.getFileInfoList() != null && !chatExecuteReq.getFileInfoList().isEmpty()) {
+            if (chatExecuteReq.getQueryText() == null){
+                chatExecuteReq.setQueryText("请解析文本内容：");
+            }
+            fileIds = chatExecuteReq.getFileInfoList().stream()
+                    .map(FileInfo::getFileId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(";"));
         }
 
         String requestBody = buildRequestBody(chatExecuteReq);
@@ -92,6 +100,7 @@ public class DeepSeekServiceImpl implements DeepSeekService {
         Disposable disposable = webClient.post()
                 .uri(urlPath)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .header(FILE_ID, fileIds)
                 .bodyValue(requestBody)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> Mono.error(new RuntimeException("API request failed")))

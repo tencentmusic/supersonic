@@ -250,7 +250,6 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             result.setHasFile(true);
             result.setFileInfoList(fileInfos);
         }
-        // 调用你的存储逻辑
         saveQueryResult(chatExecuteReq, result);
     }
     private void savePlainText(QueryResult queryResult, ExecuteContext executeContext) {
