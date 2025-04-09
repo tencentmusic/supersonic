@@ -28,6 +28,7 @@ import com.tencent.supersonic.chat.server.util.ComponentFactory;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
 import com.tencent.supersonic.common.jsqlparser.*;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.common.pojo.FileInfo;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
@@ -44,6 +45,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.*;
+import com.tencent.supersonic.headless.chat.corrector.S2SqlDateHelper;
 import com.tencent.supersonic.headless.chat.parser.llm.OnePassSCSqlGenStrategy;
 import com.tencent.supersonic.headless.chat.parser.llm.SqlGenStrategyFactory;
 import com.tencent.supersonic.headless.chat.query.QueryManager;
@@ -71,6 +73,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -853,6 +857,18 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                         partitionDimension);
                 break;
             }
+            //适配直连模式
+            if (partitionDimension.getBizName().equals(fieldExpression.getFieldName())) {
+                // first remove,then add
+                removeFieldNames.add(partitionDimension.getBizName());
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                addTimeFiltersForBizName(queryData.getDateInfo().getStartDate(), greaterThanEquals,
+                        addConditions, partitionDimension);
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                addTimeFiltersForBizName(queryData.getDateInfo().getEndDate(), minorThanEquals, addConditions,
+                        partitionDimension);
+                break;
+            }
         }
         for (FieldExpression fieldExpression : fieldExpressionList) {
             for (QueryFilter queryFilter : queryData.getDimensionFilters()) {
@@ -882,6 +898,24 @@ public class ChatQueryServiceImpl implements ChatQueryService {
             List<Expression> addConditions, SchemaElement partitionDimension) {
         Column column = new Column(partitionDimension.getName());
         StringValue stringValue = new StringValue(date);
+        comparisonExpression.setLeftExpression(column);
+        comparisonExpression.setRightExpression(stringValue);
+        addConditions.add(comparisonExpression);
+    }
+
+    /**
+     * 兼容直连模式
+     */
+    private <T extends ComparisonOperator> void addTimeFiltersForBizName(String date, T comparisonExpression,
+                                                                         List<Expression> addConditions, SchemaElement partitionDimension) {
+        Column column = new Column(partitionDimension.getBizName());
+        StringValue stringValue;
+        Object timeFormat = partitionDimension.getExtInfo().get(DimensionConstants.DIMENSION_TIME_FORMAT);
+        if(timeFormat != null && StringUtils.isNotBlank(timeFormat.toString())){
+            stringValue = new StringValue(DateUtils.format(date,DateUtils.DEFAULT_DATE_FORMAT,timeFormat.toString()));
+        }else {
+            stringValue = new StringValue(date);
+        }
         comparisonExpression.setLeftExpression(column);
         comparisonExpression.setRightExpression(stringValue);
         addConditions.add(comparisonExpression);
