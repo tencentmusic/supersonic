@@ -34,7 +34,8 @@ public class AttributionExecutor implements ChatQueryExecutor {
 
     @Override
     public boolean accept(ExecuteContext executeContext) {
-        return "Attribution_Analysis".equals(executeContext.getParseInfo().getQueryMode());
+//        return "Attribution_Analysis".equals(executeContext.getParseInfo().getQueryMode());
+        return false;
     }
 
     @Override

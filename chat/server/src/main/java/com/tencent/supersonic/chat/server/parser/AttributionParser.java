@@ -38,9 +38,9 @@ public class AttributionParser implements ChatQueryParser {
     @Override
     public boolean accept(ParseContext parseContext) {
         // 1.意图识别是否是归因分析
-        IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
-        return intentType == IntentType.ATTRIBUTION && enableAttr;
-        // return false;
+//        IntentType intentType = parseUserIntent(parseContext.getRequest().getQueryText());
+//        return intentType == IntentType.ATTRIBUTION && enableAttr;
+         return false;
     }
 
     @Override
