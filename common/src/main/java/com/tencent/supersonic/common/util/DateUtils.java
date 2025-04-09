@@ -92,7 +92,7 @@ public class DateUtils {
     }
 
     public static String getBeforeDate(String currentDate, int intervalDay,
-            DatePeriodEnum datePeriodEnum) {
+                                       DatePeriodEnum datePeriodEnum) {
         LocalDate specifiedDate = LocalDate.parse(currentDate, DEFAULT_DATE_FORMATTER2);
         LocalDate result = null;
         switch (datePeriodEnum) {
@@ -155,6 +155,18 @@ public class DateUtils {
         return dateFormat.format(date);
     }
 
+    public static String format(String dateStr, String inputFormat, String outputFormat) {
+        SimpleDateFormat inputFormatter = new SimpleDateFormat(inputFormat);
+        String outPutDate = dateStr;
+        try {
+            Date inputDate = inputFormatter.parse(dateStr);
+            outPutDate = format(inputDate,outputFormat);
+        }catch (Exception e) {
+            log.info("parse date failed, date:{}, inputFormat:{}, outputFormat:{}", dateStr, inputFormat, outputFormat, e);
+        }
+        return outPutDate;
+    }
+
     private static boolean containsTime(Date date) {
         DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         String timeString = timeFormat.format(date);
@@ -162,7 +174,7 @@ public class DateUtils {
     }
 
     public static List<String> getDateList(String startDateStr, String endDateStr,
-            DatePeriodEnum period) {
+                                           DatePeriodEnum period) {
         try {
             LocalDate startDate;
             LocalDate endDate;
