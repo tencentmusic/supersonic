@@ -170,7 +170,13 @@ public class DeepSeekServiceImpl implements DeepSeekService {
                     .put("role", "assistant")
                     .put("content", query.getQueryResult().getTextResult()));
         });
-
+        if (req.getFileInfoList() != null && !req.getFileInfoList().isEmpty()) {
+            for (FileInfo file : req.getFileInfoList()) {
+                messages.add(objectMapper.createObjectNode()
+                        .put("role", "user")
+                        .put("content", file.getFileContent()));
+            }
+        }
         // 添加当前问题
         messages.add(objectMapper.createObjectNode()
                 .put("role", "user")

@@ -1,7 +1,10 @@
 package com.tencent.supersonic.chat.server.rest;
 
+import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.server.service.DeepSeekService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +20,8 @@ public class crabController {
     private DeepSeekService deepSeekService;
 
     @PostMapping(value = "/deepSeekStream")
-    public SseEmitter streamChat(@RequestBody ChatExecuteReq chatExecuteReq) {
+    public SseEmitter streamChat(@RequestBody ChatExecuteReq chatExecuteReq, HttpServletRequest request, HttpServletResponse response) {
+        chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return deepSeekService.streamChat(chatExecuteReq);
     }
 }
