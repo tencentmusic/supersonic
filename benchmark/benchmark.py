@@ -145,9 +145,10 @@ def benchmark(url:str, agentId:str, chatId:str, filePath:str, userName:str):
             parse_cost = parse_resp.get('data').get('parseTimeCost').get('parseTime')
             execute_resp = batch_test.execute(agentId, question, parse_resp['data']['queryId'])
             execute_status = '执行失败'
+            execute_cost = 0
             if parse_status == '解析成功' and execute_resp.get('data').get('errorMsg') is None:
                 execute_status = '执行成功'
-            execute_cost = execute_resp.get('data').get('queryTimeCost')
+                execute_cost = execute_resp.get('data').get('queryTimeCost')
             res = [question.replace(',', '#'),parse_status,parse_cost/1000,execute_status,execute_cost/1000,(parse_cost+execute_cost)/1000]
             appender.append_data(res)
 
