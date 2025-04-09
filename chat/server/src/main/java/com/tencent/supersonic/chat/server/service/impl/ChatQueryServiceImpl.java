@@ -832,6 +832,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
                         partitionDimension);
                 break;
             }
+            //适配直连模式
             if (partitionDimension.getBizName().equals(fieldExpression.getFieldName())) {
                 // first remove,then add
                 removeFieldNames.add(partitionDimension.getBizName());
