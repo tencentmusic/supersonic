@@ -26,6 +26,16 @@ public class SqlDialectFactory {
                     .withLiteralQuoteString("'").withIdentifierQuoteString("\"")
                     .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
                     .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(true);
+    public static final Context PRESTO_CONTEXT =
+            SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.PRESTO)
+                    .withLiteralQuoteString("'").withIdentifierQuoteString("\"")
+                    .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
+                    .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(true);
+    public static final Context KYUUBI_CONTEXT =
+            SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.BIG_QUERY)
+                    .withLiteralQuoteString("'").withIdentifierQuoteString("`")
+                    .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
+                    .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(false);
     private static Map<EngineType, SemanticSqlDialect> sqlDialectMap;
 
     static {
@@ -35,6 +45,10 @@ public class SqlDialectFactory {
         sqlDialectMap.put(EngineType.H2, new SemanticSqlDialect(DEFAULT_CONTEXT));
         sqlDialectMap.put(EngineType.POSTGRESQL, new SemanticSqlDialect(POSTGRESQL_CONTEXT));
         sqlDialectMap.put(EngineType.HANADB, new SemanticSqlDialect(HANADB_CONTEXT));
+        sqlDialectMap.put(EngineType.STARROCKS, new SemanticSqlDialect(DEFAULT_CONTEXT));
+        sqlDialectMap.put(EngineType.KYUUBI, new SemanticSqlDialect(KYUUBI_CONTEXT));
+        sqlDialectMap.put(EngineType.PRESTO, new SemanticSqlDialect(PRESTO_CONTEXT));
+        sqlDialectMap.put(EngineType.TRINO, new SemanticSqlDialect(PRESTO_CONTEXT));
     }
 
     public static SemanticSqlDialect getSqlDialect(EngineType engineType) {

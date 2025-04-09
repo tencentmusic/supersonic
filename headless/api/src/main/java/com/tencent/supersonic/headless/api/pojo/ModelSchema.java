@@ -14,11 +14,11 @@ public class ModelSchema {
 
     private String description;
 
-    private List<ColumnSchema> columnSchemas;
+    private List<SemanticColumn> semanticColumns;
 
     @JsonIgnore
-    public ColumnSchema getColumnByName(String columnName) {
-        for (ColumnSchema fieldSchema : columnSchemas) {
+    public SemanticColumn getColumnByName(String columnName) {
+        for (SemanticColumn fieldSchema : semanticColumns) {
             if (fieldSchema.getColumnName().equalsIgnoreCase(columnName)) {
                 return fieldSchema;
             }

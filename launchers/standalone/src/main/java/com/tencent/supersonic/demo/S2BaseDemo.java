@@ -140,7 +140,7 @@ public abstract class S2BaseDemo implements CommandLineRunner {
     }
 
     protected ChatModel addChatModelIfNotExist() {
-        List<ChatModel> chatModels = chatModelService.getChatModels();
+        List<ChatModel> chatModels = chatModelService.getChatModels(defaultUser);
         if (!chatModels.isEmpty()) {
             return chatModels.get(0);
         } else {

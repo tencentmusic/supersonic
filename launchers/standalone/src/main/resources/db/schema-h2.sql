@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_model`
    `updated_by` varchar(100) NOT  NULL,
    `admin` varchar(500) NOT  NULL,
    `viewer` varchar(500) DEFAULT  NULL,
+   `is_open` TINYINT DEFAULT NULL  , -- whether public
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_chat_model IS 'chat model table';
 
@@ -128,6 +129,7 @@ create table IF NOT EXISTS s2_user
     salt varchar(256)  NULL,
     email varchar(100) null,
     is_admin INT null,
+    last_login TIMESTAMP NULL,
     PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_user IS 'user information table';
@@ -197,6 +199,7 @@ CREATE TABLE IF NOT EXISTS `s2_database` (
    `updated_by` varchar(100) NOT  NULL,
    `admin` varchar(500) NOT  NULL,
    `viewer` varchar(500) DEFAULT  NULL,
+   `is_open` TINYINT DEFAULT NULL  , -- whether public
    PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_database IS 'database instance table';
@@ -268,7 +271,7 @@ CREATE TABLE IF NOT EXISTS s2_model_rela
     from_model_id    BIGINT,
     to_model_id      BIGINT,
     join_type       VARCHAR(255),
-    join_condition  VARCHAR(255),
+    join_condition  TEXT,
     PRIMARY KEY (`id`)
 );
 
@@ -377,8 +380,11 @@ CREATE TABLE IF NOT EXISTS s2_agent
     updated_at  TIMESTAMP null,
     enable_search int null,
     enable_feedback int null,
-    admin varchar(1000),
-    viewer varchar(1000),
+    `admin` varchar(3000) DEFAULT NULL  , -- administrator
+    `admin_org` varchar(3000) DEFAULT NULL  , -- administrators organization
+    `is_open` TINYINT DEFAULT NULL  , -- whether public
+    `viewer` varchar(3000) DEFAULT NULL  , -- available users
+    `view_org` varchar(3000) DEFAULT NULL  , -- available organization
     PRIMARY KEY (`id`)
 ); COMMENT ON TABLE s2_agent IS 'agent information table';
 

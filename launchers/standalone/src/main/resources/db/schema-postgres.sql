@@ -15,8 +15,11 @@ CREATE TABLE IF NOT EXISTS s2_agent (
     created_at timestamp DEFAULT NULL,
     updated_by varchar(100) DEFAULT NULL,
     updated_at timestamp DEFAULT NULL,
-    admin varchar(1000) DEFAULT NULL,
-    viewer varchar(1000) DEFAULT NULL
+    admin varchar(3000) DEFAULT NULL,
+    admin_org varchar(3000) DEFAULT NULL,
+    is_open smallint DEFAULT NULL,
+    viewer varchar(3000) DEFAULT NULL,
+    view_org varchar(3000) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS s2_auth_groups (
@@ -144,7 +147,8 @@ CREATE TABLE IF NOT EXISTS s2_chat_model (
     updated_at timestamp NOT NULL,
     updated_by varchar(100) NOT NULL,
     admin varchar(500) DEFAULT NULL,
-    viewer varchar(500) DEFAULT NULL
+    viewer varchar(500) DEFAULT NULL,
+    is_open smallint DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS s2_database (
@@ -159,7 +163,8 @@ CREATE TABLE IF NOT EXISTS s2_database (
     updated_at timestamp NOT NULL,
     updated_by varchar(100) NOT NULL,
     admin varchar(500) DEFAULT NULL,
-    viewer varchar(500) DEFAULT NULL
+    viewer varchar(500) DEFAULT NULL,
+    is_open smallint DEFAULT NULL
 );
 
 
@@ -462,7 +467,7 @@ CREATE TABLE IF NOT EXISTS s2_model_rela (
     from_model_id bigint,
     to_model_id bigint,
     join_type VARCHAR(255),
-    join_condition VARCHAR(255)
+    join_condition text
 );
 
 CREATE TABLE IF NOT EXISTS s2_collect (
@@ -493,5 +498,6 @@ CREATE TABLE IF NOT EXISTS s2_user (
     salt varchar(256) DEFAULT NULL,
     email varchar(100) NULL,
     is_admin smallint NULL,
+    last_login timestamp NULL,
     UNIQUE(name)
 );

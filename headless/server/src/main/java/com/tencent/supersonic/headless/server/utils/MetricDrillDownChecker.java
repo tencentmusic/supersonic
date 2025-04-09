@@ -146,6 +146,9 @@ public class MetricDrillDownChecker {
     }
 
     private List<DrillDownDimension> getDrillDownDimensions(MetricResp metricResp) {
+        if (metricService == null) {
+            return Lists.newArrayList();
+        }
         return metricService.getDrillDownDimension(metricResp.getId());
     }
 }

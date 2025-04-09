@@ -2,11 +2,8 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
-import com.tencent.supersonic.common.pojo.Aggregator;
-import com.tencent.supersonic.common.pojo.Constants;
-import com.tencent.supersonic.common.pojo.DateConf;
-import com.tencent.supersonic.common.pojo.Filter;
-import com.tencent.supersonic.common.pojo.Order;
+import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
+import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -24,12 +21,7 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.OrderByElement;
-import net.sf.jsqlparser.statement.select.ParenthesedSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -51,6 +43,7 @@ public class QueryStructReq extends SemanticQueryReq {
     private List<Filter> metricFilters = new ArrayList<>();
     private DateConf dateInfo;
     private long limit = Constants.DEFAULT_DETAIL_LIMIT;
+    private long offset;
     private QueryType queryType = QueryType.DETAIL;
     private boolean convertToSql = true;
 
@@ -169,9 +162,15 @@ public class QueryStructReq extends SemanticQueryReq {
         // 5. Set the limit clause
         plainSelect.setLimit(buildLimit(queryStructReq));
 
+        // 6. Set the offset clause
+        plainSelect.setOffset(buildOffset(queryStructReq));
+
+        // 7. Set the having clause
+        plainSelect.setHaving(buildHavingClause(queryStructReq));
+
         select.setSelect(plainSelect);
 
-        // 6. Set where clause
+        // 8. Set the where clause
         return addWhereClauses(select.toString(), queryStructReq, isBizName);
     }
 
@@ -238,7 +237,8 @@ public class QueryStructReq extends SemanticQueryReq {
 
     private GroupByElement buildGroupByElement(QueryStructReq queryStructReq) {
         List<String> groups = queryStructReq.getGroups();
-        if (!CollectionUtils.isEmpty(groups) && !queryStructReq.getAggregators().isEmpty()) {
+        if ((!CollectionUtils.isEmpty(groups) && !queryStructReq.getAggregators().isEmpty())
+                || !queryStructReq.getMetricFilters().isEmpty()) {
             GroupByElement groupByElement = new GroupByElement();
             for (String group : groups) {
                 groupByElement.addGroupByExpression(new Column(group));
@@ -255,6 +255,15 @@ public class QueryStructReq extends SemanticQueryReq {
         Limit limit = new Limit();
         limit.setRowCount(new LongValue(queryStructReq.getLimit()));
         return limit;
+    }
+
+    private Offset buildOffset(QueryStructReq queryStructReq) {
+        if (Objects.isNull(queryStructReq.getOffset())) {
+            return null;
+        }
+        Offset offset = new Offset();
+        offset.setOffset(new LongValue(queryStructReq.getOffset()));
+        return offset;
     }
 
     private String addWhereClauses(String sql, QueryStructReq queryStructReq, boolean isBizName)
@@ -281,11 +290,30 @@ public class QueryStructReq extends SemanticQueryReq {
 
     public String getTableName() {
         if (StringUtils.isNotBlank(dataSetName)) {
-            return dataSetName;
+            return SqlReplaceHelper.escapeTableName(dataSetName);
         }
         if (dataSetId != null) {
             return Constants.TABLE_PREFIX + dataSetId;
         }
         return Constants.TABLE_PREFIX + StringUtils.join(modelIds, "_");
     }
+
+    public Expression buildHavingClause(QueryStructReq queryStructReq) {
+        if (queryStructReq.getMetricFilters().isEmpty()) {
+            return null;
+        }
+
+        List<Filter> filters = queryStructReq.getMetricFilters();
+        SqlFilterUtils sqlFilterUtils = ContextUtils.getBean(SqlFilterUtils.class);
+        String havingClause = sqlFilterUtils.getWhereClause(filters, false);
+        if (StringUtils.isNotBlank(havingClause)) {
+            try {
+                return CCJSqlParserUtil.parseCondExpression(havingClause);
+            } catch (JSQLParserException e) {
+                log.error("Failed to parse having clause", e);
+            }
+        }
+        return null;
+    }
+
 }

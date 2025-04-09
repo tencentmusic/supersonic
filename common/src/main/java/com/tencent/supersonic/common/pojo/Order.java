@@ -4,10 +4,13 @@ import com.google.common.base.Objects;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.io.Serializable;
+
 import static com.tencent.supersonic.common.pojo.Constants.ASC_UPPER;
 
 @Data
-public class Order {
+public class Order implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "Invalid order column")
     private String column;

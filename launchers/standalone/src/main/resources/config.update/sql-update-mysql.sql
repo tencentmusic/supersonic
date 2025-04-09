@@ -406,3 +406,18 @@ ALTER TABLE s2_chat_context RENAME COLUMN `user` TO `query_user`;
 --20241226
 ALTER TABLE s2_chat_memory add column `query_id` BIGINT DEFAULT NULL;
 ALTER TABLE s2_query_stat_info RENAME COLUMN `sql` TO `query_sql`;
+
+--20250224
+ALTER TABLE s2_agent add column `admin_org` varchar(3000) DEFAULT NULL COMMENT '管理员组织';
+ALTER TABLE s2_agent add column `view_org` varchar(3000) DEFAULT NULL COMMENT '可用组织';
+ALTER TABLE s2_agent add column `is_open` tinyint DEFAULT NULL COMMENT '是否公开';
+
+--20250309
+ALTER TABLE s2_model_rela alter column join_condition type text;
+
+--20250310
+ALTER TABLE s2_chat_model add column is_open tinyint DEFAULT NULL COMMENT '是否公开';
+ALTER TABLE s2_database add column is_open tinyint DEFAULT NULL COMMENT '是否公开';
+
+--20250321
+ALTER TABLE s2_user add column last_login datetime DEFAULT NULL;

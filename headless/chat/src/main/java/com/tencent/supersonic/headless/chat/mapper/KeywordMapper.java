@@ -30,6 +30,7 @@ public class KeywordMapper extends BaseMapper {
 
     @Override
     public void doMap(ChatQueryContext chatQueryContext) {
+        log.info("Keyword Mapper start");
         String queryText = chatQueryContext.getRequest().getQueryText();
 
         // 1. hanlpDict Match
@@ -56,8 +57,7 @@ public class KeywordMapper extends BaseMapper {
         }
 
         HanlpHelper.transLetterOriginal(mapResults);
-        Map<String, Object> transitionVauleAlias =
-                this.dimValues(mapResults, chatQueryContext, terms);
+        Map<String, Object> transitionVauleAlias = dimValues(mapResults, chatQueryContext, terms);
         mapResults = (List<HanlpMapResult>) transitionVauleAlias.get("hanlpMapResult");
         terms = (List<S2Term>) transitionVauleAlias.get("term");
         Map<String, Long> wordNatureToFrequency =
@@ -81,6 +81,9 @@ public class KeywordMapper extends BaseMapper {
                             .add(hanlpMapResult.getName() + nature);
                 }
                 Long elementID = NatureHelper.getElementID(nature);
+                if (elementID == null) {
+                    continue;
+                }
                 SchemaElement element = getSchemaElement(dataSetId, elementType, elementID,
                         chatQueryContext.getSemanticSchema());
                 if (Objects.isNull(element)) {

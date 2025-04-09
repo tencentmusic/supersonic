@@ -53,8 +53,8 @@ public class SimpleStrategy {
         Map<String, Object> variable = new HashMap<>();
         variable.put("exemplar-recall", exemplars);
 
-        String currentDayRule=new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是").append(DateFormatUtils.format(new Date(), "yyyyMMdd"))
-                .append("\n").toString();
+        String currentDayRule = new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是")
+                .append(DateFormatUtils.format(new Date(), "yyyyMMdd")).append("\n").toString();
         variable.put("current-day-rule", currentDayRule);
 
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
@@ -90,8 +90,8 @@ public class SimpleStrategy {
         variable.put("question", llmReq.getQueryText());
         variable.put("schema", "");
         variable.put("information", "");
-        String currentDayRule=new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是").append(DateFormatUtils.format(new Date(), "yyyyMMdd"))
-                .append("\n").toString();
+        String currentDayRule = new StringBuilder("所有日期不用日期函数，根据今天的日期去推算过去，今天的日期是")
+                .append(DateFormatUtils.format(new Date(), "yyyyMMdd")).append("\n").toString();
         variable.put("current-day-rule", currentDayRule);
         context.append(replyGuideline).append("\n当前用户的问题是：").append(llmReq.getQueryText())
                 .toString();

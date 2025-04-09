@@ -28,6 +28,11 @@ import java.util.Objects;
 
 public class SqlExecutor implements ChatQueryExecutor {
 
+    @Override
+    public boolean accept(ExecuteContext executeContext) {
+        return true;
+    }
+
     @SneakyThrows
     @Override
     public QueryResult execute(ExecuteContext executeContext) {
@@ -36,6 +41,7 @@ public class SqlExecutor implements ChatQueryExecutor {
             return queryResult;
         }
         QueryResult queryResult = doExecute(executeContext);
+
         if (queryResult != null) {
             if (queryResult.getQueryResults().isEmpty()) {
                 queryResult.setQueryMode("PLAIN_TEXT");
@@ -95,7 +101,6 @@ public class SqlExecutor implements ChatQueryExecutor {
         queryResult.setQueryId(executeContext.getRequest().getQueryId());
         queryResult.setChatContext(parseInfo);
         queryResult.setQueryMode(parseInfo.getQueryMode());
-        queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
         if (Objects.equals(parseInfo.getSqlInfo().getResultType(), "text")) {
             queryResult.setQueryMode("PLAIN_TEXT");
             queryResult.setQueryState(QueryState.SUCCESS);
@@ -104,6 +109,7 @@ public class SqlExecutor implements ChatQueryExecutor {
         }
         SemanticQueryResp queryResp =
                 semanticLayer.queryBySchemaStrValues(sqlReq, executeContext.getRequest().getUser());
+        queryResult.setQueryTimeCost(System.currentTimeMillis() - startTime);
         if (queryResp != null) {
             queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
             queryResult.setQuerySql(queryResp.getSql());

@@ -11,8 +11,8 @@ services:
       POSTGRES_PASSWORD: supersonic_password
     ports:
       - "15432:5432"
-#    volumes:
-#      - postgres_data:/var/lib/postgresql
+    volumes:
+       - ./supersonic_pg/data:/var/lib/postgresql/data
     networks:
       - supersonic_network
     dns:
@@ -21,7 +21,7 @@ services:
       - 8.8.4.4
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U supersonic_user -d postgres'"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
 
@@ -30,12 +30,19 @@ services:
     privileged: true
     container_name: supersonic_standalone
     environment:
-      DB_HOST: supersonic_postgres
-      DB_NAME: postgres
-      DB_USERNAME: supersonic_user
-      DB_PASSWORD: supersonic_password
+      S2_DB_TYPE: postgres
+      S2_DB_HOST: supersonic_postgres
+      S2_DB_PORT: 5432
+      S2_DB_DATABASE: postgres
+      S2_DB_USER: supersonic_user
+      S2_DB_PASSWORD: supersonic_password
     ports:
       - "9080:9080"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
     depends_on:
       supersonic_postgres:
         condition: service_healthy
@@ -58,7 +65,6 @@ services:
       #          propagation: rprivate
       #          create_host_path: true
 #volumes:
-#  postgres_data:
 #  supersonic_data:
 
 networks:

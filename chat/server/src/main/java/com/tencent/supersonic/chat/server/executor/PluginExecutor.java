@@ -10,6 +10,11 @@ import dev.langchain4j.service.TokenStream;
 public class PluginExecutor implements ChatQueryExecutor {
 
     @Override
+    public boolean accept(ExecuteContext executeContext) {
+        return PluginQueryManager.isPluginQuery(executeContext.getParseInfo().getQueryMode());
+    }
+
+    @Override
     public QueryResult execute(ExecuteContext executeContext) {
         SemanticParseInfo parseInfo = executeContext.getParseInfo();
         if (!PluginQueryManager.isPluginQuery(parseInfo.getQueryMode())) {

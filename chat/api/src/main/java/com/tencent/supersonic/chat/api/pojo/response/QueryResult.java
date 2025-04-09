@@ -2,6 +2,7 @@ package com.tencent.supersonic.chat.api.pojo.response;
 
 import com.tencent.supersonic.common.pojo.QueryAuthorization;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.FileInfo;
 import com.tencent.supersonic.headless.api.pojo.AggregateInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -30,4 +31,6 @@ public class QueryResult {
     private AggregateInfo aggregateInfo;
     private String errorMsg;
     private Boolean resultType = false;
+    private Boolean hasFile = false;
+    private List<FileInfo> fileInfoList;
 }

@@ -20,6 +20,7 @@ import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DomainDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DomainRepository;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.util.DataUtils;
@@ -46,6 +47,8 @@ public class BaseTest extends BaseApplication {
     private AgentService agentService;
     @Autowired
     protected DatabaseService databaseService;
+    @Autowired
+    protected DataSetService dataSetService;
 
     protected Agent agent;
     protected SemanticSchema schema;

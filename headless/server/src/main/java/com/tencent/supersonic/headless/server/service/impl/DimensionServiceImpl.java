@@ -24,6 +24,7 @@ import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import com.tencent.supersonic.headless.api.pojo.request.PageDimensionReq;
 import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionValueDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DimensionRepository;
 import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
@@ -65,6 +66,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private DictTaskServiceImpl dictTaskService;
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository, ModelService modelService,
             AliasGenerateHelper aliasGenerateHelper, DatabaseService databaseService,
@@ -84,6 +87,10 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionDO dimensionDO = DimensionConverter.convert2DimensionDO(dimensionReq);
         dimensionRepository.createDimension(dimensionDO);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.ADD);
+
+        // should update modelDetail
+        modelService.updateDimension(dimensionReq, user);
+
         return DimensionConverter.convert2DimensionResp(dimensionDO);
     }
 
@@ -136,6 +143,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         String oldName = dimensionDO.getName();
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
+        // should update modelDetail as well
+        modelService.updateDimension(dimensionReq, user);
+
         if (!oldName.equals(dimensionDO.getName())) {
             sendEvent(getDataItem(dimensionDO), EventType.UPDATE);
         }
@@ -161,6 +171,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
                 || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
             sendEventBatch(dimensionDOS, EventType.DELETE);
+            deleteDimensionValue(dimensionDOS);
         } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
             sendEventBatch(dimensionDOS, EventType.ADD);
         }
@@ -193,6 +204,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         dimensionDO.setUpdatedBy(user.getName());
         dimensionRepository.updateDimension(dimensionDO);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.DELETE);
+        deleteDimensionValue(Lists.newArrayList(dimensionDO));
     }
 
     @Override
@@ -405,6 +417,13 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         eventPublisher.publishEvent(dataEvent);
     }
 
+    public void sendDimensionValueEventBatch(List<DimensionValueDO> dimensionValueDOS,
+            EventType type) {
+        DataEvent event = getDimValueDataEvent(dimensionValueDOS, type);
+        eventPublisher.publishEvent(event);
+    }
+
+
     public DataEvent getAllDataEvents() {
         DimensionFilter dimensionFilter = new DimensionFilter();
         List<DimensionDO> dimensionDOS = queryDimension(dimensionFilter);
@@ -419,6 +438,9 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
             dimValueMapList = JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class);
         }
         DimValueMap dimValueMaps = req.getDimValueMaps();
+        if (StringUtils.isEmpty(dimValueMaps.getTechName())) {
+            dimValueMaps.setTechName(dimValueMaps.getValue());
+        }
         Map<String, DimValueMap> valeAndMapInfo = dimValueMapList.stream()
                 .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
         String value = dimValueMaps.getValue();
@@ -454,9 +476,25 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                 .domainId(dimensionResp.getDomainId().toString()).type(TypeEnums.DIMENSION).build();
     }
 
+    private DataItem getDataItem(DimensionValueDO dimensionValueDO) {
+        ModelResp modelResp = modelService.getModel(dimensionValueDO.getModelId());
+        return DataItem.builder().id(dimensionValueDO.getId()).dimId(dimensionValueDO.getDimId())
+                .name(dimensionValueDO.getDimName()).bizName(dimensionValueDO.getDimBizName())
+                .modelId(dimensionValueDO.getModelId().toString())
+                .domainId(modelResp.getDomainId().toString()).type(TypeEnums.VALUE)
+                .dimValue(dimensionValueDO.getDimValue()).build();
+    }
+
     private DataEvent getDataEvent(List<DimensionDO> dimensionDOS, EventType eventType) {
         List<DataItem> dataItems =
                 dimensionDOS.stream().map(this::getDataItem).collect(Collectors.toList());
+        return new DataEvent(this, dataItems, eventType);
+    }
+
+    private DataEvent getDimValueDataEvent(List<DimensionValueDO> dimensionValueDOS,
+            EventType eventType) {
+        List<DataItem> dataItems =
+                dimensionValueDOS.stream().map(this::getDataItem).collect(Collectors.toList());
         return new DataEvent(this, dataItems, eventType);
     }
 
@@ -471,5 +509,17 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         boolean isTypeParamChange =
                 !Objects.equals(dimensionReq.getTypeParams(), dimensionResp.getTypeParams());
         return isNameChange || isExtChange || isTypeParamChange;
+    }
+
+    private void deleteDimensionValue(List<DimensionDO> dimensionDOS) {
+        dimensionDOS.forEach(dimensionDO -> {
+            DictItemResp dictItemResp = new DictItemResp();
+            dictItemResp.setModelId(dimensionDO.getModelId());
+            dictItemResp.setItemId(dimensionDO.getId());
+            dictItemResp.setType(TypeEnums.DIMENSION);
+            dictItemResp.setBizName(dimensionDO.getBizName());
+            String fileName = dictItemResp.fetchDictFileName() + Constants.DOT + "txt";
+            dictTaskService.deleteEmbedding(dictItemResp, fileName);
+        });
     }
 }

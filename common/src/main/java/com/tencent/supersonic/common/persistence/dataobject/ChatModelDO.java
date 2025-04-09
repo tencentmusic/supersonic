@@ -30,4 +30,6 @@ public class ChatModelDO {
     private String admin;
 
     private String viewer;
+
+    private Integer isOpen;
 }

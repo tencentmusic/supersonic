@@ -18,12 +18,15 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ExemplarService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +35,8 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class MemoryServiceImpl implements MemoryService {
+@Slf4j
+public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
 
     @Autowired
     private ChatMemoryRepository chatMemoryRepository;
@@ -90,6 +94,12 @@ public class MemoryServiceImpl implements MemoryService {
         if (Objects.nonNull(chatMemoryUpdateReq.getHumanReviewCmt())) {
             updateWrapper.set(ChatMemoryDO::getHumanReviewCmt,
                     chatMemoryUpdateReq.getHumanReviewCmt());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getDbSchema())) {
+            updateWrapper.set(ChatMemoryDO::getDbSchema, chatMemoryUpdateReq.getDbSchema());
+        }
+        if (Objects.nonNull(chatMemoryUpdateReq.getS2sql())) {
+            updateWrapper.set(ChatMemoryDO::getS2sql, chatMemoryUpdateReq.getS2sql());
         }
         updateWrapper.set(ChatMemoryDO::getUpdatedAt, new Date());
         updateWrapper.set(ChatMemoryDO::getUpdatedBy, user.getName());
@@ -193,4 +203,25 @@ public class MemoryServiceImpl implements MemoryService {
         return memory;
     }
 
+    @Override
+    public void run(String... args) { // 优化，启动时检查，向量数据，将记忆放到向量数据库
+        loadSysExemplars();
+    }
+
+    public void loadSysExemplars() {
+        try {
+            List<ChatMemory> memories = this
+                    .getMemories(ChatMemoryFilter.builder().status(MemoryStatus.ENABLED).build());
+            for (ChatMemory memory : memories) {
+                exemplarService.storeExemplar(
+                        embeddingConfig.getMemoryCollectionName(memory.getAgentId()),
+                        Text2SQLExemplar.builder().question(memory.getQuestion())
+                                .sideInfo(memory.getSideInfo()).dbSchema(memory.getDbSchema())
+                                .sql(memory.getS2sql()).build());
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to load system exemplars", e);
+        }
+    }
 }

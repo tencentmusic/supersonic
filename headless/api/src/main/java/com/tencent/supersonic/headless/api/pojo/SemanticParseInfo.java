@@ -49,6 +49,7 @@ public class SemanticParseInfo implements Serializable {
     private String textInfo;
     private SqlEvaluation sqlEvaluation = new SqlEvaluation();
     private Map<String, Object> properties = Maps.newHashMap();
+    private List<String> sqlList;
 
     @Data
     @Builder
@@ -110,7 +111,8 @@ public class SemanticParseInfo implements Serializable {
         }
     }
 
-    private static class SchemaNameLengthComparator implements Comparator<SchemaElement> {
+    private static class SchemaNameLengthComparator
+            implements Comparator<SchemaElement>, Serializable {
         @Override
         public int compare(SchemaElement o1, SchemaElement o2) {
             if (o1.getOrder() != o2.getOrder()) {

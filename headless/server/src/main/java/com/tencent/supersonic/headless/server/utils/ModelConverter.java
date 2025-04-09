@@ -157,23 +157,29 @@ public class ModelConverter {
             modelDetail.setQueryType(ModelDefineType.TABLE_QUERY.getName());
             modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
         }
-        for (ColumnSchema columnSchema : modelSchema.getColumnSchemas()) {
-            FieldType fieldType = columnSchema.getFiledType();
+        List<Field> fields = new ArrayList<>();
+        for (SemanticColumn semanticColumn : modelSchema.getSemanticColumns()) {
+            FieldType fieldType = semanticColumn.getFiledType();
+            fields.add(new Field(semanticColumn.getName(), semanticColumn.getDataType()));
+
             if (getIdentifyType(fieldType) != null) {
-                Identify identify = new Identify(columnSchema.getName(),
-                        getIdentifyType(fieldType).name(), columnSchema.getColumnName(), 1);
+                Identify identify = new Identify(semanticColumn.getName(),
+                        getIdentifyType(fieldType).name(), semanticColumn.getColumnName(), 1);
                 modelDetail.getIdentifiers().add(identify);
             } else if (FieldType.measure.equals(fieldType)) {
-                Measure measure = new Measure(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getColumnName(), columnSchema.getAgg().getOperator(), 1);
+                Measure measure = new Measure(semanticColumn.getName(),
+                        semanticColumn.getColumnName(), semanticColumn.getExpr(),
+                        semanticColumn.getAgg().getOperator(), semanticColumn.getUnit(), 1);
                 modelDetail.getMeasures().add(measure);
             } else {
-                Dimension dim = new Dimension(columnSchema.getName(), columnSchema.getColumnName(),
-                        columnSchema.getColumnName(),
-                        DimensionType.valueOf(columnSchema.getFiledType().name()), 1);
+                Dimension dim = new Dimension(semanticColumn.getName(),
+                        semanticColumn.getColumnName(), semanticColumn.getExpr(),
+                        DimensionType.valueOf(semanticColumn.getFiledType().name()), 1);
                 modelDetail.getDimensions().add(dim);
             }
         }
+        modelDetail.setFields(fields);
+        modelDetail.setFilterSql(modelBuildReq.getFilterSql());
         modelReq.setModelDetail(modelDetail);
         return modelReq;
     }
@@ -267,12 +273,14 @@ public class ModelConverter {
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
         List<Identify> identifiers = modelReq.getModelDetail().getIdentifiers();
+        List<Field> fields = modelReq.getModelDetail().getFields();
 
         if (measures != null) {
             for (Measure measure : measures) {
                 if (StringUtils.isNotBlank(measure.getBizName())
                         && StringUtils.isBlank(measure.getExpr())) {
                     measure.setExpr(measure.getBizName());
+                    fields.add(new Field(measure.getBizName(), ""));
                 }
             }
         }
@@ -281,6 +289,7 @@ public class ModelConverter {
                 if (StringUtils.isNotBlank(dimension.getBizName())
                         && StringUtils.isBlank(dimension.getExpr())) {
                     dimension.setExpr(dimension.getBizName());
+                    fields.add(new Field(dimension.getBizName(), ""));
                 }
             }
         }
@@ -291,6 +300,7 @@ public class ModelConverter {
                     identify.setName(identify.getBizName());
                 }
                 identify.setIsCreateDimension(1);
+                fields.add(new Field(identify.getBizName(), ""));
             }
         }
 

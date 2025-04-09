@@ -7,12 +7,7 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -66,7 +61,8 @@ public class MapFilter {
             List<SchemaElementMatch> value = entry.getValue();
             if (!CollectionUtils.isEmpty(value)) {
                 value.removeIf(schemaElementMatch -> StringUtils
-                        .length(schemaElementMatch.getDetectWord()) <= 1);
+                        .length(schemaElementMatch.getDetectWord()) <= 1
+                        && !schemaElementMatch.isLlmMatched());
             }
         }
     }

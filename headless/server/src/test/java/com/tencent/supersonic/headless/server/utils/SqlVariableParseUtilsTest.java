@@ -34,6 +34,19 @@ public class SqlVariableParseUtilsTest {
         Assertions.assertEquals(expectedSql, actualSql);
     }
 
+    @Test
+    void testParseSql_if() {
+        String sql =
+                "select * from t_$interval$ where id = $id$ $if(name)$and name = $name$$endif$";
+        List<SqlVariable> variables = Lists.newArrayList(mockNumSqlVariable(),
+                mockExprSqlVariable(), mockStrSqlVariable());
+        List<Param> params =
+                Lists.newArrayList(mockIdParam(), mockNameParam(), mockIntervalParam());
+        String actualSql = SqlVariableParseUtils.parse(sql, variables, params);
+        String expectedSql = "select * from t_wk where id = 2 and name = 'alice'";
+        Assertions.assertEquals(expectedSql, actualSql);
+    }
+
     private SqlVariable mockNumSqlVariable() {
         return mockSqlVariable("id", VariableValueType.NUMBER, 1);
     }

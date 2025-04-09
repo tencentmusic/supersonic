@@ -2,52 +2,24 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.common.pojo.DataEvent;
-import com.tencent.supersonic.common.pojo.DataItem;
-import com.tencent.supersonic.common.pojo.ItemDateResp;
-import com.tencent.supersonic.common.pojo.ModelRela;
-import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.DBColumn;
-import com.tencent.supersonic.headless.api.pojo.DbSchema;
-import com.tencent.supersonic.headless.api.pojo.Dimension;
-import com.tencent.supersonic.headless.api.pojo.Identify;
-import com.tencent.supersonic.headless.api.pojo.ItemDateFilter;
-import com.tencent.supersonic.headless.api.pojo.Measure;
-import com.tencent.supersonic.headless.api.pojo.MetaFilter;
-import com.tencent.supersonic.headless.api.pojo.ModelSchema;
-import com.tencent.supersonic.headless.api.pojo.request.DateInfoReq;
-import com.tencent.supersonic.headless.api.pojo.request.DimensionReq;
-import com.tencent.supersonic.headless.api.pojo.request.FieldRemovedReq;
-import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
-import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
-import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
-import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
-import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
-import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
-import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
-import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
-import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
+import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
+import com.tencent.supersonic.headless.api.pojo.request.*;
+import com.tencent.supersonic.headless.api.pojo.response.*;
 import com.tencent.supersonic.headless.server.modeller.SemanticModeller;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ModelDO;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
 import com.tencent.supersonic.headless.server.persistence.repository.ModelRepository;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
-import com.tencent.supersonic.headless.server.service.DataSetService;
-import com.tencent.supersonic.headless.server.service.DatabaseService;
-import com.tencent.supersonic.headless.server.service.DimensionService;
-import com.tencent.supersonic.headless.server.service.DomainService;
-import com.tencent.supersonic.headless.server.service.MetricService;
-import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import com.tencent.supersonic.headless.server.service.ModelService;
+import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.utils.CoreComponentFactory;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
 import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
@@ -62,12 +34,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -277,8 +244,8 @@ public class ModelServiceImpl implements ModelService {
         dimensionService.createDimensionBatch(dimensionReqs, user);
     }
 
-    private void batchCreateMetric(ModelDO datasourceDO, User user) throws Exception {
-        List<MetricReq> metricReqs = ModelConverter.convertMetricList(datasourceDO);
+    private void batchCreateMetric(ModelDO modelDO, User user) throws Exception {
+        List<MetricReq> metricReqs = ModelConverter.convertMetricList(modelDO);
         metricService.createMetricBatch(metricReqs, user);
     }
 
@@ -551,6 +518,35 @@ public class ModelServiceImpl implements ModelService {
             }
         }).collect(Collectors.toList());
         modelRepository.batchUpdate(modelDOS);
+    }
+
+    @Override
+    public Dimension updateDimension(DimensionReq dimensionReq, User user) {
+        ModelDO modelDO = getModelDO(dimensionReq.getModelId());
+        ModelDetail modelDetail = JsonUtil.toObject(modelDO.getModelDetail(), ModelDetail.class);
+        Optional<Dimension> dimOptional = modelDetail.getDimensions().stream()
+                .filter(dimension -> dimension.getBizName().equals(dimensionReq.getBizName()))
+                .findFirst();
+        Dimension result;
+        if (dimOptional.isPresent()) {
+            Dimension dimension = dimOptional.get();
+            dimension.setExpr(dimensionReq.getExpr());
+            dimension.setName(dimensionReq.getName());
+            dimension.setType(DimensionType.valueOf(dimensionReq.getType()));
+            dimension.setDescription(dimensionReq.getDescription());
+            result = dimension;
+        } else {
+            Dimension dimension = Dimension.builder().name(dimensionReq.getName())
+                    .bizName(dimensionReq.getBizName()).expr(dimensionReq.getExpr())
+                    .type(DimensionType.valueOf(dimensionReq.getType()))
+                    .description(dimensionReq.getDescription()).build();
+            modelDetail.getDimensions().add(dimension);
+            result = dimension;
+        }
+
+        modelDO.setModelDetail(JsonUtil.toString(modelDetail));
+        modelRepository.updateModel(modelDO);
+        return result;
     }
 
     protected ModelDO getModelDO(Long id) {

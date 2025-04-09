@@ -225,9 +225,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
     private DatePeriodEnum extractDatePeriod(String fieldValue) {
         // 定义月份格式的DateTimeFormatter列表，使用严格解析
         List<DateTimeFormatter> monthFormatters = Arrays.asList(
-                DateTimeFormatter.ofPattern("yyyy-MM"),
-                DateTimeFormatter.ofPattern("yyyyMM")
-        );
+                DateTimeFormatter.ofPattern("yyyy-MM"), DateTimeFormatter.ofPattern("yyyyMM"));
 
         // 尝试解析为月份格式
         for (DateTimeFormatter formatter : monthFormatters) {
@@ -241,9 +239,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
 
         // 定义日期格式的DateTimeFormatter列表，使用严格解析
         List<DateTimeFormatter> dateFormatters = Arrays.asList(
-                DateTimeFormatter.ofPattern("yyyyMMdd"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        );
+                DateTimeFormatter.ofPattern("yyyyMMdd"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
         // 尝试解析为日期格式
         for (DateTimeFormatter formatter : dateFormatters) {
@@ -261,8 +257,8 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
     }
 
     private static boolean isPartitionDimension(DataSetSchema dataSetSchema, String sqlFieldName) {
-//        处理直连模式，period_id字段作为数据日期，不走语义建模阶段
-        if(StringUtils.endsWithIgnoreCase(sqlFieldName,"period_id")){
+        // 处理直连模式，period_id字段作为数据日期，不走语义建模阶段
+        if (StringUtils.endsWithIgnoreCase(sqlFieldName, "period_id")) {
             return true;
         }
 

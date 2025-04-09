@@ -27,15 +27,11 @@ public class ChatModel {
 
     private String admin;
 
-    private String viewer;
-
-    private List<String> admins = Lists.newArrayList();
-
     private List<String> viewers = Lists.newArrayList();
 
-    private boolean hasPermission = false;
+    private Integer isOpen = 0;
 
-    private boolean hasUsePermission = false;
-
-    private boolean hasEditPermission = false;
+    public boolean isPublic() {
+        return isOpen != null && isOpen == 1;
+    }
 }

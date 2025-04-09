@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.util.DateUtils;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,7 +13,7 @@ import java.util.Objects;
 import static java.time.LocalDate.now;
 
 @Data
-public class DateConf {
+public class DateConf implements Serializable {
 
     private static final long serialVersionUID = 3074129990945004340L;
 

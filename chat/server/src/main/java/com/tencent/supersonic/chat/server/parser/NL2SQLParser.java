@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,11 +80,12 @@ public class NL2SQLParser implements ChatQueryParser {
                         .build());
     }
 
+    public boolean accept(ParseContext parseContext) {
+        return parseContext.enableNL2SQL();
+    }
+
     @Override
     public void parse(ParseContext parseContext) {
-        if (!parseContext.enableNL2SQL()) {
-            return;
-        }
         // first go with rule-based parsers unless the user has already selected one parse.
         if (Objects.isNull(parseContext.getRequest().getSelectedParse())) {
             QueryNLReq queryNLReq = QueryReqConverter.buildQueryNLReq(parseContext);
@@ -105,10 +107,17 @@ public class NL2SQLParser implements ChatQueryParser {
                     queryNLReq.setMapModeEnum(mode);
                     doParse(queryNLReq, parseResp);
                 }
-
-                if (parseResp.getSelectedParses().isEmpty() && candidateParses.isEmpty()) {
+                Integer valueSize = 0;
+                if (!parseResp.getSelectedParses().isEmpty()) {
+                    valueSize = parseResp.getSelectedParses().get(0).getElementMatches().stream()
+                            .filter(schemaElementMatch -> schemaElementMatch.getElement().getType() == SchemaElementType.VALUE)
+                            .collect(Collectors.toList()).size();
+                }
+                if ((parseResp.getSelectedParses().isEmpty() && candidateParses.isEmpty())
+                        || valueSize == 0) {
                     queryNLReq.setMapModeEnum(MapModeEnum.LOOSE);
                     doParse(queryNLReq, parseResp);
+
                 }
 
                 if (parseResp.getSelectedParses().isEmpty()) {
@@ -267,7 +276,7 @@ public class NL2SQLParser implements ChatQueryParser {
                         && q.getQueryResult().getQueryState() == QueryState.SUCCESS
                         && StringUtils.endsWithIgnoreCase(userName, q.getUserName())
                         && DateUtils.calculateDiffMs(q.getCreateTime()) < 1000l * Integer
-                                .parseInt(parserConfig.getParameterValue(CHAT_HISTORY_SECONDS)))
+                        .parseInt(parserConfig.getParameterValue(CHAT_HISTORY_SECONDS)))
                 .collect(Collectors.toList());
 
         List<QueryResp> contextualList = contextualParseInfoList.subList(0,

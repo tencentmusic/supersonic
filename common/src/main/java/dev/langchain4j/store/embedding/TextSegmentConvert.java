@@ -1,8 +1,10 @@
 package dev.langchain4j.store.embedding;
 
 import com.alibaba.fastjson.JSONObject;
+import com.hankcs.hanlp.classification.features.IFeatureWeighter;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.DataItem;
+import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.segment.TextSegment;
 import lombok.Data;
@@ -27,8 +29,14 @@ public class TextSegmentConvert {
                     .modelId(item.getModelId() + Constants.UNDERLINE)
                     .domainId(item.getDomainId() + Constants.UNDERLINE).build();
 
+            String text = newItem.getName();
+            if (item.getType() == TypeEnums.VALUE) {
+                newItem.setDimValue(item.getDimValue());
+                text = item.getDimValue();
+                newItem.setDimId(item.getDimId());
+            }
             Map meta = JSONObject.parseObject(JSONObject.toJSONString(newItem), Map.class);
-            TextSegment textSegment = TextSegment.from(newItem.getName(), new Metadata(meta));
+            TextSegment textSegment = TextSegment.from(text, new Metadata(meta));
             addQueryId(textSegment, newItem.getId() + newItem.getType().name().toLowerCase());
             return textSegment;
         }).collect(Collectors.toList());

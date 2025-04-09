@@ -1,38 +1,26 @@
 package com.tencent.supersonic.auth.authentication.service;
 
-import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
-import com.tencent.supersonic.auth.api.authentication.constant.UserConstants;
 import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
-import com.tencent.supersonic.auth.api.authentication.service.UserStrategy;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
-import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
-import com.tencent.supersonic.auth.authentication.strategy.HttpHeaderUserStrategy;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
-import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.SystemConfigService;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private SystemConfigService sysParameterService;
-
-    @Autowired
-    private AuthenticationConfig authenticationConfig;
 
     public UserServiceImpl(SystemConfigService sysParameterService) {
         this.sysParameterService = sysParameterService;
@@ -130,6 +118,4 @@ public class UserServiceImpl implements UserService {
     public void deleteUserToken(Long id) {
         ComponentFactory.getUserAdaptor().deleteUserToken(id);
     }
-
-
 }

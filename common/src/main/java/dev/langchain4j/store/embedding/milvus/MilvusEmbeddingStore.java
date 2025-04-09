@@ -57,6 +57,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     private final ConsistencyLevelEnum consistencyLevel;
     private final boolean retrieveEmbeddingsOnSearch;
     private final boolean autoFlushOnInsert;
+    private final FieldDefinition fieldDefinition;
 
     public MilvusEmbeddingStore(String host, Integer port, String collectionName, Integer dimension,
             IndexType indexType, MetricType metricType, String uri, String token, String username,
@@ -78,11 +79,15 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         this.retrieveEmbeddingsOnSearch = getOrDefault(retrieveEmbeddingsOnSearch, false);
         this.autoFlushOnInsert = getOrDefault(autoFlushOnInsert, false);
 
+        // Define the field structure for the collection
+        this.fieldDefinition = new FieldDefinition(ID_FIELD_NAME, TEXT_FIELD_NAME,
+                METADATA_FIELD_NAME, VECTOR_FIELD_NAME);
+
         if (!hasCollection(this.milvusClient, this.collectionName)) {
-            createCollection(this.milvusClient, this.collectionName,
+            createCollection(this.milvusClient, this.collectionName, fieldDefinition,
                     ensureNotNull(dimension, "dimension"));
-            createIndex(this.milvusClient, this.collectionName, getOrDefault(indexType, FLAT),
-                    this.metricType);
+            createIndex(this.milvusClient, this.collectionName, VECTOR_FIELD_NAME,
+                    getOrDefault(indexType, FLAT), this.metricType);
         }
 
         loadCollectionInMemory(this.milvusClient, collectionName);
@@ -128,7 +133,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     public EmbeddingSearchResult<TextSegment> search(
             EmbeddingSearchRequest embeddingSearchRequest) {
 
-        SearchParam searchParam = buildSearchRequest(collectionName,
+        SearchParam searchParam = buildSearchRequest(collectionName, fieldDefinition,
                 embeddingSearchRequest.queryEmbedding().vectorAsList(),
                 embeddingSearchRequest.filter(), embeddingSearchRequest.maxResults(), metricType,
                 consistencyLevel);
@@ -137,7 +142,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
                 CollectionOperationsExecutor.search(milvusClient, searchParam);
 
         List<EmbeddingMatch<TextSegment>> matches = toEmbeddingMatches(milvusClient, resultsWrapper,
-                collectionName, consistencyLevel, retrieveEmbeddingsOnSearch);
+                collectionName, fieldDefinition, consistencyLevel, retrieveEmbeddingsOnSearch);
 
         List<EmbeddingMatch<TextSegment>> result =
                 matches.stream().filter(match -> match.score() >= embeddingSearchRequest.minScore())
@@ -226,7 +231,7 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     @Override
     public void removeAll(Filter filter) {
         ensureNotNull(filter, "filter");
-        removeForVector(this.milvusClient, this.collectionName, map(filter));
+        removeForVector(this.milvusClient, this.collectionName, map(filter, METADATA_FIELD_NAME));
     }
 
     /**

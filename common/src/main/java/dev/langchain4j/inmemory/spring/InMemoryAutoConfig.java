@@ -1,9 +1,9 @@
 package dev.langchain4j.inmemory.spring;
 
-import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
-import dev.langchain4j.model.embedding.BgeSmallZhEmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.S2OnnxEmbeddingModel;
+import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
+import dev.langchain4j.model.embedding.onnx.bgesmallzh.BgeSmallZhEmbeddingModel;
 import dev.langchain4j.provider.EmbeddingModelConstant;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import org.apache.commons.lang3.StringUtils;

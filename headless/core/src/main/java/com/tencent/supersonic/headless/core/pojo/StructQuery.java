@@ -20,6 +20,7 @@ public class StructQuery {
     private List<Filter> metricFilters = new ArrayList();
     private DateConf dateInfo;
     private Long limit = 2000L;
+    private Long offset = 0L;
     private QueryType queryType;
     private List<Param> params = new ArrayList<>();
 }

@@ -6,6 +6,8 @@ import dev.langchain4j.service.TokenStream;
 
 public interface ChatQueryExecutor {
 
+    boolean accept(ExecuteContext executeContext);
+
     QueryResult execute(ExecuteContext executeContext);
 
     TokenStream streamExecute(ExecuteContext executeContext);

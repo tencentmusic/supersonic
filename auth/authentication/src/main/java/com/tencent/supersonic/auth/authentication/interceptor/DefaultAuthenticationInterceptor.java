@@ -6,10 +6,10 @@ import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfi
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
 import com.tencent.supersonic.auth.api.authentication.response.AnalysisCloudTokenProjectLoginResponse;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.auth.authentication.exception.AuthErrorEnum;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
-import com.tencent.supersonic.auth.authentication.service.UserServiceImpl;
 import com.tencent.supersonic.auth.authentication.utils.ComponentFactory;
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
@@ -37,7 +37,7 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws AccessException {
         authenticationConfig = ContextUtils.getBean(AuthenticationConfig.class);
-        userServiceImpl = ContextUtils.getBean(UserServiceImpl.class);
+        userService = ContextUtils.getBean(UserService.class);
         tokenService = ContextUtils.getBean(TokenService.class);
         if (!authenticationConfig.isEnabled()) {
             return true;
@@ -51,6 +51,7 @@ public class DefaultAuthenticationInterceptor extends AuthenticationInterceptor 
                 return true;
             }
         }
+
         String uri = request.getServletPath();
         if (GET_CURRENT_USER.equals(uri)
                 && ComponentFactory.getUserAdaptor().verifyParameters(request)) {

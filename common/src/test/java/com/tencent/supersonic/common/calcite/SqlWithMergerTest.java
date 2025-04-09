@@ -2,7 +2,6 @@ package com.tencent.supersonic.common.calcite;
 
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.sql.parser.SqlParseException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +11,7 @@ import java.util.Collections;
 class SqlWithMergerTest {
 
     @Test
-    void test1() throws SqlParseException {
+    void test1() throws Exception {
         String sql1 = "WITH DepartmentVisits AS (\n" + "    SELECT department, SUM(pv) AS 总访问次数\n"
                 + "    FROM t_1\n"
                 + "    WHERE sys_imp_date >= '2024-09-01' AND sys_imp_date <= '2024-09-29'\n"
@@ -38,7 +37,7 @@ class SqlWithMergerTest {
     }
 
     @Test
-    void test2() throws SqlParseException {
+    void test2() throws Exception {
 
         String sql1 =
                 "WITH DepartmentVisits AS (SELECT department, SUM(pv) AS 总访问次数 FROM t_1 WHERE sys_imp_date >= '2024-08-28' "
@@ -65,7 +64,7 @@ class SqlWithMergerTest {
     }
 
     @Test
-    void test3() throws SqlParseException {
+    void test3() throws Exception {
 
         String sql1 = "SELECT COUNT(*) FROM DepartmentVisits WHERE 总访问次数 > 100 LIMIT 1000";
 
@@ -89,7 +88,7 @@ class SqlWithMergerTest {
     }
 
     @Test
-    void test4() throws SqlParseException {
+    void test4() throws Exception {
         String sql1 = "SELECT COUNT(*) FROM DepartmentVisits WHERE 总访问次数 > 100";
 
         String sql2 =
@@ -112,7 +111,7 @@ class SqlWithMergerTest {
     }
 
     @Test
-    void test5() throws SqlParseException {
+    void test5() throws Exception {
 
         String sql1 = "SELECT COUNT(*) FROM Department join Visits WHERE 总访问次数 > 100";
 
@@ -132,13 +131,13 @@ class SqlWithMergerTest {
                 "WITH t_1 AS (SELECT `t3`.`sys_imp_date`, `t2`.`department`, `t3`.`s2_pv_uv_statis_pv` AS `pv` "
                         + "FROM (SELECT `user_name`, `department` FROM `s2_user_department`) AS `t2` LEFT JOIN "
                         + "(SELECT 1 AS `s2_pv_uv_statis_pv`, `imp_date` AS `sys_imp_date`, `user_name` FROM `s2_pv_uv_statis`) "
-                        + "AS `t3` ON `t2`.`user_name` = `t3`.`user_name`) SELECT COUNT(*) FROM Department INNER JOIN Visits "
+                        + "AS `t3` ON `t2`.`user_name` = `t3`.`user_name`) SELECT COUNT(*) FROM Department JOIN Visits "
                         + "WHERE 总访问次数 > 100");
     }
 
 
     @Test
-    void test6() throws SqlParseException {
+    void test6() throws Exception {
 
         String sql1 =
                 "SELECT COUNT(*) FROM Department join Visits WHERE 总访问次数 > 100 ORDER BY 总访问次数 LIMIT 10";
@@ -159,7 +158,36 @@ class SqlWithMergerTest {
                 "WITH t_1 AS (SELECT `t3`.`sys_imp_date`, `t2`.`department`, `t3`.`s2_pv_uv_statis_pv` AS `pv` FROM "
                         + "(SELECT `user_name`, `department` FROM `s2_user_department`) AS `t2` LEFT JOIN (SELECT 1 AS `s2_pv_uv_statis_pv`,"
                         + " `imp_date` AS `sys_imp_date`, `user_name` FROM `s2_pv_uv_statis`) AS `t3` ON `t2`.`user_name` = `t3`.`user_name`) "
-                        + "SELECT COUNT(*) FROM Department INNER JOIN Visits WHERE 总访问次数 > 100 ORDER BY 总访问次数 LIMIT 10");
+                        + "SELECT COUNT(*) FROM Department JOIN Visits WHERE 总访问次数 > 100 ORDER BY 总访问次数 LIMIT 10");
+    }
+
+    @Test
+    void test7() throws Exception {
+
+        String sql1 =
+                "SELECT COUNT(*) FROM Department join Visits WHERE 总访问次数 > 100 AND imp_date >= CURRENT_DATE - "
+                        + "INTERVAL '1 year' AND  sys_imp_date < CURRENT_DATE ORDER"
+                        + " BY 总访问次数 LIMIT 10";
+
+        String sql2 =
+                "SELECT `t3`.`sys_imp_date`, `t2`.`department`, `t3`.`s2_pv_uv_statis_pv` AS `pv`\n"
+                        + "FROM\n" + "(SELECT `user_name`, `department`\n" + "FROM\n"
+                        + "`s2_user_department`) AS `t2`\n"
+                        + "LEFT JOIN (SELECT 1 AS `s2_pv_uv_statis_pv`, `imp_date` AS `sys_imp_date`, `user_name`\n"
+                        + "FROM\n"
+                        + "`s2_pv_uv_statis`) AS `t3` ON `t2`.`user_name` = `t3`.`user_name`";
+
+        String mergeSql = SqlMergeWithUtils.mergeWith(EngineType.MYSQL, sql1,
+                Collections.singletonList(sql2), Collections.singletonList("t_1"));
+
+
+        Assert.assertEquals(format(mergeSql),
+                "WITH t_1 AS (SELECT `t3`.`sys_imp_date`, `t2`.`department`, `t3`.`s2_pv_uv_statis_pv` AS `pv` FROM "
+                        + "(SELECT `user_name`, `department` FROM `s2_user_department`) AS `t2` LEFT JOIN (SELECT 1 AS `s2_pv_uv_statis_pv`,"
+                        + " `imp_date` AS `sys_imp_date`, `user_name` FROM `s2_pv_uv_statis`) AS `t3` ON `t2`.`user_name` = `t3`.`user_name`) "
+                        + "SELECT COUNT(*) FROM Department JOIN Visits WHERE 总访问次数 > 100 AND imp_date >= "
+                        + "CURRENT_DATE - INTERVAL '1 year' AND sys_imp_date < CURRENT_DATE ORDER BY 总访问次数 "
+                        + "LIMIT 10");
     }
 
     private static String format(String mergeSql) {

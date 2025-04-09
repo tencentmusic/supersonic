@@ -89,15 +89,17 @@ public class DatabaseController {
 
     @RequestMapping("/getTables")
     public List<String> getTables(@RequestParam("databaseId") Long databaseId,
+            @RequestParam(value = "catalog", required = false) String catalog,
             @RequestParam("db") String db) throws SQLException {
-        return databaseService.getTables(databaseId, db);
+        return databaseService.getTables(databaseId, catalog, db);
     }
 
     @RequestMapping("/getColumnsByName")
     public List<DBColumn> getColumnsByName(@RequestParam("databaseId") Long databaseId,
+            @RequestParam(name = "catalog", required = false) String catalog,
             @RequestParam("db") String db, @RequestParam("table") String table)
             throws SQLException {
-        return databaseService.getColumns(databaseId, db, table);
+        return databaseService.getColumns(databaseId, catalog, db, table);
     }
 
     @PostMapping("/listColumnsBySql")

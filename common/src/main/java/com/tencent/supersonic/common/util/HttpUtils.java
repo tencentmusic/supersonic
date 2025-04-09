@@ -193,4 +193,23 @@ public class HttpUtils {
         return "?" + params.entrySet().stream().map(it -> it.getKey() + "=" + it.getValue())
                 .collect(Collectors.joining("&"));
     }
+
+
+    public static String postMultipart(String url, RequestBody body) throws IOException {
+        long beginTime = System.currentTimeMillis();
+        Request request = new Request.Builder().url(url).post(body).build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                return response.body().string();
+            } else {
+                throw new RuntimeException(
+                        "Http请求失败[" + response.code() + "]:" + response.body().string() + "...");
+            }
+        } finally {
+            logger.info("begin to request : {}, execute costs(ms) : {}", request.url(),
+                    System.currentTimeMillis() - beginTime);
+        }
+    }
 }

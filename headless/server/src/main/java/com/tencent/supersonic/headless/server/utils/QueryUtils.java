@@ -68,12 +68,23 @@ public class QueryUtils {
         });
     }
 
+    private Map<String, String> reverseMap(Map<String, String> namePair) {
+        Map<String, String> reverseNamePair = new HashMap<>();
+        namePair.forEach((key, value) -> {
+            reverseNamePair.put(value, key);
+        });
+        return reverseNamePair;
+    }
+
     private void processColumn(QueryColumn column, Map<String, String> namePair,
             Map<String, String> nameTypePair, Map<String, MetricResp> metricRespMap,
             Map<String, DimensionResp> dimensionRespMap) {
         String nameEn = getName(column.getBizName());
         if (namePair.containsKey(nameEn)) {
             column.setName(namePair.get(nameEn));
+        } else if (namePair.containsValue(nameEn)) {
+            Map<String, String> reverseMap = reverseMap(namePair);
+            nameEn = reverseMap.get(nameEn);
         } else {
             String nameEnByRegex = getNameEnByRegex(nameEn, pattern);
             if (StringUtils.isEmpty(nameEnByRegex)) {
@@ -85,25 +96,28 @@ public class QueryUtils {
                 column.setName(nameEn.replaceAll(nameEnByRegex, filedName));
             }
         }
+        // 使用 final 临时变量
+        final String finalNameEn = nameEn;
         // set showType
-        if (nameTypePair.containsKey(nameEn)) {
-            column.setShowType(nameTypePair.get(nameEn));
+        if (nameTypePair.containsKey(finalNameEn)) {
+            column.setShowType(nameTypePair.get(finalNameEn));
         }
-        if (!nameTypePair.containsKey(nameEn) && isNumberType(column.getType())) {
+        if (!nameTypePair.containsKey(finalNameEn) && isNumberType(column.getType())) {
             column.setShowType(SemanticType.NUMBER.name());
         }
         if (StringUtils.isEmpty(column.getShowType())) {
             column.setShowType(SemanticType.CATEGORY.name());
         }
         // set dataFormat/dataFormatType
-        if (metricRespMap.containsKey(nameEn)) {
-            column.setDataFormatType(metricRespMap.get(nameEn).getDataFormatType());
-            column.setDataFormat(metricRespMap.get(nameEn).getDataFormat());
-            column.setModelId(metricRespMap.get(nameEn).getModelId());
+        if (metricRespMap.containsKey(finalNameEn)) {
+            column.setDataFormatType(metricRespMap.get(finalNameEn).getDataFormatType());
+            column.setDataFormat(metricRespMap.get(finalNameEn).getDataFormat());
+            column.setModelId(metricRespMap.get(finalNameEn).getModelId());
         } else {
             // if column nameEn contains metric name, use metric dataFormatType
             metricRespMap.values().forEach(metric -> {
-                if (nameEn.contains(metric.getName()) || nameEn.contains(metric.getBizName())) {
+                if (finalNameEn.contains(metric.getName())
+                        || finalNameEn.contains(metric.getBizName())) {
                     column.setDataFormatType(metric.getDataFormatType());
                     column.setDataFormat(metric.getDataFormat());
                     column.setModelId(metric.getModelId());
@@ -111,7 +125,7 @@ public class QueryUtils {
                 // if column nameEn contains metric alias, use metric dataFormatType
                 if (column.getDataFormatType() == null && metric.getAlias() != null) {
                     for (String alias : metric.getAlias().split(",")) {
-                        if (nameEn.contains(alias)) {
+                        if (finalNameEn.contains(alias)) {
                             column.setDataFormatType(metric.getDataFormatType());
                             column.setDataFormat(metric.getDataFormat());
                             column.setModelId(metric.getModelId());
@@ -122,8 +136,8 @@ public class QueryUtils {
             });
         }
 
-        if (dimensionRespMap.containsKey(nameEn)) {
-            column.setModelId(dimensionRespMap.get(nameEn).getModelId());
+        if (dimensionRespMap.containsKey(finalNameEn)) {
+            column.setModelId(dimensionRespMap.get(finalNameEn).getModelId());
         }
         // set name by NameEn
         if (StringUtils.isBlank(column.getName()) && StringUtils.isNotBlank(column.getBizName())) {

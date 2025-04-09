@@ -52,13 +52,15 @@ public class MetaEmbeddingService {
         }
         // Filter and process query results.
         return resultList.stream()
-                .map(result -> getRetrieveQueryResult(modelIdToDataSetIds, result))
+                .map(result -> getRetrieveQueryResult(modelIdToDataSetIds, detectDataSetIds,
+                        result))
                 .filter(result -> CollectionUtils.isNotEmpty(result.getRetrieval()))
                 .collect(Collectors.toList());
     }
 
     private static RetrieveQueryResult getRetrieveQueryResult(
-            Map<Long, List<Long>> modelIdToDataSetIds, RetrieveQueryResult result) {
+            Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds,
+            RetrieveQueryResult result) {
         List<Retrieval> retrievals = result.getRetrieval();
         if (CollectionUtils.isEmpty(retrievals)) {
             return result;
@@ -72,9 +74,11 @@ public class MetaEmbeddingService {
                 return Stream.of(retrieval);
             }
 
-            return dataSetIds.stream().map(dataSetId -> {
+            return dataSetIds.stream().filter(detectDataSetIds::contains).map(dataSetId -> {
                 Retrieval newRetrieval = new Retrieval();
                 BeanUtils.copyProperties(retrieval, newRetrieval);
+                HashMap<String, Object> newMetadata = new HashMap<>(retrieval.getMetadata());
+                newRetrieval.setMetadata(newMetadata);
                 newRetrieval.getMetadata().putIfAbsent("dataSetId",
                         dataSetId + Constants.UNDERLINE);
                 return newRetrieval;
