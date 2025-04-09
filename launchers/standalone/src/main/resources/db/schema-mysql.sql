@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat` (
    `is_delete` tinyint DEFAULT '0' COMMENT 'is deleted',
    `is_top` tinyint DEFAULT '0' COMMENT 'is top',
    PRIMARY KEY (`chat_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `s2_chat_config` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_query`
     `similar_queries` varchar(1024)       DEFAULT '',
     `parse_time_cost` varchar(1024)       DEFAULT '',
     PRIMARY KEY (`question_id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE IF NOT EXISTS `s2_chat_statistics` (

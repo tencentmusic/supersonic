@@ -77,7 +77,7 @@ public class VoiceServiceImpl implements VoiceService {
         headers.put("sid", sid);
         Map<String, String> sessionParam = new HashMap<>();
         sessionParam.put("native_voice_name", "qianxue2");
-        sessionParam.put("sample_rate", "48000");
+        sessionParam.put("sample_rate", "16000");
         sessionParam.put("audio_coding", "mp3");
         headers.put("sessionParam",
                 Base64.getEncoder().encodeToString(JsonUtil.toString(sessionParam).getBytes()));
