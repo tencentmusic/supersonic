@@ -75,9 +75,9 @@ s2:
 
 crab:
   api:
-    appId: qjt2geuo
-    secretKey: 4a1116f439b941f5bc5ea77e9777c2c4
-    host: http://10.191.38.16:8080
+    appId: kuaesoba
+    secretKey: e66a04b5e44748ebbeb119adc047f02d
+    host: https://crab.migu.cn
     file:
       serviceName: deepseek_whole
       serviceType: file_parse
