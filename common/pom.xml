@@ -198,6 +198,12 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-embeddings</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>onnxruntime</artifactId>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
