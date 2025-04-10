@@ -21,3 +21,4 @@ __pycache__/
 /dict
 assembly/build/*-SNAPSHOT
 **/node_modules/
+benchmark/res/
