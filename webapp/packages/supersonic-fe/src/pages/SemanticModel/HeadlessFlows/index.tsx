@@ -7,7 +7,7 @@ import { XFlowGraphCommands, XFlowNodeCommands, XFlowEdgeCommands } from '@antv/
 import { CanvasMiniMap, CanvasScaleToolbar, CanvasSnapline } from '@antv/xflow';
 import { MODELS } from '@antv/xflow';
 import GraphToolbar from './GraphToolbar/index';
-import { connect } from 'umi';
+import { connect } from '@umijs/max';
 
 /** 配置画布 */
 import { useGraphConfig } from './config-graph';

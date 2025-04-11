@@ -36,7 +36,7 @@ import TableTitleTooltips from '../../components/TableTitleTooltips';
 import { createMetric, updateMetric, mockMetricAlias, getMetricTags } from '../../service';
 import { MetricSettingKey, MetricSettingWording } from '../constants';
 import { ISemantic } from '../../data';
-import { history } from 'umi';
+import { history } from '@umijs/max';
 
 export type CreateFormProps = {
   datasourceId?: number;

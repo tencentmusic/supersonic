@@ -2,7 +2,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { useModel } from 'umi';
+import { useModel } from '@umijs/max';
 import { SENSITIVE_LEVEL_ENUM } from '../constant';
 import { getTagList, deleteTag, batchDeleteTag, getTagObjectList } from '../service';
 import TagFilter from './components/TagFilter';

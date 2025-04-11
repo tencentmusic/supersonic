@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button, message, Form, Space, Drawer, Input } from 'antd';
 import { ProCard } from '@ant-design/pro-components';
-import { useModel } from 'umi';
+import { useModel } from '@umijs/max';
 import { createGroupAuth, updateGroupAuth } from '../../service';
 import PermissionCreateForm from './PermissionCreateForm';
 import type { StateType } from '../../model';

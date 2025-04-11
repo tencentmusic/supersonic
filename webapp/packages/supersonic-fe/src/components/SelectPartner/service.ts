@@ -1,4 +1,4 @@
-import { request } from 'umi';
+import { request } from '@umijs/max';
 
 export async function getUserByDeptid(id: any) {
   return request<any>(`${process.env.AUTH_API_BASE_URL}user/getUserByOrg/${id}`, {

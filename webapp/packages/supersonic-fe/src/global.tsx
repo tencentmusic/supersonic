@@ -1,7 +1,7 @@
 import { Button, message, notification } from 'antd';
 
 import React from 'react';
-import { useIntl } from 'umi';
+import { useIntl } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 
 const { pwa } = defaultSettings;
@@ -37,7 +37,7 @@ if (pwa) {
         worker.postMessage({ type: 'skip-waiting' }, [channel.port2]);
       });
       // Refresh current page to use the updated HTML and other assets after SW has skiped waiting
-      window.location.reload(true);
+      (window.location.reload as (forceReload?: boolean) => void)(true); //兼容老版IE,现在浏览器中此方法均不再接收参数
       return true;
     };
     const key = `open${Date.now()}`;
@@ -75,7 +75,7 @@ if (pwa) {
   });
 
   // remove all caches
-  if (window.caches && window.caches.keys) {
+  if ('caches' in window) {
     caches.keys().then((keys) => {
       keys.forEach((key) => {
         caches.delete(key);
