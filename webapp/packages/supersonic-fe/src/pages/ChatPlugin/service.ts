@@ -1,4 +1,4 @@
-import { request } from 'umi';
+import { request } from '@umijs/max';
 import { DimensionType, ModelType, PluginType } from './type';
 
 export function savePlugin(params: Partial<PluginType>) {

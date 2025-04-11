@@ -1,13 +1,13 @@
 import React, { useRef } from 'react';
 import { LogoutOutlined, KeyOutlined, UnlockOutlined } from '@ant-design/icons';
-import { useModel } from 'umi';
+import { useModel } from '@umijs/max';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 import TMEAvatar from '../TMEAvatar';
 import { AUTH_TOKEN_KEY } from '@/common/constants';
 import ChangePasswordModal, { IRef as IRefChangePasswordModal } from './ChangePasswordModal';
 import AccessTokensModal, { IRef as IAccessTokensModalRef } from './AccessTokensModal';
-import { history } from 'umi';
+import { history } from '@umijs/max';
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;

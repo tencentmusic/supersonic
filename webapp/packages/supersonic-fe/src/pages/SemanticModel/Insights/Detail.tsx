@@ -1,7 +1,7 @@
 import { message, Tabs, Button, Space } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getTagData } from '../service';
-import { useParams, history } from 'umi';
+import { useParams, history } from '@umijs/max';
 import styles from './style.less';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import TagTrendSection from './components/TagTrendSection';

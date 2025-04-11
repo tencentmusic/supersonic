@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useModel } from 'umi';
+import { useModel } from '@umijs/max';
 import {
   typeConfigs,
   formatterRelationData,
