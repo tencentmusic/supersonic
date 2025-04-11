@@ -17,7 +17,9 @@ export const TOKEN_KEY = AUTH_TOKEN_KEY;
 const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
   const headers: any = {};
   const query = queryString.parse(history.location.search) || {};
-  const token = query[TOKEN_KEY] || localStorage.getItem(TOKEN_KEY);
+
+  const rawToken = query[TOKEN_KEY];
+  const token = (typeof rawToken === 'string' ? rawToken : null) || localStorage.getItem(TOKEN_KEY);
   if (token) {
     headers.Authorization = `Bearer ${token}`;
     headers.auth = `Bearer ${token}`;

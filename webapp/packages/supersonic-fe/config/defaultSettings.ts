@@ -1,9 +1,9 @@
 import { ProLayoutProps } from '@ant-design/pro-components';
-
-const Settings: ProLayoutProps & {
+export type DefaultSetting = ProLayoutProps & {
   pwa?: boolean;
   logo?: string;
-} = {
+};
+const Settings: DefaultSetting = {
   navTheme: 'light',
   colorPrimary: '#296DF3',
   layout: 'top',

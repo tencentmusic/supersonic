@@ -1,6 +1,5 @@
 import RightContent from '@/components/RightContent';
 import S2Icon, { ICON } from '@/components/S2Icon';
-import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { Space, Spin, ConfigProvider } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { history, RunTimeLayoutConfig } from '@umijs/max';
@@ -9,6 +8,7 @@ import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
 import { deleteUrlQuery, isMobile, getToken } from '@/utils/utils';
 import { publicPath } from '../config/defaultSettings';
+import type { DefaultSetting } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
 export { request } from './services/request';
@@ -42,7 +42,7 @@ const getAuthCodes = (params: any) => {
 };
 
 export async function getInitialState(): Promise<{
-  settings?: LayoutSettings;
+  settings?: DefaultSetting;
   currentUser?: API.CurrentUser;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
   codeList?: string[];
