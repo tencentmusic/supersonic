@@ -145,8 +145,9 @@ public class ModelConverter {
     public static ModelReq convert(ModelSchema modelSchema, ModelBuildReq modelBuildReq,
             String tableName) {
         ModelReq modelReq = new ModelReq();
-        modelReq.setName(modelBuildReq.getName());
-        modelReq.setBizName(modelBuildReq.getBizName());
+        modelReq.setName(modelBuildReq.getName() != null ? modelBuildReq.getName() : tableName);
+        modelReq.setBizName(
+                modelBuildReq.getBizName() != null ? modelBuildReq.getBizName() : tableName);
         modelReq.setDatabaseId(modelBuildReq.getDatabaseId());
         modelReq.setDomainId(modelBuildReq.getDomainId());
         ModelDetail modelDetail = new ModelDetail();
