@@ -161,7 +161,7 @@ public class ModelConverter {
         List<Field> fields = new ArrayList<>();
         for (SemanticColumn semanticColumn : modelSchema.getSemanticColumns()) {
             FieldType fieldType = semanticColumn.getFiledType();
-            fields.add(new Field(semanticColumn.getName(), semanticColumn.getDataType()));
+            fields.add(new Field(semanticColumn.getColumnName(), semanticColumn.getDataType()));
 
             if (getIdentifyType(fieldType) != null) {
                 Identify identify = new Identify(semanticColumn.getName(),
