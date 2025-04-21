@@ -60,6 +60,10 @@ public class RetrieveServiceImpl implements RetrieveService {
 
     @Override
     public List<SearchResult> retrieve(QueryNLReq queryNLReq) {
+        if (CollectionUtils.isEmpty(queryNLReq.getDataSetIds())) {
+            return Collections.emptyList();
+        }
+
         String queryText = queryNLReq.getQueryText();
 
         // 1. Get meta info
