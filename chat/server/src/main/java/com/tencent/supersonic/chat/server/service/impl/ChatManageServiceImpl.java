@@ -233,6 +233,10 @@ public class ChatManageServiceImpl implements ChatManageService {
     @Override
     public SemanticParseInfo getParseInfo(Long questionId, int parseId) {
         ChatParseDO chatParseDO = chatQueryRepository.getParseInfo(questionId, parseId);
-        return JSONObject.parseObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
+        if (chatParseDO == null) {
+            return null;
+        } else {
+            return JSONObject.parseObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
+        }
     }
 }
