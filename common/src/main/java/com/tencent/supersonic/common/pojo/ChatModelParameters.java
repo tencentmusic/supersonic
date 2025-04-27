@@ -2,15 +2,7 @@ package com.tencent.supersonic.common.pojo;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import dev.langchain4j.provider.AzureModelFactory;
-import dev.langchain4j.provider.DashscopeModelFactory;
-import dev.langchain4j.provider.DifyModelFactory;
-import dev.langchain4j.provider.LocalAiModelFactory;
-import dev.langchain4j.provider.ModelProvider;
-import dev.langchain4j.provider.OllamaModelFactory;
-import dev.langchain4j.provider.OpenAiModelFactory;
-import dev.langchain4j.provider.QianfanModelFactory;
-import dev.langchain4j.provider.ZhipuModelFactory;
+import dev.langchain4j.provider.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +13,7 @@ public class ChatModelParameters {
 
     public static final Parameter CHAT_MODEL_PROVIDER =
             new Parameter("provider", ModelProvider.DEMO_CHAT_MODEL.getProvider(), "接口协议", "",
-                    "list", MODULE_NAME, getCandidateValues());
+                    "list", MODULE_NAME, getCandidateProviders());
 
     public static final Parameter CHAT_MODEL_BASE_URL =
             new Parameter("baseUrl", ModelProvider.DEMO_CHAT_MODEL.getBaseUrl(), "BaseUrl", "",
@@ -58,37 +50,22 @@ public class ChatModelParameters {
                 CHAT_MODEL_ENABLE_SEARCH, CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT);
     }
 
-    private static List<String> getCandidateValues() {
+    private static List<String> getCandidateProviders() {
         return Lists.newArrayList(OpenAiModelFactory.PROVIDER, OllamaModelFactory.PROVIDER,
-                QianfanModelFactory.PROVIDER, ZhipuModelFactory.PROVIDER,
-                LocalAiModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER,
-                AzureModelFactory.PROVIDER, DifyModelFactory.PROVIDER);
+                DifyModelFactory.PROVIDER);
     }
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {
-        return getDependency(CHAT_MODEL_PROVIDER.getName(), getCandidateValues(),
+        return getDependency(CHAT_MODEL_PROVIDER.getName(), getCandidateProviders(),
                 ImmutableMap.of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_BASE_URL,
-                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
                         OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_BASE_URL,
-                        QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_BASE_URL,
-                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_BASE_URL,
-                        LocalAiModelFactory.PROVIDER, LocalAiModelFactory.DEFAULT_BASE_URL,
-                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_BASE_URL,
                         DifyModelFactory.PROVIDER, DifyModelFactory.DEFAULT_BASE_URL));
     }
 
     private static List<Parameter.Dependency> getApiKeyDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(OpenAiModelFactory.PROVIDER, QianfanModelFactory.PROVIDER,
-                        ZhipuModelFactory.PROVIDER, LocalAiModelFactory.PROVIDER,
-                        AzureModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER,
-                        DifyModelFactory.PROVIDER),
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER, DifyModelFactory.PROVIDER),
                 ImmutableMap.of(OpenAiModelFactory.PROVIDER,
-                        ModelProvider.DEMO_CHAT_MODEL.getApiKey(), QianfanModelFactory.PROVIDER,
-                        ModelProvider.DEMO_CHAT_MODEL.getApiKey(), ZhipuModelFactory.PROVIDER,
-                        ModelProvider.DEMO_CHAT_MODEL.getApiKey(), LocalAiModelFactory.PROVIDER,
-                        ModelProvider.DEMO_CHAT_MODEL.getApiKey(), AzureModelFactory.PROVIDER,
-                        ModelProvider.DEMO_CHAT_MODEL.getApiKey(), DashscopeModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey(), DifyModelFactory.PROVIDER,
                         ModelProvider.DEMO_CHAT_MODEL.getApiKey()));
     }
@@ -100,14 +77,9 @@ public class ChatModelParameters {
     }
 
     private static List<Parameter.Dependency> getModelNameDependency() {
-        return getDependency(CHAT_MODEL_PROVIDER.getName(), getCandidateValues(),
+        return getDependency(CHAT_MODEL_PROVIDER.getName(), getCandidateProviders(),
                 ImmutableMap.of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_MODEL_NAME,
                         OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_MODEL_NAME,
-                        QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_MODEL_NAME,
-                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_MODEL_NAME,
-                        LocalAiModelFactory.PROVIDER, LocalAiModelFactory.DEFAULT_MODEL_NAME,
-                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_MODEL_NAME,
-                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_MODEL_NAME,
                         DifyModelFactory.PROVIDER, DifyModelFactory.DEFAULT_MODEL_NAME));
     }
 
