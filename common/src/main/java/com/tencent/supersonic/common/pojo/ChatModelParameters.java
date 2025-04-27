@@ -85,20 +85,20 @@ public class ChatModelParameters {
 
     private static List<Parameter.Dependency> getEndpointDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(QianfanModelFactory.PROVIDER), ImmutableMap
-                        .of(QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_ENDPOINT));
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER), ImmutableMap
+                        .of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_MODEL_NAME));
     }
 
     private static List<Parameter.Dependency> getEnableSearchDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(DashscopeModelFactory.PROVIDER),
-                ImmutableMap.of(DashscopeModelFactory.PROVIDER, "false"));
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER),
+                ImmutableMap.of(OpenAiModelFactory.PROVIDER, "false"));
     }
 
     private static List<Parameter.Dependency> getSecretKeyDependency() {
         return getDependency(CHAT_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(QianfanModelFactory.PROVIDER), ImmutableMap.of(
-                        QianfanModelFactory.PROVIDER, ModelProvider.DEMO_CHAT_MODEL.getApiKey()));
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER), ImmutableMap.of(
+                        OpenAiModelFactory.PROVIDER, ModelProvider.DEMO_CHAT_MODEL.getApiKey()));
     }
 
     private static List<Parameter.Dependency> getDependency(String dependencyParameterName,
