@@ -7,7 +7,7 @@ import {
   getUserAccessTokens,
   removeAccessToken,
 } from '@/services/user';
-import { encryptPassword, encryptKey } from '@/utils/utils';
+import { encryptPassword, encryptKey, copyText } from '@/utils/utils';
 import { API } from '@/services/API';
 import { EditableProTable, ProColumns } from '@ant-design/pro-components';
 import { CopyOutlined } from '@ant-design/icons';
@@ -84,8 +84,7 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
               type="link"
               size="small"
               onClick={() => {
-                navigator.clipboard.writeText(record.token || '');
-                message.info('已复制到剪贴板');
+                copyText(record.token || '');
               }}
             >
               <CopyOutlined />
