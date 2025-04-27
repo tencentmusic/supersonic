@@ -14,9 +14,9 @@ public class DefaultParametersBuilder implements DbParametersBuilder {
     public List<DatabaseParameter> build() {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
-        host.setComment("链接");
+        host.setComment("JDBC连接");
         host.setName("url");
-        host.setPlaceholder("请输入链接");
+        host.setPlaceholder("请输入JDBC连接串");
         databaseParameters.add(host);
 
         DatabaseParameter userName = new DatabaseParameter();

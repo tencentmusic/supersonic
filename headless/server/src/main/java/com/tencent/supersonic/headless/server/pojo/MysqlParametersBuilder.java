@@ -15,9 +15,10 @@ public class MysqlParametersBuilder implements DbParametersBuilder {
     public List<DatabaseParameter> build() {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
-        host.setComment("链接");
+        host.setComment("JDBC连接");
         host.setName("url");
-        host.setPlaceholder("请输入链接");
+        host.setPlaceholder("请输入JDBC连接串");
+        host.setValue("jdbc:mysql://localhost:3306/mysql?useUnicode=true&characterEncoding=utf-8");
         databaseParameters.add(host);
 
         DatabaseParameter version = new DatabaseParameter();
