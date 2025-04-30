@@ -81,6 +81,7 @@ export enum MsgContentTypeEnum {
   METRIC_TREND = 'METRIC_TREND',
   METRIC_BAR = 'METRIC_BAR',
   MARKDOWN = 'MARKDOWN',
+  METRIC_PIE = 'METRIC_PIE',
 }
 
 export enum ChatContextTypeQueryTypeEnum {
