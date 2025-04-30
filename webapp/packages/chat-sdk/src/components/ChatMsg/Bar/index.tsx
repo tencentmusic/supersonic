@@ -32,7 +32,7 @@ type Props = {
 
 const BarChart: React.FC<Props> = ({
   data,
-  question,
+  question="",
   triggerResize,
   loading,
   metricField,
