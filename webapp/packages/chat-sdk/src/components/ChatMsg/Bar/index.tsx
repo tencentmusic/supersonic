@@ -23,7 +23,7 @@ import { useExportByEcharts } from '../../../hooks';
 
 type Props = {
   data: MsgDataType;
-  question: string;
+  question?: string;
   triggerResize?: boolean;
   loading: boolean;
   metricField: ColumnType;
@@ -32,7 +32,7 @@ type Props = {
 
 const BarChart: React.FC<Props> = ({
   data,
-  question,
+  question="",
   triggerResize,
   loading,
   metricField,

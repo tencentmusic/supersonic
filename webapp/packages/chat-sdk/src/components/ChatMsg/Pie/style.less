@@ -1,0 +1,43 @@
+@import '../../../styles/index.less';
+
+@pie-prefix-cls: ~'@{prefix-cls}-pie';
+
+.@{pie-prefix-cls} {
+  &-select-options {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &-chart {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+  }
+
+  &-metric-fields {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    column-gap: 8px;
+    row-gap: 12px;
+  }
+
+  &-metric-field-single {
+    padding-left: 0;
+    font-weight: 500;
+    cursor: default;
+    font-size: 15px;
+    color: var(--text-color);
+
+    &:hover {
+      color: var(--text-color);
+    }
+  }
+
+  &-indicator-name {
+    font-size: 14px;
+    color: var(--text-color);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+}

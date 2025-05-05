@@ -123,9 +123,11 @@ const ExecuteItem: React.FC<Props> = ({
               )}
             </div>
             <div>
-              {[MsgContentTypeEnum.METRIC_TREND, MsgContentTypeEnum.METRIC_BAR].includes(
-                msgContentType as MsgContentTypeEnum
-              ) && (
+              {[
+                MsgContentTypeEnum.METRIC_TREND,
+                MsgContentTypeEnum.METRIC_BAR,
+                MsgContentTypeEnum.METRIC_PIE,
+              ].includes(msgContentType as MsgContentTypeEnum) && (
                 <Switch
                   checkedChildren="表格"
                   unCheckedChildren="表格"

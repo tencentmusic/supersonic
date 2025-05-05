@@ -12,6 +12,7 @@ import Text from './Text';
 import DrillDownDimensions from '../DrillDownDimensions';
 import MetricOptions from '../MetricOptions';
 import { isMobile } from '../../utils/utils';
+import Pie from './Pie';
 
 type Props = {
   queryId?: number;
@@ -120,6 +121,16 @@ const ChatMsg: React.FC<Props> = ({
       return MsgContentTypeEnum.METRIC_TREND;
     }
 
+    const isMetricPie =
+      metricFields.length > 0 &&
+      metricFields?.length === 1 &&
+      (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 10) &&
+      dataSource.every(item => item[metricFields[0].bizName] > 0);
+
+    if (isMetricPie) {
+      return MsgContentTypeEnum.METRIC_PIE;
+    }
+
     const isMetricBar =
       categoryField?.length > 0 &&
       metricFields?.length === 1 &&
@@ -148,7 +159,7 @@ const ChatMsg: React.FC<Props> = ({
         [queryColumns.length > 5 ? 'width' : 'minWidth']: queryColumns.length * 150,
       };
     }
-    if (type === MsgContentTypeEnum.METRIC_TREND) {
+    if (type === MsgContentTypeEnum.METRIC_TREND || type === MsgContentTypeEnum.METRIC_PIE) {
       return { width: 'calc(100vw - 410px)' };
     }
   };
@@ -211,6 +222,21 @@ const ChatMsg: React.FC<Props> = ({
             triggerResize={triggerResize}
             loading={loading}
             metricField={metricFields[0]}
+          />
+        );
+      case MsgContentTypeEnum.METRIC_PIE:
+        const categoryField = columns.find(item => item.showType === 'CATEGORY');
+        if (!categoryField) {
+          return null;
+        }
+        return (
+          <Pie
+            data={{ ...data, queryColumns: columns, queryResults: dataSource }}
+            question={question}
+            triggerResize={triggerResize}
+            loading={loading}
+            metricField={metricFields[0]}
+            categoryField={categoryField}
           />
         );
       case MsgContentTypeEnum.MARKDOWN:
