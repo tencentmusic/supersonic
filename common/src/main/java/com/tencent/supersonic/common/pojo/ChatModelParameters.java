@@ -29,15 +29,6 @@ public class ChatModelParameters {
     public static final Parameter CHAT_MODEL_API_VERSION = new Parameter("apiVersion", "2024-02-01",
             "ApiVersion", "", "string", MODULE_NAME, null, getApiVersionDependency());
 
-    public static final Parameter CHAT_MODEL_ENDPOINT = new Parameter("endpoint", "llama_2_70b",
-            "Endpoint", "", "string", MODULE_NAME, null, getEndpointDependency());
-
-    public static final Parameter CHAT_MODEL_SECRET_KEY = new Parameter("secretKey", "demo",
-            "SecretKey", "", "password", MODULE_NAME, null, getSecretKeyDependency());
-
-    public static final Parameter CHAT_MODEL_ENABLE_SEARCH = new Parameter("enableSearch", "false",
-            "是否启用搜索增强功能，设为false表示不启用", "", "bool", MODULE_NAME, null, getEnableSearchDependency());
-
     public static final Parameter CHAT_MODEL_TEMPERATURE =
             new Parameter("temperature", "0.0", "Temperature", "", "slider", MODULE_NAME);
 
@@ -45,9 +36,9 @@ public class ChatModelParameters {
             new Parameter("timeOut", "60", "超时时间(秒)", "", "number", MODULE_NAME);
 
     public static List<Parameter> getParameters() {
-        return Lists.newArrayList(CHAT_MODEL_PROVIDER, CHAT_MODEL_BASE_URL, CHAT_MODEL_ENDPOINT,
-                CHAT_MODEL_API_KEY, CHAT_MODEL_SECRET_KEY, CHAT_MODEL_NAME, CHAT_MODEL_API_VERSION,
-                CHAT_MODEL_ENABLE_SEARCH, CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT);
+        return Lists.newArrayList(CHAT_MODEL_PROVIDER, CHAT_MODEL_BASE_URL,
+                CHAT_MODEL_API_KEY, CHAT_MODEL_NAME, CHAT_MODEL_API_VERSION,
+                CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT);
     }
 
     private static List<String> getCandidateProviders() {

@@ -33,5 +33,6 @@ public class StarrocksParametersBuilder extends DefaultParametersBuilder {
         password.setRequire(false);
         databaseParameters.add(password);
 
-        return databaseParameters;    }
+        return databaseParameters;
+    }
 }

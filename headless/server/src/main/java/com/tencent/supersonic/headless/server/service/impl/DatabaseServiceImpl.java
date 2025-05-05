@@ -79,8 +79,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     public List<DatabaseResp> getDatabaseList(User user) {
         List<DatabaseResp> databaseResps = list().stream().map(DatabaseConverter::convert)
                 .filter(database -> filterByAuth(database, user, AuthType.VIEWER))
-                .sorted(Comparator.comparingLong(DatabaseResp::getId))
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparingLong(DatabaseResp::getId)).collect(Collectors.toList());
         fillPermission(databaseResps, user);
         return databaseResps;
     }

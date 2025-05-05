@@ -15,7 +15,8 @@ public class PostgresqlParametersBuilder extends DefaultParametersBuilder {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
         host.setComment("JDBC连接");
-        host.setValue("jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf-8&useSSL");
+        host.setValue(
+                "jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf-8&useSSL");
         host.setName("url");
         host.setPlaceholder("请输入JDBC连接串");
         databaseParameters.add(host);
