@@ -4,14 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.pojo.Parameter;
-import dev.langchain4j.provider.AzureModelFactory;
-import dev.langchain4j.provider.DashscopeModelFactory;
 import dev.langchain4j.provider.EmbeddingModelConstant;
 import dev.langchain4j.provider.InMemoryModelFactory;
 import dev.langchain4j.provider.OllamaModelFactory;
 import dev.langchain4j.provider.OpenAiModelFactory;
-import dev.langchain4j.provider.QianfanModelFactory;
-import dev.langchain4j.provider.ZhipuModelFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -70,52 +66,31 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
 
     private static ArrayList<String> getCandidateValues() {
         return Lists.newArrayList(InMemoryModelFactory.PROVIDER, OpenAiModelFactory.PROVIDER,
-                OllamaModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER,
-                QianfanModelFactory.PROVIDER, ZhipuModelFactory.PROVIDER,
-                AzureModelFactory.PROVIDER);
+                OllamaModelFactory.PROVIDER);
     }
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {
         return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(OpenAiModelFactory.PROVIDER, OllamaModelFactory.PROVIDER,
-                        AzureModelFactory.PROVIDER, DashscopeModelFactory.PROVIDER,
-                        QianfanModelFactory.PROVIDER, ZhipuModelFactory.PROVIDER),
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER, OllamaModelFactory.PROVIDER),
                 ImmutableMap.of(OpenAiModelFactory.PROVIDER, OpenAiModelFactory.DEFAULT_BASE_URL,
-                        OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_BASE_URL,
-                        AzureModelFactory.PROVIDER, AzureModelFactory.DEFAULT_BASE_URL,
-                        DashscopeModelFactory.PROVIDER, DashscopeModelFactory.DEFAULT_BASE_URL,
-                        QianfanModelFactory.PROVIDER, QianfanModelFactory.DEFAULT_BASE_URL,
-                        ZhipuModelFactory.PROVIDER, ZhipuModelFactory.DEFAULT_BASE_URL));
+                        OllamaModelFactory.PROVIDER, OllamaModelFactory.DEFAULT_BASE_URL));
     }
 
     private static List<Parameter.Dependency> getApiKeyDependency() {
         return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(OpenAiModelFactory.PROVIDER, AzureModelFactory.PROVIDER,
-                        DashscopeModelFactory.PROVIDER, QianfanModelFactory.PROVIDER,
-                        ZhipuModelFactory.PROVIDER),
-                ImmutableMap.of(OpenAiModelFactory.PROVIDER, DEMO, AzureModelFactory.PROVIDER, DEMO,
-                        DashscopeModelFactory.PROVIDER, DEMO, QianfanModelFactory.PROVIDER, DEMO,
-                        ZhipuModelFactory.PROVIDER, DEMO));
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER),
+                ImmutableMap.of(OpenAiModelFactory.PROVIDER, DEMO));
     }
 
     private static List<Parameter.Dependency> getModelNameDependency() {
         return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
                 Lists.newArrayList(InMemoryModelFactory.PROVIDER, OpenAiModelFactory.PROVIDER,
-                        OllamaModelFactory.PROVIDER, AzureModelFactory.PROVIDER,
-                        DashscopeModelFactory.PROVIDER, QianfanModelFactory.PROVIDER,
-                        ZhipuModelFactory.PROVIDER),
+                        OllamaModelFactory.PROVIDER),
                 ImmutableMap.of(InMemoryModelFactory.PROVIDER, EmbeddingModelConstant.BGE_SMALL_ZH,
                         OpenAiModelFactory.PROVIDER,
                         OpenAiModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
                         OllamaModelFactory.PROVIDER,
-                        OllamaModelFactory.DEFAULT_EMBEDDING_MODEL_NAME, AzureModelFactory.PROVIDER,
-                        AzureModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
-                        DashscopeModelFactory.PROVIDER,
-                        DashscopeModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
-                        QianfanModelFactory.PROVIDER,
-                        QianfanModelFactory.DEFAULT_EMBEDDING_MODEL_NAME,
-                        ZhipuModelFactory.PROVIDER,
-                        ZhipuModelFactory.DEFAULT_EMBEDDING_MODEL_NAME));
+                        OllamaModelFactory.DEFAULT_EMBEDDING_MODEL_NAME));
     }
 
     private static List<Parameter.Dependency> getModelPathDependency() {
@@ -126,7 +101,7 @@ public class EmbeddingModelParameterConfig extends ParameterConfig {
 
     private static List<Parameter.Dependency> getSecretKeyDependency() {
         return getDependency(EMBEDDING_MODEL_PROVIDER.getName(),
-                Lists.newArrayList(QianfanModelFactory.PROVIDER),
-                ImmutableMap.of(QianfanModelFactory.PROVIDER, DEMO));
+                Lists.newArrayList(OpenAiModelFactory.PROVIDER),
+                ImmutableMap.of(OpenAiModelFactory.PROVIDER, DEMO));
     }
 }

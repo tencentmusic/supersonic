@@ -66,7 +66,6 @@ import static java.util.Collections.singletonList;
 @Slf4j
 public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
 
-    public static final String ZHIPU = "bigmodel";
     private final OpenAiClient client;
     private final String baseUrl;
     private final String modelName;
@@ -192,9 +191,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
                 .responseFormat(responseFormat).seed(seed).user(user)
                 .parallelToolCalls(parallelToolCalls);
 
-        if (!(baseUrl.contains(ZHIPU))) {
-            requestBuilder.temperature(temperature);
-        }
+        requestBuilder.temperature(temperature);
 
         if (toolSpecifications != null && !toolSpecifications.isEmpty()) {
             requestBuilder.tools(toTools(toolSpecifications, strictTools));
