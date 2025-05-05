@@ -52,7 +52,7 @@ import static dev.langchain4j.model.openai.InternalOpenAiHelper.toOpenAiMessages
 import static dev.langchain4j.model.openai.InternalOpenAiHelper.toOpenAiResponseFormat;
 import static dev.langchain4j.model.openai.InternalOpenAiHelper.toTools;
 import static dev.langchain4j.model.openai.InternalOpenAiHelper.tokenUsageFrom;
-import static dev.langchain4j.model.openai.OpenAiModelName.GPT_3_5_TURBO;
+import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_3_5_TURBO;
 import static dev.langchain4j.spi.ServiceHelper.loadFactories;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.emptyList;
@@ -111,7 +111,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
                 .connectTimeout(timeout).readTimeout(timeout).writeTimeout(timeout).proxy(proxy)
                 .logRequests(logRequests).logResponses(logResponses).userAgent(DEFAULT_USER_AGENT)
                 .customHeaders(customHeaders).build();
-        this.modelName = getOrDefault(modelName, GPT_3_5_TURBO);
+        this.modelName = getOrDefault(modelName, GPT_3_5_TURBO.name());
         this.apiVersion = apiVersion;
         this.temperature = getOrDefault(temperature, 0.7);
         this.topP = topP;
@@ -130,7 +130,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
         this.strictTools = getOrDefault(strictTools, false);
         this.parallelToolCalls = parallelToolCalls;
         this.maxRetries = getOrDefault(maxRetries, 3);
-        this.tokenizer = getOrDefault(tokenizer, OpenAiTokenizer::new);
+        this.tokenizer = getOrDefault(tokenizer, () -> new OpenAiTokenizer(this.modelName));
         this.listeners = listeners == null ? emptyList() : new ArrayList<>(listeners);
     }
 

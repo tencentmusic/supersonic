@@ -9,6 +9,7 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import lombok.Builder;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class DifyAiChatModel implements ChatLanguageModel {
     private final Double temperature;
     private final Long timeOut;
 
+    @Setter
     private String userName;
 
     @Builder
@@ -54,7 +56,7 @@ public class DifyAiChatModel implements ChatLanguageModel {
     @Override
     public String generate(String message) {
         DifyResult difyResult = this.difyClient.generate(message, this.getUserName());
-        return difyResult.getAnswer().toString();
+        return difyResult.getAnswer();
     }
 
     @Override
@@ -67,7 +69,7 @@ public class DifyAiChatModel implements ChatLanguageModel {
             List<ToolSpecification> toolSpecifications) {
         ensureNotEmpty(messages, "messages");
         DifyResult difyResult =
-                this.difyClient.generate(messages.get(0).text(), this.getUserName());
+                this.difyClient.generate(messages.get(0).toString(), this.getUserName());
         System.out.println(difyResult.toString());
 
         if (!isNullOrEmpty(toolSpecifications)) {
@@ -84,12 +86,8 @@ public class DifyAiChatModel implements ChatLanguageModel {
                 toolSpecification != null ? singletonList(toolSpecification) : null);
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public String getUserName() {
-        return null == userName ? "zhaodongsheng" : userName;
+        return null == userName ? "admin" : userName;
     }
 
 }
