@@ -61,7 +61,7 @@ function runJavaService {
   fi
   export PATH=$JAVA_HOME/bin:$PATH
   command="-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08
-  -Dapp_name=${local_app_name} -Xms1024m -Xmx2048m $main_class"
+  -Dapp_name=${local_app_name} -Xms1024m -Xmx2048m -XX:+UseZGC -XX:+ZGenerational $main_class"
 
   mkdir -p $javaRunDir/logs
   java -Dspring.profiles.active="$profile" $command >/dev/null 2>$javaRunDir/logs/error.log &
