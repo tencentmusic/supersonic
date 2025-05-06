@@ -75,7 +75,7 @@ public class DateUtils {
     }
 
     public static String getBeforeDate(String currentDate, DatePeriodEnum datePeriodEnum) {
-        LocalDate specifiedDate = LocalDate.parse(currentDate, DEFAULT_DATE_FORMATTER2);
+        LocalDate specifiedDate = parseDate(currentDate);
         LocalDate startDate;
         switch (datePeriodEnum) {
             case MONTH:
@@ -93,7 +93,7 @@ public class DateUtils {
 
     public static String getBeforeDate(String currentDate, int intervalDay,
             DatePeriodEnum datePeriodEnum) {
-        LocalDate specifiedDate = LocalDate.parse(currentDate, DEFAULT_DATE_FORMATTER2);
+        LocalDate specifiedDate = parseDate(currentDate);
         LocalDate result = null;
         switch (datePeriodEnum) {
             case DAY:
@@ -161,11 +161,25 @@ public class DateUtils {
         return !timeString.equals("00:00:00");
     }
 
+    public static LocalDate parseDate(String timeString) {
+        DateTimeFormatter[] dateFormatters =
+                {DateTimeFormatter.ofPattern("yyyyMMdd"), DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                                DateTimeFormatter.ofPattern("yyyy/MM/dd"),
+                                DateTimeFormatter.ofPattern("yyyy-MM")};
+        for (DateTimeFormatter formatter : dateFormatters) {
+            try {
+                return LocalDate.parse(timeString, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+        return null;
+    }
+
     public static List<String> getDateList(String startDateStr, String endDateStr,
             DatePeriodEnum period) {
         try {
-            LocalDate startDate = LocalDate.parse(startDateStr);
-            LocalDate endDate = LocalDate.parse(endDateStr);
+            LocalDate startDate = parseDate(startDateStr);
+            LocalDate endDate = parseDate(endDateStr);
             List<String> datesInRange = new ArrayList<>();
             LocalDate currentDate = startDate;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -189,7 +203,7 @@ public class DateUtils {
     }
 
     public static boolean isAnyDateString(String value) {
-        List<String> formats = Arrays.asList("yyyy-MM-dd", "yyyy-MM", "yyyy/MM/dd");
+        List<String> formats = Arrays.asList("yyyy-MM-dd", "yyyy-MM", "yyyy/MM/dd", "yyyyMMdd");
         return isAnyDateString(value, formats);
     }
 

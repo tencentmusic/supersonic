@@ -36,9 +36,9 @@ public class ChatModelParameters {
             new Parameter("timeOut", "60", "超时时间(秒)", "", "number", MODULE_NAME);
 
     public static List<Parameter> getParameters() {
-        return Lists.newArrayList(CHAT_MODEL_PROVIDER, CHAT_MODEL_BASE_URL,
-                CHAT_MODEL_API_KEY, CHAT_MODEL_NAME, CHAT_MODEL_API_VERSION,
-                CHAT_MODEL_TEMPERATURE, CHAT_MODEL_TIMEOUT);
+        return Lists.newArrayList(CHAT_MODEL_PROVIDER, CHAT_MODEL_BASE_URL, CHAT_MODEL_API_KEY,
+                CHAT_MODEL_NAME, CHAT_MODEL_API_VERSION, CHAT_MODEL_TEMPERATURE,
+                CHAT_MODEL_TIMEOUT);
     }
 
     private static List<String> getCandidateProviders() {

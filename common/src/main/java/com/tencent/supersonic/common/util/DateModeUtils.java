@@ -242,10 +242,8 @@ public class DateModeUtils {
                 return String.format("%s >= '%s' and %s <= '%s'", dateField,
                         dateInfo.getStartDate(), dateField, dateInfo.getEndDate());
             }
-            LocalDate endData =
-                    LocalDate.parse(dateInfo.getEndDate(), DateTimeFormatter.ofPattern(DAY_FORMAT));
-            LocalDate startData = LocalDate.parse(dateInfo.getStartDate(),
-                    DateTimeFormatter.ofPattern(DAY_FORMAT));
+            LocalDate endData = DateUtils.parseDate(dateInfo.getEndDate());
+            LocalDate startData = DateUtils.parseDate(dateInfo.getStartDate());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(MONTH_FORMAT);
             return String.format("%s >= '%s' and %s <= '%s'", dateField,
                     startData.format(formatter), dateField, endData.format(formatter));
