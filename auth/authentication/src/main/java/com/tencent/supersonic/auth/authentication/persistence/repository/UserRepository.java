@@ -24,4 +24,6 @@ public interface UserRepository {
     void deleteUserTokenByName(String userName);
 
     void deleteUserToken(Long tokenId);
+
+    void deleteUser(long userId);
 }

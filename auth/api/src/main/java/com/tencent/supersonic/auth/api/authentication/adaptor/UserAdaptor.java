@@ -21,6 +21,8 @@ public interface UserAdaptor {
 
     void register(UserReq userReq);
 
+    void deleteUser(long userId);
+
     String login(UserReq userReq, HttpServletRequest request);
 
     String login(UserReq userReq, String appKey);

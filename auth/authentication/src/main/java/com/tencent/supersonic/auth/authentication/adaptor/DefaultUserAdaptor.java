@@ -92,6 +92,12 @@ public class DefaultUserAdaptor implements UserAdaptor {
     }
 
     @Override
+    public void deleteUser(long userId) {
+        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+        userRepository.deleteUser(userId);
+    }
+
+    @Override
     public String login(UserReq userReq, HttpServletRequest request) {
         TokenService tokenService = ContextUtils.getBean(TokenService.class);
         String appKey = tokenService.getAppKey(request);

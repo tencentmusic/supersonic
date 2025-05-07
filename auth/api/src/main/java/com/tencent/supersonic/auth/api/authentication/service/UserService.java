@@ -23,6 +23,8 @@ public interface UserService {
 
     void register(UserReq userCmd);
 
+    void deleteUser(long userId);
+
     String login(UserReq userCmd, HttpServletRequest request);
 
     String login(UserReq userCmd, String appKey);

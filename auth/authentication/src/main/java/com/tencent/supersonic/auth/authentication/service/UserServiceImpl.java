@@ -71,6 +71,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(long userId) {
+        ComponentFactory.getUserAdaptor().deleteUser(userId);
+    }
+
+    @Override
     public String login(UserReq userReq, HttpServletRequest request) {
         return ComponentFactory.getUserAdaptor().login(userReq, request);
     }
