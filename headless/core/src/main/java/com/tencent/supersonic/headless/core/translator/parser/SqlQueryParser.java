@@ -47,12 +47,16 @@ public class SqlQueryParser implements QueryParser {
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
         List<String> queryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
         Set<String> queryAliases = SqlSelectHelper.getAliasFields(sqlQuery.getSql());
+        Set<String> ontologyMetricsDimensions = Collections.synchronizedSet(new HashSet<String>());
         queryFields.removeAll(queryAliases);
         Ontology ontology = queryStatement.getOntology();
         OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);
+        Set<String> queryFieldsSet = new HashSet<>(queryFields);
+        ontologyQuery.getMetrics().forEach(m -> ontologyMetricsDimensions.add(m.getName()));
+        ontologyQuery.getDimensions().forEach(d -> ontologyMetricsDimensions.add(d.getName()));
         // check if there are fields not matched with any metric or dimension
-        if (queryFields.size() > ontologyQuery.getMetrics().size()
-                + ontologyQuery.getDimensions().size()) {
+
+        if (!queryFieldsSet.containsAll(ontologyMetricsDimensions)) {
             List<String> semanticFields = Lists.newArrayList();
             ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
             ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
