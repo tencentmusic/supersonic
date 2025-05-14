@@ -299,21 +299,22 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       return;
     }
 
-    const columnFields: any[] = columns.map((item: IDataSource.IExecuteSqlColumn) => {
+    const fieldMap = new Map(
+      fieldsClassifyList.map(field => [field.fieldName, field])
+    );
+    columns.forEach((item: IDataSource.IExecuteSqlColumn) => {
       const { type, nameEn, comment } = item;
-      const oldItem =
-        fieldsClassifyList.find((oItem) => {
-          return oItem.fieldName === item.nameEn;
-        }) || {};
-      return {
-        ...oldItem,
+      const existingField = fieldMap.get(nameEn);
+
+      fieldMap.set(nameEn, {
+        ...existingField,
         bizName: nameEn,
         fieldName: nameEn,
         dataType: type,
         comment,
-      };
+      });
     });
-    setFields(columnFields || []);
+    setFields(Array.from(fieldMap.values()));
   };
 
   const formatterIdentifiers = (identifiersList: any[] = []) => {
