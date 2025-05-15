@@ -15,7 +15,7 @@ public class StarrocksParametersBuilder extends DefaultParametersBuilder {
         List<DatabaseParameter> databaseParameters = new ArrayList<>();
         DatabaseParameter host = new DatabaseParameter();
         host.setComment("JDBC连接");
-        host.setValue("jdbc:mysql://localhost:3306/dbname");
+        host.setValue("jdbc:mysql://localhost:9030/dbname");
         host.setName("url");
         host.setPlaceholder("请输入JDBC连接串");
         databaseParameters.add(host);
