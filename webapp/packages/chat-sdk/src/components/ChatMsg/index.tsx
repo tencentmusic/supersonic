@@ -122,7 +122,7 @@ const ChatMsg: React.FC<Props> = ({
     }
 
     const isMetricPie =
-      metricFields.length > 0 &&
+      categoryField.length > 0 &&
       metricFields?.length === 1 &&
       (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 10) &&
       dataSource.every(item => item[metricFields[0].bizName] > 0);
