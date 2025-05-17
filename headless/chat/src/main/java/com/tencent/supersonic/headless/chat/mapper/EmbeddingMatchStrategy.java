@@ -167,7 +167,7 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
             variable.put("retrievedInfo", JSONObject.toJSONString(results));
 
             Prompt prompt = PromptTemplate.from(LLM_FILTER_PROMPT).apply(variable);
-            ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel();
+            ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatQueryContext.getRequest().getChatAppConfig().get("REWRITE_MULTI_TURN").getChatModelConfig());
             String response = chatLanguageModel.generate(prompt.toUserMessage().singleText());
 
             if (StringUtils.isBlank(response)) {
