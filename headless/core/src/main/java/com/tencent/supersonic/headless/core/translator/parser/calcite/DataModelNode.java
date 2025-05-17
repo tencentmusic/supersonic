@@ -14,6 +14,7 @@ import com.tencent.supersonic.headless.core.pojo.JoinRelation;
 import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.pojo.OntologyQuery;
 import com.tencent.supersonic.headless.core.translator.parser.Constants;
+import com.tencent.supersonic.headless.core.utils.SqlVariableParseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlDataTypeSpec;
 import org.apache.calcite.sql.SqlNode;
@@ -34,6 +35,10 @@ public class DataModelNode extends SemanticNode {
         if (dataModel.getModelDetail().getSqlQuery() != null
                 && !dataModel.getModelDetail().getSqlQuery().isEmpty()) {
             sqlTable = dataModel.getModelDetail().getSqlQuery();
+            // if model has sqlVariables, parse sqlVariables
+            if (Objects.nonNull(dataModel.getModelDetail().getSqlVariables()) || (CollectionUtils.isEmpty(dataModel.getModelDetail().getSqlVariables()))) {
+                sqlTable = SqlVariableParseUtils.parse(sqlTable, dataModel.getModelDetail().getSqlVariables(), Lists.newArrayList());
+            }
         } else if (dataModel.getModelDetail().getTableQuery() != null
                 && !dataModel.getModelDetail().getTableQuery().isEmpty()) {
             if (dataModel.getModelDetail().getDbType()
