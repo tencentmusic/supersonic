@@ -102,7 +102,7 @@ public class SemanticSchemaManager {
         modelDetail.getMeasures().addAll(getMeasureParams(d.getMeasures()));
         modelDetail.getDimensions().addAll(getDimensions(d.getDimensions()));
         modelDetail.getFields().addAll(d.getFields());
-
+        modelDetail.getSqlVariables().addAll(d.getSqlVariables());
         return dataModel;
     }
 
