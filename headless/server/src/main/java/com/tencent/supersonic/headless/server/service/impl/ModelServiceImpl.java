@@ -241,12 +241,28 @@ public class ModelServiceImpl implements ModelService {
 
     private void batchCreateDimension(ModelDO modelDO, User user) throws Exception {
         List<DimensionReq> dimensionReqs = ModelConverter.convertDimensionList(modelDO);
-        dimensionService.createDimensionBatch(dimensionReqs, user);
+        List<DimensionReq> dimensionToCreate = new ArrayList<>();
+        for (DimensionReq dimensionReq : dimensionReqs) {
+            DimensionResp dimensionResp =
+                    dimensionService.getDimension(dimensionReq.getBizName(), modelDO.getId());
+            if (dimensionResp == null) {
+                dimensionToCreate.add(dimensionReq);
+            }
+        }
+        dimensionService.createDimensionBatch(dimensionToCreate, user);
     }
 
     private void batchCreateMetric(ModelDO modelDO, User user) throws Exception {
         List<MetricReq> metricReqs = ModelConverter.convertMetricList(modelDO);
-        metricService.createMetricBatch(metricReqs, user);
+        List<MetricReq> metricToCreate = new ArrayList<>();
+        for (MetricReq metricReq : metricReqs) {
+            MetricResp metricResp =
+                    metricService.getMetric(modelDO.getId(), metricReq.getBizName());
+            if (metricResp == null) {
+                metricToCreate.add(metricReq);
+            }
+        }
+        metricService.createMetricBatch(metricToCreate, user);
     }
 
     private void checkParams(ModelReq modelReq) {

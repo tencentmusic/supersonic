@@ -439,9 +439,8 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         metricFilter.setBizName(bizName);
         metricFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = getMetrics(metricFilter);
-        MetricResp metricResp = null;
         if (CollectionUtils.isEmpty(metricResps)) {
-            return metricResp;
+            return null;
         }
         return metricResps.get(0);
     }
