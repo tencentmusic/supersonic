@@ -122,6 +122,11 @@
             <version>${mockito-inline.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.huaban</groupId>
+            <artifactId>jieba-analysis</artifactId>
+            <version>${jieba.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

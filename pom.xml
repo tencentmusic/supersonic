@@ -82,6 +82,7 @@
         <stax2.version>4.2.2</stax2.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
         <jgrapht.version>1.5.2</jgrapht.version>
+        <jieba.version>1.0.2</jieba.version>
     </properties>
 
     <dependencyManagement>
@@ -215,6 +216,11 @@
                 <groupId>org.jgrapht</groupId>
                 <artifactId>jgrapht-core</artifactId>
                 <version>${jgrapht.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.huaban</groupId>
+                <artifactId>jieba-analysis</artifactId>
+                <version>${jieba.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
