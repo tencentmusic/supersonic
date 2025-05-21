@@ -15,6 +15,7 @@
         <module>common</module>
         <module>launchers</module>
         <module>headless</module>
+        <module>message</module>
     </modules>
 
     <name>supersonic</name>

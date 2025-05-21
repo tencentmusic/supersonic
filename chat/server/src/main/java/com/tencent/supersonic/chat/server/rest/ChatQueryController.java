@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
@@ -16,6 +17,9 @@ import jakarta.validation.Valid;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +33,10 @@ public class ChatQueryController {
     @Autowired
     private ChatQueryService chatQueryService;
 
+    @Autowired
+    @Qualifier("supersonicKafkaTemplate")
+    private KafkaTemplate<String, ChatParseReq> kafkaTemplate;
+
     @PostMapping("search")
     public Object search(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) {
@@ -40,7 +48,9 @@ public class ChatQueryController {
     public Object parse(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         chatParseReq.setUser(UserHolder.findUser(request, response));
-        return chatQueryService.parse(chatParseReq);
+        kafkaTemplate.send("supersonic", chatParseReq);
+        return ResponseEntity.ok("请求已接收，正在排队处理...");
+//        return chatQueryService.parse(chatParseReq);
     }
 
     @PostMapping("execute")

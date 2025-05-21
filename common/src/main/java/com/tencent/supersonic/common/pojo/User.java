@@ -1,5 +1,6 @@
 package com.tencent.supersonic.common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,6 +52,7 @@ public class User implements Serializable {
         return StringUtils.isBlank(displayName) ? name : displayName;
     }
 
+    @JsonIgnore
     public boolean isSuperAdmin() {
         return isAdmin != null && isAdmin == 1;
     }
