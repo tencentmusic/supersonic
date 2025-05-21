@@ -1,0 +1,146 @@
+{
+    "name": "Meetings",
+    "bizName": "Meetings",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT meeting_id, client_id, meeting_outcome, meeting_type, billable_yn, start_date_time, end_date_time, purpose_of_meeting, other_details FROM Meetings",
+        "identifiers": [
+            {
+                "name": "meeting_id",
+                "type": "primary",
+                "bizName": "meeting_id",
+                "isCreateDimension": 0,
+                "fieldName": "meeting_id"
+            },
+            {
+                "name": "client_id",
+                "type": "foreign",
+                "bizName": "client_id",
+                "isCreateDimension": 0,
+                "fieldName": "client_id"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "meeting_outcome",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "meeting_outcome",
+                "isTag": 0,
+                "fieldName": "meeting_outcome"
+            },
+            {
+                "name": "meeting_type",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "meeting_type",
+                "isTag": 0,
+                "fieldName": "meeting_type"
+            },
+            {
+                "name": "billable_yn",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "billable_yn",
+                "isTag": 0,
+                "fieldName": "billable_yn"
+            },
+            {
+                "name": "start_date_time",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "start_date_time",
+                "isTag": 0,
+                "fieldName": "start_date_time"
+            },
+            {
+                "name": "end_date_time",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "end_date_time",
+                "isTag": 0,
+                "fieldName": "end_date_time"
+            },
+            {
+                "name": "purpose_of_meeting",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "purpose_of_meeting",
+                "isTag": 0,
+                "fieldName": "purpose_of_meeting"
+            },
+            {
+                "name": "other_details",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "other_details",
+                "isTag": 0,
+                "fieldName": "other_details"
+            }
+        ],
+        "measures": [
+            {
+                "name": "meeting_id",
+                "agg": "SUM",
+                "bizName": "meeting_id",
+                "isCreateDimension": 1
+            },
+            {
+                "name": "client_id",
+                "agg": "SUM",
+                "bizName": "client_id",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "meeting_outcome"
+            },
+            {
+                "fieldName": "meeting_type"
+            },
+            {
+                "fieldName": "billable_yn"
+            },
+            {
+                "fieldName": "start_date_time"
+            },
+            {
+                "fieldName": "end_date_time"
+            },
+            {
+                "fieldName": "purpose_of_meeting"
+            },
+            {
+                "fieldName": "other_details"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

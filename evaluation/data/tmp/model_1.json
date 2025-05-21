@@ -1,0 +1,67 @@
+{
+    "name": "Staff",
+    "bizName": "Staff",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT staff_id, agency_id, staff_details FROM Staff",
+        "identifiers": [
+            {
+                "name": "staff_id",
+                "type": "primary",
+                "bizName": "staff_id",
+                "isCreateDimension": 0,
+                "fieldName": "staff_id"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "staff_details",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "staff_details",
+                "isTag": 0,
+                "fieldName": "staff_details"
+            }
+        ],
+        "measures": [
+            {
+                "name": "staff_id",
+                "agg": "SUM",
+                "bizName": "staff_id",
+                "isCreateDimension": 1
+            },
+            {
+                "name": "agency_id",
+                "agg": "SUM",
+                "bizName": "agency_id",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "staff_details"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

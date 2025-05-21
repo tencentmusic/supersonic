@@ -1,0 +1,114 @@
+{
+  "name": "公司品牌历年收入",
+  "bizName": "company_brand_revenue",
+  "description": "公司品牌历年收入",
+  "sensitiveLevel": 0,
+  "databaseId": 1,
+  "domainId": 4,
+  "modelDetail": {
+    "queryType": "sql_query",
+    "sqlQuery": "SELECT imp_date,year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year FROM company_brand_revenue",
+    "identifiers": [
+      {
+        "name": "品牌id",
+        "type": "foreign",
+        "bizName": "brand_id",
+        "isCreateDimension": 0,
+        "fieldName": "brand_id"
+      }
+    ],
+    "dimensions": [
+      {
+        "name": "",
+        "type": "time",
+        "dateFormat": "yyyy-MM-dd",
+        "typeParams": {
+          "isPrimary": "false",
+          "timeGranularity": "none"
+        },
+        "isCreateDimension": 0,
+        "bizName": "imp_date",
+        "isTag": 0,
+        "fieldName": "imp_date"
+      },
+      {
+        "name": "年份",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "year_time",
+        "isTag": 0,
+        "fieldName": "year_time"
+      }
+    ],
+    "measures": [
+      {
+        "name": "营收",
+        "agg": "SUM",
+        "bizName": "revenue",
+        "isCreateMetric": 1
+      },
+      {
+        "name": "利润",
+        "agg": "SUM",
+        "bizName": "profit",
+        "isCreateMetric": 1
+      },
+      {
+        "name": "营收同比增长",
+        "agg": "SUM",
+        "bizName": "revenue_growth_year_on_year",
+        "isCreateMetric": 1
+      },
+      {
+        "name": "利润同比增长",
+        "agg": "SUM",
+        "bizName": "profit_growth_year_on_year",
+        "isCreateMetric": 1
+      }
+    ],
+    "fields": [
+      {
+        "fieldName": "brand_id"
+      },
+      {
+        "fieldName": "imp_date"
+      },
+      {
+        "fieldName": "year_time"
+      }
+    ],
+    "sqlVariables": []
+  },
+  "viewers": [
+    "admin",
+    "tom",
+    "jack"
+  ],
+  "viewOrgs": [
+    "1"
+  ],
+  "admins": [
+    "admin"
+  ],
+  "adminOrgs": [],
+  "viewer": "admin,tom,jack",
+  "viewOrg": "1",
+  "timeDimension": [
+    {
+      "name": "",
+      "type": "time",
+      "dateFormat": "yyyy-MM-dd",
+      "typeParams": {
+        "isPrimary": "false",
+        "timeGranularity": "none"
+      },
+      "isCreateDimension": 0,
+      "bizName": "imp_date",
+      "isTag": 0,
+      "fieldName": "imp_date"
+    }
+  ],
+  "adminOrg": "",
+  "admin": "admin"
+}

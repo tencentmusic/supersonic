@@ -1,0 +1,150 @@
+{
+  "name": "公司",
+  "bizName": "company",
+  "description": "公司",
+  "sensitiveLevel": 0,
+  "databaseId": 1,
+  "domainId": 4,
+  "modelDetail": {
+    "queryType": "sql_query",
+    "sqlQuery": "SELECT imp_date,company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count FROM company",
+    "identifiers": [
+      {
+        "name": "公司id",
+        "type": "primary",
+        "bizName": "company_id",
+        "isCreateDimension": 0,
+        "fieldName": "company_id"
+      }
+    ],
+    "dimensions": [
+      {
+        "name": "",
+        "type": "time",
+        "dateFormat": "yyyy-MM-dd",
+        "typeParams": {
+          "isPrimary": "false",
+          "timeGranularity": "none"
+        },
+        "isCreateDimension": 0,
+        "bizName": "imp_date",
+        "isTag": 0,
+        "fieldName": "imp_date"
+      },
+      {
+        "name": "公司名称",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "company_name",
+        "isTag": 0,
+        "fieldName": "company_name"
+      },
+      {
+        "name": "总部地点",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "headquarter_address",
+        "isTag": 0,
+        "fieldName": "headquarter_address"
+      },
+      {
+        "name": "公司成立时间",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "company_established_time",
+        "isTag": 0,
+        "fieldName": "company_established_time"
+      },
+      {
+        "name": "创始人",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "founder",
+        "isTag": 0,
+        "fieldName": "founder"
+      },
+      {
+        "name": "首席执行官",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "ceo",
+        "isTag": 0,
+        "fieldName": "ceo"
+      }
+    ],
+    "measures": [
+      {
+        "name": "年营业额",
+        "agg": "SUM",
+        "bizName": "annual_turnover",
+        "isCreateMetric": 1
+      },
+      {
+        "name": "员工数",
+        "agg": "SUM",
+        "bizName": "employee_count",
+        "isCreateMetric": 1
+      }
+    ],
+    "fields": [
+      {
+        "fieldName": "company_id"
+      },
+      {
+        "fieldName": "imp_date"
+      },
+      {
+        "fieldName": "company_established_time"
+      },
+      {
+        "fieldName": "founder"
+      },
+      {
+        "fieldName": "headquarter_address"
+      },
+      {
+        "fieldName": "ceo"
+      },
+      {
+        "fieldName": "company_name"
+      }
+    ],
+    "sqlVariables": []
+  },
+  "viewers": [
+    "admin",
+    "tom",
+    "jack"
+  ],
+  "viewOrgs": [
+    "1"
+  ],
+  "admins": [
+    "admin"
+  ],
+  "adminOrgs": [],
+  "viewer": "admin,tom,jack",
+  "viewOrg": "1",
+  "timeDimension": [
+    {
+      "name": "",
+      "type": "time",
+      "dateFormat": "yyyy-MM-dd",
+      "typeParams": {
+        "isPrimary": "false",
+        "timeGranularity": "none"
+      },
+      "isCreateDimension": 0,
+      "bizName": "imp_date",
+      "isTag": 0,
+      "fieldName": "imp_date"
+    }
+  ],
+  "adminOrg": "",
+  "admin": "admin"
+}

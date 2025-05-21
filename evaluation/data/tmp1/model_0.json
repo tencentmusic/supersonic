@@ -1,0 +1,109 @@
+{
+    "name": "headphone",
+    "bizName": "headphone",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT Headphone_ID, Model, Class, Driver-matched_dB, Construction, Earpads, Price FROM headphone",
+        "identifiers": [
+            {
+                "name": "Headphone_ID",
+                "type": "primary",
+                "bizName": "Headphone_ID",
+                "isCreateDimension": 0,
+                "fieldName": "Headphone_ID"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "Model",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Model",
+                "isTag": 0,
+                "fieldName": "Model"
+            },
+            {
+                "name": "Class",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Class",
+                "isTag": 0,
+                "fieldName": "Class"
+            },
+            {
+                "name": "Construction",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Construction",
+                "isTag": 0,
+                "fieldName": "Construction"
+            },
+            {
+                "name": "Earpads",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Earpads",
+                "isTag": 0,
+                "fieldName": "Earpads"
+            }
+        ],
+        "measures": [
+            {
+                "name": "Headphone_ID",
+                "agg": "SUM",
+                "bizName": "Headphone_ID",
+                "isCreateDimension": 1
+            },
+            {
+                "name": "Driver-matched_dB",
+                "agg": "SUM",
+                "bizName": "Driver-matched_dB",
+                "isCreateDimension": 1
+            },
+            {
+                "name": "Price",
+                "agg": "SUM",
+                "bizName": "Price",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "Model"
+            },
+            {
+                "fieldName": "Class"
+            },
+            {
+                "fieldName": "Construction"
+            },
+            {
+                "fieldName": "Earpads"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

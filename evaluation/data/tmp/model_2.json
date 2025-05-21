@@ -1,0 +1,86 @@
+{
+    "name": "Clients",
+    "bizName": "Clients",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT client_id, agency_id, sic_code, client_details FROM Clients",
+        "identifiers": [
+            {
+                "name": "client_id",
+                "type": "primary",
+                "bizName": "client_id",
+                "isCreateDimension": 0,
+                "fieldName": "client_id"
+            },
+            {
+                "name": "agency_id",
+                "type": "foreign",
+                "bizName": "agency_id",
+                "isCreateDimension": 0,
+                "fieldName": "agency_id"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "sic_code",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "sic_code",
+                "isTag": 0,
+                "fieldName": "sic_code"
+            },
+            {
+                "name": "client_details",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "client_details",
+                "isTag": 0,
+                "fieldName": "client_details"
+            }
+        ],
+        "measures": [
+            {
+                "name": "client_id",
+                "agg": "SUM",
+                "bizName": "client_id",
+                "isCreateDimension": 1
+            },
+            {
+                "name": "agency_id",
+                "agg": "SUM",
+                "bizName": "agency_id",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "sic_code"
+            },
+            {
+                "fieldName": "client_details"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

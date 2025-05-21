@@ -1,0 +1,90 @@
+How many agencies do we have?
+Count the number of agencies.
+Show all agency ids and details.
+What are all the agency ids and details?
+Show the number of clients.
+How many clients are there?
+List all client ids and client details.
+What are all the client ids and details?
+Show agency ids and the number of clients for each agency.
+How many clients does each agency have?
+What is the agency id and details with most number of clients?
+Return the agency id and details for the agency with the greatest number of clients.
+Show agency ids and details with at least 2 clients.
+What are the agency ids and details agencies with at least 2 clients?
+Show agency details for client with detail 'Mac'.
+What are the agency details for clients with the detail Mac?
+Show details for all clients and the details of their corresponding agents.
+What are the client details for each client and the corresponding details of their agencies?
+Show all sic codes and the number of clients with each code.
+How many clients are there for each sic code?
+Show all client ids and details with sic code "Bad".
+What are the client ideas and details for clients with the sic code Bad?
+Show all agency ids and details for agencies with a client.
+What are the agency ids and agency details for all agencies who have a client?
+Show all agency ids without any client.
+What are ids of agencies that do not have any clients?
+How many invoices do we have?
+Count the number of invoices.
+Show ids, status codes, and details for all invoices for clients.
+What are the ids, statuses, and details for all invoices?
+Show all client ids and the number of invoices for each client.
+How many invoices are there for each client id?
+List the client id and detail with most number of invoices.
+What are the client id and details for the client with the most invoices?
+What are client ids for clients with at least 2 invoices.
+Return the client ids for clients with two or more invoices?
+Show all invoice status codes and the number of invoices with each status.
+How many invoices are there for each status code?
+What is the invoice status code with most number of invoices.
+Return the invoice status that has the most invoices.
+Show all invoice status codes and details and the corresponding client id and details and agency id and details.
+What are the invoice status, invoice details, and corresponding client ids and details and agency id and details?
+List all meeting type codes and details.
+What are all meeting types and other details?
+Show all meeting outcomes and purposes.
+What are all meeting outcomes and purposes?
+Show all payment ids and details for invoices whose status is 'Working'.
+What are all payment ids and payment details for invoices with status Working?
+Show all invoice ids and statuses without a payment.
+What are the invoice ids and statuses for invoices without a payment?
+How many payments do we have?
+Count the number of payments.
+List all payment ids and its corresponding invoice ids and details.
+What are the payment ids, invoice ids, and payment details for all payments?
+Show all the different invoice ids and statuses of the payments
+What are the distinct invoice ids and statuses for all payments?
+Show all invoice ids and the number of payments for each invoice.
+How many payments are there for each invoice?
+What is the invoice id, status code, and details for the invoice with most number of payments.
+Return the invoice ids, statuses, and details for invoices with the most payments?
+How many staff do we have?
+Count the number of staff.
+Show the agency ids and the number of staff in each agent?
+Return the agency ids and number of staff in each.
+What is the agent id and details for the agency with most staff?
+Return the id and detail for the agency with the most staff.
+Show meeting outcome codes and the number of meeting in each outcome.
+How many meetings had each meeting outcome?
+List the client ids and the number of meeting for each client.
+How many meetings are there for each client id?
+Show the meeting type codes and the number of meeting for each client.
+How many meetings are there for each meeting type?
+Show all meeting ids, meeting outcomes, meeting types and the details of the client atttending it.
+What are the meeting ids, meeting outcomes, meeting types, and client details for all meetings?
+Show the meeting ids and the number of staff in each meeting.
+Count the number of staff in each meeting by meeting id.
+Show the staff id and the number of meetings attended by the staff who attended some meeting but had the lowest attendance.
+What is the staff id of the staff who attended the least meetings but attended some meeting?
+How many staff have attended a meeting?
+Return the number of distinct staff who have attended a meeting?
+How many staff did not attend any meeting?
+Count the number of staff who did not attend any meeting.
+What are the ids and details of the clients who have attended any meeting or have any invoice?
+Return the ids and details of clients who have attended a meeting or had an invoice.
+What are the ids and details of the staff who have attended at least 1 meetings and have the detail with letter 's'?
+Return the ids and details of staff who have attended at least 1 meeting and have an s in their staff details?
+What are the id, sic code and agency id of the client who has attended 1 meeting and has any invoice.
+Return the ids, sic codes, and agency ids of clients who have attended 1 meeting and had an invoice.
+List the start time, end time of each meeting, and the corresponding client detail and staff detail.
+What are the start and end times of each meeting, as well as the corresponding client and staff details the attendees?

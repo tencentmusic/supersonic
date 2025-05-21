@@ -21,6 +21,8 @@
 
 from __future__ import print_function
 
+import glob
+
 import sqlparse
 import logging
 import os, sys
@@ -31,9 +33,11 @@ import argparse
 import yaml
 import re
 
+from build_models import build
 from process_sql import tokenize, get_schema, get_tables_with_alias, Schema, get_sql
 from build_pred_result import read_query,get_pred_result
 from build_tables import build_table
+from generate_model_json import build_jsons
 
 # Flag to disable value evaluation
 DISABLE_VALUE = True
@@ -895,16 +899,16 @@ def build_foreign_key_map_from_json(table):
 
 def get_evaluation_result(time_cost):
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    config_file=current_directory+"/config/config.yaml"
+    config_file=current_directory+"\config\config.yaml"
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
-    db_dir=current_directory+"/data"
-    db_path=current_directory+"/data/"
+    db_dir=current_directory+"\data"
+    db_path=current_directory+"\data\\"
     db_file=db_path+"internet.db"
-    pred = current_directory+"/data/"+"pred_example_dusql.txt"
-    gold = current_directory+"/data/"+"gold_example_dusql.txt"
-    table= current_directory+"/data/"+"tables_dusql.json"
-    query_path=current_directory+"/data/"+"internet.txt"
+    pred = current_directory+"\data\\"+"\pred_example_dusql.txt"
+    gold = current_directory+"\data\\"+"gold_example_dusql.txt"
+    table= current_directory+"\data\\"+"tables_dusql.json"
+    query_path=current_directory+"\data\\"+"internet.txt"
     etype="exec"
     kmaps = build_foreign_key_map_from_json(table)
 
@@ -928,10 +932,19 @@ def remove_unused_file():
         os.remove(pred_file)
         print("pred_file removed!")
 
+    model_json_files = glob.glob(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "internet_json", "model_[0-9]*.json"))
+    for model_json_file in model_json_files:
+        if os.path.exists(model_json_file):
+            os.remove(model_json_file)
+    print("all model json files removed!")
+
 if __name__ == "__main__":
-    build_table()
-    time_cost=get_pred_result()
-    get_evaluation_result(time_cost)
+    build_table()  # 使用.sql文件构建缓存数据库.sqlite
+    build_jsons()  # 对所缓存的.sqlite的每一张table提取schema并生成可以向系统发送POST的json格式
+    dic_info = build()  # 向系统发送POST，在系统中构建Headless模型、数据集、领域。
+    time_cost=get_pred_result(dic_info)
+    # get_evaluation_result(time_cost)
     remove_unused_file()
 
 

@@ -1,0 +1,97 @@
+{
+    "name": "store",
+    "bizName": "store",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT Store_ID, Name, Neighborhood, Parking, Date_Opened FROM store",
+        "identifiers": [
+            {
+                "name": "Store_ID",
+                "type": "primary",
+                "bizName": "Store_ID",
+                "isCreateDimension": 0,
+                "fieldName": "Store_ID"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "Name",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Name",
+                "isTag": 0,
+                "fieldName": "Name"
+            },
+            {
+                "name": "Neighborhood",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Neighborhood",
+                "isTag": 0,
+                "fieldName": "Neighborhood"
+            },
+            {
+                "name": "Parking",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Parking",
+                "isTag": 0,
+                "fieldName": "Parking"
+            },
+            {
+                "name": "Date_Opened",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "Date_Opened",
+                "isTag": 0,
+                "fieldName": "Date_Opened"
+            }
+        ],
+        "measures": [
+            {
+                "name": "Store_ID",
+                "agg": "SUM",
+                "bizName": "Store_ID",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "Name"
+            },
+            {
+                "fieldName": "Neighborhood"
+            },
+            {
+                "fieldName": "Parking"
+            },
+            {
+                "fieldName": "Date_Opened"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

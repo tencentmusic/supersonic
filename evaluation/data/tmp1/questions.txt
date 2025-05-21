@@ -1,0 +1,90 @@
+How many authors do we have?
+Count the number of authors.
+How many papers do we have?
+Count the number of papers.
+How many affiliations do we have?
+Count the number of affiliations.
+How many papers do we have in NAACL 2000?
+Count the number of papers in NAACL 2000.
+How many papers are published in year 2009 by Columbia University?
+Count the number of papers published by Columbia University in 2009.
+List names and addresses for all affiliations.
+What are the names and addresses for all affiliations?
+List all venues and years for papers ordered by year.
+What are the distinct venues for papers, ordered by year?
+Find the titles and paper IDs for papers written by Harvard University.
+What are the titles and paper ids for papers written in affiliation with Harvard University?
+Find all papers with titles and paper IDs written by Mckeown.
+What are the titles and paper ids for papers written by Mckeown?
+Find all papers with titles and paper IDs collaborated by Stanford University and Columbia University.
+What are the titles and paper ids for papers which were affiliated with both Stanford and Columbia University?
+Find all papers with titles and paper IDs co-authored by Mckeown, Kathleen and Rambow, Owen.
+What are the titles and paper ids co-authored by Mckeown, Kathleen and Rambow, Owen?
+Find the titles and paper IDs for papers which have Mckeown but not Rambow in author list.
+What are the titles and paper ids which have Mckeown as an author, but not Rambow?
+Find the titles and paper IDs for papers which have Mckeown, Kathleen or Rambow, Owen in author list.
+What are the titles and paper ids for papers that have Mckeown, Kathleen or Rambow, Owen in their author list?
+List the names of all authors and their number of papers in descending order by number of papers.
+How many papers did each author publish, ordered by number of papers?
+List all affiliations with ascending ordered number of papers.
+What are the names of all affiliations, ordered by number of papers?
+List names of all authors who have more than 50 papers.
+What are the names of all authors who have more than 50 papers?
+List names of all authors who have only 1 paper.
+What are the names of authors who have exactly 1 paper?
+What is the venue and year with the most number of publications?
+What was the venue and year with the most publications?
+What is the venue with the least number of publications?
+Which venue has the fewest publications?
+How many papers cite paper with id A00-1002?
+Count the number of papers which cited a paper with id A00-1002.
+How many reference papers does paper with id D12-1027 have?
+Count the number of references the paper with id D12-1027 has.
+What is the id and the number of citations of the most cited paper?
+Give the id and the number of citations of the most cited paper.
+Give the title of the paper which cites most number of papers?
+What is the title of the paper which cites the most other papers?
+List top 10 most cited papers and their numbers of citations.
+What are the 10 most cited papers, and how many citations did each have?
+How many citations does Mckeown , Kathleen have ?
+Count the number of citations Mckeown , Kathleen has .
+How many papers does Mckeown , Kathleen cite ?
+Count the number of papers Mckeown , Kathleen has cited .
+Find the name and number of citations of the author who has most citations among all authors?
+What is the name and number of citations of the author with the greatest number of citations among authors?
+What are the venues and years where Mckeown , Kathleen had papers ?
+Which venues and years did Mckeown , Kathleen have papers ?
+What are the venues and years where Columbia University had papers ?
+Which venues and years did Columbia University have papers ?
+Which author had the most papers in the year 2009?
+What is the name of the author with the most papers in 2009?
+What are the names of the top 3 affiliations that have the most papers in year 2009?
+Which 3 affiliations had the most papers in 2009?
+How many papers does Columbia University have in or before 2009 ?
+Count the number of papers Columbia University had during or prior to 2009 .
+How many papers does Stanford University have between 2000 and 2009?
+Count the number of papers Stanford University had between 2000 and 2009.
+What is the title of the paper that has most number of authors?
+Give the title of the paper with the most authors.
+How many collaborators has Mckeown , Kathleen had ?
+Count the number of collaborators that Mckeown , Kathleen has had .
+Who has the most papers co-authored with Mckeown , Kathleen ?
+What is the name of the author who has co-authored the most papers with Mckeown , Kathleen ?
+Find the id of the papers whose title has the key word 'translation'.
+What are the ids for papers with titles containing 'translation'?
+Find the id and title of the papers that are never cited by others.
+What are the ids and titles for papers that have never been cited?
+Find the name of the affiliation whose address contains 'China' and publishes the greatest number of papers.
+What is the name of the affiliation which publishes the greatest number of papers among those whose address contains 'China'.
+Find the number of papers published in different conferences each year.
+How many papers are published in each venue in each year?
+Find the total number of papers for each affiliation.
+How many papers has each affiliation published?
+Find the titles of papers that have more than 50 citations.
+What are the titles for papers with more than 50 citations?
+Find the number of authors who did not publish any paper that is cited more than 50 times.
+How many authors have not published a paper with more than 50 citations?
+Find the names of authors who published some paper on NAACL and ACL in the year 2009.
+What are the names of authors who published in both NAACL and ACL in 2009?
+Find the name of authors who have never published a paper in ACL.
+What are the names of authors who have not published a paper in ACL?

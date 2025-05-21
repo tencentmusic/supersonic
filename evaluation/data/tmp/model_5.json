@@ -1,0 +1,67 @@
+{
+    "name": "Payments",
+    "bizName": "Payments",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT payment_id, invoice_id, payment_details FROM Payments",
+        "identifiers": [
+            {
+                "name": "invoice_id",
+                "type": "foreign",
+                "bizName": "invoice_id",
+                "isCreateDimension": 0,
+                "fieldName": "invoice_id"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "payment_details",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "payment_details",
+                "isTag": 0,
+                "fieldName": "payment_details"
+            }
+        ],
+        "measures": [
+            {
+                "name": "payment_id",
+                "agg": "SUM",
+                "bizName": "payment_id",
+                "isCreateDimension": 1
+            },
+            {
+                "name": "invoice_id",
+                "agg": "SUM",
+                "bizName": "invoice_id",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "payment_details"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

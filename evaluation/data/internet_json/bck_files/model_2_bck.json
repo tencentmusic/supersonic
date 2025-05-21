@@ -1,0 +1,130 @@
+{
+  "name": "品牌",
+  "bizName": "brand",
+  "description": "品牌",
+  "sensitiveLevel": 0,
+  "databaseId": 1,
+  "domainId": 4,
+  "modelDetail": {
+    "queryType": "sql_query",
+    "sqlQuery": "SELECT  imp_date,brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital FROM brand",
+    "identifiers": [
+      {
+        "name": "品牌id",
+        "type": "primary",
+        "bizName": "brand_id",
+        "isCreateDimension": 0,
+        "fieldName": "brand_id"
+      },
+      {
+        "name": "公司id",
+        "type": "foreign",
+        "bizName": "company_id",
+        "isCreateDimension": 0,
+        "fieldName": "company_id"
+      }
+    ],
+    "dimensions": [
+      {
+        "name": "",
+        "type": "time",
+        "dateFormat": "yyyy-MM-dd",
+        "typeParams": {
+          "isPrimary": "false",
+          "timeGranularity": "none"
+        },
+        "isCreateDimension": 0,
+        "bizName": "imp_date",
+        "isTag": 0,
+        "fieldName": "imp_date"
+      },
+      {
+        "name": "品牌名称",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "brand_name",
+        "isTag": 0,
+        "fieldName": "brand_name"
+      },
+      {
+        "name": "品牌成立时间",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "brand_established_time",
+        "isTag": 0,
+        "fieldName": "brand_established_time"
+      },
+      {
+        "name": "法定代表人",
+        "type": "categorical",
+        "dateFormat": "yyyy-MM-dd",
+        "isCreateDimension": 1,
+        "bizName": "legal_representative",
+        "isTag": 0,
+        "fieldName": "legal_representative"
+      }
+    ],
+    "measures": [
+      {
+        "name": "注册资本",
+        "agg": "SUM",
+        "bizName": "registered_capital",
+        "isCreateMetric": 1
+      }
+    ],
+    "fields": [
+      {
+        "fieldName": "company_id"
+      },
+      {
+        "fieldName": "brand_id"
+      },
+      {
+        "fieldName": "brand_name"
+      },
+      {
+        "fieldName": "imp_date"
+      },
+      {
+        "fieldName": "brand_established_time"
+      },
+      {
+        "fieldName": "legal_representative"
+      }
+    ],
+    "sqlVariables": []
+  },
+  "viewers": [
+    "admin",
+    "tom",
+    "jack"
+  ],
+  "viewOrgs": [
+    "1"
+  ],
+  "admins": [
+    "admin"
+  ],
+  "adminOrgs": [],
+  "viewer": "admin,tom,jack",
+  "viewOrg": "1",
+  "timeDimension": [
+    {
+      "name": "",
+      "type": "time",
+      "dateFormat": "yyyy-MM-dd",
+      "typeParams": {
+        "isPrimary": "false",
+        "timeGranularity": "none"
+      },
+      "isCreateDimension": 0,
+      "bizName": "imp_date",
+      "isTag": 0,
+      "fieldName": "imp_date"
+    }
+  ],
+  "adminOrg": "",
+  "admin": "admin"
+}

@@ -1,0 +1,876 @@
+select * from tablea 
+select * from tablea 
+with t_24 as (SELECT `name`  FROM  `staff`) SELECT DISTINCT name FROM t_24 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_24 as (SELECT `Conference_ID`  FROM  `conference_participation`) SELECT name, COUNT(Conference_ID) AS `_conference_count_` FROM t_24 GROUP BY name LIMIT 1000
+with t_24 as (SELECT `Conference_ID`  FROM  `conference_participation`) SELECT name, COUNT(Conference_ID) AS `_occurrence_count_` FROM t_24 GROUP BY name LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_24 as (SELECT `t2`.`name`, `t3`.`Location`  FROM  (SELECT `staff_ID`, `name`, `Age`, `Nationality`, `Institution_ID`  FROM  `staff`) AS `t2`  INNER JOIN (SELECT *  FROM  `institution`) AS `t3` ON `t2`.`Institution_ID` = `t3`.`Institution_ID`) SELECT name, Location FROM t_24 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_24 as (SELECT `staff_ID`, `name`  FROM  `staff`) SELECT name FROM t_24 WHERE staff_ID IS NULL LIMIT 1000
+with t_24 as (SELECT `staff_ID`, `name`  FROM  `staff`) SELECT name FROM t_24 WHERE staff_ID IS NULL LIMIT 1000
+select * from tablea 
+WITH t_24 AS (SELECT `role`, `staff_ID` FROM `conference_participation`), avg_age AS (SELECT AVG(2025 - CAST(staff_ID AS INT)) AS _average_age_ FROM t_24 WHERE role = 'staff') SELECT name FROM t_24, avg_age WHERE role = 'staff' AND (2025 - CAST(staff_ID AS INT)) > _average_age_ LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_24 as (SELECT `t3`.`role`, `t2`.`name`  FROM  (SELECT `staff_ID`, `name`, `Age`, `Nationality`, `Institution_ID`  FROM  `staff`) AS `t2`  INNER JOIN (SELECT `Conference_ID`, `staff_ID`, `role`  FROM  `conference_participation`) AS `t3` ON `t2`.`staff_ID` = `t3`.`staff_ID`) SELECT DISTINCT c.name FROM t_24 c JOIN t_24 s ON c.staff_ID = s.staff_ID WHERE s.role = 'Canada' LIMIT 1000
+with t_24 as (SELECT `Conference_ID`  FROM  `conference_participation`) SELECT DISTINCT s1.name FROM t_24 s1 JOIN t_24 s2 ON s1.staff_ID = s2.staff_ID AND s1.Conference_ID = s2.Conference_ID WHERE s1.Conference_ID IS NOT NULL AND s2.Conference_ID IS NOT NULL LIMIT 1000
+select * from tablea 
+with t_24 as (SELECT `Institution_ID`, `name`  FROM  `staff`) SELECT name FROM t_24 WHERE Institution_ID = 'ACL' INTERSECT SELECT name FROM t_24 WHERE Institution_ID = 'Naccl' LIMIT 1000
+WITH t_24 AS (SELECT `Conference_ID` FROM `conference_participation`), acl_participants AS (SELECT name FROM t_24 WHERE Conference_ID = 'ACL'), naccl_participants AS (SELECT name FROM t_24 WHERE Conference_ID = 'NACCL') SELECT a.name FROM acl_participants a INNER JOIN naccl_participants n ON a.name = n.name LIMIT 1000
+with t_24 as (SELECT `Conference_ID`  FROM  `conference_participation`) SELECT DISTINCT name FROM t_24 WHERE Conference_ID LIKE '2003%' OR Conference_ID LIKE '2004%' LIMIT 1000
+with t_24 as (SELECT `Conference_ID`  FROM  `conference_participation`) SELECT DISTINCT name FROM t_24 WHERE Conference_ID LIKE '2003%' OR Conference_ID LIKE '2004%' LIMIT 1000
+select * from tablea 
+with t_24 as (SELECT `Conference_ID`  FROM  `conference_participation`) SELECT name, Conference_ID AS `_year_`, COUNT(Conference_ID) AS `_number_of_participants_` FROM t_24 GROUP BY Conference_ID, name LIMIT 1000
+WITH t_24 AS (SELECT `Conference_ID` FROM `conference_participation`), conference_counts AS (SELECT name AS _conference_name_, COUNT(Conference_ID) AS _attendant_count_ FROM t_24 GROUP BY name) SELECT _conference_name_ FROM conference_counts ORDER BY _attendant_count_ DESC LIMIT 2
+WITH t_24 AS (SELECT `role`, `Conference_ID` FROM `conference_participation`), conference_attendance AS (SELECT name, COUNT(DISTINCT Conference_ID) AS _attendance_count_ FROM t_24 WHERE role = 'attendee' GROUP BY name) SELECT name FROM conference_attendance ORDER BY _attendance_count_ DESC LIMIT 2
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT pilot_name FROM t_25 ORDER BY plane_name ASC LIMIT 1
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name FROM t_25 ORDER BY pilot_name LIMIT 1
+WITH t_25 AS (SELECT `pilot_name` FROM `PilotSkills`), avg_age AS (SELECT AVG(age) AS _average_age_ FROM t_25) SELECT pilot_name FROM t_25 WHERE age < (SELECT _average_age_ FROM avg_age) ORDER BY age LIMIT 1000
+WITH t_25 AS (SELECT `pilot_name` FROM `PilotSkills`), avg_age AS (SELECT AVG(age) AS _average_age_ FROM t_25) SELECT pilot_name FROM t_25 WHERE age < (SELECT _average_age_ FROM avg_age) ORDER BY age ASC LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_25 as (SELECT *  FROM  `Hangar`) SELECT location FROM t_25 WHERE plane_name = 'F-14 Fighter' LIMIT 1000
+with t_25 as (SELECT *  FROM  `Hangar`) SELECT location FROM t_25 WHERE plane_name = 'F-14 Fighter' LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(DISTINCT plane_name) AS `_different_places_` FROM t_25 LIMIT 1000
+with t_25 as (SELECT `location`  FROM  `Hangar`) SELECT COUNT(DISTINCT location) AS `_不同位置数量_` FROM t_25 LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT COUNT(pilot_name) FROM t_25 WHERE age > 40 LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT COUNT(pilot_name) FROM t_25 WHERE age > 40 LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(plane_name) FROM t_25 WHERE plane_name = 'B-52 Bomber' AND pilot_age < 35 LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(*) AS `_number_of_B52_Bombers_` FROM t_25 WHERE plane_name = 'B-52 Bomber' AND pilot_age < 35 LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT pilot_name FROM t_25 WHERE plane_name = 'Piper Cub' LIMIT 1
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT pilot_name FROM t_25 WHERE plane_name = 'Piper Cub' LIMIT 1
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name FROM t_25 LIMIT 1
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name FROM t_25 GROUP BY plane_name ORDER BY COUNT(*) DESC LIMIT 1
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name FROM t_25 LIMIT 1
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name FROM t_25 GROUP BY plane_name ORDER BY COUNT(*) ASC LIMIT 1
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(DISTINCT pilot_name) FROM t_25 WHERE plane_name IN (SELECT plane_name FROM t_25 WHERE plane_name LIKE '%Chicago%') LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(DISTINCT plane_name) AS `_distinct_planes_` FROM t_25 LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(DISTINCT plane_name) AS `_different_plane_names_count_` FROM t_25 LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(plane_name) FROM t_25 WHERE pilot_name = 'Smith' LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(plane_name) FROM t_25 WHERE owner = 'Smith' LIMIT 1000
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT COUNT(plane_name) FROM t_25 WHERE 1 = 0 LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name FROM t_25 WHERE age >= 30 AND age <= 40 ORDER BY age ASC LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name FROM t_25 WHERE age >= 30 AND age <= 40 ORDER BY age ASC LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name FROM t_25 ORDER BY pilot_name DESC LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name FROM t_25 ORDER BY pilot_name DESC LIMIT 1000
+with t_25 as (SELECT *  FROM  `Hangar`) SELECT plane_name, location FROM t_25 ORDER BY plane_name LIMIT 1000
+with t_25 as (SELECT *  FROM  `Hangar`) SELECT plane_name, location FROM t_25 ORDER BY plane_name LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT plane_name FROM t_25 ORDER BY plane_name ASC LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT plane_name FROM t_25 ORDER BY plane_name LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT COUNT(pilot_name) FROM t_25 WHERE age > 40 OR age < 30 LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT COUNT(pilot_name) FROM t_25 WHERE age > 40 OR age < 30 LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT pilot_name FROM t_25 WHERE plane_name = 'Piper Cub' EXCEPT SELECT pilot_name FROM t_25 WHERE plane_name = 'B-52 Bomber' LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT t1.pilot_name FROM t_25 t1 LEFT JOIN t_25 t2 ON t1.pilot_name = t2.pilot_name AND t2.plane_name = 'B-52 Bomber' WHERE t1.plane_name = 'Piper Cub' AND t2.pilot_name IS NULL LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT a.pilot_name FROM t_25 a JOIN t_25 b ON a.pilot_name = b.pilot_name WHERE a.plane_name = 'Piper Cub' AND b.plane_name = 'B-52 Bomber' LIMIT 1000
+WITH t_25 AS (SELECT `plane_name` FROM `Hangar`), piper_cub_pilots AS (SELECT pilot_name FROM t_25 WHERE plane_name = 'Piper Cub'), b52_pilots AS (SELECT pilot_name FROM t_25 WHERE plane_name = 'B-52 Bomber') SELECT a.pilot_name FROM piper_cub_pilots a INNER JOIN b52_pilots b ON a.pilot_name = b.pilot_name LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT a.pilot_name FROM t_25 a JOIN t_25 b ON a.pilot_name = b.pilot_name WHERE a.plane_name IN (SELECT plane_name FROM t_25 WHERE plane_name LIKE '%Austin%') AND b.plane_name IN (SELECT plane_name FROM t_25 WHERE plane_name LIKE '%Boston%') LIMIT 1000
+select * from tablea 
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT pilot_name FROM t_25 WHERE plane_name IN ('Piper Cub', 'F-14 Fighter') LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT pilot_name FROM t_25 WHERE plane_name IN ('Piper Cub', 'F-14 Fighter') LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name, AVG(age) AS `_average_age_` FROM t_25 GROUP BY plane_name LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name, AVG(age) AS `_平均年龄_` FROM t_25 GROUP BY plane_name LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name, COUNT(*) AS `_plane_count_` FROM t_25 GROUP BY plane_name LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT plane_name, COUNT(*) AS `_entry_count_` FROM t_25 GROUP BY plane_name LIMIT 1000
+select * from tablea 
+WITH t_25 AS (SELECT `plane_name` FROM `Hangar`), oldest_pilots AS (SELECT plane_name, pilot_name, ROW_NUMBER() OVER (PARTITION BY plane_name ORDER BY pilot_name) AS _row_num FROM t_25) SELECT plane_name AS `_plane_name`, pilot_name AS `_pilot_name` FROM oldest_pilots WHERE _row_num = 1 ORDER BY plane_name LIMIT 1000
+WITH t_25 AS (SELECT `plane_name` FROM `Hangar`), ranked_pilots AS (SELECT p.plane_name AS _plane_name_, p.pilot_name AS _pilot_name_, ROW_NUMBER() OVER (PARTITION BY p.plane_name ORDER BY p.age DESC) AS _rank_ FROM t_25 p) SELECT _plane_name_, _pilot_name_ FROM ranked_pilots WHERE _rank_ = 1 LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT plane_name, (SELECT MIN(pilot_name) FROM t_25 AS s2 WHERE s2.plane_name = s1.plane_name) AS `_oldest_pilot_` FROM t_25 AS s1 LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name, MAX(age) AS `_max_age_` FROM t_25 GROUP BY pilot_name LIMIT 1000
+with t_25 as (SELECT `pilot_name`  FROM  `PilotSkills`) SELECT pilot_name, MAX(age) AS `max_age` FROM t_25 GROUP BY pilot_name LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+WITH t_25 AS (SELECT `plane_name` FROM `Hangar`), f14_pilots AS (SELECT pilot_name FROM t_25 WHERE plane_name = 'F-14 Fighter'), all_pilots AS (SELECT pilot_name FROM t_25 WHERE pilot_name NOT IN (SELECT pilot_name FROM f14_pilots)) SELECT COUNT(*) AS `_younger_pilots_count_` FROM all_pilots LIMIT 1000
+WITH t_25 AS (SELECT `plane_name` FROM `Hangar`), f14_pilots AS (SELECT pilot_age FROM t_25 WHERE plane_name = 'F-14 Fighter') SELECT COUNT(*) AS `_younger_pilots_count_` FROM t_25 WHERE pilot_age < ALL(SELECT pilot_age FROM f14_pilots) LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT plane_name FROM t_25 WHERE plane_name LIKE '%Bomber%' LIMIT 1000
+with t_25 as (SELECT `plane_name`  FROM  `Hangar`) SELECT DISTINCT plane_name FROM t_25 WHERE plane_name LIKE '%Bomber%' LIMIT 1000
+select * from tablea 
+WITH t_25 AS (SELECT `plane_name` FROM `Hangar`), youngest_piper_pilot AS (SELECT MIN(pilot_age) AS _youngest_age FROM t_25 WHERE plane_name = 'Piper Cub') SELECT COUNT(*) AS `_older_pilots_count` FROM t_25 WHERE pilot_age > (SELECT _youngest_age FROM youngest_piper_pilot) LIMIT 1000
+with t_26 as (SELECT `District_ID`, `Name`  FROM  `district`) SELECT Name FROM t_26 WHERE District_ID = (SELECT MAX(District_ID) FROM t_26) LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_26 as (SELECT `District_ID`  FROM  `district`) SELECT MAX(DISTINCT District_ID) AS `_biggest_district_`, AVG(DISTINCT District_ID) AS `_average_district_` FROM t_26 LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_26 as (SELECT `Government_website`, `Name`  FROM  `district`) SELECT Name FROM t_26 WHERE Government_website LIKE '%gov%' LIMIT 1000
+select * from tablea 
+with t_26 as (SELECT `Speach_title`, `Name`  FROM  `spokesman`) SELECT Name, Speach_title FROM t_26 LIMIT 1000
+select * from tablea 
+with t_26 as (SELECT `Spokesman_ID`, `Name`  FROM  `spokesman`) SELECT Name FROM t_26 WHERE Spokesman_ID < 40 LIMIT 1000
+with t_26 as (SELECT `Spokesman_ID`  FROM  `spokesman`) SELECT Spokesman_ID FROM t_26 ORDER BY Spokesman_ID ASC LIMIT 1
+with t_26 as (SELECT `Spokesman_ID`  FROM  `spokesman`) SELECT Spokesman_ID FROM t_26 WHERE Spokesman_ID < (SELECT AVG(Spokesman_ID) FROM t_26) LIMIT 1000
+WITH t_26 AS (SELECT `Spokesman_ID`, `Name` FROM `spokesman`), district_spokesman_counts AS (SELECT Name, COUNT(Spokesman_ID) AS _spokesman_count_ FROM t_26 GROUP BY Name) SELECT Name FROM district_spokesman_counts WHERE _spokesman_count_ = (SELECT MAX(_spokesman_count_) FROM district_spokesman_counts) LIMIT 1000
+with t_26 as (SELECT `District_ID`, `Name`  FROM  `district`) SELECT DISTINCT Name FROM t_26 WHERE District_ID IS NOT NULL AND District_ID < 2004 LIMIT 1000
+with t_26 as (SELECT `Spokesman_ID`, `Name`  FROM  `spokesman`) SELECT Name AS `_district_name_`, COUNT(DISTINCT Spokesman_ID) AS `_number_of_spokesmen_` FROM t_26 GROUP BY Name LIMIT 1000
+WITH t_26 AS (SELECT `Spokesman_ID`, `District_ID` FROM `spokesman_district`), Rank1 AS (SELECT District_ID FROM t_26 WHERE Spokesman_ID = 1), Rank2 AS (SELECT District_ID FROM t_26 WHERE Spokesman_ID = 2) SELECT DISTINCT t.Name FROM t_26 t INNER JOIN Rank1 ON t.District_ID = Rank1.District_ID INNER JOIN Rank2 ON t.District_ID = Rank2.District_ID LIMIT 1000
+with t_26 as (SELECT `Spokesman_ID`, `District_ID`  FROM  `spokesman_district`) SELECT Name FROM t_26 GROUP BY District_ID, Name HAVING COUNT(DISTINCT Spokesman_ID) > 1 LIMIT 1000
+with t_26 as (SELECT `t3`.`Spokesman_ID`, `t2`.`District_ID`  FROM  (SELECT `District_ID`, `Name`, `Area_km`, `Population`, `Density_km`, `Government_website`  FROM  `district`) AS `t2`  INNER JOIN (SELECT `Spokesman_ID`, `Name`, `Age`, `Speach_title`, `Rank_position`, `Points`  FROM  `spokesman`) AS `t3` ON `t2`.`Name` = `t3`.`Name`) SELECT COUNT(DISTINCT District_ID) AS `_number_of_districts_without_spokesmen_` FROM t_26 WHERE Spokesman_ID IS NULL LIMIT 1000
+with t_26 as (SELECT `District_ID`, `Name`  FROM  `district`) SELECT Name FROM t_26 WHERE District_ID IS NULL LIMIT 1000
+WITH t_26 AS (SELECT `Spokesman_ID`, `District_ID` FROM `spokesman_district`), districts_with_spokesmen AS (SELECT DISTINCT District_ID FROM t_26 WHERE Spokesman_ID IS NOT NULL) SELECT SUM(Population) AS `_total_population_`, AVG(Population) AS `_average_population_` FROM t_26 WHERE District_ID IN (SELECT District_ID FROM districts_with_spokesmen) LIMIT 1000
+with t_27 as (SELECT `Entrant`  FROM  `driver`) SELECT COUNT(DISTINCT Entrant) FROM t_27 LIMIT 1000
+with t_27 as (SELECT `Entrant`  FROM  `driver`) SELECT COUNT(DISTINCT Entrant) AS `_race_count_` FROM t_27 LIMIT 1000
+with t_27 as (SELECT `Winning_team`, `Winning_driver`  FROM  `race`) SELECT Winning_driver, Winning_team FROM t_27 ORDER BY Winning_team ASC LIMIT 1000
+with t_27 as (SELECT `Winning_team`, `Winning_driver`  FROM  `race`) SELECT Winning_driver, Winning_team FROM t_27 ORDER BY Winning_team ASC LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Pole_Position`  FROM  `race`) SELECT Winning_driver FROM t_27 WHERE Pole_Position = Winning_driver AND Pole_Position != 'Junior Strous' LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Pole_Position`  FROM  `race`) SELECT Winning_driver FROM t_27 WHERE Winning_driver = 'Junior Strous' AND Pole_Position != 'Junior Strous' LIMIT 1000
+with t_27 as (SELECT `t2`.`Driver_ID`, `t3`.`Winning_driver`, `t2`.`Constructor`  FROM  (SELECT `Driver_ID`, `Driver_Name`, `Entrant`, `Constructor`, `Chassis`, `Engine`, `Age`  FROM  `driver`) AS `t2`  INNER JOIN (SELECT `Road`, `Driver_ID`, `Race_Name`, `Pole_Position`, `Fastest_Lap`, `Winning_driver`, `Winning_team`, `Report`  FROM  `race`) AS `t3` ON `t2`.`Driver_ID` = `t3`.`Driver_ID`) SELECT Constructor, Winning_driver FROM t_27 ORDER BY Driver_ID ASC LIMIT 1000
+with t_27 as (SELECT `Constructor`  FROM  `driver`) SELECT DISTINCT Constructor FROM t_27 ORDER BY Constructor ASC LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Entrant`  FROM  `driver`) SELECT DISTINCT Entrant FROM t_27 WHERE Driver_ID >= 20 LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Entrant`  FROM  `driver`) SELECT DISTINCT Entrant FROM t_27 WHERE Driver_ID >= 20 LIMIT 1000
+with t_27 as (SELECT `Driver_ID`  FROM  `race`) SELECT MAX(Driver_ID) AS `_max_driver_id_`, MIN(Driver_ID) AS `_min_driver_id_` FROM t_27 LIMIT 1000
+with t_27 as (SELECT `Driver_ID`  FROM  `race`) SELECT MAX(Driver_ID) AS `_maximum_driver_id_`, MIN(Driver_ID) AS `_minimum_driver_id_` FROM t_27 LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Engine`  FROM  `driver`) SELECT COUNT(DISTINCT Engine) FROM t_27 WHERE Driver_ID > 30 OR Driver_ID < 20 LIMIT 1000
+select * from tablea 
+with t_27 as (SELECT `Winning_driver`  FROM  `race`) SELECT DISTINCT Winning_driver FROM t_27 ORDER BY Winning_driver DESC LIMIT 1000
+with t_27 as (SELECT `Winning_driver`  FROM  `race`) SELECT DISTINCT Winning_driver FROM t_27 ORDER BY Winning_driver DESC LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Race_Name`  FROM  `race`) SELECT DISTINCT Winning_driver, Race_Name FROM t_27 LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Race_Name`  FROM  `race`) SELECT Winning_driver, Race_Name FROM t_27 LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Race_Name`  FROM  `race`) SELECT Winning_driver, COUNT(Race_Name) AS `_number_of_races_` FROM t_27 GROUP BY Winning_driver LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Race_Name`  FROM  `race`) SELECT Driver_ID, COUNT(Race_Name) AS `_race_count_` FROM t_27 GROUP BY Driver_ID LIMIT 1000
+with t_27 as (SELECT `Winning_driver`  FROM  `race`) SELECT Winning_driver, COUNT(*) AS `_race_count_` FROM t_27 GROUP BY Winning_driver ORDER BY `_race_count_` DESC LIMIT 1
+WITH t_27 AS (SELECT `Winning_driver`, `Race_Name` FROM `race`), driver_race_counts AS (SELECT Winning_driver, COUNT(Race_Name) AS _race_count FROM t_27 GROUP BY Winning_driver ORDER BY _race_count DESC LIMIT 1) SELECT Winning_driver FROM driver_race_counts LIMIT 1000
+WITH t_27 AS (SELECT `Driver_ID`, `Winning_driver`, `Race_Name` FROM `race`), driver_race_count AS (SELECT Driver_ID, COUNT(Race_Name) AS _race_count_ FROM t_27 GROUP BY Driver_ID HAVING COUNT(Race_Name) >= 2) SELECT Winning_driver AS `_name_`, Driver_ID AS `_age_` FROM t_27 WHERE Driver_ID IN (SELECT Driver_ID FROM driver_race_count) GROUP BY Winning_driver, Driver_ID LIMIT 1000
+WITH t_27 AS (SELECT `Driver_ID`, `Winning_driver`, `Race_Name` FROM `race`), driver_race_counts AS (SELECT Driver_ID, COUNT(DISTINCT Race_Name) AS race_count FROM t_27 GROUP BY Driver_ID HAVING COUNT(DISTINCT Race_Name) >= 2) SELECT d.Driver_ID, d.Winning_driver AS `name` FROM t_27 d INNER JOIN driver_race_counts c ON d.Driver_ID = c.Driver_ID GROUP BY d.Driver_ID, d.Winning_driver LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_27 as (SELECT `t3`.`Winning_driver`, `t2`.`Constructor`  FROM  (SELECT `Driver_ID`, `Driver_Name`, `Entrant`, `Constructor`, `Chassis`, `Engine`, `Age`  FROM  `driver`) AS `t2`  INNER JOIN (SELECT `Road`, `Driver_ID`, `Race_Name`, `Pole_Position`, `Fastest_Lap`, `Winning_driver`, `Winning_team`, `Report`  FROM  `race`) AS `t3` ON `t2`.`Driver_ID` = `t3`.`Driver_ID`) SELECT DISTINCT Winning_driver FROM t_27 WHERE Constructor != 'Bugatti' LIMIT 1000
+with t_27 as (SELECT `t3`.`Winning_driver`, `t2`.`Constructor`  FROM  (SELECT `Driver_ID`, `Driver_Name`, `Entrant`, `Constructor`, `Chassis`, `Engine`, `Age`  FROM  `driver`) AS `t2`  INNER JOIN (SELECT `Road`, `Driver_ID`, `Race_Name`, `Pole_Position`, `Fastest_Lap`, `Winning_driver`, `Winning_team`, `Report`  FROM  `race`) AS `t3` ON `t2`.`Driver_ID` = `t3`.`Driver_ID`) SELECT DISTINCT Winning_driver FROM t_27 WHERE Winning_driver NOT IN (SELECT Winning_driver FROM t_27 WHERE Constructor = 'Bugatti') LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Constructor`  FROM  `driver`) SELECT Constructor, COUNT(DISTINCT Driver_ID) AS `_driver_count_` FROM t_27 GROUP BY Constructor LIMIT 1000
+with t_27 as (SELECT `t3`.`Winning_driver`, `t2`.`Constructor`  FROM  (SELECT `Driver_ID`, `Driver_Name`, `Entrant`, `Constructor`, `Chassis`, `Engine`, `Age`  FROM  `driver`) AS `t2`  INNER JOIN (SELECT `Road`, `Driver_ID`, `Race_Name`, `Pole_Position`, `Fastest_Lap`, `Winning_driver`, `Winning_team`, `Report`  FROM  `race`) AS `t3` ON `t2`.`Driver_ID` = `t3`.`Driver_ID`) SELECT Constructor, COUNT(DISTINCT Winning_driver) AS `driver_count` FROM t_27 GROUP BY Constructor LIMIT 1000
+WITH t_27 AS (SELECT `Engine` FROM `driver`), engine_counts AS (SELECT Engine, COUNT(*) AS _count FROM t_27 GROUP BY Engine) SELECT Engine FROM engine_counts ORDER BY _count DESC LIMIT 1
+with t_27 as (SELECT `Engine`  FROM  `driver`) SELECT Engine, COUNT(*) AS `_count_` FROM t_27 GROUP BY Engine ORDER BY `_count_` DESC LIMIT 1
+WITH t_27 AS (SELECT `Driver_ID`, `Engine` FROM `driver`), driver_count AS (SELECT Engine, COUNT(DISTINCT Driver_ID) AS _driver_count FROM t_27 GROUP BY Engine) SELECT Engine FROM driver_count WHERE _driver_count >= 2 LIMIT 1000
+WITH t_27 AS (SELECT `Driver_ID`, `Engine` FROM `driver`), driver_count AS (SELECT Engine, COUNT(DISTINCT Driver_ID) AS _driver_count_ FROM t_27 GROUP BY Engine) SELECT Engine FROM driver_count WHERE _driver_count_ >= 2 LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Winning_driver`  FROM  `race`) SELECT DISTINCT Driver_ID FROM t_27 WHERE Driver_ID NOT IN (SELECT Winning_driver FROM t_27 WHERE Winning_driver IS NOT NULL) LIMIT 1000
+with t_27 as (SELECT `Driver_ID`, `Winning_driver`  FROM  `race`) SELECT DISTINCT d.Driver_ID FROM t_27 d WHERE d.Driver_ID NOT IN (SELECT DISTINCT Winning_driver FROM t_27 WHERE Winning_driver IS NOT NULL) LIMIT 1000
+WITH t_27 AS (SELECT `t2`.`Driver_ID`, `t3`.`Winning_driver`, `t2`.`Constructor` FROM (SELECT `Driver_ID`, `Driver_Name`, `Entrant`, `Constructor`, `Chassis`, `Engine`, `Age` FROM `driver`) AS `t2` INNER JOIN (SELECT `Road`, `Driver_ID`, `Race_Name`, `Pole_Position`, `Fastest_Lap`, `Winning_driver`, `Winning_team`, `Report` FROM `race`) AS `t3` ON `t2`.`Driver_ID` = `t3`.`Driver_ID`), young_drivers_constructors AS (SELECT DISTINCT Constructor FROM t_27 WHERE Driver_ID IN (SELECT Driver_ID FROM t_27 WHERE Winning_driver < 20)), old_drivers_constructors AS (SELECT DISTINCT Constructor FROM t_27 WHERE Driver_ID IN (SELECT Driver_ID FROM t_27 WHERE Winning_driver > 30)) SELECT y.Constructor FROM young_drivers_constructors y INNER JOIN old_drivers_constructors o ON y.Constructor = o.Constructor LIMIT 1000
+select * from tablea 
+WITH t_27 AS (SELECT `Winning_team` FROM `race`), win_counts AS (SELECT Winning_team, COUNT(*) AS _win_count FROM t_27 GROUP BY Winning_team) SELECT Winning_team FROM win_counts WHERE _win_count > 1 LIMIT 1000
+with t_27 as (SELECT `Winning_team`, `Race_Name`  FROM  `race`) SELECT Winning_team FROM t_27 GROUP BY Winning_team HAVING COUNT(Race_Name) > 1 LIMIT 1000
+WITH t_27 AS (SELECT `Driver_ID`, `Winning_driver`, `Pole_Position` FROM `race`), hinchcliffe_poles AS (SELECT DISTINCT Driver_ID FROM t_27 WHERE Winning_driver = 'James Hinchcliffe' AND Pole_Position IS NOT NULL), skerlong_poles AS (SELECT DISTINCT Driver_ID FROM t_27 WHERE Winning_driver = 'Carl Skerlong' AND Pole_Position IS NOT NULL) SELECT DISTINCT h.Driver_ID FROM hinchcliffe_poles h INNER JOIN skerlong_poles s ON h.Driver_ID = s.Driver_ID LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Pole_Position`  FROM  `race`) SELECT DISTINCT a.Winning_driver FROM t_27 a JOIN t_27 b ON a.Winning_driver = b.Winning_driver WHERE a.Pole_Position = 'James Hinchcliffe' AND b.Pole_Position = 'Carl Skerlong' LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Pole_Position`  FROM  `race`) SELECT DISTINCT Winning_driver FROM t_27 WHERE Winning_driver NOT IN (SELECT Winning_driver FROM t_27 WHERE Pole_Position = 'James Hinchcliffe') LIMIT 1000
+with t_27 as (SELECT `Winning_driver`, `Pole_Position`  FROM  `race`) SELECT DISTINCT Winning_driver FROM t_27 WHERE Pole_Position != 'James Hinchcliffe' LIMIT 1000
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT COUNT(DISTINCT language_id) AS `_how_many_languages_` FROM t_28 LIMIT 1000
+with t_28 as (SELECT `country_id`  FROM  `official_languages`) SELECT COUNT(DISTINCT country_id) AS `_语言数量_` FROM t_28 LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 ORDER BY name ASC LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 ORDER BY name ASC LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 WHERE name LIKE '%ish%' LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 WHERE name LIKE '%ish%' LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_28 as (SELECT `country_id`  FROM  `official_languages`) SELECT MAX(country_id) AS `_max_health_score_`, MIN(country_id) AS `_min_health_score_` FROM t_28 WHERE country_id != 'Norway' LIMIT 1000
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT COUNT(DISTINCT language_id) AS `_different_official_languages_` FROM t_28 LIMIT 1000
+with t_28 as (SELECT `country_id`  FROM  `official_languages`) SELECT COUNT(DISTINCT country_id) AS `_不同官方语言数量_` FROM t_28 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT c.name AS `_country_name_`, l.name AS `_language_name_` FROM t_28 c JOIN t_28 l ON c.language_id = l.language_id LIMIT 1000
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT language_id AS `_official_languages_`, COUNT(*) AS `_number_of_countries_` FROM t_28 GROUP BY language_id LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name AS `_language_name_`, COUNT(*) AS `_number_of_countries_` FROM t_28 GROUP BY name LIMIT 1000
+WITH t_28 AS (SELECT `language_id` FROM `official_languages`), language_counts AS (SELECT language_id, COUNT(*) AS _country_count FROM t_28 GROUP BY language_id) SELECT language_id FROM language_counts ORDER BY _country_count DESC LIMIT 1
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT language_id AS `_most_common_language_` FROM t_28 GROUP BY language_id ORDER BY COUNT(language_id) DESC LIMIT 1
+WITH t_28 AS (SELECT `country_id` FROM `official_languages`), language_count AS (SELECT l.name AS _language_name_, COUNT(c.country_id) AS _country_count_ FROM t_28 l JOIN t_28 c ON l.language_id = c.language_id GROUP BY l.name) SELECT _language_name_ FROM language_count WHERE _country_count_ >= 2 LIMIT 1000
+WITH t_28 AS (SELECT `country_id` FROM `official_languages`), language_count AS (SELECT name, COUNT(DISTINCT country_id) AS country_count FROM t_28 GROUP BY name HAVING COUNT(DISTINCT country_id) >= 2) SELECT name FROM language_count LIMIT 1000
+WITH t_28 AS (SELECT * FROM `official_languages`), english_countries AS (SELECT country_id FROM t_28 WHERE language_id IN (SELECT language_id FROM t_28 WHERE language_name = 'English')) SELECT AVG(overall_score) AS `_average_score_` FROM t_28 WHERE country_id IN (SELECT country_id FROM english_countries) LIMIT 1000
+select * from tablea 
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT name, COUNT(language_id) AS `_出现次数_` FROM t_28 GROUP BY name ORDER BY `_出现次数_` DESC LIMIT 3
+WITH t_28 AS (SELECT `name` FROM `languages`), language_count AS (SELECT name, COUNT(*) AS _country_count FROM t_28 GROUP BY name ORDER BY _country_count DESC LIMIT 3) SELECT name FROM language_count LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 ORDER BY (SELECT AVG(overall_score) FROM Spider测试数据集 WHERE official_language = name) DESC LIMIT 1000
+with t_28 as (SELECT `name`  FROM  `languages`) SELECT name FROM t_28 ORDER BY (SELECT AVG(overall_score) FROM countries WHERE countries.language_id = Spider测试数据集.language_id) DESC LIMIT 1000
+WITH t_28 AS (SELECT `country_id` FROM `official_languages`), language_counts AS (SELECT country_id, COUNT(*) AS num_languages FROM t_28 GROUP BY country_id) SELECT name FROM t_28 WHERE country_id = (SELECT country_id FROM language_counts ORDER BY num_languages DESC LIMIT 1) LIMIT 1
+WITH t_28 AS (SELECT `country_id` FROM `official_languages`), language_count AS (SELECT country_id, COUNT(*) AS _count FROM t_28 GROUP BY country_id) SELECT country_id FROM language_count ORDER BY _count DESC LIMIT 1
+select * from tablea 
+with t_28 as (SELECT `src1_languages`.`name`, `src1_official_languages`.`language_id`, `src1_official_languages`.`country_id`  FROM  (SELECT `language_id`, `country_id`  FROM  `official_languages`) AS `src1_official_languages`  INNER JOIN (SELECT `id`, `name`  FROM  `languages`) AS `src1_languages`) SELECT name FROM t_28 WHERE language_id NOT IN (SELECT language_id FROM t_28 WHERE country_id IS NOT NULL) LIMIT 1000
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT name FROM t_28 WHERE language_id IS NULL LIMIT 1000
+with t_28 as (SELECT `language_id`  FROM  `official_languages`) SELECT name FROM t_28 WHERE language_id IS NULL LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_29 as (SELECT `town_city`, `country`  FROM  `Addresses`) SELECT DISTINCT country, town_city FROM t_29 LIMIT 1000
+with t_29 as (SELECT `town_city`, `country`  FROM  `Addresses`) SELECT country, town_city FROM t_29 LIMIT 1000
+select * from tablea 
+with t_29 as (SELECT `src1_Addresses`.`county_state_province`, `src1_Property_Features`.`property_id`  FROM  (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description`  FROM  `Property_Features`) AS `src1_Property_Features`  INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`) SELECT property_id, county_state_province FROM t_29 LIMIT 1000
+with t_29 as (SELECT `feature_name`, `feature_description`  FROM  `Features`) SELECT feature_description FROM t_29 WHERE feature_name = 'rooftop' LIMIT 1000
+with t_29 as (SELECT `feature_name`, `feature_description`  FROM  `Features`) SELECT feature_description FROM t_29 WHERE feature_name = 'rooftop' LIMIT 1000
+WITH t_29 AS (SELECT `feature_name`, `feature_description` FROM `Features`), feature_counts AS (SELECT feature_name, feature_description, COUNT(*) AS _count FROM t_29 GROUP BY feature_name, feature_description) SELECT feature_name, feature_description FROM feature_counts ORDER BY _count DESC LIMIT 1
+WITH t_29 AS (SELECT `feature_name`, `feature_description` FROM `Features`), feature_counts AS (SELECT feature_name, feature_description, COUNT(*) AS _count FROM t_29 GROUP BY feature_name, feature_description) SELECT feature_name AS `_feature_name`, feature_description AS `_feature_description` FROM feature_counts ORDER BY _count DESC LIMIT 1
+with t_29 as (SELECT `room_number`  FROM  `Rooms`) SELECT MIN(room_number) AS `_minimum_number_of_rooms_` FROM t_29 LIMIT 1000
+with t_29 as (SELECT `room_count`  FROM  `Properties`) SELECT MIN(room_count) AS `_lowest_room_count_` FROM t_29 LIMIT 1000
+with t_29 as (SELECT `parking_lots`, `garage_yn`  FROM  `Properties`) SELECT COUNT(*) FROM t_29 WHERE parking_lots = 1 OR garage_yn = 'Y' LIMIT 1000
+with t_29 as (SELECT `parking_lots`, `garage_yn`  FROM  `Properties`) SELECT COUNT(*) AS `_property_count_` FROM t_29 WHERE parking_lots = 1 OR garage_yn = '1' LIMIT 1000
+with t_29 as (SELECT `t3`.`other_user_details`, `t2`.`age_category_description`  FROM  (SELECT `age_category_code`, `age_category_description`  FROM  `Ref_Age_Categories`) AS `t2`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `t3` ON `t2`.`age_category_code` = `t3`.`age_category_code`) SELECT DISTINCT age_category_description FROM t_29 WHERE other_user_details LIKE '%Mother%' LIMIT 1000
+with t_29 as (SELECT `t3`.`other_user_details`, `t2`.`age_category_description`  FROM  (SELECT `age_category_code`, `age_category_description`  FROM  `Ref_Age_Categories`) AS `t2`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `t3` ON `t2`.`age_category_code` = `t3`.`age_category_code`) SELECT DISTINCT age_category_description FROM t_29 WHERE other_user_details LIKE '%Mother%' LIMIT 1000
+WITH t_29 AS (SELECT `src1_Properties`.`owner_user_id`, `src1_Users`.`first_name` FROM (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details` FROM `Properties`) AS `src1_Properties` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), property_counts AS (SELECT owner_user_id, COUNT(*) AS _property_count_ FROM t_29 GROUP BY owner_user_id) SELECT first_name FROM t_29 WHERE owner_user_id = (SELECT owner_user_id FROM property_counts ORDER BY _property_count_ DESC LIMIT 1) LIMIT 1
+WITH t_29 AS (SELECT `src1_Properties`.`owner_user_id`, `src1_Users`.`first_name` FROM (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details` FROM `Properties`) AS `src1_Properties` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), property_counts AS (SELECT owner_user_id, COUNT(*) AS _property_count FROM t_29 GROUP BY owner_user_id) SELECT first_name FROM t_29 WHERE owner_user_id = (SELECT owner_user_id FROM property_counts ORDER BY _property_count DESC LIMIT 1) LIMIT 1
+with t_29 as (SELECT `room_count`, `garage_yn`  FROM  `Properties`) SELECT AVG(room_count) AS `_average_room_count_` FROM t_29 WHERE garage_yn = 'Y' LIMIT 1000
+select * from tablea 
+with t_29 as (SELECT `src1_Addresses`.`town_city`, `src1_Properties`.`parking_lots`  FROM  (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `src1_Properties`  INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`) SELECT DISTINCT town_city FROM t_29 WHERE parking_lots LIKE '%swimming pool%' LIMIT 1000
+with t_29 as (SELECT `src1_Addresses`.`town_city`, `src1_Features`.`feature_name`  FROM  (SELECT `feature_id`, `feature_name`, `feature_description`  FROM  `Features`) AS `src1_Features`  INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`) SELECT DISTINCT town_city FROM t_29 WHERE feature_name = 'swimming pool' LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_29 as (SELECT `property_feature_description`  FROM  `Property_Features`) SELECT AVG(CAST(SUBSTRING(property_feature_description, '([0-9]+) rooms?') AS INTEGER)) AS `_average_rooms_per_property_` FROM t_29 WHERE property_feature_description LIKE '%room%' LIMIT 1000
+with t_29 as (SELECT `room_number`  FROM  `Rooms`) SELECT AVG(room_number) AS `_average_number_of_rooms_` FROM t_29 LIMIT 1000
+with t_29 as (SELECT `room_size`  FROM  `Rooms`) SELECT COUNT(DISTINCT room_size) AS `_kinds_of_room_sizes_` FROM t_29 LIMIT 1000
+with t_29 as (SELECT `room_size`  FROM  `Rooms`) SELECT COUNT(DISTINCT room_size) AS `_不同房间大小数量_` FROM t_29 LIMIT 1000
+WITH t_29 AS (SELECT `user_id`, `search_string` FROM `User_Searches`), user_search_counts AS (SELECT user_id, COUNT(*) AS search_count FROM t_29 GROUP BY user_id HAVING COUNT(*) >= 2) SELECT s.user_id, s.search_string FROM t_29 s INNER JOIN user_search_counts u ON s.user_id = u.user_id LIMIT 1000
+WITH t_29 AS (SELECT `user_id`, `search_datetime`, `search_string` FROM `User_Searches`), user_searches AS (SELECT user_id, search_string, search_datetime FROM t_29 GROUP BY user_id, search_string, search_datetime) SELECT user_id, search_string, search_datetime FROM user_searches WHERE user_id IN (SELECT user_id FROM user_searches GROUP BY user_id HAVING COUNT(*) >= 2) ORDER BY user_id, search_datetime LIMIT 1000
+with t_29 as (SELECT `user_id`, `search_datetime`  FROM  `User_Searches`) SELECT user_id, MAX(search_datetime) AS `_latest_search_time_` FROM t_29 GROUP BY user_id LIMIT 1000
+with t_29 as (SELECT `search_datetime`  FROM  `User_Searches`) SELECT MAX(search_datetime) AS `_most_recent_search_time_` FROM t_29 LIMIT 1000
+with t_29 as (SELECT `user_id`, `search_datetime`, `search_string`  FROM  `User_Searches`) SELECT user_id, search_datetime, search_string FROM t_29 ORDER BY search_string DESC LIMIT 1000
+with t_29 as (SELECT `search_datetime`, `search_string`  FROM  `User_Searches`) SELECT search_string, search_datetime FROM t_29 ORDER BY search_string DESC LIMIT 1000
+WITH t_29 AS (SELECT `src1_Users`.`user_id`, `src1_Addresses`.`zip_postcode`, `src1_Property_Features`.`property_id` FROM (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description` FROM `Property_Features`) AS `src1_Property_Features` INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details` FROM `Addresses`) AS `src1_Addresses` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), users_with_more_than_2_properties AS (SELECT user_id FROM t_29 GROUP BY user_id HAVING COUNT(property_id) > 2) SELECT DISTINCT zip_postcode FROM t_29 WHERE user_id NOT IN (SELECT user_id FROM users_with_more_than_2_properties) LIMIT 1000
+WITH t_29 AS (SELECT `src1_Users`.`user_id`, `src1_Addresses`.`zip_postcode`, `src1_Property_Features`.`property_id` FROM (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description` FROM `Property_Features`) AS `src1_Property_Features` INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details` FROM `Addresses`) AS `src1_Addresses` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), users_with_more_than_two_properties AS (SELECT user_id FROM t_29 GROUP BY user_id HAVING COUNT(property_id) > 2) SELECT DISTINCT zip_postcode FROM t_29 WHERE user_id NOT IN (SELECT user_id FROM users_with_more_than_two_properties) LIMIT 1000
+WITH t_29 AS (SELECT `t3`.`user_id`, `t2`.`user_category_description` FROM (SELECT `user_category_code`, `user_category_description` FROM `Ref_User_Categories`) AS `t2` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `t3` ON `t2`.`user_category_code` = `t3`.`user_category_code`), user_search_counts AS (SELECT user_id, user_category_description, COUNT(*) AS _search_count_ FROM t_29 GROUP BY user_id, user_category_description) SELECT user_category_description AS `_category_`, user_id AS `_user_id_` FROM user_search_counts WHERE _search_count_ = 1 LIMIT 1000
+WITH t_29 AS (SELECT `user_id`, `age_category_code`, `user_category_code` FROM `Users`), user_search_counts AS (SELECT user_id, COUNT(*) AS _search_count FROM t_29 GROUP BY user_id HAVING COUNT(*) = 1) SELECT usc.user_id, s.user_category_code, s.age_category_code FROM user_search_counts usc JOIN t_29 s ON usc.user_id = s.user_id LIMIT 1000
+with t_29 as (SELECT `src1_Ref_Age_Categories`.`age_category_description`, `src1_User_Searches`.`search_datetime`  FROM  (SELECT `user_id`, `search_seq`, `search_datetime`, `search_string`  FROM  `User_Searches`) AS `src1_User_Searches`  INNER JOIN (SELECT `age_category_code`, `age_category_description`  FROM  `Ref_Age_Categories`) AS `src1_Ref_Age_Categories`) SELECT age_category_description FROM t_29 WHERE search_datetime = (SELECT MIN(search_datetime) FROM t_29) LIMIT 1000
+with t_29 as (SELECT `src1_Ref_Age_Categories`.`age_category_description`, `src1_User_Searches`.`search_datetime`  FROM  (SELECT `user_id`, `search_seq`, `search_datetime`, `search_string`  FROM  `User_Searches`) AS `src1_User_Searches`  INNER JOIN (SELECT `age_category_code`, `age_category_description`  FROM  `Ref_Age_Categories`) AS `src1_Ref_Age_Categories`) SELECT age_category_description FROM t_29 WHERE search_datetime = (SELECT MIN(search_datetime) FROM t_29) LIMIT 1
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_29 as (SELECT `login_name`, `date_registered`  FROM  `Users`) SELECT date_registered FROM t_29 WHERE login_name = 'ratione' LIMIT 1000
+with t_29 as (SELECT `login_name`, `date_registered`  FROM  `Users`) SELECT date_registered FROM t_29 WHERE login_name = 'ratione' LIMIT 1000
+with t_29 as (SELECT `login_name`, `is_seller`, `last_name`, `middle_name`, `first_name`  FROM  `Users`) SELECT first_name, middle_name, last_name, login_name FROM t_29 WHERE is_seller = 1 LIMIT 1000
+select * from tablea 
+with t_29 as (SELECT `src1_Addresses`.`town_city`, `src1_Rooms`.`room_size`, `src1_Users`.`user_id`, `src1_Addresses`.`line_2_number_street`, `src1_Addresses`.`line_1_number_building`  FROM  (SELECT `property_id`, `room_number`, `room_type_code`, `room_size`, `other_room_details`  FROM  `Rooms`) AS `src1_Rooms`  INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `src1_Users`) SELECT line_1_number_building AS `_building_`, line_2_number_street AS `_street_`, town_city AS `_city_` FROM t_29 WHERE user_id IN (SELECT DISTINCT user_id FROM t_29 WHERE room_size = 'Senior') LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_29 as (SELECT `src1_Addresses`.`country`, `src1_Users`.`user_id`, `src1_Properties`.`room_count`, `src1_Rooms`.`room_number`, `src1_Users`.`last_name`, `src1_Addresses`.`line_2_number_street`, `src1_Property_Features`.`property_id`  FROM  (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description`  FROM  `Property_Features`) AS `src1_Property_Features`  INNER JOIN (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `src1_Properties` ON `src1_Property_Features`.`property_id` = `src1_Properties`.`property_id`  INNER JOIN (SELECT `property_id`, `room_number`, `room_type_code`, `room_size`, `other_room_details`  FROM  `Rooms`) AS `src1_Rooms` ON `src1_Properties`.`property_id` = `src1_Rooms`.`property_id`  INNER JOIN (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `src1_Users`) SELECT COUNT(*) AS `_property_count_` FROM (SELECT property_id FROM t_29 GROUP BY property_id HAVING COUNT(CASE WHEN room_number IS NOT NULL THEN 1 END) + COUNT(CASE WHEN line_2_number_street IS NOT NULL THEN 1 END) + COUNT(CASE WHEN last_name IS NOT NULL THEN 1 END) + COUNT(CASE WHEN country IS NOT NULL THEN 1 END) + COUNT(CASE WHEN room_count IS NOT NULL THEN 1 END) + COUNT(CASE WHEN user_id IS NOT NULL THEN 1 END) >= 2) AS _properties_with_features_ LIMIT 1000
+with t_29 as (SELECT `photo_filename`, `property_id`  FROM  `Property_Photos`) SELECT property_id, COUNT(photo_filename) AS `_photo_count_` FROM t_29 GROUP BY property_id LIMIT 1000
+with t_29 as (SELECT `property_id`  FROM  `Property_Features`) SELECT property_id, COUNT(*) AS `property_photos_count` FROM t_29 GROUP BY property_id LIMIT 1000
+with t_29 as (SELECT `t2`.`owner_user_id`, `t3`.`photo_filename`  FROM  (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `t2`  INNER JOIN (SELECT `property_id`, `photo_seq`, `photo_title`, `photo_description`, `photo_filename`  FROM  `Property_Photos`) AS `t3` ON `t2`.`property_id` = `t3`.`property_id`) SELECT owner_user_id, COUNT(photo_filename) AS `number_of_photos` FROM t_29 GROUP BY owner_user_id LIMIT 1000
+with t_29 as (SELECT `t4`.`owner_user_id`, `t5`.`photo_filename`, `t3`.`property_id`  FROM  (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description`  FROM  `Property_Features`) AS `t3`  INNER JOIN (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `t4` ON `t3`.`property_id` = `t4`.`property_id`  INNER JOIN (SELECT `property_id`, `photo_seq`, `photo_title`, `photo_description`, `photo_filename`  FROM  `Property_Photos`) AS `t5` ON `t4`.`property_id` = `t5`.`property_id`) SELECT owner_user_id, COUNT(property_id) AS `_photo_count_` FROM t_29 WHERE photo_filename IS NOT NULL GROUP BY owner_user_id LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_29 as (SELECT `t2`.`datestamp`, `t3`.`property_name`  FROM  (SELECT `user_id`, `property_id`, `datestamp`  FROM  `User_Property_History`) AS `t2`  INNER JOIN (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `t3` ON `t2`.`property_id` = `t3`.`property_id`) SELECT datestamp, property_name FROM t_29 ORDER BY datestamp LIMIT 1000
+with t_29 as (SELECT `t2`.`datestamp`, `t3`.`property_name`  FROM  (SELECT `user_id`, `property_id`, `datestamp`  FROM  `User_Property_History`) AS `t2`  INNER JOIN (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `t3` ON `t2`.`property_id` = `t3`.`property_id`) SELECT datestamp, property_name FROM t_29 ORDER BY datestamp LIMIT 1000
+WITH t_29 AS (SELECT `property_type_code` FROM `Properties`), property_counts AS (SELECT property_type_code, property_type_description, COUNT(*) AS _count FROM t_29 GROUP BY property_type_code, property_type_description) SELECT property_type_description, property_type_code FROM property_counts ORDER BY _count DESC LIMIT 1
+WITH t_29 AS (SELECT `property_type_code` FROM `Properties`), property_type_counts AS (SELECT property_type_code, COUNT(*) AS _count FROM t_29 GROUP BY property_type_code) SELECT p.property_type_code, p.property_type_description, ptc._count FROM t_29 p JOIN property_type_counts ptc ON p.property_type_code = ptc.property_type_code ORDER BY ptc._count DESC LIMIT 1
+with t_29 as (SELECT `t2`.`age_category_description`, `t3`.`age_category_code`  FROM  (SELECT `age_category_code`, `age_category_description`  FROM  `Ref_Age_Categories`) AS `t2`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `t3` ON `t2`.`age_category_code` = `t3`.`age_category_code`) SELECT age_category_description FROM t_29 WHERE age_category_code = 'Over 60' LIMIT 1000
+with t_29 as (SELECT `t2`.`age_category_description`, `t3`.`age_category_code`  FROM  (SELECT `age_category_code`, `age_category_description`  FROM  `Ref_Age_Categories`) AS `t2`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `t3` ON `t2`.`age_category_code` = `t3`.`age_category_code`) SELECT age_category_description FROM t_29 WHERE age_category_code = 'Over 60' LIMIT 1000
+with t_29 as (SELECT `room_size`  FROM  `Rooms`) SELECT room_size, COUNT(*) AS `_数量_` FROM t_29 GROUP BY room_size LIMIT 1000
+with t_29 as (SELECT `room_size`  FROM  `Rooms`) SELECT room_size, COUNT(*) AS `_房间数量_` FROM t_29 GROUP BY room_size LIMIT 1000
+with t_29 as (SELECT `src1_Addresses`.`country`, `src1_Users`.`first_name`  FROM  (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `src1_Users`) SELECT country FROM t_29 WHERE first_name = 'Robbie' LIMIT 1000
+with t_29 as (SELECT `src1_Addresses`.`country`, `src1_Users`.`first_name`  FROM  (SELECT `address_id`, `line_1_number_building`, `line_2_number_street`, `line_3_area_locality`, `town_city`, `zip_postcode`, `county_state_province`, `country`, `other_address_details`  FROM  `Addresses`) AS `src1_Addresses`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `src1_Users`) SELECT country FROM t_29 WHERE first_name = 'Robbie' LIMIT 1000
+with t_29 as (SELECT `src1_Users`.`user_id`, `src1_Users`.`last_name`, `src1_Users`.`middle_name`, `src1_Users`.`first_name`, `src1_Property_Features`.`property_id`  FROM  (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description`  FROM  `Property_Features`) AS `src1_Property_Features`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `src1_Users`) SELECT first_name, middle_name, last_name FROM t_29 WHERE user_id IN (SELECT user_id FROM t_29 WHERE property_id IN (SELECT property_id FROM Spider测试数据集 WHERE user_id = property_address_id)) LIMIT 1000
+with t_29 as (SELECT `src1_Users`.`login_name`, `src1_Users`.`last_name`, `src1_Users`.`first_name`, `src1_Properties`.`property_name`  FROM  (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details`  FROM  `Properties`) AS `src1_Properties`  INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details`  FROM  `Users`) AS `src1_Users`) SELECT DISTINCT CONCAT(first_name, ' ', last_name) AS `_full_name_` FROM t_29 WHERE login_name IN (SELECT login_name FROM t_29 WHERE property_name IN (SELECT property_name FROM Spider测试数据集 GROUP BY property_name HAVING COUNT(DISTINCT login_name) = 1)) LIMIT 1000
+WITH t_29 AS (SELECT `src1_Users`.`user_id`, `src1_User_Searches`.`search_string`, `src1_Property_Features`.`property_id` FROM (SELECT `user_id`, `search_seq`, `search_datetime`, `search_string` FROM `User_Searches`) AS `src1_User_Searches` INNER JOIN (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description` FROM `Property_Features`) AS `src1_Property_Features` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), 非业主用户 AS (SELECT DISTINCT user_id FROM t_29 WHERE user_id NOT IN (SELECT DISTINCT user_id FROM t_29 WHERE property_id IS NOT NULL)) SELECT search_string FROM t_29 WHERE user_id IN (SELECT user_id FROM 非业主用户) LIMIT 1000
+WITH t_29 AS (SELECT `src1_Users`.`user_id`, `src1_User_Searches`.`search_string`, `src1_Property_Features`.`property_id` FROM (SELECT `user_id`, `search_seq`, `search_datetime`, `search_string` FROM `User_Searches`) AS `src1_User_Searches` INNER JOIN (SELECT `property_id`, `feature_id`, `feature_value`, `property_feature_description` FROM `Property_Features`) AS `src1_Property_Features` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), users_without_properties AS (SELECT DISTINCT user_id FROM t_29 WHERE user_id NOT IN (SELECT DISTINCT user_id FROM t_29 WHERE property_id IS NOT NULL)) SELECT search_string FROM t_29 WHERE user_id IN (SELECT user_id FROM users_without_properties) LIMIT 1000
+WITH t_29 AS (SELECT `src1_Users`.`user_id`, `src1_Users`.`last_name`, `src1_User_Searches`.`search_string`, `src1_Properties`.`property_name` FROM (SELECT `user_id`, `search_seq`, `search_datetime`, `search_string` FROM `User_Searches`) AS `src1_User_Searches` INNER JOIN (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details` FROM `Properties`) AS `src1_Properties` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), user_property_counts AS (SELECT user_id, COUNT(DISTINCT property_name) AS property_count FROM t_29 GROUP BY user_id HAVING COUNT(DISTINCT property_name) >= 2), user_search_counts AS (SELECT user_id, COUNT(DISTINCT search_string) AS search_count FROM t_29 GROUP BY user_id HAVING COUNT(DISTINCT search_string) <= 2) SELECT DISTINCT u.last_name, u.user_id FROM t_29 u JOIN user_property_counts p ON u.user_id = p.user_id JOIN user_search_counts s ON u.user_id = s.user_id LIMIT 1000
+WITH t_29 AS (SELECT `src1_Users`.`user_id`, `src1_Users`.`last_name`, `src1_Properties`.`property_name` FROM (SELECT `property_id`, `property_address_id`, `owner_user_id`, `property_type_code`, `date_on_market`, `date_off_market`, `property_name`, `property_description`, `garage_yn`, `parking_lots`, `room_count`, `vendor_requested_price`, `price_min`, `price_max`, `other_property_details` FROM `Properties`) AS `src1_Properties` INNER JOIN (SELECT `user_id`, `age_category_code`, `user_category_code`, `user_address_id`, `is_buyer`, `is_seller`, `login_name`, `password`, `date_registered`, `first_name`, `middle_name`, `last_name`, `other_user_details` FROM `Users`) AS `src1_Users`), user_searches AS (SELECT user_id, COUNT(*) AS search_count FROM t_29 GROUP BY user_id HAVING COUNT(*) <= 2), user_properties AS (SELECT user_id, COUNT(DISTINCT property_name) AS property_count FROM t_29 GROUP BY user_id HAVING COUNT(DISTINCT property_name) >= 2) SELECT DISTINCT s.last_name, s.user_id FROM t_29 s JOIN user_searches us ON s.user_id = us.user_id JOIN user_properties up ON s.user_id = up.user_id LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_30 as (SELECT `id`, `product_name`  FROM  `bike`) SELECT DISTINCT id AS `_distinct_id_`, product_name AS `_product_name_` FROM t_30 WHERE product_name LIKE '%bike%' AND id > 2015 LIMIT 1000
+WITH t_30 AS (SELECT `cyclist_id`, `bike_id` FROM `cyclists_own_bikes`), bike_purchases AS (SELECT bike_id, COUNT(DISTINCT cyclist_id) AS _purchase_count FROM t_30 GROUP BY bike_id HAVING COUNT(DISTINCT cyclist_id) >= 4) SELECT b.id, b.name FROM t_30 b INNER JOIN bike_purchases bp ON b.bike_id = bp.bike_id WHERE b.name LIKE '%racing bike%' LIMIT 1000
+WITH t_30 AS (SELECT `cyclist_id`, `bike_id` FROM `cyclists_own_bikes`), bike_counts AS (SELECT cyclist_id, COUNT(bike_id) AS _bike_count FROM t_30 GROUP BY cyclist_id) SELECT id, name FROM t_30 WHERE cyclist_id = (SELECT cyclist_id FROM bike_counts ORDER BY _bike_count DESC LIMIT 1) LIMIT 1
+select * from tablea 
+select * from tablea 
+with t_30 as (SELECT `cyclist_id`  FROM  `cyclists_own_bikes`) SELECT COUNT(DISTINCT cyclist_id) FROM t_30 WHERE cyclist_id NOT IN (SELECT DISTINCT cyclist_id FROM t_30 WHERE purchase_date > '2015-12-31') LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_30 as (SELECT `cyclist_id`, `bike_id`  FROM  `cyclists_own_bikes`) SELECT cyclist_id, COUNT(bike_id) AS `num_bikes` FROM t_30 GROUP BY cyclist_id ORDER BY cyclist_id LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_31 as (SELECT `Car_Owner`, `Sponsor`, `Team`, `Manager`  FROM  `team`) SELECT Manager, Sponsor, Team, Car_Owner FROM t_31 ORDER BY Car_Owner LIMIT 1000
+with t_31 as (SELECT `Car_Owner`, `Sponsor`, `Team`, `Manager`  FROM  `team`) SELECT Team, Manager, Sponsor FROM t_31 ORDER BY Car_Owner LIMIT 1000
+with t_31 as (SELECT `Team`, `Make`  FROM  `team`) SELECT Make FROM t_31 GROUP BY Make HAVING COUNT(Team) > 1 LIMIT 1000
+with t_31 as (SELECT `Team`, `Make`  FROM  `team`) SELECT Make FROM t_31 GROUP BY Make HAVING COUNT(Team) > 1 LIMIT 1000
+with t_31 as (SELECT `Car_Owner`, `Make`  FROM  `team`) SELECT Make FROM t_31 WHERE Car_Owner = 'Buddy Arrington' LIMIT 1000
+with t_31 as (SELECT `Car_Owner`, `Make`  FROM  `team`) SELECT Make FROM t_31 WHERE Car_Owner = 'Buddy Arrington' LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_32 as (SELECT `Institution_ID`  FROM  `institution`) SELECT COUNT(DISTINCT Institution_ID) AS `_number_of_institutions_` FROM t_32 LIMIT 1000
+with t_32 as (SELECT `Institution_ID`  FROM  `institution`) SELECT COUNT(DISTINCT Institution_ID) AS `institution_count` FROM t_32 LIMIT 1000
+with t_32 as (SELECT `Name`  FROM  `institution`) SELECT Name FROM t_32 ORDER BY Name ASC LIMIT 1000
+with t_32 as (SELECT `Name`  FROM  `institution`) SELECT Name FROM t_32 ORDER BY Name LIMIT 1000
+with t_32 as (SELECT `Name`  FROM  `institution`) SELECT Name FROM t_32 ORDER BY Name ASC LIMIT 1000
+select * from tablea 
+with t_32 as (SELECT `City`, `Province`  FROM  `institution`) SELECT DISTINCT Province, City FROM t_32 LIMIT 1000
+with t_32 as (SELECT `City`, `Province`  FROM  `institution`) SELECT DISTINCT City, Province FROM t_32 LIMIT 1000
+with t_32 as (SELECT `Stadium`  FROM  `institution`) SELECT MAX(Stadium) AS `_maximum_enrollment_`, MIN(Stadium) AS `_minimum_enrollment_` FROM t_32 LIMIT 1000
+select * from tablea 
+with t_32 as (SELECT `City`, `Affiliation`  FROM  `institution`) SELECT Affiliation FROM t_32 WHERE City != 'Vancouver' LIMIT 1000
+with t_32 as (SELECT `City`, `Affiliation`  FROM  `institution`) SELECT Affiliation FROM t_32 WHERE City != 'Vancouver' LIMIT 1000
+with t_32 as (SELECT `Stadium`, `Institution_ID`  FROM  `institution`) SELECT Stadium FROM t_32 ORDER BY Institution_ID DESC LIMIT 1000
+select * from tablea 
+with t_32 as (SELECT `Stadium`, `Institution_ID`  FROM  `institution`) SELECT Stadium FROM t_32 ORDER BY Institution_ID DESC LIMIT 1
+with t_32 as (SELECT `Stadium`, `Endowment`  FROM  `institution`) SELECT Stadium FROM t_32 ORDER BY Endowment DESC LIMIT 1
+with t_32 as (SELECT `t3`.`Institution_ID`, `t2`.`Nickname`  FROM  (SELECT `Institution_ID`, `Nickname`, `Joined`, `Number_of_Championships`  FROM  `Championship`) AS `t2`  INNER JOIN (SELECT `Institution_ID`, `Name`, `Team`, `City`, `Province`, `Founded`, `Affiliation`, `Enrollment`, `Endowment`, `Stadium`, `Capacity`  FROM  `institution`) AS `t3` ON `t2`.`Institution_ID` = `t3`.`Institution_ID`) SELECT Institution_ID, Nickname FROM t_32 LIMIT 1000
+with t_32 as (SELECT `t3`.`Institution_ID`, `t2`.`Nickname`  FROM  (SELECT `Institution_ID`, `Nickname`, `Joined`, `Number_of_Championships`  FROM  `Championship`) AS `t2`  INNER JOIN (SELECT `Institution_ID`, `Name`, `Team`, `City`, `Province`, `Founded`, `Affiliation`, `Enrollment`, `Endowment`, `Stadium`, `Capacity`  FROM  `institution`) AS `t3` ON `t2`.`Institution_ID` = `t3`.`Institution_ID`) SELECT Institution_ID, Nickname FROM t_32 LIMIT 1000
+WITH t_32 AS (SELECT `t3`.`Institution_ID`, `t2`.`Nickname` FROM (SELECT `Institution_ID`, `Nickname`, `Joined`, `Number_of_Championships` FROM `Championship`) AS `t2` INNER JOIN (SELECT `Institution_ID`, `Name`, `Team`, `City`, `Province`, `Founded`, `Affiliation`, `Enrollment`, `Endowment`, `Stadium`, `Capacity` FROM `institution`) AS `t3` ON `t2`.`Institution_ID` = `t3`.`Institution_ID`), min_enrollment AS (SELECT Institution_ID FROM t_32 GROUP BY Institution_ID ORDER BY COUNT(*) ASC LIMIT 1) SELECT Nickname FROM t_32 WHERE Institution_ID = (SELECT Institution_ID FROM min_enrollment) LIMIT 1000
+with t_32 as (SELECT `t3`.`Endowment`, `t2`.`Nickname`  FROM  (SELECT `Institution_ID`, `Nickname`, `Joined`, `Number_of_Championships`  FROM  `Championship`) AS `t2`  INNER JOIN (SELECT `Institution_ID`, `Name`, `Team`, `City`, `Province`, `Founded`, `Affiliation`, `Enrollment`, `Endowment`, `Stadium`, `Capacity`  FROM  `institution`) AS `t3` ON `t2`.`Institution_ID` = `t3`.`Institution_ID`) SELECT Nickname FROM t_32 ORDER BY Endowment ASC LIMIT 1
+with t_32 as (SELECT `Name`  FROM  `institution`) SELECT Name FROM t_32 ORDER BY Name DESC LIMIT 1000
+with t_32 as (SELECT `Institution_ID`, `Name`  FROM  `institution`) SELECT Name FROM t_32 ORDER BY Institution_ID DESC LIMIT 1000
+with t_32 as (SELECT `Team`, `Name`  FROM  `institution`) SELECT DISTINCT Name FROM t_32 WHERE Team IS NOT NULL LIMIT 1000
+with t_32 as (SELECT `Name`  FROM  `institution`) SELECT DISTINCT i.Name FROM t_32 i JOIN t_32 c ON i.Institution_ID = c.Institution_ID LIMIT 1000
+with t_32 as (SELECT `Institution_ID`, `Affiliation`  FROM  `institution`) SELECT COUNT(DISTINCT Institution_ID) AS `_total_number_of_championships_` FROM t_32 WHERE Affiliation = 'public' LIMIT 1000
+with t_32 as (SELECT `Affiliation`  FROM  `institution`) SELECT COUNT(*) AS `_total_championships_` FROM t_32 WHERE Affiliation = 'Public' LIMIT 1000
+with t_32 as (SELECT `Institution_ID`, `Affiliation`  FROM  `institution`) SELECT Affiliation, COUNT(DISTINCT Institution_ID) AS `机构数量` FROM t_32 GROUP BY Affiliation LIMIT 1000
+with t_32 as (SELECT `Institution_ID`, `Affiliation`  FROM  `institution`) SELECT Affiliation, COUNT(DISTINCT Institution_ID) AS `_institution_count_` FROM t_32 GROUP BY Affiliation LIMIT 1000
+WITH t_32 AS (SELECT `Institution_ID`, `Affiliation` FROM `institution`), affiliation_counts AS (SELECT Affiliation, COUNT(Institution_ID) AS _count FROM t_32 GROUP BY Affiliation) SELECT Affiliation FROM affiliation_counts ORDER BY _count DESC LIMIT 1
+WITH t_32 AS (SELECT `Institution_ID`, `Affiliation` FROM `institution`), affiliation_counts AS (SELECT Affiliation, COUNT(Institution_ID) AS _count FROM t_32 GROUP BY Affiliation) SELECT Affiliation FROM affiliation_counts ORDER BY _count DESC LIMIT 1
+WITH t_32 AS (SELECT `Institution_ID` FROM `Championship`), yearly_institutions AS (SELECT EXTRACT(YEAR FROM Founded) AS founded_year, COUNT(DISTINCT Institution_ID) AS institution_count FROM t_32 GROUP BY EXTRACT(YEAR FROM Founded)) SELECT founded_year FROM yearly_institutions WHERE institution_count > 1 LIMIT 1000
+WITH t_32 AS (SELECT `Institution_ID` FROM `Championship`), institution_counts AS (SELECT YEAR(Founded) AS founded_year, COUNT(Institution_ID) AS num_institutions FROM t_32 GROUP BY YEAR(Founded)) SELECT founded_year, num_institutions FROM institution_counts WHERE num_institutions > 1 LIMIT 1000
+with t_32 as (SELECT `t3`.`Stadium`, `t2`.`Nickname`  FROM  (SELECT `Institution_ID`, `Nickname`, `Joined`, `Number_of_Championships`  FROM  `Championship`) AS `t2`  INNER JOIN (SELECT `Institution_ID`, `Name`, `Team`, `City`, `Province`, `Founded`, `Affiliation`, `Enrollment`, `Endowment`, `Stadium`, `Capacity`  FROM  `institution`) AS `t3` ON `t2`.`Institution_ID` = `t3`.`Institution_ID`) SELECT Nickname FROM t_32 ORDER BY Stadium DESC LIMIT 1000
+select * from tablea 
+with t_32 as (SELECT `Institution_ID`, `City`  FROM  `institution`) SELECT COUNT(DISTINCT Institution_ID) AS `_total_enrollment_` FROM t_32 WHERE City IN ('Vancouver', 'Calgary') LIMIT 1000
+with t_32 as (SELECT `City`  FROM  `institution`) SELECT * FROM t_32 WHERE City IN ('Vancouver', 'Calgary') LIMIT 1000
+WITH t_32 AS (SELECT `Team`, `Province` FROM `institution`), pre_1920 AS (SELECT DISTINCT Province FROM t_32 WHERE Team < 1920), post_1950 AS (SELECT DISTINCT Province FROM t_32 WHERE Team > 1950) SELECT pre_1920.Province FROM pre_1920 INNER JOIN post_1950 ON pre_1920.Province = post_1950.Province LIMIT 1000
+WITH t_32 AS (SELECT `Team`, `Province` FROM `institution`), pre_1920 AS (SELECT DISTINCT Province FROM t_32 WHERE Team < 1920), post_1950 AS (SELECT DISTINCT Province FROM t_32 WHERE Team > 1950) SELECT pre_1920.Province FROM pre_1920 INNER JOIN post_1950 ON pre_1920.Province = post_1950.Province LIMIT 1000
+with t_32 as (SELECT `Province`  FROM  `institution`) SELECT COUNT(DISTINCT Province) AS `_distinct_provinces_count_` FROM t_32 LIMIT 1000
+with t_32 as (SELECT `Province`  FROM  `institution`) SELECT COUNT(DISTINCT Province) AS `_province_count_` FROM t_32 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_33 as (SELECT `Location`  FROM  `Warehouses`) SELECT DISTINCT Location FROM t_33 LIMIT 1000
+with t_33 as (SELECT `Location`  FROM  `Warehouses`) SELECT DISTINCT Location FROM t_33 LIMIT 1000
+with t_33 as (SELECT `Code`, `Location`  FROM  `Warehouses`) SELECT Code FROM t_33 WHERE Location IN ('Chicago', 'New York') LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_33 as (SELECT `Code`, `Location`  FROM  `Warehouses`) SELECT Code, Location FROM t_33 LIMIT 1000
+select * from tablea 
+with t_33 as (SELECT `Code`, `Location`  FROM  `Warehouses`) SELECT Code FROM t_33 WHERE Location = 'Chicago' LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_34 as (SELECT `State`, `University_Name`, `City`  FROM  `university`) SELECT University_Name, City, State FROM t_34 ORDER BY University_Name ASC LIMIT 1000
+with t_34 as (SELECT `State`, `University_Name`, `City`  FROM  `university`) SELECT University_Name, City, State FROM t_34 ORDER BY University_Name LIMIT 1000
+with t_34 as (SELECT `State`  FROM  `university`) SELECT COUNT(*) FROM t_34 WHERE State IN ('Illinois', 'Ohio') LIMIT 1000
+with t_34 as (SELECT `State`, `University_Name`  FROM  `university`) SELECT COUNT(University_Name) FROM t_34 WHERE State IN ('Illinois', 'Ohio') LIMIT 1000
+with t_34 as (SELECT `University_ID`  FROM  `university`) SELECT MAX(University_ID) AS `_maximum_enrollment_`, AVG(University_ID) AS `_average_enrollment_`, MIN(University_ID) AS `_minimum_enrollment_` FROM t_34 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_34 as (SELECT `Home_Conference`  FROM  `university`) SELECT DISTINCT Home_Conference FROM t_34 LIMIT 1000
+with t_34 as (SELECT `Home_Conference`  FROM  `university`) SELECT DISTINCT Home_Conference FROM t_34 LIMIT 1000
+with t_34 as (SELECT `Home_Conference`, `University_ID`  FROM  `university`) SELECT Home_Conference, COUNT(University_ID) AS `_number_of_universities_` FROM t_34 GROUP BY Home_Conference LIMIT 1000
+with t_34 as (SELECT `Home_Conference`, `University_Name`  FROM  `university`) SELECT Home_Conference, COUNT(DISTINCT University_Name) AS `_number_of_universities_` FROM t_34 GROUP BY Home_Conference LIMIT 1000
+with t_34 as (SELECT `State`, `University_Name`  FROM  `university`) SELECT State, COUNT(DISTINCT University_Name) AS `_number_of_universities_` FROM t_34 GROUP BY State ORDER BY `_number_of_universities_` DESC LIMIT 1
+WITH t_34 AS (SELECT `University_ID`, `State` FROM `university`), state_counts AS (SELECT State, COUNT(University_ID) AS university_count FROM t_34 GROUP BY State) SELECT State FROM state_counts ORDER BY university_count DESC LIMIT 1
+select * from tablea 
+with t_34 as (SELECT `Home_Conference`, `University_ID`  FROM  `university`) SELECT Home_Conference FROM t_34 GROUP BY Home_Conference HAVING AVG(University_ID) > 2000 LIMIT 1000
+WITH t_34 AS (SELECT `Home_Conference` FROM `university`), conference_enrollment AS (SELECT Home_Conference, COUNT(*) AS _total_enrollment_ FROM t_34 GROUP BY Home_Conference) SELECT Home_Conference FROM conference_enrollment ORDER BY _total_enrollment_ ASC LIMIT 1
+WITH t_34 AS (SELECT `Home_Conference` FROM `university`), conference_counts AS (SELECT Home_Conference, COUNT(*) AS _enrollment_count FROM t_34 GROUP BY Home_Conference) SELECT Home_Conference FROM conference_counts ORDER BY _enrollment_count ASC LIMIT 1
+with t_34 as (SELECT `Major_ID`, `Major_Name`  FROM  `major`) SELECT Major_Name, Major_ID FROM t_34 ORDER BY Major_ID LIMIT 1000
+with t_34 as (SELECT `Major_ID`, `Major_Name`  FROM  `major`) SELECT Major_Name, Major_ID FROM t_34 ORDER BY Major_ID LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_34 as (SELECT `University_ID`  FROM  `university`) SELECT University_ID FROM t_34 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_35 as (SELECT `Rating`, `Title`  FROM  `Movies`) SELECT Title FROM t_35 WHERE Rating IS NULL OR Rating = '' LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Name FROM t_35 WHERE Rating IS NULL LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Name FROM t_35 WHERE Rating = 'G' LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Name FROM t_35 WHERE Rating = 'G' LIMIT 1000
+with t_35 as (SELECT `t2`.`Movie`, `t3`.`Title`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Title FROM t_35 WHERE Movie = 'Odeon' LIMIT 1000
+select * from tablea 
+with t_35 as (SELECT `Code`, `Name`  FROM  `MovieTheaters`) SELECT Name AS `_movie_name_`, Code AS `_theater_name_` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Code`, `Name`  FROM  `MovieTheaters`) SELECT Name AS `_movie_name_`, Code AS `_theater_code_` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT COUNT(*) AS `_number_of_movies_` FROM t_35 WHERE Rating = 'G' LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT COUNT(*) FROM t_35 WHERE Rating = 'G' LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT COUNT(DISTINCT Rating) AS `"how_many_movies_are_playing_across_all_theaters"` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Code`  FROM  `MovieTheaters`) SELECT COUNT(DISTINCT Code) AS `_number_of_movies_` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Title`  FROM  `Movies`) SELECT COUNT(DISTINCT Title) FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Code`  FROM  `MovieTheaters`) SELECT COUNT(DISTINCT Code) AS `_different_movies_` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Movie`  FROM  `MovieTheaters`) SELECT COUNT(DISTINCT Movie) AS `_distinct_movie_theaters_` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Movie`  FROM  `MovieTheaters`) SELECT COUNT(DISTINCT Movie) AS `_different_movie_theaters_` FROM t_35 LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Rating FROM t_35 WHERE Name LIKE '%Citizen%' LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Name, Rating FROM t_35 WHERE Name LIKE '%Citizen%' LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT DISTINCT Name FROM t_35 WHERE Rating IN ('G', 'PG') LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT DISTINCT Name FROM t_35 WHERE Rating IN ('G', 'PG') LIMIT 1000
+with t_35 as (SELECT `t3`.`Title`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Title FROM t_35 WHERE Name IN ('Odeon', 'Imperial') LIMIT 1000
+with t_35 as (SELECT `Title`, `Code`  FROM  `Movies`) SELECT Title FROM t_35 WHERE Code IN ('Odeon', 'Imperial') LIMIT 1000
+with t_35 as (SELECT `Movie`, `Name`  FROM  `MovieTheaters`) SELECT DISTINCT a.Movie FROM t_35 a JOIN t_35 b ON a.Movie = b.Movie WHERE a.Name = 'Odeon' AND b.Name = 'Imperial' LIMIT 1000
+with t_35 as (SELECT `Movie`, `Code`  FROM  `MovieTheaters`) SELECT DISTINCT a.Movie FROM t_35 a JOIN t_35 b ON a.Movie = b.Movie WHERE a.Code = 'Odeon' AND b.Code = 'Imperial' LIMIT 1000
+with t_35 as (SELECT `Code`, `Name`  FROM  `MovieTheaters`) SELECT Name FROM t_35 WHERE Code NOT IN (SELECT Code FROM t_35 WHERE Name = 'Odeon') LIMIT 1000
+with t_35 as (SELECT `Movie`, `Name`  FROM  `MovieTheaters`) SELECT DISTINCT Movie FROM t_35 WHERE Name != 'Odeon' LIMIT 1000
+with t_35 as (SELECT `Title`  FROM  `Movies`) SELECT Title FROM t_35 ORDER BY Title ASC LIMIT 1000
+with t_35 as (SELECT `Movie`  FROM  `MovieTheaters`) SELECT Movie FROM t_35 ORDER BY Movie ASC LIMIT 1000
+with t_35 as (SELECT `Rating`, `Title`  FROM  `Movies`) SELECT Title FROM t_35 ORDER BY Rating DESC LIMIT 1000
+with t_35 as (SELECT `t2`.`Movie`, `t3`.`Rating`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Movie, Rating FROM t_35 ORDER BY Rating DESC LIMIT 1000
+WITH t_35 AS (SELECT `Movie`, `Name` FROM `MovieTheaters`), theater_movie_count AS (SELECT Name, COUNT(DISTINCT Movie) AS _movie_count_ FROM t_35 GROUP BY Name) SELECT Name FROM theater_movie_count ORDER BY _movie_count_ DESC LIMIT 1
+WITH t_35 AS (SELECT `Movie`, `Name` FROM `MovieTheaters`), movie_count AS (SELECT Name, COUNT(DISTINCT Movie) AS _movie_count FROM t_35 GROUP BY Name) SELECT Name FROM movie_count ORDER BY _movie_count DESC LIMIT 1
+WITH t_35 AS (SELECT `Name` FROM `MovieTheaters`), movie_counts AS (SELECT Name, COUNT(*) AS _count FROM t_35 GROUP BY Name) SELECT Name FROM movie_counts ORDER BY _count DESC LIMIT 1
+WITH t_35 AS (SELECT `Movie` FROM `MovieTheaters`), movie_theater_count AS (SELECT Movie, COUNT(*) AS _theater_count_ FROM t_35 GROUP BY Movie) SELECT Movie FROM movie_theater_count ORDER BY _theater_count_ DESC LIMIT 1
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT Rating, COUNT(*) AS `_number_of_movies_` FROM t_35 GROUP BY Rating LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT Rating, COUNT(*) AS `movie_count` FROM t_35 GROUP BY Rating LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT COUNT(*) AS `_number_of_movies_` FROM t_35 WHERE Rating IS NOT NULL LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT COUNT(*) FROM t_35 WHERE Rating IS NOT NULL LIMIT 1000
+with t_35 as (SELECT `Movie`, `Name`  FROM  `MovieTheaters`) SELECT DISTINCT Name FROM t_35 WHERE Movie IS NOT NULL LIMIT 1000
+with t_35 as (SELECT `Movie`, `Name`  FROM  `MovieTheaters`) SELECT DISTINCT Name FROM t_35 WHERE Movie IS NOT NULL LIMIT 1000
+with t_35 as (SELECT `Movie`, `Name`  FROM  `MovieTheaters`) SELECT Name FROM t_35 WHERE Movie IS NULL LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Name FROM t_35 WHERE Rating IS NULL LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT DISTINCT Name FROM t_35 WHERE Rating = 'G' LIMIT 1000
+with t_35 as (SELECT `t3`.`Rating`, `t2`.`Name`  FROM  (SELECT `Code`, `Name`, `Movie`  FROM  `MovieTheaters`) AS `t2`  INNER JOIN (SELECT `Code`, `Title`, `Rating`  FROM  `Movies`) AS `t3` ON `t2`.`Code` = `t3`.`Code`) SELECT Name FROM t_35 WHERE Rating = 'G' LIMIT 1000
+with t_35 as (SELECT `Title`  FROM  `Movies`) SELECT Title FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Movie`  FROM  `MovieTheaters`) SELECT DISTINCT Movie FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT DISTINCT Rating FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT DISTINCT Rating FROM t_35 LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT * FROM t_35 WHERE Rating IS NULL LIMIT 1000
+with t_35 as (SELECT `Rating`  FROM  `Movies`) SELECT * FROM t_35 WHERE Rating IS NULL LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `PackageNumber`  FROM  `Package`) SELECT PackageNumber FROM t_36 ORDER BY PackageNumber DESC LIMIT 1
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Sender`, `PackageNumber`  FROM  `Package`) SELECT PackageNumber FROM t_36 WHERE Sender = 'Leo Wong' LIMIT 1000
+with t_36 as (SELECT `Sender`  FROM  `Package`) SELECT COUNT(*) AS `_number_of_packages_` FROM t_36 WHERE Sender = 'Leo Wong' LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Sender`, `PackageNumber`, `Contents`, `Shipment`, `Recipient`  FROM  `Package`) SELECT PackageNumber, Shipment, Recipient, Contents, ShipmentID, Sender FROM t_36 WHERE Sender = 'Leo Wong' OR Recipient = 'Leo Wong' LIMIT 1000
+with t_36 as (SELECT `Sender`, `PackageNumber`, `Recipient`  FROM  `Package`) SELECT DISTINCT PackageNumber FROM t_36 WHERE Sender = 'Leo Wong' OR Recipient = 'Leo Wong' LIMIT 1000
+with t_36 as (SELECT `Sender`, `Recipient`  FROM  `Package`) SELECT COUNT(*) AS `_package_count_` FROM t_36 WHERE Sender = 'Ogden Wernstrom' AND Recipient = 'Leo Wong' LIMIT 1000
+with t_36 as (SELECT `Sender`, `Recipient`  FROM  `Package`) SELECT COUNT(*) FROM t_36 WHERE Sender = 'Ogden Wernstrom' AND Recipient = 'Leo Wong' LIMIT 1000
+with t_36 as (SELECT `Sender`, `Contents`  FROM  `Package`) SELECT Contents FROM t_36 WHERE Sender = 'John Zoidfarb' LIMIT 1000
+with t_36 as (SELECT `Sender`, `Contents`  FROM  `Package`) SELECT Contents FROM t_36 WHERE Sender = 'John Zoidfarb' LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `PackageNumber`  FROM  `Package`) SELECT PackageNumber FROM t_36 ORDER BY PackageNumber ASC LIMIT 3
+with t_36 as (SELECT `PackageNumber`  FROM  `Package`) SELECT PackageNumber FROM t_36 ORDER BY PackageNumber ASC LIMIT 3
+select * from tablea 
+select * from tablea 
+select * from tablea 
+WITH t_36 AS (SELECT `Sender`, `PackageNumber` FROM `Package`), min_package AS (SELECT MIN(PackageNumber) AS _min_package_number_ FROM t_36) SELECT Sender, PackageNumber FROM t_36 WHERE PackageNumber = (SELECT _min_package_number_ FROM min_package) LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Remarks FROM t_36 WHERE Planet = 'Mars' LIMIT 1000
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Name, Planet FROM t_36 ORDER BY Name ASC LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Name, Planet FROM t_36 ORDER BY Name LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT ShipmentID FROM t_36 WHERE Planet = 'Mars' LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT ShipmentID FROM t_36 WHERE Planet = 'Mars' LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Planet, COUNT(Shipment) AS `_total_shipments_` FROM t_36 GROUP BY Planet LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Planet, COUNT(Shipment) AS `_shipment_count_` FROM t_36 GROUP BY Planet LIMIT 1000
+WITH t_36 AS (SELECT `Planet` FROM `Has_Clearance`), shipment_counts AS (SELECT Planet, COUNT(Shipment) AS _shipment_count_ FROM t_36 GROUP BY Planet) SELECT Planet FROM shipment_counts ORDER BY _shipment_count_ DESC LIMIT 1
+WITH t_36 AS (SELECT `Planet` FROM `Has_Clearance`), shipment_counts AS (SELECT Planet, COUNT(Shipment) AS _shipment_count FROM t_36 GROUP BY Planet) SELECT Planet AS `_planet_name` FROM shipment_counts ORDER BY _shipment_count DESC LIMIT 1
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT SUM(Shipment) AS `_total_weight_` FROM t_36 WHERE Planet = 'Mars' LIMIT 1000
+with t_36 as (SELECT `Shipment`  FROM  `Package`) SELECT SUM(Weight) AS `_total_weight_` FROM t_36 WHERE Shipment = 'Mars' LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Planet, SUM(PackageNumber) AS `_total_weight_` FROM t_36 GROUP BY Planet LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Planet, SUM(PackageNumber) AS `total_package_weight` FROM t_36 GROUP BY Planet LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Planet FROM t_36 GROUP BY Planet HAVING SUM(Shipment) > 30 LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Planet FROM t_36 GROUP BY Planet HAVING SUM(Shipment) > 30 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT COUNT(*) AS `_number_of_packages_` FROM t_36 WHERE Planet = 'Omicron Persei 8' OR Sender = 'Zapp Brannigan' LIMIT 1000
+select * from tablea 
+with t_36 as (SELECT `PackageNumber`  FROM  `Package`) SELECT PackageNumber FROM t_36 WHERE PackageNumber >= 10 AND PackageNumber <= 30 LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT Name FROM t_36 WHERE Planet = 'Omega III' LIMIT 1000
+with t_36 as (SELECT `Planet`  FROM  `Has_Clearance`) SELECT DISTINCT Name FROM t_36 WHERE Planet = 'Omega III' LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_37 as (SELECT `Platform_ID`  FROM  `game`) SELECT COUNT(DISTINCT Platform_ID) AS `_number_of_games_` FROM t_37 LIMIT 1000
+select * from tablea 
+with t_37 as (SELECT `Developers`, `Title`  FROM  `game`) SELECT Title, Developers FROM t_37 ORDER BY Title LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_37 as (SELECT `Market_district`, `Platform_name`  FROM  `platform`) SELECT Platform_name, Market_district FROM t_37 LIMIT 1000
+with t_37 as (SELECT `Market_district`, `Platform_name`  FROM  `platform`) SELECT Platform_name, Market_district FROM t_37 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_37 as (SELECT `Player_ID`  FROM  `game_player`) SELECT COUNT(DISTINCT Player_ID) AS `player_count` FROM t_37 WHERE rank_of_the_year < 3 LIMIT 1000
+with t_37 as (SELECT `Player_ID`  FROM  `game_player`) SELECT COUNT(DISTINCT Player_ID) FROM t_37 WHERE year_rank <= 3 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_37 as (SELECT `t2`.`Platform_name`, `t3`.`Title`  FROM  (SELECT `Platform_ID`, `Platform_name`, `Market_district`, `Download_rank`  FROM  `platform`) AS `t2`  INNER JOIN (SELECT `Game_ID`, `Title`, `Release_Date`, `Franchise`, `Developers`, `Platform_ID`, `Units_sold_Millions`  FROM  `game`) AS `t3` ON `t2`.`Platform_ID` = `t3`.`Platform_ID`) SELECT Title, Platform_name FROM t_37 LIMIT 1000
+with t_37 as (SELECT `t2`.`Platform_name`, `t3`.`Title`  FROM  (SELECT `Platform_ID`, `Platform_name`, `Market_district`, `Download_rank`  FROM  `platform`) AS `t2`  INNER JOIN (SELECT `Game_ID`, `Title`, `Release_Date`, `Franchise`, `Developers`, `Platform_ID`, `Units_sold_Millions`  FROM  `game`) AS `t3` ON `t2`.`Platform_ID` = `t3`.`Platform_ID`) SELECT Title, Platform_name FROM t_37 LIMIT 1000
+with t_37 as (SELECT `t2`.`Market_district`, `t3`.`Title`  FROM  (SELECT `Platform_ID`, `Platform_name`, `Market_district`, `Download_rank`  FROM  `platform`) AS `t2`  INNER JOIN (SELECT `Game_ID`, `Title`, `Release_Date`, `Franchise`, `Developers`, `Platform_ID`, `Units_sold_Millions`  FROM  `game`) AS `t3` ON `t2`.`Platform_ID` = `t3`.`Platform_ID`) SELECT Title FROM t_37 WHERE Market_district IN ('Asia', 'USA') LIMIT 1000
+with t_37 as (SELECT `t2`.`Market_district`, `t3`.`Title`  FROM  (SELECT `Platform_ID`, `Platform_name`, `Market_district`, `Download_rank`  FROM  `platform`) AS `t2`  INNER JOIN (SELECT `Game_ID`, `Title`, `Release_Date`, `Franchise`, `Developers`, `Platform_ID`, `Units_sold_Millions`  FROM  `game`) AS `t3` ON `t2`.`Platform_ID` = `t3`.`Platform_ID`) SELECT DISTINCT Title FROM t_37 WHERE Market_district IN ('Asia', 'USA') LIMIT 1000
+with t_37 as (SELECT `Game_ID`, `Franchise`  FROM  `game`) SELECT Franchise, COUNT(Game_ID) AS `_number_of_games_` FROM t_37 GROUP BY Franchise LIMIT 1000
+with t_37 as (SELECT `Game_ID`, `Franchise`  FROM  `game`) SELECT Franchise, COUNT(DISTINCT Game_ID) AS `_game_count_` FROM t_37 GROUP BY Franchise LIMIT 1000
+with t_37 as (SELECT `Game_ID`, `Franchise`  FROM  `game`) SELECT Franchise FROM t_37 GROUP BY Franchise ORDER BY COUNT(DISTINCT Game_ID) DESC LIMIT 1
+with t_37 as (SELECT `Game_ID`, `Franchise`  FROM  `game`) SELECT Franchise, COUNT(Game_ID) AS `_game_count_` FROM t_37 GROUP BY Franchise ORDER BY `_game_count_` DESC LIMIT 1
+with t_37 as (SELECT `Game_ID`, `Franchise`  FROM  `game`) SELECT Franchise FROM t_37 GROUP BY Franchise HAVING COUNT(DISTINCT Game_ID) >= 2 LIMIT 1000
+with t_37 as (SELECT `Game_ID`, `Franchise`  FROM  `game`) SELECT Franchise FROM t_37 GROUP BY Franchise HAVING COUNT(DISTINCT Game_ID) >= 2 LIMIT 1000
+with t_37 as (SELECT `Game_ID`  FROM  `game_player`) SELECT DISTINCT Player_name FROM t_37 WHERE Game_ID IS NULL LIMIT 1000
+with t_37 as (SELECT `Game_ID`  FROM  `game_player`) SELECT DISTINCT Player_name FROM t_37 WHERE Game_ID IS NULL LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_37 as (SELECT `Franchise`  FROM  `game`) SELECT DISTINCT Franchise FROM t_37 LIMIT 1000
+with t_37 as (SELECT `Franchise`  FROM  `game`) SELECT DISTINCT Franchise FROM t_37 LIMIT 1000
+select * from tablea 
+WITH t_37 AS (SELECT `Player_ID`, `Game_ID` FROM `game_player`), GuardPlayers AS (SELECT DISTINCT Player_ID FROM t_37 WHERE Position = 'Guard') SELECT DISTINCT Title FROM t_37 WHERE Game_ID NOT IN (SELECT Game_ID FROM t_37 WHERE Player_ID IN (SELECT Player_ID FROM GuardPlayers)) LIMIT 1000
+with t_38 as (SELECT `Press_ID`  FROM  `book`) SELECT Press_ID FROM t_38 ORDER BY Press_ID DESC LIMIT 1000
+with t_38 as (SELECT `Title`  FROM  `book`) SELECT Title FROM t_38 ORDER BY Title DESC LIMIT 1000
+with t_38 as (SELECT `Title`, `Press_ID`  FROM  `book`) SELECT Press_ID, Title FROM t_38 WHERE 1 = 0 LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_38 as (SELECT `Name`  FROM  `author`) SELECT Name FROM t_38 LIMIT 1000
+with t_38 as (SELECT `Name`  FROM  `author`) SELECT Name FROM t_38 LIMIT 1
+with t_38 as (SELECT `Name`  FROM  `author`) SELECT Name FROM t_38 LIMIT 1000
+with t_38 as (SELECT `Name`  FROM  `author`) SELECT Name FROM t_38 LIMIT 1000
+select * from tablea 
+select * from tablea 
+with t_38 as (SELECT `Author_ID`, `Gender`  FROM  `author`) SELECT Gender, AVG(Author_ID) AS `_average_age_` FROM t_38 GROUP BY Gender LIMIT 1000
+select * from tablea 
+select * from tablea 
+select * from tablea 
+with t_38 as (SELECT `Release_date`, `Title`  FROM  `book`) SELECT Title, Release_date FROM t_38 ORDER BY Release_date DESC LIMIT 1000
+with t_38 as (SELECT `Release_date`, `Title`  FROM  `book`) SELECT Title FROM t_38 ORDER BY Release_date DESC LIMIT 1000
+with t_38 as (SELECT `Book_ID`, `Book_Series`  FROM  `book`) SELECT Book_Series, COUNT(Book_ID) AS `_number_of_books_` FROM t_38 GROUP BY Book_Series LIMIT 1000
+with t_38 as (SELECT `Book_ID`, `Book_Series`  FROM  `book`) SELECT Book_Series, COUNT(DISTINCT Book_ID) AS `_book_count_` FROM t_38 GROUP BY Book_Series LIMIT 1000
+with t_38 as (SELECT `Book_ID`, `Release_date`, `Title`  FROM  `book`) SELECT Title, Release_date FROM t_38 ORDER BY Book_ID DESC LIMIT 5
+with t_38 as (SELECT `Release_date`, `Title`, `Sale_Amount`  FROM  `book`) SELECT Title, Release_date FROM t_38 ORDER BY Sale_Amount DESC LIMIT 5
+WITH t_38 AS (SELECT `Book_Series`, `Press_ID` FROM `book`), high_selling AS (SELECT Book_Series FROM t_38 WHERE Press_ID > 1000 GROUP BY Book_Series), low_selling AS (SELECT Book_Series FROM t_38 WHERE Press_ID < 500 GROUP BY Book_Series) SELECT h.Book_Series FROM high_selling h JOIN low_selling l ON h.Book_Series = l.Book_Series LIMIT 1000
+WITH t_38 AS (SELECT `Book_Series`, `Sale_Amount` FROM `book`), high_selling_series AS (SELECT DISTINCT Book_Series FROM t_38 WHERE Sale_Amount > 1000), low_selling_series AS (SELECT DISTINCT Book_Series FROM t_38 WHERE Sale_Amount < 500) SELECT h.Book_Series FROM high_selling_series h INNER JOIN low_selling_series l ON h.Book_Series = l.Book_Series LIMIT 1000
+WITH t_38 AS (SELECT `t2`.`Book_Series`, `t3`.`Author_ID`, `t3`.`Name` FROM (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date` FROM `book`) AS `t2` INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender` FROM `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`), mm_authors AS (SELECT DISTINCT Author_ID FROM t_38 WHERE Book_Series = 'MM'), lt_authors AS (SELECT DISTINCT Author_ID FROM t_38 WHERE Book_Series = 'LT') SELECT DISTINCT a.Name FROM t_38 a JOIN mm_authors m ON a.Author_ID = m.Author_ID JOIN lt_authors l ON a.Author_ID = l.Author_ID LIMIT 1000
+with t_38 as (SELECT `t2`.`Book_Series`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT DISTINCT a.Name FROM t_38 a JOIN t_38 b ON a.Author_ID = b.Author_ID WHERE a.Book_Series = 'MM' AND b.Book_Series = 'LT' LIMIT 1000
+select * from tablea 
+with t_38 as (SELECT `t2`.`Book_ID`, `t3`.`Author_ID`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT Name FROM t_38 WHERE Author_ID NOT IN (SELECT Author_ID FROM t_38 WHERE Book_ID IS NOT NULL) LIMIT 1000
+WITH t_38 AS (SELECT `t2`.`Book_ID`, `t3`.`Author_ID`, `t3`.`Name` FROM (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date` FROM `book`) AS `t2` INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender` FROM `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`), author_book_count AS (SELECT Author_ID, COUNT(Book_ID) AS _book_count_ FROM t_38 GROUP BY Author_ID) SELECT Name FROM t_38 WHERE Author_ID IN (SELECT Author_ID FROM author_book_count WHERE _book_count_ > 1) GROUP BY Name LIMIT 1000
+WITH t_38 AS (SELECT `t2`.`Book_ID`, `t3`.`Author_ID`, `t3`.`Name` FROM (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date` FROM `book`) AS `t2` INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender` FROM `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`), author_book_count AS (SELECT Author_ID, COUNT(Book_ID) AS _book_count_ FROM t_38 GROUP BY Author_ID) SELECT Name FROM t_38 WHERE Author_ID IN (SELECT Author_ID FROM author_book_count WHERE _book_count_ > 1) GROUP BY Name LIMIT 1000
+with t_38 as (SELECT `t2`.`Title`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT Title, Name AS `_author_name_`, Name AS `_publisher_name_` FROM t_38 ORDER BY (implicit_sales_metric) DESC LIMIT 3
+with t_38 as (SELECT `t2`.`Title`, `t2`.`Press_ID`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT Title, Name AS `_author_name_`, Press_ID AS `_press_name_` FROM t_38 LIMIT 3
+with t_38 as (SELECT `t2`.`Sale_Amount`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT p.Name AS `_出版社名称_`, SUM(b.Sale_Amount) AS `_总销售金额_` FROM t_38 p JOIN t_38 b ON p.Press_ID = b.Press_ID GROUP BY p.Name LIMIT 1000
+with t_38 as (SELECT `t2`.`Sale_Amount`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT p.Name AS `_press_name_`, SUM(b.Sale_Amount) AS `_total_sale_amount_` FROM t_38 p JOIN t_38 b ON p.Press_ID = b.Press_ID GROUP BY p.Name LIMIT 1000
+with t_38 as (SELECT `Book_ID`, `Press_ID`  FROM  `book`) SELECT Press_ID, COUNT(Book_ID) AS `_number_of_books_` FROM t_38 GROUP BY Press_ID HAVING COUNT(Book_ID) > 1000 LIMIT 1000
+with t_38 as (SELECT `t2`.`Book_ID`, `t2`.`Sale_Amount`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT p.Name AS `_press_name_`, COUNT(b.Book_ID) AS `_book_count_` FROM t_38 p JOIN t_38 b ON p.Press_ID = b.Press_ID WHERE b.Sale_Amount > 1000 GROUP BY p.Name LIMIT 1000
+with t_38 as (SELECT `t2`.`Book_ID`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT Name FROM t_38 WHERE Book_ID = (SELECT Book_ID FROM t_38 GROUP BY Book_ID ORDER BY COUNT(*) DESC LIMIT 1) LIMIT 1000
+select * from tablea 
+WITH t_38 AS (SELECT `t2`.`Book_ID`, `t3`.`Author_ID`, `t3`.`Gender`, `t3`.`Name` FROM (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date` FROM `book`) AS `t2` INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender` FROM `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`), author_book_count AS (SELECT Author_ID, COUNT(Book_ID) AS _book_count FROM t_38 GROUP BY Author_ID ORDER BY _book_count DESC LIMIT 1) SELECT Name, Gender FROM t_38 WHERE Author_ID = (SELECT Author_ID FROM author_book_count) LIMIT 1000
+WITH t_38 AS (SELECT `t2`.`Book_ID`, `t3`.`Gender`, `t3`.`Name` FROM (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date` FROM `book`) AS `t2` INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender` FROM `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`), book_counts AS (SELECT Name, Gender, COUNT(Book_ID) AS _book_count_ FROM t_38 GROUP BY Name, Gender) SELECT Name, Gender FROM book_counts ORDER BY _book_count_ DESC LIMIT 1
+with t_38 as (SELECT `t3`.`Author_ID`, `t2`.`Press_ID`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT DISTINCT Name FROM t_38 A WHERE NOT EXISTS (SELECT 1 FROM t_38 B WHERE A.Author_ID = B.Author_ID AND B.Press_ID = 'Accor') LIMIT 1000
+with t_38 as (SELECT `t3`.`Author_ID`, `t2`.`Press_ID`, `t3`.`Name`  FROM  (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date`  FROM  `book`) AS `t2`  INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender`  FROM  `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`) SELECT DISTINCT Name FROM t_38 WHERE Author_ID NOT IN (SELECT Author_ID FROM t_38 WHERE Press_ID = 'Accor') LIMIT 1000
+WITH t_38 AS (SELECT `t2`.`Book_ID`, `t2`.`Press_ID`, `t3`.`Name` FROM (SELECT `Book_ID`, `Title`, `Book_Series`, `Author_ID`, `Press_ID`, `Sale_Amount`, `Release_date` FROM `book`) AS `t2` INNER JOIN (SELECT `Author_ID`, `Name`, `Age`, `Gender` FROM `author`) AS `t3` ON `t2`.`Author_ID` = `t3`.`Author_ID`), press_book_count AS (SELECT Press_ID, COUNT(Book_ID) AS _book_count_ FROM t_38 GROUP BY Press_ID HAVING COUNT(Book_ID) > 2) SELECT p.Name, p.Press_ID FROM t_38 p JOIN press_book_count c ON p.Press_ID = c.Press_ID GROUP BY p.Name, p.Press_ID LIMIT 1000
+select * from tablea 
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT COUNT(DISTINCT author_name) AS `_author_count_` FROM t_39 LIMIT 1000
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT DISTINCT author_name FROM t_39 LIMIT 1000
+with t_39 as (SELECT `t2`.`other_details`, `t3`.`author_name`  FROM  (SELECT `process_id`, `next_process_id`, `process_name`, `process_description`, `other_details`  FROM  `Business_Processes`) AS `t2`  INNER JOIN (SELECT *  FROM  `Authors`) AS `t3` ON `t2`.`other_details` = `t3`.`other_details`) SELECT author_name, other_details FROM t_39 LIMIT 1000
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT * FROM t_39 WHERE author_name = 'Addison Denesik' LIMIT 1000
+with t_39 as (SELECT `document_id`  FROM  `Documents`) SELECT COUNT(DISTINCT document_id) AS `_document_count_` FROM t_39 LIMIT 1000
+with t_39 as (SELECT `document_id`  FROM  `Documents_Processes`) SELECT author_name FROM t_39 WHERE document_id = 4 LIMIT 1000
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT author_name FROM t_39 WHERE document_name = 'Travel to Brazil' LIMIT 1000
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT COUNT(*) AS `_document_count_` FROM t_39 WHERE author_name = 'Era Kerluke' LIMIT 1000
+with t_39 as (SELECT `document_name`, `document_description`  FROM  `Documents`) SELECT document_name, document_description FROM t_39 LIMIT 1000
+with t_39 as (SELECT `author_name`, `document_name`  FROM  `Documents`) SELECT id, document_name FROM t_39 WHERE author_name = 'Bianka Cummings' LIMIT 1000
+with t_39 as (SELECT `other_details`, `author_name`  FROM  `Authors`) SELECT author_name, other_details FROM t_39 WHERE document_name = 'Travel to China' LIMIT 1000
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT author_name, COUNT(document_name) AS `_number_of_documents_` FROM t_39 GROUP BY author_name LIMIT 1000
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT author_name FROM t_39 GROUP BY author_name ORDER BY COUNT(document_name) DESC LIMIT 1
+with t_39 as (SELECT `author_name`  FROM  `Authors`) SELECT author_name FROM t_39 GROUP BY author_name HAVING COUNT(DISTINCT document_name) >= 2 LIMIT 1000
+with t_39 as (SELECT `process_id`  FROM  `Business_Processes`) SELECT COUNT(DISTINCT process_id) AS `_how_many_business_processes_` FROM t_39 LIMIT 1000
+with t_39 as (SELECT `process_id`, `process_name`, `process_description`  FROM  `Business_Processes`) SELECT process_id, process_name, process_description FROM t_39 WHERE process_id > 9 ORDER BY process_id ASC LIMIT 1
+with t_39 as (SELECT `process_id`, `process_name`  FROM  `Business_Processes`) SELECT process_name FROM t_39 WHERE process_id = (SELECT process_id + 1 FROM t_39 WHERE process_id = 9) LIMIT 1000
+with t_39 as (SELECT `process_outcome_code`  FROM  `Documents_Processes`) SELECT process_outcome_code, COUNT(*) AS `_number_of_process_outcomes_` FROM t_39 GROUP BY process_outcome_code LIMIT 1000
+with t_39 as (SELECT `process_outcome_code`  FROM  `Documents_Processes`) SELECT process_outcome_code, process_outcome_description FROM t_39 LIMIT 1000
+with t_39 as (SELECT `process_outcome_code`  FROM  `Documents_Processes`) SELECT process_outcome_description FROM t_39 WHERE process_outcome_code = 'working' LIMIT 1000
+with t_39 as (SELECT `process_status_code`  FROM  `Process_Status`) SELECT COUNT(DISTINCT process_status_code) AS `_process_status_count_` FROM t_39 LIMIT 1000
+with t_39 as (SELECT `process_status_code`  FROM  `Documents_Processes`) SELECT DISTINCT process_status_code, process_status_description FROM t_39 LIMIT 1000
+with t_39 as (SELECT `process_status_code`  FROM  `Documents_Processes`) SELECT process_status_description FROM t_39 WHERE process_status_code = 'ct' LIMIT 1000
+with t_39 as (SELECT `staff_id`  FROM  `Staff`) SELECT COUNT(DISTINCT staff_id) AS `_staff_count_` FROM t_39 LIMIT 1000
+with t_39 as (SELECT `other_details`, `staff_id`  FROM  `Staff_in_Processes`) SELECT staff_id, staff_details, other_details FROM t_39 LIMIT 1000
+with t_39 as (SELECT `staff_id`  FROM  `Staff`) SELECT * FROM t_39 WHERE staff_id = 100 LIMIT 1000
+with t_39 as (SELECT `staff_role_code`  FROM  `Staff_in_Processes`) SELECT COUNT(DISTINCT staff_role_code) AS `staff_roles_count` FROM t_39 LIMIT 1000
+with t_39 as (SELECT `staff_role_code`  FROM  `Staff_in_Processes`) SELECT DISTINCT staff_role_code, staff_role_description FROM t_39 LIMIT 1000
+with t_39 as (SELECT `staff_role_code`  FROM  `Staff_in_Processes`) SELECT staff_role_description FROM t_39 WHERE staff_role_code = 'HR' LIMIT 1000
+with t_39 as (SELECT `process_id`  FROM  `Business_Processes`) SELECT COUNT(*) AS `document_count` FROM t_39 WHERE process_id IS NOT NULL LIMIT 1000
+with t_39 as (SELECT `t2`.`process_id`, `t3`.`document_id`  FROM  (SELECT `process_id`, `next_process_id`, `process_name`, `process_description`, `other_details`  FROM  `Business_Processes`) AS `t2`  INNER JOIN (SELECT `document_id`, `process_id`, `process_outcome_code`, `process_status_code`  FROM  `Documents_Processes`) AS `t3` ON `t2`.`process_id` = `t3`.`process_id`) SELECT DISTINCT process_id FROM t_39 WHERE document_id IS NOT NULL LIMIT 1000
+with t_39 as (SELECT `t2`.`process_id`, `t3`.`document_id`  FROM  (SELECT `process_id`, `next_process_id`, `process_name`, `process_description`, `other_details`  FROM  `Business_Processes`) AS `t2`  INNER JOIN (SELECT `document_id`, `process_id`, `process_outcome_code`, `process_status_code`  FROM  `Documents_Processes`) AS `t3` ON `t2`.`process_id` = `t3`.`process_id`) SELECT document_id FROM t_39 WHERE process_id IS NULL LIMIT 1000
+with t_39 as (SELECT `t2`.`process_id`, `t3`.`document_id`  FROM  (SELECT `process_id`, `next_process_id`, `process_name`, `process_description`, `other_details`  FROM  `Business_Processes`) AS `t2`  INNER JOIN (SELECT `document_id`, `process_id`, `process_outcome_code`, `process_status_code`  FROM  `Documents_Processes`) AS `t3` ON `t2`.`process_id` = `t3`.`process_id`) SELECT process_id FROM t_39 WHERE document_id IS NULL LIMIT 1000
+with t_39 as (SELECT `src1_Process_Outcomes`.`process_outcome_description`, `src1_Process_Status`.`process_status_description`, `src1_Documents_Processes`.`document_id`  FROM  (SELECT `process_outcome_code`, `process_outcome_description`  FROM  `Process_Outcomes`) AS `src1_Process_Outcomes`  INNER JOIN (SELECT `process_status_code`, `process_status_description`  FROM  `Process_Status`) AS `src1_Process_Status`  INNER JOIN (SELECT `document_id`, `process_id`, `process_outcome_code`, `process_status_code`  FROM  `Documents_Processes`) AS `src1_Documents_Processes` ON `src1_Process_Status`.`process_status_code` = `src1_Documents_Processes`.`process_status_code`) SELECT process_outcome_description, process_status_description FROM t_39 WHERE document_id = 0 LIMIT 1000
+with t_39 as (SELECT `t3`.`document_name`, `t2`.`process_name`  FROM  (SELECT `process_id`, `next_process_id`, `process_name`, `process_description`, `other_details`  FROM  `Business_Processes`) AS `t2`  INNER JOIN (SELECT `document_id`, `author_name`, `document_name`, `document_description`, `other_details`  FROM  `Documents`) AS `t3` ON `t2`.`other_details` = `t3`.`other_details`) SELECT process_name FROM t_39 WHERE document_name = 'Travel to Brazil' LIMIT 1000
+with t_39 as (SELECT `process_id`  FROM  `Business_Processes`) SELECT process_id, COUNT(*) AS `_document_count_` FROM t_39 GROUP BY process_id LIMIT 1000
+with t_39 as (SELECT `src1_Business_Processes`.`process_id`, `src1_Staff`.`staff_id`, `src1_Documents_Processes`.`document_id`  FROM  (SELECT `process_id`, `next_process_id`, `process_name`, `process_description`, `other_details`  FROM  `Business_Processes`) AS `src1_Business_Processes`  INNER JOIN (SELECT `staff_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `document_id`, `process_id`, `process_outcome_code`, `process_status_code`  FROM  `Documents_Processes`) AS `src1_Documents_Processes`) SELECT COUNT(staff_id) FROM t_39 WHERE document_id = 0 AND process_id = 9 LIMIT 1000
+with t_39 as (SELECT `document_id`  FROM  `Documents_Processes`) SELECT staff_id, COUNT(document_id) AS `number_of_document_processes` FROM t_39 GROUP BY staff_id LIMIT 1000
+with t_39 as (SELECT `document_id`  FROM  `Documents_Processes`) SELECT staff_role_code, COUNT(document_id) AS `number_of_document_processes` FROM t_39 GROUP BY staff_role_code LIMIT 1000
+with t_39 as (SELECT `staff_role_code`  FROM  `Ref_Staff_Roles`) SELECT COUNT(DISTINCT staff_role_code) AS `_different_roles_count_` FROM t_39 WHERE staff_id = 3 LIMIT 1000
+with t_40 as (SELECT `agency_id`  FROM  `Agencies`) SELECT COUNT(DISTINCT agency_id) AS `_agency_count_` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `agency_id`  FROM  `Agencies`) SELECT COUNT(DISTINCT agency_id) AS `agency_count` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT agency_id, other_details, payment_details, client_details, staff_details, invoice_details, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT agency_id, other_details, payment_details, client_details, staff_details, invoice_details, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `client_id`  FROM  `Meetings`) SELECT COUNT(DISTINCT client_id) AS `_number_of_clients_` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `other_details`  FROM  `Meetings`) SELECT COUNT(DISTINCT other_details) AS `_client_count_` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `client_details`, `client_id`  FROM  `Clients`) SELECT client_id, client_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT client_id, other_details, payment_details, client_details, staff_details, invoice_details, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `agency_id`  FROM  `Agencies`) SELECT agency_id, COUNT(*) AS `_number_of_clients_` FROM t_40 GROUP BY agency_id LIMIT 1000
+with t_40 as (SELECT `agency_id`  FROM  `Agencies`) SELECT agency_id, COUNT(*) AS `_client_count_` FROM t_40 GROUP BY agency_id LIMIT 1000
+WITH t_40 AS (SELECT `t2`.`client_details`, `t3`.`agency_id`, `t3`.`agency_details` FROM (SELECT `client_id`, `agency_id`, `sic_code`, `client_details` FROM `Clients`) AS `t2` INNER JOIN (SELECT * FROM `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`), client_counts AS (SELECT agency_id, COUNT(DISTINCT client_details) AS _client_count_ FROM t_40 GROUP BY agency_id) SELECT agency_id, agency_details FROM t_40 WHERE agency_id = (SELECT agency_id FROM client_counts ORDER BY _client_count_ DESC LIMIT 1) LIMIT 1
+WITH t_40 AS (SELECT `t2`.`client_details`, `t3`.`agency_id`, `t3`.`agency_details` FROM (SELECT `client_id`, `agency_id`, `sic_code`, `client_details` FROM `Clients`) AS `t2` INNER JOIN (SELECT * FROM `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`), agency_client_count AS (SELECT agency_id, COUNT(client_details) AS _client_count FROM t_40 GROUP BY agency_id) SELECT a.agency_id, a.agency_details FROM t_40 a JOIN (SELECT agency_id FROM agency_client_count ORDER BY _client_count DESC LIMIT 1) b ON a.agency_id = b.agency_id LIMIT 1
+WITH t_40 AS (SELECT `t2`.`client_details`, `t3`.`agency_id`, `t3`.`agency_details` FROM (SELECT `client_id`, `agency_id`, `sic_code`, `client_details` FROM `Clients`) AS `t2` INNER JOIN (SELECT * FROM `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`), agency_client_count AS (SELECT agency_id, COUNT(DISTINCT client_details) AS _client_count FROM t_40 GROUP BY agency_id) SELECT a.agency_id, a.agency_details FROM t_40 a JOIN agency_client_count acc ON a.agency_id = acc.agency_id WHERE acc._client_count >= 2 GROUP BY a.agency_id, a.agency_details LIMIT 1000
+WITH t_40 AS (SELECT `t2`.`client_details`, `t3`.`agency_id`, `t3`.`agency_details` FROM (SELECT `client_id`, `agency_id`, `sic_code`, `client_details` FROM `Clients`) AS `t2` INNER JOIN (SELECT * FROM `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`), agency_client_count AS (SELECT agency_id, COUNT(DISTINCT client_details) AS _client_count FROM t_40 GROUP BY agency_id HAVING COUNT(DISTINCT client_details) >= 2) SELECT a.agency_id, a.agency_details FROM t_40 a JOIN agency_client_count acc ON a.agency_id = acc.agency_id GROUP BY a.agency_id, a.agency_details LIMIT 1000
+with t_40 as (SELECT `t2`.`client_details`, `t3`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT *  FROM  `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`) SELECT agency_details FROM t_40 WHERE client_details LIKE '%Mac%' LIMIT 1000
+with t_40 as (SELECT `t2`.`client_details`, `t3`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT *  FROM  `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`) SELECT agency_details FROM t_40 WHERE client_details LIKE '%Mac%' LIMIT 1000
+with t_40 as (SELECT `src1_Clients`.`client_details`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Clients`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`) SELECT client_id, client_details, agency_id, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `t2`.`client_details`, `t3`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT *  FROM  `Agencies`) AS `t3` ON `t2`.`agency_id` = `t3`.`agency_id`) SELECT client_details, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `sic_code`  FROM  `Clients`) SELECT sic_code, COUNT(*) AS `number_of_clients` FROM t_40 GROUP BY sic_code LIMIT 1000
+with t_40 as (SELECT `t3`.`other_details`, `t2`.`sic_code`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `t3` ON `t2`.`client_id` = `t3`.`client_id`) SELECT sic_code, COUNT(other_details) AS `_client_count_` FROM t_40 GROUP BY sic_code LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Clients`.`sic_code`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT client_id, other_details, payment_details, client_details, staff_details, invoice_details, agency_details FROM t_40 WHERE sic_code = 'Bad' LIMIT 1000
+with t_40 as (SELECT `t3`.`other_details`, `t2`.`sic_code`, `t2`.`client_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `t3` ON `t2`.`client_id` = `t3`.`client_id`) SELECT client_details, other_details FROM t_40 WHERE sic_code = 'Bad' LIMIT 1000
+with t_40 as (SELECT `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`  FROM  (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`) SELECT DISTINCT agency_id, agency_details FROM t_40 WHERE client_id IS NOT NULL LIMIT 1000
+with t_40 as (SELECT `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`  FROM  (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`) SELECT DISTINCT agency_id, agency_details FROM t_40 WHERE client_id IS NOT NULL LIMIT 1000
+with t_40 as (SELECT `agency_id`, `client_id`  FROM  `Clients`) SELECT DISTINCT agency_id FROM t_40 WHERE client_id IS NULL OR client_id = '' LIMIT 1000
+with t_40 as (SELECT `src1_Staff`.`staff_id`, `src1_Payments`.`invoice_id`  FROM  (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT DISTINCT s1.staff_id FROM t_40 s1 WHERE NOT EXISTS (SELECT 1 FROM t_40 s2 WHERE s2.staff_id = s1.staff_id AND s2.invoice_id IS NOT NULL) LIMIT 1000
+with t_40 as (SELECT `invoice_id`  FROM  `Payments`) SELECT COUNT(invoice_id) AS `_how_many_invoices_` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `invoice_id`  FROM  `Payments`) SELECT COUNT(DISTINCT invoice_id) AS `_invoice_count_` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `invoice_details`, `invoice_id`, `invoice_status`  FROM  `Invoices`) SELECT invoice_id, invoice_status, invoice_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Payments`.`invoice_id`, `src1_Agencies`.`agency_details`, `src1_Invoices`.`invoice_status`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT invoice_id, invoice_status, invoice_details, payment_details, client_details, staff_details, agency_details, other_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `client_id`  FROM  `Meetings`) SELECT client_id, COUNT(*) AS `_invoice_count_` FROM t_40 GROUP BY client_id LIMIT 1000
+with t_40 as (SELECT `client_id`  FROM  `Meetings`) SELECT client_id, COUNT(*) AS `_invoice_count_` FROM t_40 GROUP BY client_id LIMIT 1000
+WITH t_40 AS (SELECT `client_details`, `client_id` FROM `Clients`), invoice_counts AS (SELECT client_id, COUNT(*) AS _invoice_count_ FROM t_40 GROUP BY client_id) SELECT s.client_id, s.client_details FROM t_40 s JOIN invoice_counts ic ON s.client_id = ic.client_id ORDER BY ic._invoice_count_ DESC LIMIT 1
+WITH t_40 AS (SELECT `src1_Meetings`.`other_details`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id` FROM (SELECT `client_id`, `agency_id`, `sic_code`, `client_details` FROM `Clients`) AS `src1_Clients` INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details` FROM `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id` INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details` FROM `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id` INNER JOIN (SELECT `agency_id`, `agency_details` FROM `Agencies`) AS `src1_Agencies` INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details` FROM `Staff`) AS `src1_Staff` INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details` FROM `Payments`) AS `src1_Payments`), invoice_counts AS (SELECT client_id, COUNT(*) AS _invoice_count FROM t_40 GROUP BY client_id ORDER BY _invoice_count DESC LIMIT 1) SELECT t.client_id, t.other_details, t.payment_details, t.client_details, t.staff_details, t.invoice_details, t.agency_details FROM t_40 t JOIN invoice_counts ic ON t.client_id = ic.client_id LIMIT 1
+with t_40 as (SELECT `client_id`  FROM  `Meetings`) SELECT client_id FROM t_40 GROUP BY client_id HAVING COUNT(*) >= 2 LIMIT 1000
+with t_40 as (SELECT `client_id`  FROM  `Meetings`) SELECT client_id FROM t_40 GROUP BY client_id HAVING COUNT(*) >= 2 LIMIT 1000
+with t_40 as (SELECT `invoice_id`, `invoice_status`  FROM  `Invoices`) SELECT invoice_status, COUNT(invoice_id) AS `_invoice_count` FROM t_40 GROUP BY invoice_status LIMIT 1000
+with t_40 as (SELECT `invoice_status`  FROM  `Invoices`) SELECT invoice_status, COUNT(*) AS `_invoice_count_` FROM t_40 GROUP BY invoice_status LIMIT 1000
+with t_40 as (SELECT `invoice_id`, `invoice_status`  FROM  `Invoices`) SELECT invoice_status, COUNT(invoice_id) AS `_number_of_invoices` FROM t_40 GROUP BY invoice_status ORDER BY `_number_of_invoices` DESC LIMIT 1
+with t_40 as (SELECT `invoice_id`, `invoice_status`  FROM  `Invoices`) SELECT invoice_status, COUNT(invoice_id) AS `_invoice_count_` FROM t_40 GROUP BY invoice_status ORDER BY `_invoice_count_` DESC LIMIT 1
+with t_40 as (SELECT `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`, `src1_Invoices`.`invoice_status`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`) SELECT invoice_status, invoice_details, client_id, client_details, agency_id, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details`, `src1_Meetings`.`client_id`, `src1_Invoices`.`invoice_status`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`) SELECT invoice_status, invoice_details, client_id, client_details, agency_id, agency_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `purpose_of_meeting`, `meeting_outcome`, `meeting_type`  FROM  `Meetings`) SELECT DISTINCT meeting_type, purpose_of_meeting, meeting_outcome FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Meetings`.`purpose_of_meeting`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Meetings`.`meeting_outcome`, `src1_Payments`.`payment_details`, `src1_Meetings`.`meeting_id`, `src1_Meetings`.`meeting_type`, `src1_Agencies`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT DISTINCT meeting_type, other_details, payment_details, client_details, staff_details, invoice_details, agency_details, purpose_of_meeting, meeting_id, meeting_outcome FROM t_40 LIMIT 1000
+with t_40 as (SELECT `purpose_of_meeting`, `meeting_outcome`  FROM  `Meetings`) SELECT purpose_of_meeting, meeting_outcome FROM t_40 LIMIT 1000
+with t_40 as (SELECT `purpose_of_meeting`, `meeting_outcome`  FROM  `Meetings`) SELECT DISTINCT purpose_of_meeting, meeting_outcome FROM t_40 LIMIT 1000
+with t_40 as (SELECT `t2`.`invoice_details`, `t3`.`payment_details`, `t2`.`invoice_status`  FROM  (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `t2`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `t3` ON `t2`.`invoice_id` = `t3`.`invoice_id`) SELECT payment_details, invoice_details FROM t_40 WHERE invoice_status = 'Working' LIMIT 1000
+select * from tablea 
+with t_40 as (SELECT `t3`.`payment_details`, `t3`.`invoice_id`, `t2`.`invoice_status`  FROM  (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `t2`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `t3` ON `t2`.`invoice_id` = `t3`.`invoice_id`) SELECT invoice_id, invoice_status FROM t_40 WHERE payment_details IS NULL LIMIT 1000
+with t_40 as (SELECT `t3`.`payment_details`, `t3`.`invoice_id`, `t2`.`invoice_status`  FROM  (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `t2`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `t3` ON `t2`.`invoice_id` = `t3`.`invoice_id`) SELECT invoice_id, invoice_status FROM t_40 WHERE payment_details IS NULL LIMIT 1000
+select * from tablea 
+with t_40 as (SELECT `payment_details`  FROM  `Payments`) SELECT COUNT(payment_details) AS `_payment_count_` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `t2`.`invoice_details`, `t3`.`payment_details`, `t3`.`invoice_id`  FROM  (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `t2`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `t3` ON `t2`.`invoice_id` = `t3`.`invoice_id`) SELECT invoice_id, payment_details, invoice_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `payment_details`, `invoice_id`  FROM  `Payments`) SELECT invoice_id, payment_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `invoice_id`, `invoice_status`  FROM  `Invoices`) SELECT DISTINCT invoice_id, invoice_status FROM t_40 LIMIT 1000
+with t_40 as (SELECT `invoice_id`, `invoice_status`  FROM  `Invoices`) SELECT DISTINCT invoice_id, invoice_status FROM t_40 LIMIT 1000
+select * from tablea 
+with t_40 as (SELECT `invoice_id`  FROM  `Payments`) SELECT i.invoice_id, COUNT(*) AS `payment_count` FROM t_40 i JOIN t_40 p ON i.invoice_id = p.invoice_id GROUP BY i.invoice_id LIMIT 1000
+WITH t_40 AS (SELECT `invoice_details`, `invoice_id`, `invoice_status` FROM `Invoices`), payment_counts AS (SELECT invoice_id, COUNT(*) AS _payment_count FROM t_40 GROUP BY invoice_id) SELECT invoice_id, invoice_status, invoice_details FROM t_40 WHERE invoice_id = (SELECT invoice_id FROM payment_counts ORDER BY _payment_count DESC LIMIT 1) LIMIT 1000
+WITH t_40 AS (SELECT `invoice_details`, `invoice_id`, `invoice_status` FROM `Invoices`), payment_counts AS (SELECT invoice_id, COUNT(*) AS _payment_count FROM t_40 GROUP BY invoice_id) SELECT s.invoice_id, s.invoice_status, s.invoice_details FROM t_40 s JOIN payment_counts p ON s.invoice_id = p.invoice_id ORDER BY p._payment_count DESC LIMIT 1
+with t_40 as (SELECT `staff_id`  FROM  `Staff`) SELECT COUNT(DISTINCT staff_id) AS `staff_count` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `staff_id`  FROM  `Staff`) SELECT COUNT(DISTINCT staff_id) AS `staff_count` FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Staff`.`staff_id`, `src1_Agencies`.`agency_id`  FROM  (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`) SELECT agency_id, COUNT(DISTINCT staff_id) AS `_number_of_staff_` FROM t_40 GROUP BY agency_id LIMIT 1000
+with t_40 as (SELECT `src1_Staff`.`staff_id`, `src1_Agencies`.`agency_id`  FROM  (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`) SELECT agency_id, COUNT(staff_id) AS `_number_of_staff_` FROM t_40 GROUP BY agency_id LIMIT 1000
+WITH t_40 AS (SELECT `src1_Staff`.`staff_id`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details` FROM (SELECT `agency_id`, `agency_details` FROM `Agencies`) AS `src1_Agencies` INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details` FROM `Staff`) AS `src1_Staff`), agency_staff_count AS (SELECT agency_id, COUNT(staff_id) AS _staff_count FROM t_40 GROUP BY agency_id ORDER BY _staff_count DESC LIMIT 1) SELECT a.agency_id, a.agency_details FROM t_40 a JOIN agency_staff_count b ON a.agency_id = b.agency_id GROUP BY a.agency_id, a.agency_details LIMIT 1000
+WITH t_40 AS (SELECT `src1_Staff`.`staff_id`, `src1_Agencies`.`agency_id`, `src1_Agencies`.`agency_details` FROM (SELECT `agency_id`, `agency_details` FROM `Agencies`) AS `src1_Agencies` INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details` FROM `Staff`) AS `src1_Staff`), agency_staff_count AS (SELECT agency_id, COUNT(staff_id) AS _staff_count FROM t_40 GROUP BY agency_id) SELECT agency_id, agency_details FROM t_40 WHERE agency_id = (SELECT agency_id FROM agency_staff_count ORDER BY _staff_count DESC LIMIT 1) LIMIT 1
+with t_40 as (SELECT `meeting_outcome`, `meeting_id`  FROM  `Meetings`) SELECT meeting_outcome, COUNT(meeting_id) AS `_number_of_meetings_` FROM t_40 GROUP BY meeting_outcome LIMIT 1000
+with t_40 as (SELECT `meeting_outcome`, `meeting_id`  FROM  `Meetings`) SELECT meeting_outcome, COUNT(meeting_id) AS `meeting_count` FROM t_40 GROUP BY meeting_outcome LIMIT 1000
+with t_40 as (SELECT `meeting_id`, `client_id`  FROM  `Meetings`) SELECT client_id, COUNT(meeting_id) AS `_meeting_count_` FROM t_40 GROUP BY client_id LIMIT 1000
+with t_40 as (SELECT `client_id`  FROM  `Meetings`) SELECT client_id, COUNT(*) AS `meeting_count` FROM t_40 GROUP BY client_id LIMIT 1000
+with t_40 as (SELECT `meeting_id`, `meeting_type`, `client_id`  FROM  `Meetings`) SELECT client_id, meeting_type, COUNT(meeting_id) AS `_number_of_meetings_` FROM t_40 GROUP BY client_id, meeting_type LIMIT 1000
+with t_40 as (SELECT `meeting_id`, `meeting_type`  FROM  `Meetings`) SELECT meeting_type, COUNT(meeting_id) AS `_meeting_count_` FROM t_40 GROUP BY meeting_type LIMIT 1000
+with t_40 as (SELECT `t2`.`client_details`, `t3`.`meeting_outcome`, `t3`.`meeting_id`, `t3`.`meeting_type`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `t3` ON `t2`.`client_id` = `t3`.`client_id`) SELECT meeting_id, meeting_outcome, meeting_type, client_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `t2`.`client_details`, `t3`.`meeting_outcome`, `t3`.`meeting_id`, `t3`.`meeting_type`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `t2`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `t3` ON `t2`.`client_id` = `t3`.`client_id`) SELECT meeting_id, meeting_outcome, meeting_type, client_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT *  FROM  `Staff_in_Meetings`) SELECT meeting_id, COUNT(staff_id) AS `_number_of_staff_` FROM t_40 GROUP BY meeting_id LIMIT 1000
+with t_40 as (SELECT *  FROM  `Staff_in_Meetings`) SELECT meeting_id, COUNT(staff_id) AS `_staff_count_` FROM t_40 GROUP BY meeting_id LIMIT 1000
+WITH t_40 AS (SELECT * FROM `Staff_in_Meetings`), meeting_counts AS (SELECT staff_id, COUNT(meeting_id) AS _attendance_count_ FROM t_40 GROUP BY staff_id) SELECT staff_id, _attendance_count_ FROM meeting_counts WHERE _attendance_count_ = (SELECT MIN(_attendance_count_) FROM meeting_counts) LIMIT 1000
+WITH t_40 AS (SELECT * FROM `Staff_in_Meetings`), meeting_counts AS (SELECT staff_id, COUNT(meeting_id) AS _meeting_count_ FROM t_40 GROUP BY staff_id HAVING COUNT(meeting_id) > 0) SELECT staff_id FROM meeting_counts ORDER BY _meeting_count_ ASC LIMIT 1
+with t_40 as (SELECT *  FROM  `Staff_in_Meetings`) SELECT COUNT(DISTINCT staff_id) AS `_staff_count_` FROM t_40 WHERE meeting_id IS NOT NULL LIMIT 1000
+with t_40 as (SELECT *  FROM  `Staff_in_Meetings`) SELECT COUNT(DISTINCT staff_id) AS `_distinct_staff_count_` FROM t_40 WHERE meeting_id IS NOT NULL LIMIT 1000
+with t_40 as (SELECT *  FROM  `Staff_in_Meetings`) SELECT COUNT(DISTINCT staff_id) FROM t_40 WHERE staff_id NOT IN (SELECT DISTINCT staff_id FROM t_40 WHERE meeting_id IS NOT NULL) LIMIT 1000
+with t_40 as (SELECT *  FROM  `Staff_in_Meetings`) SELECT COUNT(DISTINCT s.staff_id) AS `_staff_count_` FROM t_40 s LEFT JOIN t_40 m ON s.staff_id = m.staff_id AND m.meeting_id IS NOT NULL WHERE m.meeting_id IS NULL LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Clients`.`client_details`, `src1_Meetings`.`meeting_id`, `src1_Payments`.`invoice_id`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Clients`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT DISTINCT client_details, other_details FROM t_40 WHERE meeting_id IS NOT NULL OR invoice_id IS NOT NULL LIMIT 1000
+with t_40 as (SELECT `src1_Clients`.`client_details`, `src1_Meetings`.`meeting_id`, `src1_Payments`.`invoice_id`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Clients`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT DISTINCT client_details FROM t_40 WHERE meeting_id IS NOT NULL OR invoice_id IS NOT NULL LIMIT 1000
+with t_40 as (SELECT `src1_Meetings`.`other_details`, `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Invoices`.`invoice_details`, `src1_Payments`.`payment_details`, `src1_Staff`.`staff_id`, `src1_Payments`.`invoice_id`, `src1_Agencies`.`agency_details`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details`  FROM  `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT DISTINCT staff_id, staff_details FROM t_40 WHERE invoice_id IS NOT NULL AND (other_details LIKE '%s%' OR payment_details LIKE '%s%' OR client_details LIKE '%s%' OR staff_details LIKE '%s%' OR invoice_details LIKE '%s%' OR agency_details LIKE '%s%') LIMIT 1000
+with t_40 as (SELECT `src1_Staff`.`staff_details`, `src1_Meetings`.`meeting_id`, `src1_Staff`.`staff_id`  FROM  (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`) SELECT DISTINCT s.staff_id, s.staff_details FROM t_40 s INNER JOIN t_40 m ON s.staff_id = m.staff_id WHERE m.meeting_id IS NOT NULL AND s.staff_details LIKE '%s%' LIMIT 1000
+with t_40 as (SELECT `src1_Clients`.`sic_code`, `src1_Meetings`.`meeting_id`, `src1_Agencies`.`agency_id`, `src1_Payments`.`invoice_id`, `src1_Meetings`.`client_id`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Clients`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `agency_id`, `agency_details`  FROM  `Agencies`) AS `src1_Agencies`  INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details`  FROM  `Payments`) AS `src1_Payments`) SELECT DISTINCT c.client_id AS `_id_`, c.sic_code AS `_sic_code_`, c.agency_id AS `_agency_id_` FROM t_40 c WHERE c.client_id IN (SELECT m.client_id FROM t_40 m GROUP BY m.client_id HAVING COUNT(m.meeting_id) = 1) AND c.client_id IN (SELECT i.client_id FROM t_40 i WHERE i.invoice_id IS NOT NULL) LIMIT 1000
+WITH t_40 AS (SELECT `src1_Clients`.`sic_code`, `src1_Meetings`.`meeting_id`, `src1_Agencies`.`agency_id`, `src1_Payments`.`invoice_id`, `src1_Invoices`.`invoice_status` FROM (SELECT `client_id`, `agency_id`, `sic_code`, `client_details` FROM `Clients`) AS `src1_Clients` INNER JOIN (SELECT `invoice_id`, `client_id`, `invoice_status`, `invoice_details` FROM `Invoices`) AS `src1_Invoices` ON `src1_Clients`.`client_id` = `src1_Invoices`.`client_id` INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details` FROM `Meetings`) AS `src1_Meetings` ON `src1_Invoices`.`client_id` = `src1_Meetings`.`client_id` INNER JOIN (SELECT `agency_id`, `agency_details` FROM `Agencies`) AS `src1_Agencies` INNER JOIN (SELECT `payment_id`, `invoice_id`, `payment_details` FROM `Payments`) AS `src1_Payments`), meeting_count AS (SELECT invoice_id, COUNT(meeting_id) AS _meeting_count_ FROM t_40 GROUP BY invoice_id HAVING COUNT(meeting_id) = 1) SELECT DISTINCT invoice_id AS `_id_`, sic_code AS `_sic_code_`, agency_id AS `_agency_id_` FROM t_40 WHERE invoice_id IN (SELECT invoice_id FROM meeting_count) AND invoice_status IS NOT NULL LIMIT 1000
+with t_40 as (SELECT `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Meetings`.`end_date_time`, `src1_Meetings`.`start_date_time`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Clients`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`) SELECT start_date_time, end_date_time, client_details, staff_details FROM t_40 LIMIT 1000
+with t_40 as (SELECT `src1_Staff`.`staff_details`, `src1_Clients`.`client_details`, `src1_Meetings`.`end_date_time`, `src1_Meetings`.`start_date_time`  FROM  (SELECT `client_id`, `agency_id`, `sic_code`, `client_details`  FROM  `Clients`) AS `src1_Clients`  INNER JOIN (SELECT `meeting_id`, `client_id`, `meeting_outcome`, `meeting_type`, `billable_yn`, `start_date_time`, `end_date_time`, `purpose_of_meeting`, `other_details`  FROM  `Meetings`) AS `src1_Meetings` ON `src1_Clients`.`client_id` = `src1_Meetings`.`client_id`  INNER JOIN (SELECT `staff_id`, `agency_id`, `staff_details`  FROM  `Staff`) AS `src1_Staff`) SELECT start_date_time, end_date_time, client_details, staff_details FROM t_40 LIMIT 1000

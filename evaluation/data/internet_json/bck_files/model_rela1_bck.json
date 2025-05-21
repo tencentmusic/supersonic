@@ -1,0 +1,13 @@
+{
+  "domainId": 4,
+  "fromModelId": 9,
+  "toModelId": 10,
+  "joinType": "inner join",
+  "joinConditions": [
+    {
+      "leftField": "company_id",
+      "rightField": "company_id",
+      "operator": "="
+    }
+  ]
+}

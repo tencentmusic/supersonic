@@ -1,0 +1,61 @@
+{
+    "name": "Agencies",
+    "bizName": "Agencies",
+    "description": "",
+    "sensitiveLevel": 0,
+    "databaseId": 1,
+    "domainId": 4,
+    "modelDetail": {
+        "queryType": "sql_query",
+        "sqlQuery": "SELECT agency_id, agency_details FROM Agencies",
+        "identifiers": [
+            {
+                "name": "agency_id",
+                "type": "primary",
+                "bizName": "agency_id",
+                "isCreateDimension": 0,
+                "fieldName": "agency_id"
+            }
+        ],
+        "dimensions": [
+            {
+                "name": "agency_details",
+                "type": "categorical",
+                "dateFormat": "yyyy-MM-dd",
+                "isCreateDimension": 1,
+                "bizName": "agency_details",
+                "isTag": 0,
+                "fieldName": "agency_details"
+            }
+        ],
+        "measures": [
+            {
+                "name": "agency_id",
+                "agg": "SUM",
+                "bizName": "agency_id",
+                "isCreateDimension": 1
+            }
+        ],
+        "fields": [
+            {
+                "fieldName": "agency_details"
+            }
+        ],
+        "sqlVariables": []
+    },
+    "timeDimension": [],
+    "viewers": [
+        "admin"
+    ],
+    "viewOrgs": [
+        "1"
+    ],
+    "admins": [
+        "admin"
+    ],
+    "adminOrgs": [],
+    "viewer": "admin",
+    "viewOrg": "1",
+    "admin": "admin",
+    "adminOrg": ""
+}

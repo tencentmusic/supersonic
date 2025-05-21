@@ -1,0 +1,74 @@
+{
+  "id": 10,
+  "createdBy": "admin",
+  "updatedBy": "admin",
+  "createdAt": "2025-05-18T05:41:32.359+00:00",
+  "updatedAt": "2025-05-18T05:41:32.359+00:00",
+  "name": "Spider 测试助手",
+  "description": "Spider 测试助手",
+  "status": 1,
+  "examples": [],
+  "enableSearch": 1,
+  "enableFeedback": 0,
+  "toolConfig": "{\"tools\":[{\"id\":1,\"type\":\"DATASET\",\"dataSetIds\":[4]}],\"simpleMode\":false,\"debugMode\":true}",
+  "chatAppConfig": {
+    "MEMORY_REVIEW": {
+      "name": "记忆启用评估",
+      "description": "通过大模型对记忆做正确性评估以决定是否启用",
+      "prompt": "#Role: You are a senior data engineer experienced in writing SQL.\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,please take a review and give your opinion.\n#Rules: \n1.ALWAYS follow the output format: `opinion=(POSITIVE|NEGATIVE),comment=(your comment)`.\n2.NO NEED to check date filters as the junior engineer seldom makes mistakes in this regard.\n#Question: %s\n#Schema: %s\n#SideInfo: %s\n#SQL: %s\n#Response: ",
+      "enable": false,
+      "chatModelId": 1
+    },
+    "REWRITE_MULTI_TURN": {
+      "name": "多轮对话改写",
+      "description": "通过大模型根据历史对话来改写本轮对话",
+      "prompt": "#Role: You are a data product manager experienced in data requirements.#Task: Your will be provided with current and history questions asked by a user,along with their mapped schema elements(metric, dimension and value),please try understanding the semantics and rewrite a question.#Rules: 1.ALWAYS keep relevant entities, metrics, dimensions, values and date ranges.2.ONLY respond with the rewritten question.#Current Question: {{current_question}}#Current Mapped Schema: {{current_schema}}#History Question: {{history_question}}#History Mapped Schema: {{history_schema}}#History SQL: {{history_sql}}#Rewritten Question: ",
+      "enable": false,
+      "chatModelId": 1
+    },
+    "S2SQL_CORRECTOR": {
+      "name": "语义SQL修正",
+      "description": "通过大模型对解析S2SQL做二次修正",
+      "prompt": "#Role: You are a senior data engineer experienced in writing SQL.\n#Task: Your will be provided with a user question and the SQL written by a junior engineer,please take a review and help correct it if necessary.\n#Rules: 1.ALWAYS specify time range using `>`,`<`,`>=`,`<=` operator.2.DO NOT calculate date range using functions.3.SQL columns and values must be mentioned in the `#Schema`.\n#Question:{{question}} #Schema:{{schema}} #InputSQL:{{sql}} #Response:",
+      "enable": false,
+      "chatModelId": 1
+    },
+    "SMALL_TALK": {
+      "name": "闲聊对话",
+      "description": "直接将原始输入透传大模型",
+      "prompt": "#Role: You are a nice person to talk to.\n#Task: Respond quickly and nicely to the user.\n#Rules: 1.ALWAYS use the same language as the `#Current Input`.\n#History Inputs: %s\n#Current Input: %s\n#Response: ",
+      "enable": false,
+      "chatModelId": 1
+    },
+    "DATA_INTERPRETER": {
+      "name": "结果数据解读",
+      "description": "通过大模型对结果数据做提炼总结",
+      "prompt": "#Role: You are a data expert who communicates with business users everyday.\n#Task: Your will be provided with a question asked by a user and the relevant result data queried from the databases, please interpret the data and organize a brief answer.\n#Rules: \n1.ALWAYS respond in the use the same language as the `#Question`.\n2.ALWAYS reference some key data in the `#Answer`.\n#Question:{{question}} #Data:{{data}} #Answer:",
+      "enable": false,
+      "chatModelId": 1
+    },
+    "S2SQL_PARSER": {
+      "name": "语义SQL解析",
+      "description": "通过大模型做语义解析生成S2SQL",
+      "prompt": "#Role: You are a data analyst experienced in SQL languages.\n#Task: You will be provided with a natural language question asked by users,please convert it to a SQL query so that relevant data could be returned by executing the SQL query against underlying database.\n#Rules:\n1.SQL columns and values must be mentioned in the `Schema`, DO NOT hallucinate.\n2.ALWAYS specify time range using `>`,`<`,`>=`,`<=` operator.\n3.DO NOT include time range in the where clause if not explicitly expressed in the `Question`.\n4.DO NOT calculate date range using functions.\n5.ALWAYS use `with` statement if nested aggregation is needed.\n6.ALWAYS enclose alias declared by `AS` command in underscores.\n7.Alias created by `AS` command must be in the same language ast the `Question`.\n#Exemplars: {{exemplar}}\n#Query: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}",
+      "enable": true,
+      "chatModelId": 1
+    },
+    "REWRITE_ERROR_MESSAGE": {
+      "name": "异常提示改写",
+      "description": "通过大模型将异常信息改写为更友好和引导性的提示用语",
+      "prompt": "#Role: You are a data business partner who closely interacts with business people.\n#Task: Your will be provided with user input, system output and some examples, please respond shortly to teach user how to ask the right question, by using `Examples` as references.#Rules: ALWAYS respond with the same language as the `Input`.\n#Input: {{user_question}}\n#Output: {{system_message}}\n#Examples: {{examples}}\n#Response: ",
+      "enable": true,
+      "chatModelId": 1
+    }
+  },
+  "visualConfig": null,
+  "admins": [],
+  "viewers": [],
+  "adminOrgs": [],
+  "viewOrgs": [],
+  "isOpen": 0,
+  "dataSetIds": [
+    4
+  ]
+}
