@@ -179,13 +179,15 @@ public class NatureHelper {
     }
 
     public static Long parseIdFromNature(String nature, int index) {
-        try {
-            String[] split = nature.split(DictWordType.NATURE_SPILT);
-            if (split.length > index) {
-                return Long.valueOf(split[index]);
+        if(nature.startsWith("_")){ // 框架的字典都是以_开头的
+            try {
+                String[] split = nature.split(DictWordType.NATURE_SPILT);
+                if (split.length > index) {
+                    return Long.valueOf(split[index]);
+                }
+            } catch (NumberFormatException e) {
+                log.error("Error parsing long from nature: {}", nature, e);
             }
-        } catch (NumberFormatException e) {
-            log.error("Error parsing long from nature: {}", nature, e);
         }
         return null;
     }
