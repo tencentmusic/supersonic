@@ -12,6 +12,7 @@ import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.*;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.*;
+import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.request.*;
@@ -711,6 +712,14 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         }
         if (!modelCluster.isContainsPartitionDimensions()) {
             queryMetricReq.setDateInfo(null);
+        } else {
+            Optional<DimensionResp> first = dimensionResps.stream().filter(entry -> DimensionType.isPartitionTime(entry.getType())).findFirst();
+            if (first.isPresent()) {
+                DimensionResp dimensionResp = first.get();
+                String name = dimensionResp.getName();
+                DateConf dateInfo = queryMetricReq.getDateInfo();
+                dateInfo.setDateField(name);
+            }
         }
         // 4. set groups
         List<String> dimensionNames = dimensionResps.stream()
