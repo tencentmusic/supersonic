@@ -711,6 +711,15 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         }
         if (!modelCluster.isContainsPartitionDimensions()) {
             queryMetricReq.setDateInfo(null);
+        } else {
+            // set date field
+            DimensionResp partitionDimension = dimensionResps.stream()
+                    .filter(entry -> modelCluster.getModelIds().contains(entry.getModelId()))
+                    .filter(entry -> entry.getStatus().equals(StatusEnum.ONLINE.getCode()))
+                    .filter(entry -> entry.isPartitionTime()).findFirst().orElse(null);
+            if (partitionDimension != null) {
+                queryMetricReq.getDateInfo().setDateField(partitionDimension.getName());
+            }
         }
         // 4. set groups
         List<String> dimensionNames = dimensionResps.stream()
