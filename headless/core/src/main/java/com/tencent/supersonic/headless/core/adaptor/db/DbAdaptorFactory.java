@@ -22,6 +22,7 @@ public class DbAdaptorFactory {
         dbAdaptorMap.put(EngineType.KYUUBI.getName(), new KyuubiAdaptor());
         dbAdaptorMap.put(EngineType.PRESTO.getName(), new PrestoAdaptor());
         dbAdaptorMap.put(EngineType.TRINO.getName(), new TrinoAdaptor());
+        dbAdaptorMap.put(EngineType.ORACLE.getName(), new OracleAdaptor());
     }
 
     public static DbAdaptor getEngineAdaptor(String engineType) {
