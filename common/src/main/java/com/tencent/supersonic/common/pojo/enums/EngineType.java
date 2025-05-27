@@ -13,7 +13,8 @@ public enum EngineType {
     STARROCKS(10, "STARROCKS"),
     KYUUBI(11, "KYUUBI"),
     PRESTO(12, "PRESTO"),
-    TRINO(13, "TRINO"),;
+    TRINO(13, "TRINO"),
+    ORACLE(14, "ORACLE");
 
     private Integer code;
 

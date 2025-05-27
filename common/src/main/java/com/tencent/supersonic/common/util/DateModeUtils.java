@@ -318,7 +318,7 @@ public class DateModeUtils {
     }
 
     public String getDateWhereStr(DateConf dateInfo, ItemDateResp dateDate) {
-        if (Objects.isNull(dateInfo)) {
+        if (Objects.isNull(dateInfo) || Objects.isNull(dateInfo.getDateField())) {
             return "";
         }
         String dateStr = "";
