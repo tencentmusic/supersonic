@@ -440,7 +440,7 @@ const ChatItem: React.FC<Props> = ({
 
   const { register, call } = useMethodRegister(() => message.error('该条消息暂不支持该操作'));
 
-  let actualQueryText=parseInfo?.properties.CONTEXT.queryText // lance修改 结果显示多轮对话转义的内容
+  let actualQueryText=parseInfo?.properties?.CONTEXT?.queryText //  2025-05-27 增加判空，防止出现上下文没有 queryText 的情况
   actualQueryText=actualQueryText==null?msg:actualQueryText
   return (
     <ChartItemContext.Provider value={{ register, call }}>
