@@ -19,7 +19,7 @@ public class ParseContext {
     }
 
     public boolean enableNL2SQL() {
-        return Objects.nonNull(agent) && agent.containsDatasetTool();
+        return Objects.nonNull(agent) && agent.containsDatasetTool()&&response.getSelectedParses().size() == 0;
     }
 
     public boolean enableLLM() {
