@@ -22,9 +22,6 @@ public class NL2PluginParser implements ChatQueryParser {
     public void parse(ParseContext parseContext) {
         pluginRecognizers.forEach(pluginRecognizer -> {
             pluginRecognizer.recognize(parseContext);
-            if (parseContext.getResponse().getSelectedParses().size()>=2){
-                parseContext.getResponse().setSelectedParses(parseContext.getResponse().getSelectedParses().subList(0, 1));
-            }
             log.info("{} recallResult:{}", pluginRecognizer.getClass().getSimpleName(),
                     JsonUtil.toString(parseContext.getResponse()));
         });
