@@ -49,11 +49,10 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             try {
                 EmbeddingModel embeddingModel = ModelProvider.getEmbeddingModel();
                 Embedding embedding = embeddingModel.embed(question).content();
-                boolean existSegment =
-                        existSegment(collectionName, embeddingStore, query, embedding);
-                if (existSegment) {
-                    continue;
-                }
+                MetadataFilterBuilder filterBuilder =
+                        new MetadataFilterBuilder(TextSegmentConvert.QUERY_ID);
+                Filter filter = filterBuilder.isEqualTo(TextSegmentConvert.getQueryId(query));
+                embeddingStore.removeAll(filter);
                 embeddingStore.add(embedding, query);
                 cache.put(TextSegmentConvert.getQueryId(query), true);
             } catch (Exception e) {

@@ -65,12 +65,16 @@ public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
         ChatMemoryDO chatMemoryDO = chatMemoryRepository.getMemory(chatMemoryUpdateReq.getId());
         boolean hadEnabled =
                 MemoryStatus.ENABLED.toString().equals(chatMemoryDO.getStatus().trim());
-        if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus()) && !hadEnabled) {
+
+        if (MemoryStatus.ENABLED.equals(chatMemoryUpdateReq.getStatus())) {
+            // Update the latest SQL/Schema to vector DB once memory is enabled
+            chatMemoryDO.setS2sql(chatMemoryUpdateReq.getS2sql());
+            chatMemoryDO.setDbSchema(chatMemoryUpdateReq.getDbSchema());
             enableMemory(chatMemoryDO);
-        } else if (MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus()) && hadEnabled) {
+        } else if ((MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus())||MemoryStatus.PENDING.equals(chatMemoryUpdateReq.getStatus())) && hadEnabled) {
+           //  Remove from vector DB when transitioning: launched→disabled OR enabled→pending
             disableMemory(chatMemoryDO);
         }
-
         LambdaUpdateWrapper<ChatMemoryDO> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(ChatMemoryDO::getId, chatMemoryDO.getId());
         if (Objects.nonNull(chatMemoryUpdateReq.getStatus())) {
