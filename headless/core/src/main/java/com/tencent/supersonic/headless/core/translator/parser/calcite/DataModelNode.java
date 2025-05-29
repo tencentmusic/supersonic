@@ -36,8 +36,8 @@ public class DataModelNode extends SemanticNode {
                 && !dataModel.getModelDetail().getSqlQuery().isEmpty()) {
             sqlTable = dataModel.getModelDetail().getSqlQuery();
             // if model has sqlVariables, parse sqlVariables
-            if (Objects.nonNull(dataModel.getModelDetail().getSqlVariables())
-                    || (CollectionUtils.isEmpty(dataModel.getModelDetail().getSqlVariables()))) {
+            if (Objects.nonNull(dataModel.getModelDetail().getSqlVariables()) &&
+                    !(CollectionUtils.isEmpty(dataModel.getModelDetail().getSqlVariables()))) {
                 sqlTable = SqlVariableParseUtils.parse(sqlTable,
                         dataModel.getModelDetail().getSqlVariables(), Lists.newArrayList());
             }
