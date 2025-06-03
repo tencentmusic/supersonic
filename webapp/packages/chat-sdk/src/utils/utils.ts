@@ -10,7 +10,7 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
     return value;
   }
   let strValue = (+value).toFixed(decimalPlaces);
-  if (!/^[0-9.]+$/g.test(strValue)) {
+  if (!/^-?[0-9.]+$/g.test(strValue)) {
     return '0';
   }
   while (strValue.includes('.') && (strValue.endsWith('.') || strValue.endsWith('0'))) {
@@ -72,17 +72,20 @@ export const getFormattedValue = (value: number | string, remainZero?: boolean) 
   if (!isFinite(+value)) {
     return value;
   }
+
+  const absNumericValue = Math.abs(+value);
+
   const unit =
-    +value >= 100000000
+    absNumericValue >= 100000000
       ? NumericUnit.OneHundredMillion
-      : +value >= 10000
+      : absNumericValue >= 10000
       ? NumericUnit.TenThousand
       : NumericUnit.None;
 
   let formattedValue = formatByUnit(value, unit);
   formattedValue = formatByDecimalPlaces(
     formattedValue,
-    unit === NumericUnit.OneHundredMillion ? 2 : +value < 1 ? 3 : 1
+    unit === NumericUnit.OneHundredMillion ? 2 : absNumericValue < 1 ? 3 : 1
   );
   formattedValue = formatByThousandSeperator(formattedValue);
   if ((typeof formattedValue === 'number' && isNaN(formattedValue)) || +formattedValue === 0) {
@@ -93,7 +96,7 @@ export const getFormattedValue = (value: number | string, remainZero?: boolean) 
 
 export const formatNumberWithCN = (num: number) => {
   if (isNaN(num)) return '-';
-  if (num >= 10000) {
+  if (Math.abs(+num) >= 10000) {
     return (num / 10000).toFixed(1) + '万';
   } else {
     return formatByDecimalPlaces(num, 2);

@@ -268,7 +268,7 @@ export function formatByDecimalPlaces(value: number | string, decimalPlaces: num
     return value;
   }
   let str = (+value).toFixed(decimalPlaces);
-  if (!/^[0-9.]+$/g.test(str)) {
+  if (!/^-?[0-9.]+$/g.test(str)) {
     return '0';
   }
   while (str.includes('.') && (str.endsWith('.') || str.endsWith('0'))) {
@@ -337,17 +337,20 @@ export const getFormattedValueData = (value: number | string, remainZero?: boole
   if (!isFinite(+value)) {
     return value;
   }
+
+  const absNumericValue = Math.abs(+value);
+
   const unit =
-    value >= 100000000
+    absNumericValue >= 100000000
       ? NumericUnit.OneHundredMillion
-      : value >= 10000
+      : absNumericValue >= 10000
       ? NumericUnit.EnTenThousand
       : NumericUnit.None;
 
   let formattedValue = formatByUnit(value, unit);
   formattedValue = formatByDecimalPlaces(
     formattedValue,
-    unit === NumericUnit.OneHundredMillion ? 2 : value < 1 ? 3 : 1,
+    unit === NumericUnit.OneHundredMillion ? 2 : absNumericValue < 1 ? 3 : 1,
   );
   formattedValue = formatByThousandSeperator(formattedValue);
   if ((typeof formattedValue === 'number' && isNaN(formattedValue)) || +formattedValue === 0) {
