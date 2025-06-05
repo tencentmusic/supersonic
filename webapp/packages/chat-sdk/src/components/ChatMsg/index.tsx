@@ -125,7 +125,7 @@ const ChatMsg: React.FC<Props> = ({
       categoryField.length > 0 &&
       metricFields?.length === 1 &&
       (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 10) &&
-      dataSource.every(item => item[metricFields[0].bizName] > 0);
+      dataSource.every(item => item[metricFields[0].bizName] >= 0);
 
     if (isMetricPie) {
       return MsgContentTypeEnum.METRIC_PIE;
@@ -226,9 +226,6 @@ const ChatMsg: React.FC<Props> = ({
         );
       case MsgContentTypeEnum.METRIC_PIE:
         const categoryField = columns.find(item => item.showType === 'CATEGORY');
-        if (!categoryField) {
-          return null;
-        }
         return (
           <Pie
             data={{ ...data, queryColumns: columns, queryResults: dataSource }}
@@ -236,7 +233,7 @@ const ChatMsg: React.FC<Props> = ({
             triggerResize={triggerResize}
             loading={loading}
             metricField={metricFields[0]}
-            categoryField={categoryField}
+            categoryField={categoryField!}
           />
         );
       case MsgContentTypeEnum.MARKDOWN:
