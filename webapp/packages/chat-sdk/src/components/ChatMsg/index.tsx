@@ -52,14 +52,14 @@ const ChatMsg: React.FC<Props> = ({
 
   const prefixCls = `${PREFIX_CLS}-chat-msg`;
 
-  const updateColummns = (queryColumnsValue: ColumnType[]) => {
+  const updateColumns = (queryColumnsValue: ColumnType[]) => {
     const referenceColumn = queryColumnsValue.find(item => item.showType === 'more');
     setReferenceColumn(referenceColumn);
     setColumns(queryColumnsValue.filter(item => item.showType !== 'more'));
   };
 
   useEffect(() => {
-    updateColummns(queryColumns);
+    updateColumns(queryColumns);
     setDataSource(queryResults);
     setDefaultMetricField(chatContext?.metrics?.[0]);
     setActiveMetricField(chatContext?.metrics?.[0]);
@@ -282,7 +282,7 @@ const ChatMsg: React.FC<Props> = ({
     });
     setLoading(false);
     if (res.code === 200) {
-      updateColummns(res.data?.queryColumns || []);
+      updateColumns(res.data?.queryColumns || []);
       setDataSource(res.data?.queryResults || []);
     }
   };
