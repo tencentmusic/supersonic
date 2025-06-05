@@ -121,6 +121,15 @@ const ChatMsg: React.FC<Props> = ({
       return MsgContentTypeEnum.METRIC_TREND;
     }
 
+    /**
+     * For Pie Chart:
+     * 1. There should be at least one category field.
+     * 2. There should be exactly one metric field.
+     * 3. All metric values should be non-negative.
+     * 4. limit the number of data points based on device type:
+     *   - For mobile devices, limit to 5 data points.
+     *   - For desktop devices, limit to 10 data points.
+     */
     const isMetricPie =
       categoryField.length > 0 &&
       metricFields?.length === 1 &&
@@ -131,10 +140,20 @@ const ChatMsg: React.FC<Props> = ({
       return MsgContentTypeEnum.METRIC_PIE;
     }
 
+    /**
+     * For Bar Chart:
+     * 1. There should be at least one category field.
+     * 2. There should be exactly one metric field.
+     * 3. The number of data points should be limited based on device type:
+     *  - For mobile devices, limit to 5 data points.
+     *  - For desktop devices, limit to 50 data points.
+     * 4. All metric values should be finite numbers.
+     */
     const isMetricBar =
       categoryField?.length > 0 &&
       metricFields?.length === 1 &&
-      (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 50);
+      (isMobile ? dataSource?.length <= 5 : dataSource?.length <= 50) &&
+      dataSource.every(item => isFinite(Number(item[metricFields[0].bizName])));
 
     if (isMetricBar) {
       return MsgContentTypeEnum.METRIC_BAR;
