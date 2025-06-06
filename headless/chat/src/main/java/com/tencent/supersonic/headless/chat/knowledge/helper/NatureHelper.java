@@ -179,7 +179,7 @@ public class NatureHelper {
     }
 
     public static Long parseIdFromNature(String nature, int index) {
-        if(nature.startsWith("_")){ // 框架的字典都是以_开头的
+        if (nature.startsWith("_")) { // 框架的字典都是以_开头的
             try {
                 String[] split = nature.split(DictWordType.NATURE_SPILT);
                 if (split.length > index) {

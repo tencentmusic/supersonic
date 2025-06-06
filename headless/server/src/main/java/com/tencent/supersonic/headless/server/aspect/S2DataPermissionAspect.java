@@ -335,13 +335,17 @@ public class S2DataPermissionAspect {
                 if (StringUtils.isNotEmpty(filter.getDescription())) {
                     descList.add(filter.getDescription());
                 }
-                exprList.add(filter.getExpressions().toString());
+                if (!"[]".equals(filter.getExpressions().toString())) {
+                    exprList.add(filter.getExpressions().toString());
+                }
             });
-            String promptInfo = "当前结果已经过行权限过滤，详细过滤条件如下:%s, 申请权限请联系管理员%s";
-            String message = String.format(promptInfo,
-                    CollectionUtils.isEmpty(descList) ? exprList : descList, admins);
-            queryResultWithColumns.setQueryAuthorization(
-                    new QueryAuthorization(modelResp.getName(), exprList, descList, message));
+            if (!CollectionUtils.isEmpty(exprList)) {
+                String promptInfo = "当前结果已经过行权限过滤，详细过滤条件如下:%s, 申请权限请联系管理员%s";
+                String message = String.format(promptInfo,
+                        CollectionUtils.isEmpty(descList) ? exprList : descList, admins);
+                queryResultWithColumns.setQueryAuthorization(
+                        new QueryAuthorization(modelResp.getName(), exprList, descList, message));
+            }
         }
     }
 }

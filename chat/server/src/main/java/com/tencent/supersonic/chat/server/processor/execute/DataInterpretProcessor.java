@@ -46,8 +46,8 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
     public boolean accept(ExecuteContext executeContext) {
         Agent agent = executeContext.getAgent();
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
-        return Objects.nonNull(chatApp) && chatApp.isEnable()&&
-                StringUtils.isNotBlank(executeContext.getResponse().getTextResult()); //  如果都没结果，则无法处理，直接跳过
+        return Objects.nonNull(chatApp) && chatApp.isEnable()
+                && StringUtils.isNotBlank(executeContext.getResponse().getTextResult()); // 如果都没结果，则无法处理，直接跳过
     }
 
     @Override
