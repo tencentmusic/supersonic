@@ -1,5 +1,5 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatByDecimalPlaces, formatMetric, formatNumberWithCN } from '../../../utils/utils';
+import { formatByDataFormatType, formatMetric, formatNumberWithCN } from '../../../utils/utils';
 import ApplyAuth from '../ApplyAuth';
 import { MsgDataType } from '../../../common/type';
 import PeriodCompareItem from './PeriodCompareItem';
@@ -52,10 +52,7 @@ const MetricCard: React.FC<Props> = ({ data, question, loading, onApplyAuth }) =
                 {typeof value === 'string' && isNaN(+value)
                   ? value
                   : dataFormatType === 'percent' || dataFormatType === 'decimal'
-                  ? `${formatByDecimalPlaces(
-                      dataFormat?.needMultiply100 ? +value * 100 : value,
-                      dataFormat?.decimalPlaces || 2
-                    )}${dataFormatType === 'percent' ? '%' : ''}`
+                  ? formatByDataFormatType(value, dataFormatType, dataFormat)
                   : isNumber
                   ? formatMetric(value) || '-'
                   : formatNumberWithCN(+value)}

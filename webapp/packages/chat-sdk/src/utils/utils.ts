@@ -1,6 +1,11 @@
 import moment, { Moment } from 'moment';
 import { NumericUnit } from '../common/constants';
 import { isString } from 'lodash';
+import { ColumnType } from '../common/type';
+
+export function formatByDataFormatType(value: number | string, type: ColumnType['dataFormatType'], dataFormat: Partial<ColumnType['dataFormat']> = {}) {
+  return `${formatByDecimalPlaces(dataFormat?.needMultiply100 ? +value * 100 : value, dataFormat?.decimalPlaces || 2)}${type === 'percent' ? '%' : ''}`;
+}
 
 export function formatByDecimalPlaces(value: number | string, decimalPlaces: number) {
   if (value === null || value === undefined || value === '') {
