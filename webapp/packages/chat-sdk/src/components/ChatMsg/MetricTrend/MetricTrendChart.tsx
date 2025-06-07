@@ -1,6 +1,6 @@
 import { CHART_SECONDARY_COLOR, CLS_PREFIX, THEME_COLOR_LIST } from '../../../common/constants';
 import {
-  formatByDecimalPlaces,
+  formatByDataFormatType,
   getFormattedValue,
   getMinMaxDate,
   groupByColumn,
@@ -134,7 +134,7 @@ const MetricTrendChart: React.FC<Props> = ({
             return value === 0
               ? 0
               : metricField.dataFormatType === 'percent'
-              ? `${formatByDecimalPlaces(value, metricField.dataFormat?.decimalPlaces || 2)}%`
+              ? formatByDataFormatType(value, metricField.dataFormatType, metricField.dataFormat)
               : getFormattedValue(value);
           },
         },
@@ -156,10 +156,7 @@ const MetricTrendChart: React.FC<Props> = ({
                     ? '-'
                     : metricField.dataFormatType === 'percent' ||
                       metricField.dataFormatType === 'decimal'
-                    ? `${formatByDecimalPlaces(
-                        item.value,
-                        metricField.dataFormat?.decimalPlaces || 2
-                      )}${metricField.dataFormatType === 'percent' ? '%' : ''}`
+                    ? formatByDataFormatType(item.value, metricField.dataFormatType, metricField.dataFormat)
                     : getFormattedValue(item.value)
                 }</span></div>`
             )

@@ -1,4 +1,4 @@
-import { formatByDecimalPlaces, formatByThousandSeperator } from '../../../utils/utils';
+import { formatByDataFormatType, formatByThousandSeperator } from '../../../utils/utils';
 import { Table as AntTable } from 'antd';
 import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
@@ -42,10 +42,7 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
               <div className={`${prefixCls}-formatted-value`}>
                 {`${
                   value
-                    ? formatByDecimalPlaces(
-                        dataFormat?.needMultiply100 ? +value * 100 : value,
-                        dataFormat?.decimalPlaces || 2
-                      )
+                    ? formatByDataFormatType(value, dataFormatType, dataFormat)
                     : 0
                 }%`}
               </div>

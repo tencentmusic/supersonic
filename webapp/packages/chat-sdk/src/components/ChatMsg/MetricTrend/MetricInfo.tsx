@@ -1,5 +1,5 @@
 import { PREFIX_CLS } from '../../../common/constants';
-import { formatByDecimalPlaces, formatMetric, formatNumberWithCN } from '../../../utils/utils';
+import { formatByDataFormatType, formatMetric, formatNumberWithCN } from '../../../utils/utils';
 import { AggregateInfoType, ColumnType } from '../../../common/type';
 import PeriodCompareItem from '../MetricCard/PeriodCompareItem';
 import { SwapOutlined } from '@ant-design/icons';
@@ -29,10 +29,7 @@ const MetricInfo: React.FC<Props> = ({ aggregateInfo, currentMetricField }) => {
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
           <div className={`${prefixCls}-indicator-value`}>
             {dataFormatType === 'percent' || dataFormatType === 'decimal'
-              ? `${formatByDecimalPlaces(
-                  dataFormat?.needMultiply100 ? +value * 100 : value,
-                  dataFormat?.decimalPlaces || 2
-                )}${dataFormatType === 'percent' ? '%' : ''}`
+              ? formatByDataFormatType(value, dataFormatType, dataFormat)
               : isNumber
               ? formatMetric(value)
               : formatNumberWithCN(+value)}

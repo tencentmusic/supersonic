@@ -1,6 +1,6 @@
 import { PREFIX_CLS, THEME_COLOR_LIST } from '../../../common/constants';
 import { MsgDataType } from '../../../common/type';
-import { formatByDecimalPlaces, getFormattedValue } from '../../../utils/utils';
+import { formatByDataFormatType, getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import { useEffect, useRef } from 'react';
@@ -55,10 +55,7 @@ const PieChart: React.FC<Props> = ({
           const value = params.value;
           return `${params.name}: ${
             metricField.dataFormatType === 'percent'
-              ? `${formatByDecimalPlaces(
-                  metricField.dataFormat?.needMultiply100 ? +value * 100 : value,
-                  metricField.dataFormat?.decimalPlaces || 2
-                )}%`
+              ? formatByDataFormatType(value, metricField.dataFormatType, metricField.dataFormat)
               : getFormattedValue(value)
           }`;
         },
