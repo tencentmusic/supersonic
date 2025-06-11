@@ -363,7 +363,7 @@ const ModelCreateForm: React.FC<CreateFormProps> = ({
       }
       if (tableQueryString.split('.').length === 2) {
         const [dbName, tableName] = tableQueryString.split('.');
-        columns = await queryTableColumnList(modelItem.databaseId, '', dbName, tableName);
+        columns = await queryTableColumnList(modelItem.databaseId, dbName, dbName, tableName);
         tableQueryInitValue = {
           catalog: '',
           dbName,
