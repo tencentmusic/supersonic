@@ -420,4 +420,4 @@ ALTER TABLE s2_chat_model add column is_open tinyint DEFAULT NULL COMMENT '是�
 ALTER TABLE s2_database add column is_open tinyint DEFAULT NULL COMMENT '是否公开';
 
 --20250321
-ALTER TABLE s2_user add column last_loin datetime DEFAULT NULL;
+ALTER TABLE s2_user add column last_login datetime DEFAULT NULL;
