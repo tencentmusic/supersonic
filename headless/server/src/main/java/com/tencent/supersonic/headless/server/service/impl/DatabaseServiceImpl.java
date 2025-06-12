@@ -282,6 +282,7 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     public List<DBColumn> getColumns(Long id, String catalog, String db, String table)
             throws SQLException {
         DatabaseResp databaseResp = getDatabase(id);
+        catalog = StringUtils.isEmpty(catalog) ? db : catalog;
         return getColumns(databaseResp, catalog, db, table);
     }
 
