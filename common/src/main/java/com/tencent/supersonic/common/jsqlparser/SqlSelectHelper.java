@@ -5,52 +5,20 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.BinaryExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.WhenClause;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsBooleanExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.FromItem;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.LateralView;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.OrderByElement;
-import net.sf.jsqlparser.statement.select.ParenthesedSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectVisitorAdapter;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +26,27 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class SqlSelectHelper {
+
+    /***
+     * @Author: luxf yclxf@yeah.net
+     * @Description:
+     * @Date: 12/06/2025
+     * 全角转半角字符映射
+     **/
+    private static final Map<Character, Character> fullWidthToHalfWidthMap = new HashMap<Character, Character>() {{
+        put('（', '(');
+        put('）', ')');
+        put('，', ',');
+        put('；', ';');
+        put('：', ':');
+        put('！', '!');
+        put('？', '?');
+        put('｛', '{');
+        put('｝', '}');
+        put('［', '[');
+        put('］', ']');
+        put('＝', '=');
+    }};
 
     public static List<FieldExpression> getFilterExpression(String sql) {
         List<PlainSelect> plainSelectList = getPlainSelect(sql);
@@ -222,10 +211,35 @@ public class SqlSelectHelper {
         }
     }
 
+    /***
+     * @Author: luxf yclxf@yeah.net
+     * @Description:
+     * @Date: 12/06/2025
+     * @param: sql
+     * @return: java.lang.String
+     * 全角转半角字符方法
+     **/
+    private static String convertFullWidthToHalfWidth(String sql) {
+        if (StringUtils.isEmpty(sql)) {
+            return sql;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (char c : sql.toCharArray()) {
+            if (fullWidthToHalfWidthMap.containsKey(c)) {
+                sb.append(fullWidthToHalfWidthMap.get(c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
     public static Select getSelect(String sql) {
         Statement statement = null;
         try {
-            statement = CCJSqlParserUtil.parse(sql);
+            // 预处理SQL，转换全角字符为半角
+            String sql_handled = convertFullWidthToHalfWidth(sql);
+            statement = CCJSqlParserUtil.parse(sql_handled);
         } catch (JSQLParserException e) {
             log.error("parse error, sql:{}", sql, e);
             throw new RuntimeException(e);
@@ -820,7 +834,7 @@ public class SqlSelectHelper {
     }
 
     private static void getFieldsWithSubQuery(PlainSelect plainSelect,
-            Map<String, Set<String>> fields) {
+                                              Map<String, Set<String>> fields) {
         if (plainSelect.getFromItem() instanceof Table) {
             List<String> withAlias = new ArrayList<>();
             if (!CollectionUtils.isEmpty(plainSelect.getWithItemsList())) {
@@ -923,7 +937,7 @@ public class SqlSelectHelper {
     }
 
     public static void collectWithItemPlainSelects(List<WithItem> withItemList,
-            Set<Select> selects) {
+                                                   Set<Select> selects) {
         if (CollectionUtils.isEmpty(withItemList)) {
             return;
         }
