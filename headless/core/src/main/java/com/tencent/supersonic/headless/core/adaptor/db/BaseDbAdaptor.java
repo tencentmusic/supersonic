@@ -5,7 +5,6 @@ import com.tencent.supersonic.headless.api.pojo.DBColumn;
 import com.tencent.supersonic.headless.api.pojo.enums.FieldType;
 import com.tencent.supersonic.headless.core.pojo.ConnectInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -148,7 +147,8 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         String url = connectionInfo.getUrl().toLowerCase();
 
         // 设置通用属性
-        properties.setProperty("user", connectionInfo.getUserName());
+        String userName = Optional.ofNullable(connectionInfo.getUserName()).orElse("");
+        properties.setProperty("user", userName);
 
 
         String password = Optional.ofNullable(connectionInfo.getPassword()).orElse("");

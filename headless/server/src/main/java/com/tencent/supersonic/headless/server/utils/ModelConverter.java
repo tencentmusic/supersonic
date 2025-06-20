@@ -156,7 +156,11 @@ public class ModelConverter {
             modelDetail.setSqlQuery(modelBuildReq.getSql());
         } else {
             modelDetail.setQueryType(ModelDefineType.TABLE_QUERY.getName());
-            modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
+            if (modelBuildReq.getDb() != null) {
+                modelDetail.setTableQuery(String.format("%s.%s", modelBuildReq.getDb(), tableName));
+            } else {
+                modelDetail.setTableQuery(tableName);
+            }
         }
         List<Field> fields = new ArrayList<>();
         for (SemanticColumn semanticColumn : modelSchema.getSemanticColumns()) {
