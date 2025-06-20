@@ -35,13 +35,14 @@ public class LLMPhysicalSqlCorrector extends BaseSemanticCorrector {
             + "#Role: You are a senior database performance optimization expert experienced in SQL tuning."
             + "\n\n#Task: You will be provided with a user question and the corresponding physical SQL query,"
             + " please analyze and optimize this SQL to improve query performance." + "\n\n#Rules:"
-            + "\n1. ALWAYS add appropriate index hints if the database supports them."
-            + "\n2. Optimize JOIN order by placing smaller tables first."
-            + "\n3. Add reasonable query limits to prevent large result sets if no LIMIT exists."
-            + "\n4. Optimize WHERE condition order by placing high-selectivity conditions first."
-            + "\n5. Ensure the optimized SQL is syntactically correct and logically equivalent."
-            + "\n6. If the SQL is already well-optimized, return 'positive'."
-            + "\n\n#Question: {{question}}" + "\n\n#OriginalSQL: {{sql}}" + "\n\n#Response:";
+            + "\n1. DO NOT add or introduce any new fields, columns, or aliases that are not in the original SQL."
+            + "\n2. Push WHERE conditions into JOIN ON clauses when possible to reduce intermediate result sets."
+            + "\n3. Optimize JOIN order by placing smaller tables or tables with selective conditions first."
+            + "\n4. For date range conditions, ensure they are applied as early as possible in the query execution."
+            + "\n5. Remove or comment out database-specific index hints (like USE INDEX) that may cause syntax errors."
+            + "\n6. ONLY modify the structure and order of existing elements, do not change field names or add new ones."
+            + "\n7. Ensure the optimized SQL is syntactically correct and logically equivalent to the original."
+            + "\n\n#Question: {{question}}" + "\n\n#OriginalSQL: {{sql}}";
 
     public LLMPhysicalSqlCorrector() {
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("物理SQL修正")
