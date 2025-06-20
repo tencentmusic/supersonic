@@ -71,8 +71,9 @@ public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
             chatMemoryDO.setS2sql(chatMemoryUpdateReq.getS2sql());
             chatMemoryDO.setDbSchema(chatMemoryUpdateReq.getDbSchema());
             enableMemory(chatMemoryDO);
-        } else if ((MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus())||MemoryStatus.PENDING.equals(chatMemoryUpdateReq.getStatus())) && hadEnabled) {
-           //  Remove from vector DB when transitioning: launched→disabled OR enabled→pending
+        } else if ((MemoryStatus.DISABLED.equals(chatMemoryUpdateReq.getStatus())
+                || MemoryStatus.PENDING.equals(chatMemoryUpdateReq.getStatus())) && hadEnabled) {
+            // Remove from vector DB when transitioning: launched→disabled OR enabled→pending
             disableMemory(chatMemoryDO);
         }
         LambdaUpdateWrapper<ChatMemoryDO> updateWrapper = new LambdaUpdateWrapper<>();
