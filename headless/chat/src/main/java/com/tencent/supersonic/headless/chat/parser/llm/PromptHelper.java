@@ -52,7 +52,8 @@ public class PromptHelper {
         for (int i = 0; i < selfConsistencyNumber; i++) {
             List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
             // only shuffle the exemplars from config
-            List<Text2SQLExemplar> subList=shuffledList.subList(llmReq.getDynamicExemplars().size(),shuffledList.size());
+            List<Text2SQLExemplar> subList =
+                    shuffledList.subList(llmReq.getDynamicExemplars().size(), shuffledList.size());
             Collections.shuffle(subList);
             results.add(shuffledList.subList(0, Math.min(shuffledList.size(), fewShotNumber)));
         }

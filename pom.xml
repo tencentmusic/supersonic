@@ -10,9 +10,9 @@
     <version>${revision}</version>
 
     <modules>
+        <module>common</module>
         <module>auth</module>
         <module>chat</module>
-        <module>common</module>
         <module>launchers</module>
         <module>headless</module>
     </modules>
@@ -31,6 +31,7 @@
         <java.target.version>21</java.target.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <file.encoding>UTF-8</file.encoding>
         <jsqlparser.version>4.9</jsqlparser.version>
         <pagehelper.version>6.1.0</pagehelper.version>
@@ -254,6 +255,13 @@
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>
                     <encoding>${file.encoding}</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>

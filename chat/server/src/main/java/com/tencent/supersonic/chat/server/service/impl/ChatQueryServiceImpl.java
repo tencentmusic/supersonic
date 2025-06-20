@@ -49,6 +49,7 @@ import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -66,6 +67,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Autowired
     private SemanticLayerService semanticLayerService;
     @Autowired
+    @Lazy
     private AgentService agentService;
 
     private final List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
