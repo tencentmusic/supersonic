@@ -15,7 +15,8 @@ com.tencent.supersonic.headless.chat.parser.SemanticParser=\
 
 com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\
     com.tencent.supersonic.headless.chat.corrector.RuleSqlCorrector,\
-    com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector
+    com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector,\
+    com.tencent.supersonic.headless.chat.corrector.LLMPhysicalSqlCorrector
 
 com.tencent.supersonic.headless.chat.knowledge.file.FileHandler=\
     com.tencent.supersonic.headless.chat.knowledge.file.FileHandlerImpl

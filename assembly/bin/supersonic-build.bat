@@ -43,10 +43,26 @@ if "%service%"=="webapp" (
    call mvn -f %projectDir% clean package -DskipTests -Dspotless.skip=true
    IF ERRORLEVEL 1 (
       ECHO Failed to build backend Java modules.
+      ECHO Please check Maven and Java versions are compatible.
+      ECHO Current Java: %JAVA_HOME%
+      ECHO Current Maven: %MAVEN_HOME%
       EXIT /B 1
    )
+   
+   REM extract and copy files to deployment directory
+   cd %projectDir%\launchers\%model_name%\target
+   if exist "launchers-%model_name%-%MVN_VERSION%-bin.tar.gz" (
+       echo "Extracting launchers-%model_name%-%MVN_VERSION%-bin.tar.gz..."
+       tar -xf "launchers-%model_name%-%MVN_VERSION%-bin.tar.gz"
+       if exist "launchers-%model_name%-%MVN_VERSION%" (
+           echo "Copying files to deployment directory..."
+           xcopy /E /Y "launchers-%model_name%-%MVN_VERSION%\*" "%buildDir%\supersonic-%model_name%-%MVN_VERSION%\"
+       )
+   )
+   
    copy /y %projectDir%\launchers\%model_name%\target\*.tar.gz %buildDir%\
    echo "finished building supersonic-%model_name% service"
+   cd %baseDir%
    goto :EOF
 
 
@@ -72,22 +88,55 @@ if "%service%"=="webapp" (
    cd %buildDir%
    if exist %release_dir% rmdir /s /q %release_dir%
    if exist %release_dir%.zip del %release_dir%.zip
-   mkdir %release_dir%
-   rem package webapp
-   tar xvf supersonic-webapp.tar.gz
-   move /y supersonic-webapp webapp
-   echo {"env": ""} > webapp\supersonic.config.json
-   move /y webapp %release_dir%
-   rem package java service
-   tar xvf %service_name%-bin.tar.gz
-   for /d %%D in ("%service_name%\*") do (
-       move "%%D" "%release_dir%"
+   
+   rem check if release directory already exists from buildJavaService
+   if exist %release_dir% (
+       echo "Release directory already prepared by buildJavaService"
+   ) else (
+       mkdir %release_dir%
+       
+       rem package java service
+       tar xvf %service_name%-bin.tar.gz 2>nul
+       if errorlevel 1 (
+           echo "Warning: tar command failed, trying PowerShell extraction..."
+           powershell -Command "Expand-Archive -Path '%service_name%-bin.tar.gz' -DestinationPath '.' -Force"
+       )
+       for /d %%D in ("%service_name%\*") do (
+           move "%%D" "%release_dir%"
+       )
+       rmdir /s /q %service_name% 2>nul
    )
+   
+   rem package webapp
+   if exist supersonic-webapp.tar.gz (
+       tar xvf supersonic-webapp.tar.gz 2>nul
+       if errorlevel 1 (
+           echo "Warning: tar command failed, trying PowerShell extraction..."
+           powershell -Command "Expand-Archive -Path 'supersonic-webapp.tar.gz' -DestinationPath '.' -Force"
+       )
+       move /y supersonic-webapp webapp
+       echo {"env": ""} > webapp\supersonic.config.json
+       move /y webapp %release_dir%
+       del supersonic-webapp.tar.gz 2>nul
+   )
+   
+   rem verify deployment structure
+   if exist "%release_dir%\lib\launchers-%model_name%-%MVN_VERSION%.jar" (
+       echo "Deployment structure verified successfully"
+   ) else (
+       echo "Warning: Main jar file not found in deployment structure"
+       echo "Expected: %release_dir%\lib\launchers-%model_name%-%MVN_VERSION%.jar"
+   )
+   
    rem generate zip file
-   powershell Compress-Archive -Path %release_dir% -DestinationPath %release_dir%.zip
-   del %service_name%-bin.tar.gz
-   del supersonic-webapp.tar.gz
-   rmdir /s /q %service_name%
+   powershell -Command "Compress-Archive -Path '%release_dir%' -DestinationPath '%release_dir%.zip' -Force"
+   if errorlevel 1 (
+       echo "Warning: PowerShell compression failed, release directory still available: %release_dir%"
+   ) else (
+       echo "Successfully created release package: %release_dir%.zip"
+   )
+   
+   del %service_name%-bin.tar.gz 2>nul
    echo "finished packaging supersonic release"
    goto :EOF
 
