@@ -21,7 +21,8 @@ public class LoadRemoveService {
         List<String> resultList = new ArrayList<>(value);
         if (!CollectionUtils.isEmpty(modelIdOrDataSetIds)) {
             resultList.removeIf(nature -> {
-                if (Objects.isNull(nature)) {
+                if (Objects.isNull(nature) || !nature.startsWith("_")) { // 系统的字典是以 _ 开头的，
+                                                                         // 过滤因引用外部字典导致的异常
                     return false;
                 }
                 Long id = getId(nature);

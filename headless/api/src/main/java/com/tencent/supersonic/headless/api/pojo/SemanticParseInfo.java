@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_DETAIL_LIMIT;
 import static com.tencent.supersonic.common.pojo.Constants.DEFAULT_METRIC_LIMIT;
@@ -65,12 +66,23 @@ public class SemanticParseInfo implements Serializable {
             DataSetMatchResult mr2 = getDataSetMatchResult(o2.getElementMatches());
 
             double difference = mr1.getMaxDatesetSimilarity() - mr2.getMaxDatesetSimilarity();
-            if (difference == 0) {
+            if (Math.abs(difference) < 0.0005) { // 看完全匹配的个数，实践证明，可以用户输入规范后，该逻辑具有优势
+                if (!o1.getDataSetId().equals(o2.getDataSetId())) {
+                    List<SchemaElementMatch> elementMatches1 = o1.getElementMatches().stream()
+                            .filter(e -> e.getSimilarity() == 1).collect(Collectors.toList());
+                    List<SchemaElementMatch> elementMatches2 = o2.getElementMatches().stream()
+                            .filter(e -> e.getSimilarity() == 1).collect(Collectors.toList());
+                    if (elementMatches1.size() > elementMatches2.size()) {
+                        return -1;
+                    } else if (elementMatches1.size() < elementMatches2.size()) {
+                        return 1;
+                    }
+                }
                 difference = mr1.getMaxMetricSimilarity() - mr2.getMaxMetricSimilarity();
-                if (difference == 0) {
+                if (Math.abs(difference) < 0.0005) {
                     difference = mr1.getTotalSimilarity() - mr2.getTotalSimilarity();
                 }
-                if (difference == 0) {
+                if (Math.abs(difference) < 0.0005) {
                     difference = mr1.getMaxMetricUseCnt() - mr2.getMaxMetricUseCnt();
                 }
             }
