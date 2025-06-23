@@ -49,7 +49,7 @@ public class PromptHelper {
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
             List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
-            List<Text2SQLExemplar> same = shuffledList.stream() //  相似度极高的话，先找出来
+            List<Text2SQLExemplar> same = shuffledList.stream() // 相似度极高的话，先找出来
                     .filter(e -> e.getSimilarity() > 0.989).collect(Collectors.toList());
             List<Text2SQLExemplar> noSame = shuffledList.stream()
                     .filter(e -> e.getSimilarity() <= 0.989).collect(Collectors.toList());

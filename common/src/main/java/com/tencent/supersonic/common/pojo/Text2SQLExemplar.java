@@ -23,5 +23,5 @@ public class Text2SQLExemplar implements Serializable {
 
     private String sql;
 
-    protected double similarity; //  传递相似度，可以作为样本筛选的依据
+    protected double similarity; // 传递相似度，可以作为样本筛选的依据
 }

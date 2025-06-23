@@ -94,10 +94,11 @@ public class TokenService {
 
     public Optional<Claims> getClaims(String token, String appKey) {
         try {
-            if(StringUtils.isNotBlank(appKey)&&appKey.startsWith("SysDbToken:")) {// 如果是配置的长期令牌，需校验数据库是否存在该配置
+            if (StringUtils.isNotBlank(appKey) && appKey.startsWith("SysDbToken:")) {// 如果是配置的长期令牌，需校验数据库是否存在该配置
                 UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
-                UserTokenDO dbToken= userRepository.getUserTokenByName(appKey.substring("SysDbToken:".length()));
-                if(dbToken==null||!dbToken.getToken().equals(token.replace("Bearer ",""))) {
+                UserTokenDO dbToken =
+                        userRepository.getUserTokenByName(appKey.substring("SysDbToken:".length()));
+                if (dbToken == null || !dbToken.getToken().equals(token.replace("Bearer ", ""))) {
                     throw new AccessException("Token does not exist :" + appKey);
                 }
             }
@@ -133,14 +134,14 @@ public class TokenService {
         Map<String, String> appKeyToSecretMap = authenticationConfig.getAppKeyToSecretMap();
         String secret = appKeyToSecretMap.get(appKey);
         if (StringUtils.isBlank(secret)) {
-            if(StringUtils.isNotBlank(appKey)&&appKey.startsWith("SysDbToken:")) { // 是配置的长期令牌
-                String realAppKey=appKey.substring("SysDbToken:".length());
-                String tmp = "WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==";
-                if(tmp.length()<=realAppKey.length()) {
+            if (StringUtils.isNotBlank(appKey) && appKey.startsWith("SysDbToken:")) { // 是配置的长期令牌
+                String realAppKey = appKey.substring("SysDbToken:".length());
+                String tmp =
+                        "WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==";
+                if (tmp.length() <= realAppKey.length()) {
                     return realAppKey;
-                }
-                else{
-                    return realAppKey+tmp.substring(realAppKey.length());
+                } else {
+                    return realAppKey + tmp.substring(realAppKey.length());
                 }
             }
             throw new AccessException("get secret from appKey failed :" + appKey);

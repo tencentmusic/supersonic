@@ -66,7 +66,7 @@ public class SemanticParseInfo implements Serializable {
             DataSetMatchResult mr2 = getDataSetMatchResult(o2.getElementMatches());
 
             double difference = mr1.getMaxDatesetSimilarity() - mr2.getMaxDatesetSimilarity();
-            if (Math.abs(difference) < 0.0005) { //  看完全匹配的个数，实践证明，可以用户输入规范后，该逻辑具有优势
+            if (Math.abs(difference) < 0.0005) { // 看完全匹配的个数，实践证明，可以用户输入规范后，该逻辑具有优势
                 if (!o1.getDataSetId().equals(o2.getDataSetId())) {
                     List<SchemaElementMatch> elementMatches1 = o1.getElementMatches().stream()
                             .filter(e -> e.getSimilarity() == 1).collect(Collectors.toList());
