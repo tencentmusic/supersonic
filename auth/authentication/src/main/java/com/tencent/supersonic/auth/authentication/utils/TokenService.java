@@ -6,7 +6,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.tencent.supersonic.auth.api.authentication.config.AuthenticationConfig;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
+import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserTokenDO;
+import com.tencent.supersonic.auth.authentication.persistence.repository.UserRepository;
 import com.tencent.supersonic.common.pojo.exception.AccessException;
+import com.tencent.supersonic.common.util.ContextUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -71,6 +74,7 @@ public class TokenService {
         return generateToken(UserWithPassword.convert(appUser), request);
     }
 
+
     public Optional<Claims> getClaims(HttpServletRequest request) {
         String token = request.getHeader(authenticationConfig.getTokenHttpHeaderKey());
         String appKey = getAppKey(request);
@@ -90,6 +94,13 @@ public class TokenService {
 
     public Optional<Claims> getClaims(String token, String appKey) {
         try {
+            if(StringUtils.isNotBlank(appKey)&&appKey.startsWith("SysDbToken:")) {// 如果是配置的长期令牌，需校验数据库是否存在该配置
+                UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+                UserTokenDO dbToken= userRepository.getUserTokenByName(appKey.substring("SysDbToken:".length()));
+                if(dbToken==null||!dbToken.getToken().equals(token.replace("Bearer ",""))) {
+                    throw new AccessException("Token does not exist :" + appKey);
+                }
+            }
             String tokenSecret = getTokenSecret(appKey);
             Claims claims =
                     Jwts.parser().setSigningKey(tokenSecret.getBytes(StandardCharsets.UTF_8))
@@ -122,6 +133,16 @@ public class TokenService {
         Map<String, String> appKeyToSecretMap = authenticationConfig.getAppKeyToSecretMap();
         String secret = appKeyToSecretMap.get(appKey);
         if (StringUtils.isBlank(secret)) {
+            if(StringUtils.isNotBlank(appKey)&&appKey.startsWith("SysDbToken:")) { // 是配置的长期令牌
+                String realAppKey=appKey.substring("SysDbToken:".length());
+                String tmp = "WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==";
+                if(tmp.length()<=realAppKey.length()) {
+                    return realAppKey;
+                }
+                else{
+                    return realAppKey+tmp.substring(realAppKey.length());
+                }
+            }
             throw new AccessException("get secret from appKey failed :" + appKey);
         }
         return secret;

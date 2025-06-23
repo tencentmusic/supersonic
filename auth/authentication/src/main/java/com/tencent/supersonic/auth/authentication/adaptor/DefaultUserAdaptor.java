@@ -222,8 +222,9 @@ public class DefaultUserAdaptor implements UserAdaptor {
                 new UserWithPassword(userDO.getId(), userDO.getName(), userDO.getDisplayName(),
                         userDO.getEmail(), userDO.getPassword(), userDO.getIsAdmin());
 
+        // 使用令牌名称作为生成key ，这样可以区分正常请求和api 请求，api 的令牌失效时间很长，需考虑令牌泄露的情况
         String token =
-                tokenService.generateToken(UserWithPassword.convert(userWithPassword), expireTime);
+                tokenService.generateToken(UserWithPassword.convert(userWithPassword),"SysDbToken:"+name, (new Date().getTime() + expireTime));
         UserTokenDO userTokenDO = saveUserToken(name, userName, token, expireTime);
         return convertUserToken(userTokenDO);
     }

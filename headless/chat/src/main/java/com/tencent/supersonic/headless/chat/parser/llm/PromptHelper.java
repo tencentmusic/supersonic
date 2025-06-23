@@ -14,10 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
 
@@ -51,13 +49,33 @@ public class PromptHelper {
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
             List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
-            // only shuffle the exemplars from config
-            List<Text2SQLExemplar> subList =
-                    shuffledList.subList(llmReq.getDynamicExemplars().size(), shuffledList.size());
-            Collections.shuffle(subList);
-            results.add(shuffledList.subList(0, Math.min(shuffledList.size(), fewShotNumber)));
+            List<Text2SQLExemplar> same = shuffledList.stream() //  相似度极高的话，先找出来
+                    .filter(e -> e.getSimilarity() > 0.989).collect(Collectors.toList());
+            List<Text2SQLExemplar> noSame = shuffledList.stream()
+                    .filter(e -> e.getSimilarity() <= 0.989).collect(Collectors.toList());
+            if ((noSame.size() - same.size()) > fewShotNumber) {// 去除部分最低分
+                noSame.sort(Comparator.comparingDouble(Text2SQLExemplar::getSimilarity));
+                noSame = noSame.subList((noSame.size() - fewShotNumber) / 2, noSame.size());
+            }
+            Text2SQLExemplar mostSimilar = noSame.get(noSame.size() - 1);
+            Collections.shuffle(noSame);
+            List<Text2SQLExemplar> ts;
+            if (same.size() > 0) {// 一样的话，必须作为提示语
+                ts = new ArrayList<>();
+                int needSize = Math.min(noSame.size() + same.size(), fewShotNumber);
+                if (needSize > same.size()) {
+                    ts.addAll(noSame.subList(0, needSize - same.size()));
+                }
+                ts.addAll(same);
+            } else { // 至少要一个最像的
+                ts = noSame.subList(0, Math.min(noSame.size(), fewShotNumber));
+                if (!ts.contains(mostSimilar)) {
+                    ts.remove(ts.size() - 1);
+                    ts.add(mostSimilar);
+                }
+            }
+            results.add(ts);
         }
-
         return results;
     }
 
