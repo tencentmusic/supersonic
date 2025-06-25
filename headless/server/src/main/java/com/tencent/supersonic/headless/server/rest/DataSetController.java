@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -50,10 +51,8 @@ public class DataSetController {
 
     @GetMapping("/getDataSetList")
     public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setDomainId(domainId);
-        metaFilter.setStatus(StatusEnum.ONLINE.getCode());
-        return dataSetService.getDataSetList(metaFilter);
+        List<Integer> statuCodeList = Arrays.asList(StatusEnum.ONLINE.getCode(),StatusEnum.OFFLINE.getCode());
+        return dataSetService.getDataSetList(domainId,statuCodeList);
     }
 
     @DeleteMapping("/{id}")
