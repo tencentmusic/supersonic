@@ -274,6 +274,8 @@ public class DictUtils {
     private QuerySqlReq constructQuerySqlReq(DictItemResp dictItemResp) {
 
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
+        String tableStr = model.getModelDetail().getTableQuery() != null ? model.getModelDetail().getTableQuery()
+                : "(" + model.getModelDetail().getSqlQuery() + ")";
         String sqlPattern =
                 "select %s,count(1) from %s %s group by %s order by count(1) desc limit %d";
         String dimBizName = dictItemResp.getBizName();
@@ -288,7 +290,7 @@ public class DictUtils {
         }
 
         String sql =
-                String.format(sqlPattern, dimBizName, model.getBizName(), where, dimBizName, limit);
+                String.format(sqlPattern, dimBizName, tableStr, where, dimBizName, limit);
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
