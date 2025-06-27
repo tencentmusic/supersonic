@@ -314,58 +314,37 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     @Override
     public List<String> mockAlias(DimensionReq dimensionReq, String mockType, User user) {
-        String mockAlias = aliasGenerateHelper.generateAlias(mockType, dimensionReq.getName(),
-                dimensionReq.getBizName(), "", dimensionReq.getDescription());
-        String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(mockAlias);
-        return JSONObject.parseObject(ret, new TypeReference<List<String>>() {});
+        String name = dimensionReq.getName();
+        ModelResp modelResp = modelService.getModel(dimensionReq.getModelId());
+        if (Objects.isNull(modelResp)) {
+            return Lists.newArrayList();
+        }
+        String modelName = modelResp.getName();
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(modelName)) {
+            return Lists.newArrayList();
+        }
+        return aliasGenerateHelper.generateAlias(modelName, name, "dimension");
     }
 
     @Override
     public List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user) {
-        ModelResp modelResp = modelService.getModel(dimensionReq.getModelId());
-        ModelDetail modelDetail = modelResp.getModelDetail();
-        String sqlQuery = modelDetail.getSqlQuery();
-        if (ModelDefineType.TABLE_QUERY.getName().equals(modelDetail.getQueryType())) {
-            String tableQuery = modelDetail.getTableQuery();
-            sqlQuery = "SELECT * FROM " + tableQuery;
+        String json = JsonUtil.toString(dimensionReq.getDimValueMaps());
+        if (StringUtils.isEmpty(json)) {
+            return Collections.emptyList();
         }
-        DatabaseResp database = databaseService.getDatabase(modelResp.getDatabaseId());
-
-        String sql = "select ai_talk." + dimensionReq.getBizName() + " from (" + sqlQuery
-                + ") as ai_talk group by ai_talk." + dimensionReq.getBizName();
-        SemanticQueryResp semanticQueryResp = databaseService.executeSql(sql, database);
-        List<Map<String, Object>> resultList = semanticQueryResp.getResultList();
-        List<String> valueList = new ArrayList<>();
-        for (Map<String, Object> stringObjectMap : resultList) {
-            String value = String.valueOf(stringObjectMap.get(dimensionReq.getBizName()));
-            valueList.add(value);
-        }
-        String json = aliasGenerateHelper.generateDimensionValueAlias(JSON.toJSONString(valueList));
-        log.info("return llm res is :{}", json);
-        String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(json);
-        JSONObject jsonObject = JSON.parseObject(ret);
-        List<DimValueMap> dimValueMapsResp = new ArrayList<>();
-        int i = 0;
-        for (Map<String, Object> stringObjectMap : resultList) {
-            DimValueMap dimValueMap = new DimValueMap();
-            dimValueMap.setTechName(String.valueOf(stringObjectMap.get(dimensionReq.getBizName())));
-            try {
-                String tran = jsonObject.getJSONArray("tran").getString(i);
-                dimValueMap.setBizName(tran);
-            } catch (Exception exception) {
-                dimValueMap.setBizName("");
+        String mockAlias = aliasGenerateHelper.generateDimensionValueAlias(json);
+        String ret = aliasGenerateHelper.extractJsonStringFromAiMessage(mockAlias);
+        Map<String, List<String>> aliasMap =
+                (Map<String, List<String>>) JSONObject.parseObject(ret, Map.class).get("alias");
+        List<DimValueMap> dimValueMaps = dimensionReq.getDimValueMaps();
+        if (aliasMap != null) {
+            for (DimValueMap dimValueMap : dimValueMaps) {
+                if (aliasMap.containsKey(dimValueMap.getBizName())) {
+                    dimValueMap.setAlias(aliasMap.get(dimValueMap.getBizName()));
+                }
             }
-            try {
-                dimValueMap.setAlias(jsonObject.getJSONObject("alias")
-                        .getJSONArray(stringObjectMap.get(dimensionReq.getBizName()) + "")
-                        .toJavaList(String.class));
-            } catch (Exception exception) {
-                dimValueMap.setAlias(null);
-            }
-            dimValueMapsResp.add(dimValueMap);
-            i++;
         }
-        return dimValueMapsResp;
+        return dimValueMaps;
     }
 
     private void checkExist(List<DimensionReq> dimensionReqs) {

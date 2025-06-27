@@ -1,9 +1,14 @@
 package dev.langchain4j.provider;
 
+import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.config.EmbeddingModelParameterConfig;
 import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.service.ChatModelService;
+import com.tencent.supersonic.common.config.SystemConfig;
+import com.tencent.supersonic.common.service.SystemConfigService;
+import com.tencent.supersonic.common.config.AliasGenerateParameterConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +35,23 @@ public class ModelProvider {
     public static ChatLanguageModel getChatModel(ChatModelConfig modelConfig) {
         if (modelConfig == null || StringUtils.isBlank(modelConfig.getProvider())
                 || StringUtils.isBlank(modelConfig.getBaseUrl())) {
+            SystemConfigService systemConfigService = ContextUtils.getBean(SystemConfigService.class);
+            SystemConfig systemConfig = systemConfigService.getSystemConfig();
+            String modelId = systemConfig.getParameterByName(
+                    AliasGenerateParameterConfig.LLM_ALIAS_GENERATION_MODEL.getName());
+            if (StringUtils.isNotBlank(modelId)) {
+                ChatModelService chatModelService = ContextUtils.getBean(ChatModelService.class);
+                ChatModel chatModel = chatModelService.getChatModel(Integer.parseInt(modelId));
+                if (chatModel != null) {
+                    modelConfig = chatModel.getConfig();
+                } else {
+                    modelConfig = DEMO_CHAT_MODEL;
+                }
+            } else {
+                modelConfig = DEMO_CHAT_MODEL;
+            }
+        }
+        if (modelConfig == null) {
             modelConfig = DEMO_CHAT_MODEL;
         }
         ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());

@@ -74,4 +74,8 @@ public class SystemConfig {
         }
         return defaultParameters;
     }
+
+    public String getAliasGeneratePrompt() {
+        return getParameterByName(AliasGenerateParameterConfig.LLM_ALIAS_GENERATION_PROMPT.getName());
+    }
 }

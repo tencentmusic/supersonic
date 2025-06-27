@@ -118,7 +118,7 @@ ${format(sqlInfo.correctedS2SQL)}
 
   const getCorrectedQuerySQLText = () => {
     return `
-物理SQL修正
+物理SQL修正前
 
 ${format(sqlInfo.correctedQuerySQL || '')}
 `;
@@ -240,7 +240,7 @@ ${executeErrorMsg}
                 setSqlType(sqlType === 'correctedQuerySQL' ? '' : 'correctedQuerySQL');
               }}
             >
-              物理SQL修正
+              物理SQL修正前
             </div>
           )}
           {sqlInfo.querySQL && (

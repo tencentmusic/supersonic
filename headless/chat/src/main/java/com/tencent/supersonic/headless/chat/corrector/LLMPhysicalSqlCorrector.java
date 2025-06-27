@@ -71,6 +71,12 @@ public class LLMPhysicalSqlCorrector extends BaseSemanticCorrector {
             return;
         }
 
+        // Check if querySQL is null to avoid template variable error
+        String querySQL = semanticParseInfo.getSqlInfo().getQuerySQL();
+        if (StringUtils.isBlank(querySQL)) {
+            return;
+        }
+
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(chatApp.getChatModelConfig());
         PhysicalSqlExtractor extractor =
