@@ -56,18 +56,44 @@ public class SqlQueryParser implements QueryParser {
         ontologyQuery.getMetrics().forEach(m -> {
             ontologyMetricsDimensions.add(m.getName());
             ontologyBizNameMetricsDimensions.add(m.getBizName());
+            // Add aliases to the semantic fields
+            if (StringUtils.isNotBlank(m.getAlias())) {
+                List<String> aliasList = SchemaItem.getAliasList(m.getAlias());
+                ontologyMetricsDimensions.addAll(aliasList);
+                ontologyBizNameMetricsDimensions.addAll(aliasList);
+            }
         });
         ontologyQuery.getDimensions().forEach(d -> {
             ontologyMetricsDimensions.add(d.getName());
             ontologyBizNameMetricsDimensions.add(d.getBizName());
+            // Add aliases to the semantic fields
+            if (StringUtils.isNotBlank(d.getAlias())) {
+                List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                ontologyMetricsDimensions.addAll(aliasList);
+                ontologyBizNameMetricsDimensions.addAll(aliasList);
+            }
         });
         // check if there are fields not matched with any metric or dimension
 
-        if (!(queryFieldsSet.containsAll(ontologyMetricsDimensions)
-                || queryFieldsSet.containsAll(ontologyBizNameMetricsDimensions))) {
+        if (!(ontologyMetricsDimensions.containsAll(queryFieldsSet)
+                || ontologyBizNameMetricsDimensions.containsAll(queryFieldsSet))) {
             List<String> semanticFields = Lists.newArrayList();
-            ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
-            ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
+            ontologyQuery.getMetrics().forEach(m -> {
+                semanticFields.add(m.getName());
+                // Add aliases to semantic fields for error message
+                if (StringUtils.isNotBlank(m.getAlias())) {
+                    List<String> aliasList = SchemaItem.getAliasList(m.getAlias());
+                    semanticFields.addAll(aliasList);
+                }
+            });
+            ontologyQuery.getDimensions().forEach(d -> {
+                semanticFields.add(d.getName());
+                // Add aliases to semantic fields for error message
+                if (StringUtils.isNotBlank(d.getAlias())) {
+                    List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                    semanticFields.addAll(aliasList);
+                }
+            });
             String errMsg =
                     String.format("Querying columns[%s] not matched with semantic fields[%s].",
                             queryFields, semanticFields);
@@ -200,13 +226,20 @@ public class SqlQueryParser implements QueryParser {
         ontology.getMetricMap().entrySet().forEach(entry -> {
             String modelName = entry.getKey();
             entry.getValue().forEach(m -> {
-                if (fields.contains(m.getName()) || fields.contains(m.getBizName())) {
+                Set<String> allNamesForMetric = new HashSet<>();
+                allNamesForMetric.add(m.getName());
+                allNamesForMetric.add(m.getBizName());
+                if (StringUtils.isNotBlank(m.getAlias())) {
+                    allNamesForMetric.addAll(SchemaItem.getAliasList(m.getAlias()));
+                }
+                Set<String> matchedFields = new HashSet<>(fields);
+                matchedFields.retainAll(allNamesForMetric);
+                if (!matchedFields.isEmpty()) {
                     ontologyQuery.getModelMap().put(modelName,
                             ontology.getModelMap().get(modelName));
                     ontologyQuery.getMetricMap().computeIfAbsent(modelName, k -> Sets.newHashSet())
                             .add(m);
-                    fields.remove(m.getName());
-                    fields.remove(m.getBizName());
+                    fields.removeAll(matchedFields);
                 }
             });
         });
@@ -217,13 +250,20 @@ public class SqlQueryParser implements QueryParser {
                 .forEach(entry -> {
                     String modelName = entry.getKey();
                     entry.getValue().forEach(d -> {
-                        if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                        Set<String> allNamesForDimension = new HashSet<>();
+                        allNamesForDimension.add(d.getName());
+                        allNamesForDimension.add(d.getBizName());
+                        if (StringUtils.isNotBlank(d.getAlias())) {
+                            allNamesForDimension.addAll(SchemaItem.getAliasList(d.getAlias()));
+                        }
+                        Set<String> matchedFields = new HashSet<>(fields);
+                        matchedFields.retainAll(allNamesForDimension);
+                        if (!matchedFields.isEmpty()) {
                             ontologyQuery.getModelMap().put(modelName,
                                     ontology.getModelMap().get(modelName));
                             ontologyQuery.getDimensionMap()
                                     .computeIfAbsent(modelName, k -> Sets.newHashSet()).add(d);
-                            fields.remove(d.getName());
-                            fields.remove(d.getBizName());
+                            fields.removeAll(matchedFields);
                         }
                     });
                 });
@@ -232,21 +272,33 @@ public class SqlQueryParser implements QueryParser {
         // is needed.
         if (!fields.isEmpty()) {
             Map<String, Set<DimSchemaResp>> model2dims = new HashMap<>();
+            Map<String, Set<String>> model2matchedFields = new HashMap<>();
             ontology.getDimensionMap().entrySet().forEach(entry -> {
                 String modelName = entry.getKey();
                 entry.getValue().forEach(d -> {
-                    if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                    Set<String> allNamesForDimension = new HashSet<>();
+                    allNamesForDimension.add(d.getName());
+                    allNamesForDimension.add(d.getBizName());
+                    if (StringUtils.isNotBlank(d.getAlias())) {
+                        allNamesForDimension.addAll(SchemaItem.getAliasList(d.getAlias()));
+                    }
+                    Set<String> matchedFieldsInQuery = new HashSet<>(fields);
+                    matchedFieldsInQuery.retainAll(allNamesForDimension);
+                    if (!matchedFieldsInQuery.isEmpty()) {
                         model2dims.computeIfAbsent(modelName, k -> Sets.newHashSet()).add(d);
+                        model2matchedFields.computeIfAbsent(modelName, k -> Sets.newHashSet())
+                                .addAll(matchedFieldsInQuery);
                     }
                 });
             });
-            Optional<Map.Entry<String, Set<DimSchemaResp>>> modelEntry = model2dims.entrySet()
-                    .stream().filter(entry -> entry.getValue().size() == fields.size()).findFirst();
-            if (modelEntry.isPresent()) {
-                ontologyQuery.getDimensionMap().put(modelEntry.get().getKey(),
-                        modelEntry.get().getValue());
-                ontologyQuery.getModelMap().put(modelEntry.get().getKey(),
-                        ontology.getModelMap().get(modelEntry.get().getKey()));
+            Optional<String> bestModel = model2matchedFields.entrySet().stream()
+                    .filter(entry -> entry.getValue().size() == fields.size())
+                    .map(Map.Entry::getKey).findFirst();
+            if (bestModel.isPresent()) {
+                String modelName = bestModel.get();
+                ontologyQuery.getDimensionMap().put(modelName, model2dims.get(modelName));
+                ontologyQuery.getModelMap().put(modelName,
+                        ontology.getModelMap().get(modelName));
                 fields.clear();
             }
         }
@@ -258,13 +310,20 @@ public class SqlQueryParser implements QueryParser {
                 String modelName = entry.getKey();
                 if (!ontologyQuery.getDimensionMap().containsKey(modelName)) {
                     entry.getValue().forEach(d -> {
-                        if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                        Set<String> allNamesForDimension = new HashSet<>();
+                        allNamesForDimension.add(d.getName());
+                        allNamesForDimension.add(d.getBizName());
+                        if (StringUtils.isNotBlank(d.getAlias())) {
+                            allNamesForDimension.addAll(SchemaItem.getAliasList(d.getAlias()));
+                        }
+                        Set<String> matchedFields = new HashSet<>(fields);
+                        matchedFields.retainAll(allNamesForDimension);
+                        if (!matchedFields.isEmpty()) {
                             ontologyQuery.getModelMap().put(modelName,
                                     ontology.getModelMap().get(modelName));
                             ontologyQuery.getDimensionMap()
                                     .computeIfAbsent(modelName, k -> Sets.newHashSet()).add(d);
-                            fields.remove(d.getName());
-                            fields.remove(d.getBizName());
+                            fields.removeAll(matchedFields);
                         }
                     });
                 }
