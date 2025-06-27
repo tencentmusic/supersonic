@@ -178,8 +178,9 @@ public class ChatWorkflowEngine {
                         // 如果物理SQL被修正了，更新querySQL为修正后的版本
                         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
                         if (StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectedQuerySQL())) {
-                            parseInfo.getSqlInfo().setQuerySQL(parseInfo.getSqlInfo().getCorrectedQuerySQL());
-                            log.info("Physical SQL corrected and updated querySQL: {}", 
+                            parseInfo.getSqlInfo()
+                                    .setQuerySQL(parseInfo.getSqlInfo().getCorrectedQuerySQL());
+                            log.info("Physical SQL corrected and updated querySQL: {}",
                                     parseInfo.getSqlInfo().getQuerySQL());
                         }
                         break;
