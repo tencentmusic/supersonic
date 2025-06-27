@@ -56,18 +56,44 @@ public class SqlQueryParser implements QueryParser {
         ontologyQuery.getMetrics().forEach(m -> {
             ontologyMetricsDimensions.add(m.getName());
             ontologyBizNameMetricsDimensions.add(m.getBizName());
+            // Add aliases to the semantic fields
+            if (StringUtils.isNotBlank(m.getAlias())) {
+                List<String> aliasList = SchemaItem.getAliasList(m.getAlias());
+                ontologyMetricsDimensions.addAll(aliasList);
+                ontologyBizNameMetricsDimensions.addAll(aliasList);
+            }
         });
         ontologyQuery.getDimensions().forEach(d -> {
             ontologyMetricsDimensions.add(d.getName());
             ontologyBizNameMetricsDimensions.add(d.getBizName());
+            // Add aliases to the semantic fields
+            if (StringUtils.isNotBlank(d.getAlias())) {
+                List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                ontologyMetricsDimensions.addAll(aliasList);
+                ontologyBizNameMetricsDimensions.addAll(aliasList);
+            }
         });
         // check if there are fields not matched with any metric or dimension
 
-        if (!(queryFieldsSet.containsAll(ontologyMetricsDimensions)
-                || queryFieldsSet.containsAll(ontologyBizNameMetricsDimensions))) {
+        if (!(ontologyMetricsDimensions.containsAll(queryFieldsSet)
+                || ontologyBizNameMetricsDimensions.containsAll(queryFieldsSet))) {
             List<String> semanticFields = Lists.newArrayList();
-            ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
-            ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
+            ontologyQuery.getMetrics().forEach(m -> {
+                semanticFields.add(m.getName());
+                // Add aliases to semantic fields for error message
+                if (StringUtils.isNotBlank(m.getAlias())) {
+                    List<String> aliasList = SchemaItem.getAliasList(m.getAlias());
+                    semanticFields.addAll(aliasList);
+                }
+            });
+            ontologyQuery.getDimensions().forEach(d -> {
+                semanticFields.add(d.getName());
+                // Add aliases to semantic fields for error message
+                if (StringUtils.isNotBlank(d.getAlias())) {
+                    List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                    semanticFields.addAll(aliasList);
+                }
+            });
             String errMsg =
                     String.format("Querying columns[%s] not matched with semantic fields[%s].",
                             queryFields, semanticFields);
@@ -200,13 +226,36 @@ public class SqlQueryParser implements QueryParser {
         ontology.getMetricMap().entrySet().forEach(entry -> {
             String modelName = entry.getKey();
             entry.getValue().forEach(m -> {
+                boolean matchFound = false;
+                // Check name and bizName
                 if (fields.contains(m.getName()) || fields.contains(m.getBizName())) {
+                    matchFound = true;
+                }
+                // Check aliases
+                if (!matchFound && StringUtils.isNotBlank(m.getAlias())) {
+                    List<String> aliasList = SchemaItem.getAliasList(m.getAlias());
+                    for (String alias : aliasList) {
+                        if (fields.contains(alias)) {
+                            matchFound = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (matchFound) {
                     ontologyQuery.getModelMap().put(modelName,
                             ontology.getModelMap().get(modelName));
                     ontologyQuery.getMetricMap().computeIfAbsent(modelName, k -> Sets.newHashSet())
                             .add(m);
                     fields.remove(m.getName());
                     fields.remove(m.getBizName());
+                    // Also remove aliases from fields
+                    if (StringUtils.isNotBlank(m.getAlias())) {
+                        List<String> aliasList = SchemaItem.getAliasList(m.getAlias());
+                        for (String alias : aliasList) {
+                            fields.remove(alias);
+                        }
+                    }
                 }
             });
         });
@@ -217,13 +266,36 @@ public class SqlQueryParser implements QueryParser {
                 .forEach(entry -> {
                     String modelName = entry.getKey();
                     entry.getValue().forEach(d -> {
+                        boolean matchFound = false;
+                        // Check name and bizName
                         if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                            matchFound = true;
+                        }
+                        // Check aliases
+                        if (!matchFound && StringUtils.isNotBlank(d.getAlias())) {
+                            List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                            for (String alias : aliasList) {
+                                if (fields.contains(alias)) {
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (matchFound) {
                             ontologyQuery.getModelMap().put(modelName,
                                     ontology.getModelMap().get(modelName));
                             ontologyQuery.getDimensionMap()
                                     .computeIfAbsent(modelName, k -> Sets.newHashSet()).add(d);
                             fields.remove(d.getName());
                             fields.remove(d.getBizName());
+                            // Also remove aliases from fields
+                            if (StringUtils.isNotBlank(d.getAlias())) {
+                                List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                                for (String alias : aliasList) {
+                                    fields.remove(alias);
+                                }
+                            }
                         }
                     });
                 });
@@ -235,7 +307,23 @@ public class SqlQueryParser implements QueryParser {
             ontology.getDimensionMap().entrySet().forEach(entry -> {
                 String modelName = entry.getKey();
                 entry.getValue().forEach(d -> {
+                    boolean matchFound = false;
+                    // Check name and bizName
                     if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                        matchFound = true;
+                    }
+                    // Check aliases
+                    if (!matchFound && StringUtils.isNotBlank(d.getAlias())) {
+                        List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                        for (String alias : aliasList) {
+                            if (fields.contains(alias)) {
+                                matchFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (matchFound) {
                         model2dims.computeIfAbsent(modelName, k -> Sets.newHashSet()).add(d);
                     }
                 });
@@ -258,13 +346,36 @@ public class SqlQueryParser implements QueryParser {
                 String modelName = entry.getKey();
                 if (!ontologyQuery.getDimensionMap().containsKey(modelName)) {
                     entry.getValue().forEach(d -> {
+                        boolean matchFound = false;
+                        // Check name and bizName
                         if (fields.contains(d.getName()) || fields.contains(d.getBizName())) {
+                            matchFound = true;
+                        }
+                        // Check aliases
+                        if (!matchFound && StringUtils.isNotBlank(d.getAlias())) {
+                            List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                            for (String alias : aliasList) {
+                                if (fields.contains(alias)) {
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (matchFound) {
                             ontologyQuery.getModelMap().put(modelName,
                                     ontology.getModelMap().get(modelName));
                             ontologyQuery.getDimensionMap()
                                     .computeIfAbsent(modelName, k -> Sets.newHashSet()).add(d);
                             fields.remove(d.getName());
                             fields.remove(d.getBizName());
+                            // Also remove aliases from fields
+                            if (StringUtils.isNotBlank(d.getAlias())) {
+                                List<String> aliasList = SchemaItem.getAliasList(d.getAlias());
+                                for (String alias : aliasList) {
+                                    fields.remove(alias);
+                                }
+                            }
                         }
                     });
                 }
