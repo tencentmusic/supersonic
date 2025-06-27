@@ -174,13 +174,15 @@ public class ChatWorkflowEngine {
             for (SemanticQuery semanticQuery : candidateQueries) {
                 for (SemanticCorrector corrector : semanticCorrectors) {
                     if (corrector instanceof LLMPhysicalSqlCorrector) {
-                        corrector.correct(queryCtx, semanticQuery.getParseInfo());
-                        // 如果物理SQL被修正了，更新querySQL为修正后的版本
                         SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
-                        if (StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectedQuerySQL())) {
-                            parseInfo.getSqlInfo().setQuerySQL(parseInfo.getSqlInfo().getCorrectedQuerySQL());
-                            log.info("Physical SQL corrected and updated querySQL: {}", 
-                                    parseInfo.getSqlInfo().getQuerySQL());
+                        String originalSQL = parseInfo.getSqlInfo().getQuerySQL();
+                        corrector.correct(queryCtx, parseInfo);
+                        String optimizedSQL = parseInfo.getSqlInfo().getCorrectedQuerySQL();
+                        if (StringUtils.isNotBlank(optimizedSQL)) {
+                            parseInfo.getSqlInfo().setCorrectedQuerySQL(originalSQL);
+                            parseInfo.getSqlInfo().setQuerySQL(optimizedSQL);
+                            log.info("Corrected Physical SQL: {}", 
+                                    StringUtils.normalizeSpace(optimizedSQL));
                         }
                         break;
                     }
