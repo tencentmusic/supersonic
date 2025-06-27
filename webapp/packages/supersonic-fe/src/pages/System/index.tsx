@@ -2,6 +2,7 @@ import styles from './style.less';
 import { Button, Form, message, Space, Divider, Anchor, Row, Col } from 'antd';
 import React, { useState, useEffect, useRef } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
+import { getLlmList } from '@/services/system';
 import { ProCard } from '@ant-design/pro-components';
 import SelectTMEPerson from '@/components/SelectTMEPerson';
 import { ConfigParametersItem, SystemConfig, dependenciesItem } from './types';
@@ -15,6 +16,7 @@ type Admin = string[];
 
 const System: React.FC = () => {
   const [systemConfig, setSystemConfig] = useState<Record<string, ConfigParametersItem[]>>({});
+  const [llmList, setLlmList] = useState<{ id: number; modelName: string }[]>([]);
   const [anchorItems, setAnchorItems] = useState<{ key: string; href: string; title: string }[]>(
     [],
   );
@@ -25,17 +27,41 @@ const System: React.FC = () => {
   const configIocDepMap = useRef<Record<string, any>>();
   // const [llmTestLoading, setLlmTestLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    querySystemConfig();
-  }, []);
   const [form] = Form.useForm();
-  const querySystemConfig = async () => {
+
+  useEffect(() => {
+    queryLlmList();
+  }, []);
+
+  const queryLlmList = async () => {
+    const { code, data } = await getLlmList();
+    if (code === 200) {
+      setLlmList(data);
+      querySystemConfig(data);
+    }
+  };
+
+  const querySystemConfig = async (llmListValue: any) => {
     const { code, data, msg } = await getSystemConfig();
 
     if (code === 200 && data) {
       const { parameters = [], admins = [] } = data;
 
-      const parametersMap = parameters.reduce(
+      const newParameters = parameters.map((item: ConfigParametersItem) => {
+        if (item.name === 'llm.alias.generation.model') {
+          return {
+            ...item,
+            dataType: 'list',
+            candidateValues: llmListValue.map((llm: any) => ({
+              value: `${llm.id}`,
+              label: `${llm.name} (ID: ${llm.id})`,
+            })),
+          };
+        }
+        return item;
+      });
+
+      const parametersMap = newParameters.reduce(
         (configReduceMap: Record<string, ConfigParametersItem>, item: ConfigParametersItem) => {
           return {
             ...configReduceMap,
@@ -47,8 +73,8 @@ const System: React.FC = () => {
 
       configMap.current = parametersMap;
 
-      groupConfigAndSet(parameters);
-      initDepConfig(parameters, admins);
+      groupConfigAndSet(newParameters);
+      initDepConfig(newParameters, admins);
 
       setConfigSource(data);
     } else {
@@ -196,6 +222,10 @@ const System: React.FC = () => {
     groupConfigAndSet(Object.values(tempConfigMap));
   };
 
+  const extendedGenneratorFormItemList = (itemList: ConfigParametersItem[]) => {
+    return genneratorFormItemList(itemList as any);
+  };
+
   // const testLLMConnect = async (params: any) => {
   //   setLlmTestLoading(true);
   //   const { code, data } = await testLLMConn(params);
@@ -230,7 +260,6 @@ const System: React.FC = () => {
               <Form
                 form={form}
                 layout="vertical"
-                className={styles.form}
                 onValuesChange={(value, values) => {
                   const valueKey = Object.keys(value)[0];
                   excuteDepConfig(valueKey, values);
@@ -242,17 +271,19 @@ const System: React.FC = () => {
 
                 <Divider />
 
-                <Space direction="vertical" style={{ width: '100%' }} size={35}>
-                  {Object.keys(systemConfig).map((key: string) => {
-                    const itemList = systemConfig[key];
+                <Space direction="vertical" style={{ width: '100%', gap: 35 }}>
+                  {Object.keys(systemConfig).map((moduleName: string, index: number) => {
+                    const itemList = systemConfig[moduleName];
                     return (
                       <ProCard
-                        title={<span style={{ color: '#296df3' }}>{key}</span>}
-                        key={key}
+                        collapsible
+                        defaultCollapsed={index > 1}
+                        title={<span style={{ color: '#296df3' }}>{moduleName}</span>}
                         bordered
-                        id={key}
+                        key={moduleName}
+                        id={moduleName}
                       >
-                        {genneratorFormItemList(itemList)}
+                        {extendedGenneratorFormItemList(itemList)}
                       </ProCard>
                     );
                   })}

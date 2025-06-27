@@ -473,12 +473,16 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
 
     @Override
     public List<String> mockAlias(MetricBaseReq metricReq, String mockType, User user) {
-
-        String mockAlias = aliasGenerateHelper.generateAlias(mockType, metricReq.getName(),
-                metricReq.getBizName(), "", metricReq.getDescription());
-        String ret = mockAlias.replaceAll("`", "").replace("json", "").replace("\n", "")
-                .replace(" ", "");
-        return JSONObject.parseObject(ret, new TypeReference<List<String>>() {});
+        String name = metricReq.getName();
+        ModelResp modelResp = modelService.getModel(metricReq.getModelId());
+        if (Objects.isNull(modelResp)) {
+            return Lists.newArrayList();
+        }
+        String modelName = modelResp.getName();
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(modelName)) {
+            return Lists.newArrayList();
+        }
+        return aliasGenerateHelper.generateAlias(modelName, name, "metric");
     }
 
     @Override

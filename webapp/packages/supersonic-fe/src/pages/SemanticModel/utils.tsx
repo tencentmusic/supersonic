@@ -1,4 +1,3 @@
-import type { API } from '@/services/API';
 import { ISemantic } from './data';
 import type { DataNode } from 'antd/lib/tree';
 import { Form, Input, InputNumber, Switch, Select, Slider } from 'antd';
@@ -209,14 +208,11 @@ export const genneratorFormItemList = (itemList: ConfigParametersItem[]) => {
         return itemList;
       case 'list': {
         const { candidateValues = [] } = item;
-        const options = candidateValues.map((item: string | { label: string; value: string }) => {
-          if (isString(item)) {
-            return { label: item, value: item };
+        const options = candidateValues.map((optionItem: any) => {
+          if (isString(optionItem)) {
+            return { label: optionItem, value: optionItem };
           }
-          if (item?.label) {
-            return item;
-          }
-          return { label: item, value: item };
+          return { label: optionItem.label, value: optionItem.value };
         });
         defaultItem = (
           <Select style={{ width: '100%' }} options={options} placeholder={placeholder} />
