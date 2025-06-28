@@ -138,7 +138,8 @@ public class DictUtils {
         semanticQueryReq.setNeedAuth(false);
         String bizName = dictItemResp.getBizName();
         try {
-            SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, null);
+            SemanticQueryResp semanticQueryResp =
+                    queryService.queryByReq(semanticQueryReq, User.getDefaultUser());
             if (Objects.isNull(semanticQueryResp)
                     || CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
                 return lines;
@@ -274,7 +275,7 @@ public class DictUtils {
     private QuerySqlReq constructQuerySqlReq(DictItemResp dictItemResp) {
 
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
-        String tableStr = model.getModelDetail().getTableQuery() != null
+        String tableStr = StringUtils.isNotBlank(model.getModelDetail().getTableQuery())
                 ? model.getModelDetail().getTableQuery()
                 : "(" + model.getModelDetail().getSqlQuery() + ")";
         String sqlPattern =
