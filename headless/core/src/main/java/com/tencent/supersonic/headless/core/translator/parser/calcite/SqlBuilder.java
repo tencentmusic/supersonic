@@ -88,7 +88,7 @@ public class SqlBuilder {
         GraphPath<String, DefaultEdge> selectedGraphPath = null;
         for (String fromModel : queryModels) {
             for (String toModel : queryModels) {
-                if (fromModel != toModel) {
+                if (!fromModel.equals(toModel)) {
                     GraphPath<String, DefaultEdge> path = dijkstraAlg.getPath(fromModel, toModel);
                     if (isGraphPathContainsAll(path, queryModels)) {
                         selectedGraphPath = path;
@@ -100,13 +100,13 @@ public class SqlBuilder {
         if (selectedGraphPath == null) {
             return dataModels;
         }
-        Set<String> modelNames = Sets.newHashSet();
+        Set<String> modelNames = Sets.newLinkedHashSet();
         for (DefaultEdge edge : selectedGraphPath.getEdgeList()) {
             modelNames.add(selectedGraphPath.getGraph().getEdgeSource(edge));
             modelNames.add(selectedGraphPath.getGraph().getEdgeTarget(edge));
         }
         return modelNames.stream().map(m -> ontology.getModelMap().get(m))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private boolean isGraphPathContainsAll(GraphPath<String, DefaultEdge> graphPath,
