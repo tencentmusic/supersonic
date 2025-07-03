@@ -129,7 +129,7 @@ public abstract class BaseMapper implements SchemaMapper {
         Map<MatchText, List<T>> matchResult = matchStrategy.match(chatQueryContext, terms,
                 chatQueryContext.getRequest().getDataSetIds());
         List<T> matches = new ArrayList<>();
-        if (Objects.isNull(matchResult)) {
+        if (Objects.isNull(matchResult) || matchResult.isEmpty()) {
             return matches;
         }
         Optional<List<T>> first = matchResult.entrySet().stream()
