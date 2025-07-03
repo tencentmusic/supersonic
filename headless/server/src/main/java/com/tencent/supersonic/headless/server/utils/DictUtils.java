@@ -277,7 +277,7 @@ public class DictUtils {
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
         String tableStr = StringUtils.isNotBlank(model.getModelDetail().getTableQuery())
                 ? model.getModelDetail().getTableQuery()
-                : "(" + model.getModelDetail().getSqlQuery() + ")";
+                : "(" + model.getModelDetail().getSqlQuery() + ") AS t";
         String sqlPattern =
                 "select %s,count(1) from %s %s group by %s order by count(1) desc limit %d";
         String dimBizName = dictItemResp.getBizName();
