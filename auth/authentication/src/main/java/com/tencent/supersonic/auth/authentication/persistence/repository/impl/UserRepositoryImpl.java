@@ -66,6 +66,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public UserTokenDO getUserTokenByName(String tokenName) {
+        QueryWrapper<UserTokenDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UserTokenDO::getName, tokenName);
+        return userTokenDOMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public void deleteUserTokenByName(String userName) {
         QueryWrapper<UserTokenDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(UserTokenDO::getUserName, userName);

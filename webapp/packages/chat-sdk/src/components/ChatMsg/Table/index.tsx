@@ -24,7 +24,6 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
         dataIndex: bizName,
         key: bizName,
         title: name || bizName,
-        defaultSortOrder: 'descend',
         sorter:
           showType === 'NUMBER'
             ? (a, b) => {
@@ -73,10 +72,11 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
     return index % 2 !== 0 ? `${prefixCls}-even-row` : '';
   };
 
-  const dateColumn = queryColumns.find(column => column.type === 'DATE');
+  const dateColumn = queryColumns.find(column => column.type === 'DATE' || column.showType === 'DATE');
   const dataSource = dateColumn
     ? queryResults.sort((a, b) => moment(a[dateColumn.bizName]).diff(moment(b[dateColumn.bizName])))
     : queryResults;
+
   return (
     <div className={prefixCls}>
       {question && (

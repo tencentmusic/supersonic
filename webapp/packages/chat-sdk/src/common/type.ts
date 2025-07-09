@@ -79,6 +79,7 @@ export type SqlInfoType = {
   parsedS2SQL: string;
   correctedS2SQL: string;
   querySQL: string;
+  correctedQuerySQL?: string;
 };
 
 export type ChatContextType = {

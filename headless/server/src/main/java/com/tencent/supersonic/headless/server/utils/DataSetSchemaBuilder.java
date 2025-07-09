@@ -19,9 +19,10 @@ public class DataSetSchemaBuilder {
     public static DataSetSchema build(DataSetSchemaResp resp) {
         DataSetSchema dataSetSchema = new DataSetSchema();
         dataSetSchema.setQueryConfig(resp.getQueryConfig());
-        SchemaElement dataSet = SchemaElement.builder().dataSetId(resp.getId())
-                .dataSetName(resp.getName()).id(resp.getId()).name(resp.getName())
-                .bizName(resp.getBizName()).type(SchemaElementType.DATASET).build();
+        SchemaElement dataSet =
+                SchemaElement.builder().dataSetId(resp.getId()).dataSetName(resp.getName())
+                        .id(resp.getId()).name(resp.getName()).description(resp.getDescription())
+                        .bizName(resp.getBizName()).type(SchemaElementType.DATASET).build();
         dataSetSchema.setDataSet(dataSet);
         dataSetSchema.setDatabaseType(resp.getDatabaseType());
         dataSetSchema.setDatabaseVersion(resp.getDatabaseVersion());

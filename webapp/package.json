@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"supersonic-chat-sdk": "link:packages/chat-sdk"
+	}
+}

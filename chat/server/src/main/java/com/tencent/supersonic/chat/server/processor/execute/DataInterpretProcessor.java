@@ -47,7 +47,8 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         Agent agent = executeContext.getAgent();
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
         return Objects.nonNull(chatApp) && chatApp.isEnable()
-                && StringUtils.isNotBlank(executeContext.getResponse().getTextResult()); // 如果都没结果，则无法处理，直接跳过
+                && StringUtils.isNotBlank(executeContext.getResponse().getTextResult()) // 如果都没结果，则无法处理
+                && StringUtils.isBlank(executeContext.getResponse().getTextSummary()); // 如果已经有汇总的结果了，无法再次处理
     }
 
     @Override
@@ -57,7 +58,16 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
 
         Map<String, Object> variable = new HashMap<>();
-        variable.put("question", executeContext.getRequest().getQueryText());
+        String question = executeContext.getResponse().getTextResult();// 结果解析应该用改写的问题，因为改写的内容信息量更大
+        if (executeContext.getParseInfo().getProperties() != null
+                && executeContext.getParseInfo().getProperties().containsKey("CONTEXT")) {
+            Map<String, Object> context = (Map<String, Object>) executeContext.getParseInfo()
+                    .getProperties().get("CONTEXT");
+            if (context.get("queryText") != null && "".equals(context.get("queryText"))) {
+                question = context.get("queryText").toString();
+            }
+        }
+        variable.put("question", question);
         variable.put("data", queryResult.getTextResult());
 
         Prompt prompt = PromptTemplate.from(chatApp.getPrompt()).apply(variable);

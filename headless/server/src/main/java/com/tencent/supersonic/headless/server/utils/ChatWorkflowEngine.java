@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.ParseResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticTranslateResp;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
+import com.tencent.supersonic.headless.chat.corrector.LLMPhysicalSqlCorrector;
 import com.tencent.supersonic.headless.chat.corrector.SemanticCorrector;
 import com.tencent.supersonic.headless.chat.mapper.SchemaMapper;
 import com.tencent.supersonic.headless.chat.parser.SemanticParser;
@@ -76,6 +77,10 @@ public class ChatWorkflowEngine {
                     long start = System.currentTimeMillis();
                     performTranslating(queryCtx, parseResult);
                     parseResult.getParseTimeCost().setSqlTime(System.currentTimeMillis() - start);
+                    queryCtx.setChatWorkflowState(ChatWorkflowState.PHYSICAL_SQL_CORRECTING);
+                    break;
+                case PHYSICAL_SQL_CORRECTING:
+                    performPhysicalSqlCorrecting(queryCtx);
                     queryCtx.setChatWorkflowState(ChatWorkflowState.FINISHED);
                     break;
                 default:
@@ -160,6 +165,28 @@ public class ChatWorkflowEngine {
         });
         if (!errorMsg.isEmpty()) {
             parseResult.setErrorMsg(String.join("\n", errorMsg));
+        }
+    }
+
+    private void performPhysicalSqlCorrecting(ChatQueryContext queryCtx) {
+        List<SemanticQuery> candidateQueries = queryCtx.getCandidateQueries();
+        if (CollectionUtils.isNotEmpty(candidateQueries)) {
+            for (SemanticQuery semanticQuery : candidateQueries) {
+                for (SemanticCorrector corrector : semanticCorrectors) {
+                    if (corrector instanceof LLMPhysicalSqlCorrector) {
+                        corrector.correct(queryCtx, semanticQuery.getParseInfo());
+                        // 如果物理SQL被修正了，更新querySQL为修正后的版本
+                        SemanticParseInfo parseInfo = semanticQuery.getParseInfo();
+                        if (StringUtils.isNotBlank(parseInfo.getSqlInfo().getCorrectedQuerySQL())) {
+                            parseInfo.getSqlInfo()
+                                    .setQuerySQL(parseInfo.getSqlInfo().getCorrectedQuerySQL());
+                            log.info("Physical SQL corrected and updated querySQL: {}",
+                                    parseInfo.getSqlInfo().getQuerySQL());
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

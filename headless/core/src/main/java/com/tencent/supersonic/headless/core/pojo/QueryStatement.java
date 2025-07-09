@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.core.pojo;
 
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class QueryStatement {
     private SemanticSchemaResp semanticSchema;
     private Integer limit = 1000;
     private Boolean isTranslated = false;
+    private User user;
 
     public boolean isOk() {
         return StringUtils.isBlank(errMsg) && StringUtils.isNotBlank(sql);

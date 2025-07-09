@@ -72,7 +72,10 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
                 embeddingService.retrieveQuery(collection, retrieveQuery, num);
         results.forEach(ret -> {
             ret.getRetrieval().forEach(r -> {
-                exemplars.add(JsonUtil.mapToObject(r.getMetadata(), Text2SQLExemplar.class));
+                Text2SQLExemplar tmp = // 传递相似度，可以作为样本筛选的依据
+                        JsonUtil.mapToObject(r.getMetadata(), Text2SQLExemplar.class);
+                tmp.setSimilarity(r.getSimilarity());
+                exemplars.add(tmp);
             });
         });
 

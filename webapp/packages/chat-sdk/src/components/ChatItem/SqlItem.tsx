@@ -58,32 +58,28 @@ const SqlItem: React.FC<Props> = ({
   const getSchemaMapText = () => {
     return `
 Schema映射
-${schema?.fieldNameList?.length > 0 ? `名称：${schema.fieldNameList.join('、')}` : ''}${
-      schema?.values?.length > 0
+${schema?.fieldNameList?.length > 0 ? `名称：${schema.fieldNameList.join('、')}` : ''}${schema?.values?.length > 0
         ? `
 取值：${schema.values
-            .map((item: any) => {
-              return `${item.fieldName}: ${item.fieldValue}`;
-            })
-            .join('、')}`
+          .map((item: any) => {
+            return `${item.fieldName}: ${item.fieldValue}`;
+          })
+          .join('、')}`
         : ''
-    }${
-      priorExts
+      }${priorExts
         ? `
 附加：${priorExts}`
         : ''
-    }${
-      terms?.length > 0
+      }${terms?.length > 0
         ? `
 术语：${terms
-            .map((item: any) => {
-              return `${item.name}${item.alias?.length > 0 ? `(${item.alias.join(',')})` : ''}: ${
-                item.description
+          .map((item: any) => {
+            return `${item.name}${item.alias?.length > 0 ? `(${item.alias.join(',')})` : ''}: ${item.description
               }`;
-            })
-            .join('、')}`
+          })
+          .join('、')}`
         : ''
-    }
+      }
 
 `;
   };
@@ -91,16 +87,16 @@ ${schema?.fieldNameList?.length > 0 ? `名称：${schema.fieldNameList.join('、
   const getFewShotText = () => {
     return `
 Few-shot示例${fewShots
-      .map((item: any, index: number) => {
-        return `
+        .map((item: any, index: number) => {
+          return `
 
 示例${index + 1}：
 问题：${item.question}
 SQL：
 ${format(item.sql)}
 `;
-      })
-      .join('')}
+        })
+        .join('')}
 `;
   };
 
@@ -117,6 +113,14 @@ ${format(sqlInfo.parsedS2SQL)}
 修正S2SQL
 
 ${format(sqlInfo.correctedS2SQL)}
+`;
+  };
+
+  const getCorrectedQuerySQLText = () => {
+    return `
+物理SQL修正
+
+${format(sqlInfo.correctedQuerySQL || '')}
 `;
   };
 
@@ -155,6 +159,9 @@ ${executeErrorMsg}
     if (sqlInfo.correctedS2SQL) {
       text += getCorrectedS2SQLText();
     }
+    if (sqlInfo.correctedQuerySQL) {
+      text += getCorrectedQuerySQLText();
+    }
     if (sqlInfo.querySQL) {
       text += getQuerySQLText();
     }
@@ -183,9 +190,8 @@ ${executeErrorMsg}
         <div className={`${tipPrefixCls}-content-options`}>
           {llmReq && (
             <div
-              className={`${tipPrefixCls}-content-option ${
-                sqlType === 'schemaMap' ? `${tipPrefixCls}-content-option-active` : ''
-              }`}
+              className={`${tipPrefixCls}-content-option ${sqlType === 'schemaMap' ? `${tipPrefixCls}-content-option-active` : ''
+                }`}
               onClick={() => {
                 setSqlType(sqlType === 'schemaMap' ? '' : 'schemaMap');
               }}
@@ -195,9 +201,8 @@ ${executeErrorMsg}
           )}
           {fewShots.length > 0 && (
             <div
-              className={`${tipPrefixCls}-content-option ${
-                sqlType === 'fewShots' ? `${tipPrefixCls}-content-option-active` : ''
-              }`}
+              className={`${tipPrefixCls}-content-option ${sqlType === 'fewShots' ? `${tipPrefixCls}-content-option-active` : ''
+                }`}
               onClick={() => {
                 setSqlType(sqlType === 'fewShots' ? '' : 'fewShots');
               }}
@@ -207,9 +212,8 @@ ${executeErrorMsg}
           )}
           {sqlInfo.parsedS2SQL && (
             <div
-              className={`${tipPrefixCls}-content-option ${
-                sqlType === 'parsedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
-              }`}
+              className={`${tipPrefixCls}-content-option ${sqlType === 'parsedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
+                }`}
               onClick={() => {
                 setSqlType(sqlType === 'parsedS2SQL' ? '' : 'parsedS2SQL');
               }}
@@ -219,9 +223,8 @@ ${executeErrorMsg}
           )}
           {sqlInfo.correctedS2SQL && (
             <div
-              className={`${tipPrefixCls}-content-option ${
-                sqlType === 'correctedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
-              }`}
+              className={`${tipPrefixCls}-content-option ${sqlType === 'correctedS2SQL' ? `${tipPrefixCls}-content-option-active` : ''
+                }`}
               onClick={() => {
                 setSqlType(sqlType === 'correctedS2SQL' ? '' : 'correctedS2SQL');
               }}
@@ -229,16 +232,26 @@ ${executeErrorMsg}
               修正S2SQL
             </div>
           )}
+          {sqlInfo.correctedQuerySQL && (
+            <div
+              className={`${tipPrefixCls}-content-option ${sqlType === 'correctedQuerySQL' ? `${tipPrefixCls}-content-option-active` : ''
+                }`}
+              onClick={() => {
+                setSqlType(sqlType === 'correctedQuerySQL' ? '' : 'correctedQuerySQL');
+              }}
+            >
+              物理SQL修正
+            </div>
+          )}
           {sqlInfo.querySQL && (
             <div
-              className={`${tipPrefixCls}-content-option ${
-                sqlType === 'querySQL' ? `${tipPrefixCls}-content-option-active` : ''
-              }`}
+              className={`${tipPrefixCls}-content-option ${sqlType === 'querySQL' ? `${tipPrefixCls}-content-option-active` : ''
+                }`}
               onClick={() => {
                 setSqlType(sqlType === 'querySQL' ? '' : 'querySQL');
               }}
             >
-              最终执行SQL
+              {sqlInfo.correctedQuerySQL ? '最终执行SQL' : '最终执行SQL'}
             </div>
           )}
           <Button className={`${prefixCls}-export-log`} size="small" onClick={onExportLog}>
@@ -248,13 +261,12 @@ ${executeErrorMsg}
         </div>
       </div>
       <div
-        className={`${prefixCls} ${
-          !window.location.pathname.includes('/chat') &&
+        className={`${prefixCls} ${!window.location.pathname.includes('/chat') &&
           integrateSystem &&
           integrateSystem !== 'wiki'
-            ? `${prefixCls}-copilot`
-            : ''
-        }`}
+          ? `${prefixCls}-copilot`
+          : ''
+          }`}
       >
         {sqlType === 'schemaMap' && (
           <div className={`${prefixCls}-code`}>
@@ -290,9 +302,8 @@ ${executeErrorMsg}
                 <div className={`${prefixCls}-schema-content`}>
                   {terms
                     .map((item: any) => {
-                      return `${item.name}${
-                        item.alias?.length > 0 ? `(${item.alias.join(',')})` : ''
-                      }: ${item.description}`;
+                      return `${item.name}${item.alias?.length > 0 ? `(${item.alias.join(',')})` : ''
+                        }: ${item.description}`;
                     })
                     .join('、')}
                 </div>

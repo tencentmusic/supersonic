@@ -26,7 +26,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -110,6 +109,14 @@ public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
 
     @Override
     public void batchDelete(List<Long> ids) {
+        QueryWrapper<ChatMemoryDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().in(ChatMemoryDO::getId, ids);
+        List<ChatMemoryDO> chatMemoryDOS = chatMemoryRepository.getMemories(queryWrapper);
+        chatMemoryDOS.forEach(chatMemoryDO -> {
+            if (MemoryStatus.ENABLED.toString().equals(chatMemoryDO.getStatus().trim())) {
+                disableMemory(chatMemoryDO);
+            }
+        });
         chatMemoryRepository.batchDelete(ids);
     }
 

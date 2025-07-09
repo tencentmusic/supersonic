@@ -138,7 +138,8 @@ public class DictUtils {
         semanticQueryReq.setNeedAuth(false);
         String bizName = dictItemResp.getBizName();
         try {
-            SemanticQueryResp semanticQueryResp = queryService.queryByReq(semanticQueryReq, null);
+            SemanticQueryResp semanticQueryResp =
+                    queryService.queryByReq(semanticQueryReq, User.getDefaultUser());
             if (Objects.isNull(semanticQueryResp)
                     || CollectionUtils.isEmpty(semanticQueryResp.getResultList())) {
                 return lines;
@@ -274,6 +275,9 @@ public class DictUtils {
     private QuerySqlReq constructQuerySqlReq(DictItemResp dictItemResp) {
 
         ModelResp model = modelService.getModel(dictItemResp.getModelId());
+        String tableStr = StringUtils.isNotBlank(model.getModelDetail().getTableQuery())
+                ? model.getModelDetail().getTableQuery()
+                : "(" + model.getModelDetail().getSqlQuery() + ")";
         String sqlPattern =
                 "select %s,count(1) from %s %s group by %s order by count(1) desc limit %d";
         String dimBizName = dictItemResp.getBizName();
@@ -287,8 +291,7 @@ public class DictUtils {
             limit = Integer.MAX_VALUE;
         }
 
-        String sql =
-                String.format(sqlPattern, dimBizName, model.getBizName(), where, dimBizName, limit);
+        String sql = String.format(sqlPattern, dimBizName, tableStr, where, dimBizName, limit);
         Set<Long> modelIds = new HashSet<>();
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();

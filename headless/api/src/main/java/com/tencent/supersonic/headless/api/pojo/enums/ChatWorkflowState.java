@@ -8,5 +8,6 @@ public enum ChatWorkflowState {
     VALIDATING,
     SQL_CORRECTING,
     PROCESSING,
+    PHYSICAL_SQL_CORRECTING,
     FINISHED
 }
