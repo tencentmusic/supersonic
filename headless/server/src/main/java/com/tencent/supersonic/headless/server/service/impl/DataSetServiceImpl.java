@@ -103,6 +103,20 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     }
 
     @Override
+    public List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList) {
+        if(domainId==null || CollectionUtils.isEmpty(statuCodesList)){
+            return List.of();
+        }
+        QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(DataSetDO::getDomainId, domainId);
+        wrapper.lambda().in(DataSetDO::getStatus, statuCodesList);
+        wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
+
+        return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
+
+    }
+
+    @Override
     public void delete(Long id, User user) {
         DataSetDO dataSetDO = getById(id);
         dataSetDO.setStatus(StatusEnum.DELETED.getCode());
