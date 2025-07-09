@@ -42,8 +42,8 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
                 {`${
                   value
                     ? formatByDataFormatType(value, dataFormatType, dataFormat)
-                    : 0
-                }%`}
+                    : '0%'
+                }`}
               </div>
             );
           }
