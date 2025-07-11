@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.chat.mapper;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.hankcs.hanlp.seg.common.Term;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
@@ -167,9 +168,13 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
             variable.put("retrievedInfo", JSONObject.toJSONString(results));
 
             Prompt prompt = PromptTemplate.from(LLM_FILTER_PROMPT).apply(variable);
-            ChatLanguageModel chatLanguageModel =
-                    ModelProvider.getChatModel(chatQueryContext.getRequest().getChatAppConfig()
-                            .get("REWRITE_MULTI_TURN").getChatModelConfig());
+
+            ChatModelConfig chatModelConfig=null;
+            if(chatQueryContext.getRequest().getChatAppConfig()!=null
+                    && chatQueryContext.getRequest().getChatAppConfig().containsKey("REWRITE_MULTI_TURN")){
+                chatModelConfig=chatQueryContext.getRequest().getChatAppConfig().get("REWRITE_MULTI_TURN").getChatModelConfig();
+            }
+            ChatLanguageModel chatLanguageModel = ModelProvider.getChatModel(chatModelConfig);
             String response = chatLanguageModel.generate(prompt.toUserMessage().singleText());
 
             if (StringUtils.isBlank(response)) {
