@@ -175,6 +175,7 @@ public class FileHandlerImpl implements FileHandler {
     private DictValueResp convert2Resp(String lineStr) {
         DictValueResp dictValueResp = new DictValueResp();
         if (StringUtils.isNotEmpty(lineStr)) {
+            lineStr=StringUtils.stripStart(lineStr,null);
             String[] itemArray = lineStr.split("\\s+");
             if (Objects.nonNull(itemArray) && itemArray.length >= 3) {
                 dictValueResp.setValue(itemArray[0].replace("#", " "));
