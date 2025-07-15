@@ -1,10 +1,7 @@
 package com.tencent.supersonic.headless.chat.mapper;
 
 import com.tencent.supersonic.common.util.ContextUtils;
-import com.tencent.supersonic.headless.api.pojo.SchemaElement;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
-import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
+import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.response.S2Term;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.DatabaseMapResult;
@@ -54,7 +51,7 @@ public class KeywordMapper extends BaseMapper {
     }
 
     private void convertMapResultToMapInfo(List<HanlpMapResult> mapResults,
-            ChatQueryContext chatQueryContext, List<S2Term> terms) {
+                                           ChatQueryContext chatQueryContext, List<S2Term> terms) {
         if (CollectionUtils.isEmpty(mapResults)) {
             return;
         }
@@ -90,13 +87,14 @@ public class KeywordMapper extends BaseMapper {
                         .similarity(hanlpMapResult.getSimilarity())
                         .detectWord(hanlpMapResult.getDetectWord()).build();
                 // doDimValueAliasLogic 将维度值别名进行替换成真实维度值
-                doDimValueAliasLogic(schemaElementMatch);
+                doDimValueAliasLogic(schemaElementMatch,chatQueryContext.getSemanticSchema().getDimensionValues());
                 addToSchemaMap(chatQueryContext.getMapInfo(), dataSetId, schemaElementMatch);
             }
         }
     }
 
-    private void doDimValueAliasLogic(SchemaElementMatch schemaElementMatch) {
+    private void doDimValueAliasLogic(SchemaElementMatch schemaElementMatch,
+                                      List<SchemaElement> dimensionValues) {
         SchemaElement element = schemaElementMatch.getElement();
         if (SchemaElementType.VALUE.equals(element.getType())) {
             Long dimId = element.getId();
@@ -112,11 +110,23 @@ public class KeywordMapper extends BaseMapper {
                     schemaElementMatch.setWord(wordTech);
                 }
             }
+            SchemaElement dimensionValue = dimensionValues.stream()
+                    .filter(dimValue -> dimId.equals(dimValue.getId())).findFirst().orElse(null);
+            if (dimensionValue != null) {
+                SchemaValueMap dimValue =
+                        dimensionValue.getSchemaValueMaps().stream().filter(schemaValueMap -> {
+                            return StringUtils.equals(schemaValueMap.getBizName(), word)
+                                    || schemaValueMap.getAlias().contains(word);
+                        }).findFirst().orElse(null);
+                if (dimValue != null) {
+                    schemaElementMatch.setWord(dimValue.getTechName());
+                }
+            }
         }
     }
 
     private void convertMapResultToMapInfo(ChatQueryContext chatQueryContext,
-            List<DatabaseMapResult> mapResults) {
+                                           List<DatabaseMapResult> mapResults) {
         for (DatabaseMapResult match : mapResults) {
             SchemaElement schemaElement = match.getSchemaElement();
             Set<Long> regElementSet =
@@ -143,8 +153,8 @@ public class KeywordMapper extends BaseMapper {
             return new HashSet<>();
         }
         return elements.stream().filter(
-                elementMatch -> SchemaElementType.METRIC.equals(elementMatch.getElement().getType())
-                        || SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType()))
+                        elementMatch -> SchemaElementType.METRIC.equals(elementMatch.getElement().getType())
+                                || SchemaElementType.DIMENSION.equals(elementMatch.getElement().getType()))
                 .map(elementMatch -> elementMatch.getElement().getId()).collect(Collectors.toSet());
     }
 }
