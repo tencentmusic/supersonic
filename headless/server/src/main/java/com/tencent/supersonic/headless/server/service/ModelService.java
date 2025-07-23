@@ -11,6 +11,8 @@ import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.UnAvailableItemResp;
+import com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 
 import java.sql.SQLException;
@@ -53,5 +55,7 @@ public interface ModelService {
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
 
-    Dimension updateDimension(DimensionReq dimensionReq, User user);
+    void updateModelByDimAndMetric(Long modelId, List<DimensionReq> dimensionReqList, List<MetricReq> metricReqList, User user);
+
+    void deleteModelDetailByDimAndMetric(Long modelId, List<DimensionDO> dimensionReqList, List<MetricDO> metricReqList);
 }

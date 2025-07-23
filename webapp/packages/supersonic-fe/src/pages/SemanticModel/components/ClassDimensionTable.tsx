@@ -435,17 +435,17 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
           queryDimensionList({ ...filterParams, ...currentPagin });
         }}
         toolBarRender={() => [
-          <Button
-            key="create"
-            type="primary"
-            onClick={() => {
-              toDimensionEditPage(domainId, modelId!, 0);
-              // setDimensionItem(undefined);
-              // setCreateModalVisible(true);
-            }}
-          >
-            创建维度
-          </Button>,
+          // <Button
+          //   key="create"
+          //   type="primary"
+          //   onClick={() => {
+          //     toDimensionEditPage(domainId, modelId!, 0);
+          //     // setDimensionItem(undefined);
+          //     // setCreateModalVisible(true);
+          //   }}
+          // >
+          //   创建维度
+          // </Button>,
           <BatchCtrlDropDownButton
             key="ctrlBtnList"
             extenderList={['batchSensitiveLevel', 'exportTagButton']}

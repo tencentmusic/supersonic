@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.supersonic.headless.server.persistence.mapper.MetricDOCustomMapper">
     <resultMap id="BaseResultMap"
-            type="com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO">
+               type="com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="model_id" jdbcType="BIGINT" property="modelId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
@@ -23,7 +23,7 @@
         <result column="define_type" jdbcType="VARCHAR" property="defineType"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs"
-            type="com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO">
+               type="com.tencent.supersonic.headless.server.persistence.dataobject.MetricDO">
         <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams"/>
     </resultMap>
     <sql id="Example_Where_Clause">
@@ -46,7 +46,7 @@
                                 <when test="criterion.listValue">
                                     and ${criterion.condition}
                                     <foreach close=")" collection="criterion.value" item="listItem"
-                                            open="(" separator=",">
+                                             open="(" separator=",">
                                         #{listItem}
                                     </foreach>
                                 </when>
@@ -97,6 +97,35 @@
         </foreach>
     </update>
 
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="list" item="metric" separator=";">
+            update s2_metric
+            set
+            <if test="metric.name != null and metric.name !=''">name = #{metric.name,jdbcType=VARCHAR},</if>
+            <if test="metric.bizName != null and metric.bizName !=''">biz_name = #{metric.bizName,jdbcType=VARCHAR},
+            </if>
+            <if test="metric.description != null and metric.description !=''">description =
+                #{metric.description,jdbcType=VARCHAR},
+            </if>
+            <if test="metric.status != null">status = #{metric.status,jdbcType=INTEGER},</if>
+            <if test="metric.modelId != null">model_id = #{metric.modelId,jdbcType=BIGINT},</if>
+            <if test="metric.type != null and metric.type !=''">type = #{metric.type,jdbcType=VARCHAR},</if>
+            <if test="metric.typeParams != null and metric.typeParams !=''">type_params =
+                #{metric.typeParams,jdbcType=VARCHAR},
+            </if>
+            <if test="metric.createdAt != null">created_at = #{metric.createdAt,jdbcType=TIMESTAMP},</if>
+            <if test="metric.createdBy != null and dimension.createdBy !=''">created_by =
+                #{metric.createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="metric.sensitiveLevel != null">sensitive_level = #{metric.sensitiveLevel,jdbcType=INTEGER},</if>
+            <if test="metric.updatedBy != null and metric.updatedBy !=''">updated_by =
+                #{metric.updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="metric.updatedAt != null">updated_at = #{metric.updatedAt,jdbcType=TIMESTAMP}</if>
+            where id = #{metric.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
     <update id="batchPublish" parameterType="java.util.List">
         <foreach collection="list" item="metric" separator=";">
             update s2_metric
@@ -134,14 +163,14 @@
         <if test="modelIds != null and modelIds.size >0">
             and model_id in
             <foreach collection="modelIds" index="index" item="model" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{model}
             </foreach>
         </if>
         <if test="metricIds != null  and metricIds.size >0">
             and id in
             <foreach collection="metricIds" index="index" item="metricId" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{metricId}
             </foreach>
         </if>
@@ -149,13 +178,13 @@
             AND (
             (name IN
             <foreach collection="metricNames" index="index" item="metricName" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{metricName}
             </foreach>)
             OR
             (biz_name IN
             <foreach collection="metricNames" index="index" item="metricName" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{metricName}
             </foreach>)
             )

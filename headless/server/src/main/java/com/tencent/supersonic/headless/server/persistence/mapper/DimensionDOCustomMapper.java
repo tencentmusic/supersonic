@@ -13,5 +13,7 @@ public interface DimensionDOCustomMapper {
 
     void batchUpdateStatus(List<DimensionDO> dimensionDOS);
 
+    void batchUpdate(List<DimensionDO> dimensionDOS);
+
     List<DimensionDO> queryDimensions(DimensionsFilter dimensionsFilter);
 }

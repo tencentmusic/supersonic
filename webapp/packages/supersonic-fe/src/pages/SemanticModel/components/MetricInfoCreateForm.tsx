@@ -367,6 +367,15 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
       message.error('请输入度量表达式');
       return;
     }
+
+    if (defineType === METRIC_DEFINE_TYPE.MEASURE) {
+      const { bizName, name, metricDefineByMeasureParams } = queryParams;
+      queryParams[queryParamsTypeParamsKey[METRIC_DEFINE_TYPE.MEASURE]].measures =
+        metricDefineByMeasureParams.measures.map((item: ISemantic.IMeasure) => {
+          return item.bizName === bizName && name ? { ...item, name } : item;
+        });
+    }
+
     if (!dataFormatType) {
       delete queryParams.dataFormat;
     }

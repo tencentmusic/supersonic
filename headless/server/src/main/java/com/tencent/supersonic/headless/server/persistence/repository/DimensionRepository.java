@@ -16,6 +16,8 @@ public interface DimensionRepository {
 
     void batchUpdateStatus(List<DimensionDO> dimensionDOS);
 
+    void batchUpdate(List<DimensionDO> dimensionDOS);
+
     DimensionDO getDimensionById(Long id);
 
     List<DimensionDO> getDimension(DimensionFilter dimensionFilter);
