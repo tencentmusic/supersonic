@@ -10,54 +10,58 @@ import com.tencent.supersonic.headless.api.pojo.request.MetricReq;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+
 public class MetricCheckUtils {
 
-    public static void checkParam(MetricReq metricReq) {
-        String expr = "";
-        if (MetricDefineType.METRIC.equals(metricReq.getMetricDefineType())) {
-            MetricDefineByMetricParams typeParams = metricReq.getMetricDefineByMetricParams();
-            if (typeParams == null) {
-                throw new InvalidArgumentException("指标定义参数不可为空");
+    public static void checkParam(List<MetricReq> metricReqList) {
+        metricReqList.forEach(metricReq -> {
+            String expr = "";
+            if (MetricDefineType.METRIC.equals(metricReq.getMetricDefineType())) {
+                MetricDefineByMetricParams typeParams = metricReq.getMetricDefineByMetricParams();
+                if (typeParams == null) {
+                    throw new InvalidArgumentException("指标定义参数不可为空");
+                }
+                expr = typeParams.getExpr();
+                if (CollectionUtils.isEmpty(typeParams.getMetrics())) {
+                    throw new InvalidArgumentException("定义指标的指标列表参数不可为空");
+                }
+                if (hasAggregateFunction(expr)) {
+                    throw new InvalidArgumentException("基于指标来创建指标,表达式中不可再包含聚合函数");
+                }
             }
-            expr = typeParams.getExpr();
-            if (CollectionUtils.isEmpty(typeParams.getMetrics())) {
-                throw new InvalidArgumentException("定义指标的指标列表参数不可为空");
+            if (MetricDefineType.MEASURE.equals(metricReq.getMetricDefineType())) {
+                MetricDefineByMeasureParams typeParams = metricReq.getMetricDefineByMeasureParams();
+                if (typeParams == null) {
+                    throw new InvalidArgumentException("指标定义参数不可为空");
+                }
+                expr = typeParams.getExpr();
+                if (hasAggregateFunction(expr)) {
+                    throw new InvalidArgumentException("基于度量来创建指标,表达式中不可再包含聚合函数");
+                }
             }
-            if (hasAggregateFunction(expr)) {
-                throw new InvalidArgumentException("基于指标来创建指标,表达式中不可再包含聚合函数");
+            if (MetricDefineType.FIELD.equals(metricReq.getMetricDefineType())) {
+                MetricDefineByFieldParams typeParams = metricReq.getMetricDefineByFieldParams();
+                if (typeParams == null) {
+                    throw new InvalidArgumentException("指标定义参数不可为空");
+                }
+                expr = typeParams.getExpr();
+                // if (CollectionUtils.isEmpty(typeParams.getFields())) {
+                // throw new InvalidArgumentException("定义指标的字段列表参数不可为空");
+                // }
+                if (!hasAggregateFunction(expr)) {
+                    throw new InvalidArgumentException("基于字段来创建指标,表达式中必须包含聚合函数");
+                }
             }
-        }
-        if (MetricDefineType.MEASURE.equals(metricReq.getMetricDefineType())) {
-            MetricDefineByMeasureParams typeParams = metricReq.getMetricDefineByMeasureParams();
-            if (typeParams == null) {
-                throw new InvalidArgumentException("指标定义参数不可为空");
+            if (StringUtils.isBlank(expr)) {
+                throw new InvalidArgumentException("表达式不可为空");
             }
-            expr = typeParams.getExpr();
-            if (hasAggregateFunction(expr)) {
-                throw new InvalidArgumentException("基于度量来创建指标,表达式中不可再包含聚合函数");
+            String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(metricReq.getName());
+            if (StringUtils.isNotBlank(forbiddenCharacters)) {
+                throw new InvalidArgumentException(
+                        String.format("名称包含特殊字符%s, 请修改", forbiddenCharacters));
             }
-        }
-        if (MetricDefineType.FIELD.equals(metricReq.getMetricDefineType())) {
-            MetricDefineByFieldParams typeParams = metricReq.getMetricDefineByFieldParams();
-            if (typeParams == null) {
-                throw new InvalidArgumentException("指标定义参数不可为空");
-            }
-            expr = typeParams.getExpr();
-            // if (CollectionUtils.isEmpty(typeParams.getFields())) {
-            // throw new InvalidArgumentException("定义指标的字段列表参数不可为空");
-            // }
-            if (!hasAggregateFunction(expr)) {
-                throw new InvalidArgumentException("基于字段来创建指标,表达式中必须包含聚合函数");
-            }
-        }
-        if (StringUtils.isBlank(expr)) {
-            throw new InvalidArgumentException("表达式不可为空");
-        }
-        String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(metricReq.getName());
-        if (StringUtils.isNotBlank(forbiddenCharacters)) {
-            throw new InvalidArgumentException(
-                    String.format("名称包含特殊字符%s, 请修改", forbiddenCharacters));
-        }
+        });
     }
 
     private static boolean hasAggregateFunction(String expr) {

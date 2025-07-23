@@ -3,26 +3,27 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.supersonic.headless.server.persistence.mapper.DimensionDOCustomMapper">
     <resultMap id="BaseResultMap" type="com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO">
-        <id column="id" jdbcType="BIGINT" property="id" />
-        <result column="model_id" jdbcType="BIGINT" property="modelId" />
-        <result column="name" jdbcType="VARCHAR" property="name" />
-        <result column="biz_name" jdbcType="VARCHAR" property="bizName" />
-        <result column="description" jdbcType="VARCHAR" property="description" />
-        <result column="status" jdbcType="INTEGER" property="status" />
-        <result column="sensitive_level" jdbcType="INTEGER" property="sensitiveLevel" />
-        <result column="type" jdbcType="VARCHAR" property="type" />
-        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
-        <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
-        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
-        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
-        <result column="semantic_type" jdbcType="VARCHAR" property="semanticType" />
-        <result column="alias" jdbcType="VARCHAR" property="alias" />
-        <result column="default_values" jdbcType="VARCHAR" property="defaultValues" />
-        <result column="dim_value_maps" jdbcType="VARCHAR" property="dimValueMaps" />
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="model_id" jdbcType="BIGINT" property="modelId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="biz_name" jdbcType="VARCHAR" property="bizName"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="sensitive_level" jdbcType="INTEGER" property="sensitiveLevel"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="semantic_type" jdbcType="VARCHAR" property="semanticType"/>
+        <result column="alias" jdbcType="VARCHAR" property="alias"/>
+        <result column="default_values" jdbcType="VARCHAR" property="defaultValues"/>
+        <result column="dim_value_maps" jdbcType="VARCHAR" property="dimValueMaps"/>
     </resultMap>
-    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO">
-        <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams" />
-        <result column="expr" jdbcType="LONGVARCHAR" property="expr" />
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs"
+               type="com.tencent.supersonic.headless.server.persistence.dataobject.DimensionDO">
+        <result column="type_params" jdbcType="LONGVARCHAR" property="typeParams"/>
+        <result column="expr" jdbcType="LONGVARCHAR" property="expr"/>
     </resultMap>
 
 
@@ -46,7 +47,7 @@
                                 <when test="criterion.listValue">
                                     and ${criterion.condition}
                                     <foreach close=")" collection="criterion.value" item="listItem"
-                                            open="(" separator=",">
+                                             open="(" separator=",">
                                         #{listItem}
                                     </foreach>
                                 </when>
@@ -59,7 +60,7 @@
     </sql>
     <sql id="Base_Column_List">
         id
-        , name, biz_name, description, status, model_id, type, type_params, expr, datasource_id,
+        , name, biz_name, description, status, model_id, type, type_params, expr,
     created_at, created_by, updated_by, updated_at, semantic_type
     </sql>
 
@@ -86,21 +87,36 @@
     <update id="batchUpdate" parameterType="java.util.List">
         <foreach collection="list" item="dimension" separator=";">
             update s2_dimension
-            set name = #{dimension.name,jdbcType=VARCHAR},
-            biz_name = #{dimension.bizName,jdbcType=VARCHAR},
-            description = #{dimension.description,jdbcType=VARCHAR},
-            status = #{dimension.status,jdbcType=INTEGER},
-            model_id = #{dimension.modelId,jdbcType=BIGINT},
-            type = #{dimension.type,jdbcType=VARCHAR},
-            type_params = #{dimension.typeParams,jdbcType=VARCHAR},
-            datasource_id = #{dimension.datasourceId,jdbcType=BIGINT},
-            created_at = #{dimension.createdAt,jdbcType=TIMESTAMP},
-            created_by = #{dimension.createdBy,jdbcType=VARCHAR},
-            updated_by = #{dimension.updatedBy,jdbcType=VARCHAR},
-            updated_at = #{dimension.updatedAt,jdbcType=TIMESTAMP},
-            semantic_type = #{dimension.semanticType,jdbcType=VARCHAR},
-            sensitive_level = #{dimension.sensitiveLevel,jdbcType=INTEGER},
-            expr = #{dimension.expr,jdbcType=LONGVARCHAR}
+            set
+            <if test="dimension.name != null and dimension.name !=''">name = #{dimension.name,jdbcType=VARCHAR},</if>
+            <if test="dimension.bizName != null and dimension.bizName !=''">biz_name =
+                #{dimension.bizName,jdbcType=VARCHAR},
+            </if>
+            <if test="dimension.description != null and dimension.description !=''">description =
+                #{dimension.description,jdbcType=VARCHAR},
+            </if>
+            <if test="dimension.status != null">status = #{dimension.status,jdbcType=INTEGER},</if>
+            <if test="dimension.modelId != null">model_id = #{dimension.modelId,jdbcType=BIGINT},</if>
+            <if test="dimension.type != null and dimension.type !=''">type = #{dimension.type,jdbcType=VARCHAR},</if>
+            <if test="dimension.typeParams != null and dimension.typeParams !=''">type_params =
+                #{dimension.typeParams,jdbcType=VARCHAR},
+            </if>
+            <if test="dimension.createdAt != null">created_at = #{dimension.createdAt,jdbcType=TIMESTAMP},</if>
+            <if test="dimension.createdBy != null and dimension.createdBy !=''">created_by =
+                #{dimension.createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="dimension.semanticType != null and dimension.semanticType !=''">semantic_type =
+                #{dimension.semanticType,jdbcType=VARCHAR},
+            </if>
+            <if test="dimension.sensitiveLevel != null and dimension.sensitiveLevel !=''">sensitive_level =
+                #{dimension.sensitiveLevel,jdbcType=INTEGER},
+            </if>
+            <if test="dimension.expr != null and dimension.expr !=''">expr = #{dimension.expr,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="dimension.updatedBy != null and dimension.updatedBy !=''">updated_by =
+                #{dimension.updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="dimension.updatedAt != null">updated_at = #{dimension.updatedAt,jdbcType=TIMESTAMP}</if>
             where id = #{dimension.id,jdbcType=BIGINT}
         </foreach>
     </update>
@@ -123,14 +139,14 @@
         <if test="modelIds != null and modelIds.size >0">
             and model_id in
             <foreach collection="modelIds" index="index" item="model" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{model}
             </foreach>
         </if>
         <if test="dimensionIds != null and dimensionIds.size >0">
             and id in
             <foreach collection="dimensionIds" index="index" item="dimensionId" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{dimensionId}
             </foreach>
         </if>
@@ -138,13 +154,13 @@
             AND (
             (name IN
             <foreach collection="dimensionNames" index="index" item="dimensionName" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{dimensionName}
             </foreach>)
             OR
             (biz_name IN
             <foreach collection="dimensionNames" index="index" item="dimensionName" open="(" close=")"
-                    separator=",">
+                     separator=",">
                 #{dimensionName}
             </foreach>)
             )

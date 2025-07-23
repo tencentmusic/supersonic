@@ -47,6 +47,11 @@ public class DimensionRepositoryImpl implements DimensionRepository {
     }
 
     @Override
+    public void batchUpdate(List<DimensionDO> dimensionDOS) {
+        dimensionDOCustomMapper.batchUpdate(dimensionDOS);
+    }
+
+    @Override
     public DimensionDO getDimensionById(Long id) {
         return dimensionDOMapper.selectById(id);
     }

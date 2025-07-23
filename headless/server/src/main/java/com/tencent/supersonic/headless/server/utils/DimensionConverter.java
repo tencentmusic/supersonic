@@ -70,6 +70,9 @@ public class DimensionConverter {
         if (dimensionReq.getExt() != null) {
             dimensionDO.setExt(JSONObject.toJSONString(dimensionReq.getExt()));
         }
+        if (dimensionReq.getTypeParams() != null) {
+            dimensionDO.setTypeParams(JSONObject.toJSONString(dimensionReq.getTypeParams()));
+        }
         dimensionDO.setStatus(StatusEnum.ONLINE.getCode());
         return dimensionDO;
     }
