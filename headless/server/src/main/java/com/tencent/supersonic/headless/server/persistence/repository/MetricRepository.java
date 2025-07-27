@@ -17,6 +17,8 @@ public interface MetricRepository {
 
     void batchUpdateStatus(List<MetricDO> metricDOS);
 
+    void batchUpdateMetric(List<MetricDO> metricDOS);
+
     void batchPublish(List<MetricDO> metricDOS);
 
     void batchUnPublish(List<MetricDO> metricDOS);

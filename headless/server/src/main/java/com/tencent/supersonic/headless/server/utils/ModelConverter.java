@@ -28,7 +28,7 @@ public class ModelConverter {
 
     public static ModelDO convert(ModelReq modelReq, User user) {
         ModelDO modelDO = new ModelDO();
-        ModelDetail modelDetail = createModelDetail(modelReq);
+        ModelDetail modelDetail = convert(modelReq);
         modelReq.createdBy(user.getName());
         BeanMapper.mapper(modelReq, modelDO);
         modelDO.setStatus(StatusEnum.ONLINE.getCode());
@@ -68,7 +68,7 @@ public class ModelConverter {
     }
 
     public static ModelDO convert(ModelDO modelDO, ModelReq modelReq, User user) {
-        ModelDetail modelDetail = updateModelDetail(modelReq);
+        ModelDetail modelDetail = convert(modelReq);
         BeanMapper.mapper(modelReq, modelDO);
         if (modelReq.getDrillDownDimensions() != null) {
             modelDO.setDrillDownDimensions(
@@ -143,7 +143,7 @@ public class ModelConverter {
     }
 
     public static ModelReq convert(ModelSchema modelSchema, ModelBuildReq modelBuildReq,
-            String tableName) {
+                                   String tableName) {
         ModelReq modelReq = new ModelReq();
         modelReq.setName(modelBuildReq.getName() != null ? modelBuildReq.getName() : tableName);
         modelReq.setBizName(
@@ -169,7 +169,7 @@ public class ModelConverter {
 
             if (getIdentifyType(fieldType) != null) {
                 Optional<Identify> optional = modelDetail.getIdentifiers().stream().filter(
-                        identify -> identify.getBizName().equals(semanticColumn.getColumnName()))
+                                identify -> identify.getBizName().equals(semanticColumn.getColumnName()))
                         .findAny();
                 if (optional.isEmpty()) {
                     Identify identify = new Identify(semanticColumn.getName(),
@@ -178,7 +178,7 @@ public class ModelConverter {
                 }
             } else if (FieldType.measure.equals(fieldType)) {
                 Optional<Measure> optional = modelDetail.getMeasures().stream().filter(
-                        measure -> measure.getBizName().equals(semanticColumn.getColumnName()))
+                                measure -> measure.getBizName().equals(semanticColumn.getColumnName()))
                         .findAny();
                 if (optional.isEmpty()) {
                     Measure measure = new Measure(semanticColumn.getName(),
@@ -188,7 +188,7 @@ public class ModelConverter {
                 }
             } else {
                 Optional<Dimension> optional = modelDetail.getDimensions().stream().filter(
-                        dimension -> dimension.getBizName().equals(semanticColumn.getColumnName()))
+                                dimension -> dimension.getBizName().equals(semanticColumn.getColumnName()))
                         .findAny();
                 if (optional.isEmpty()) {
                     Dimension dim = new Dimension(semanticColumn.getName(),
@@ -288,18 +288,21 @@ public class ModelConverter {
                 .collect(Collectors.toList());
     }
 
-    private static ModelDetail createModelDetail(ModelReq modelReq) {
+    private static ModelDetail convert(ModelReq modelReq) {
         ModelDetail modelDetail = new ModelDetail();
         List<Measure> measures = modelReq.getModelDetail().getMeasures();
         List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
         List<Identify> identifiers = modelReq.getModelDetail().getIdentifiers();
         List<Field> fields = modelReq.getModelDetail().getFields();
+        List<String> fieldNames = fields.stream().map(Field::getFieldName).collect(Collectors.toList());
 
         if (measures != null) {
             for (Measure measure : measures) {
                 if (StringUtils.isNotBlank(measure.getBizName())
                         && StringUtils.isBlank(measure.getExpr())) {
                     measure.setExpr(measure.getBizName());
+                }
+                if (StringUtils.isNotBlank(measure.getBizName()) && !fieldNames.contains(measure.getBizName())) {
                     fields.add(new Field(measure.getBizName(), ""));
                 }
             }
@@ -309,53 +312,24 @@ public class ModelConverter {
                 if (StringUtils.isNotBlank(dimension.getBizName())
                         && StringUtils.isBlank(dimension.getExpr())) {
                     dimension.setExpr(dimension.getBizName());
+                }
+                if (StringUtils.isNotBlank(dimension.getBizName()) && !fieldNames.contains(dimension.getBizName())) {
                     fields.add(new Field(dimension.getBizName(), ""));
                 }
             }
         }
         if (identifiers != null) {
             for (Identify identify : identifiers) {
-                if (StringUtils.isNotBlank(identify.getBizName())
-                        && StringUtils.isBlank(identify.getName())) {
+                if (StringUtils.isNotBlank(identify.getBizName()) && StringUtils.isBlank(identify.getName())) {
                     identify.setName(identify.getBizName());
                 }
                 identify.setIsCreateDimension(1);
-                fields.add(new Field(identify.getBizName(), ""));
-            }
-        }
-
-        BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
-        return modelDetail;
-    }
-
-    private static ModelDetail updateModelDetail(ModelReq modelReq) {
-        ModelDetail modelDetail = new ModelDetail();
-        List<Measure> measures = modelReq.getModelDetail().getMeasures();
-        List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
-        if (!CollectionUtils.isEmpty(dimensions)) {
-            for (Dimension dimension : dimensions) {
-                if (StringUtils.isNotBlank(dimension.getBizName())
-                        && StringUtils.isBlank(dimension.getExpr())) {
-                    dimension.setExpr(dimension.getBizName());
+                if (StringUtils.isNotBlank(identify.getBizName()) && !fieldNames.contains(identify.getBizName())) {
+                    fields.add(new Field(identify.getBizName(), ""));
                 }
             }
         }
-        if (measures == null) {
-            measures = Lists.newArrayList();
-        }
-        for (Measure measure : measures) {
-            if (StringUtils.isBlank(measure.getBizName())) {
-                continue;
-            }
-            // Compatible with front-end tmp
 
-            String oriFieldName =
-                    measure.getBizName().replaceFirst(modelReq.getBizName() + "_", "");
-            measure.setExpr(oriFieldName);
-            if (!measure.getBizName().startsWith(modelReq.getBizName())) {
-                measure.setBizName(String.format("%s_%s", modelReq.getBizName(), oriFieldName));
-            }
-        }
         BeanMapper.mapper(modelReq.getModelDetail(), modelDetail);
         return modelDetail;
     }
