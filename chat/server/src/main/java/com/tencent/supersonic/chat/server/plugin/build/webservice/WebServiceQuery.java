@@ -88,10 +88,10 @@ public class WebServiceQuery extends PluginSemanticQuery {
         restTemplate = ContextUtils.getBean(RestTemplate.class);
         try {
             responseEntity =
-                    restTemplate.exchange(requestUrl, HttpMethod.POST, entity, Object.class);
+                    restTemplate.exchange(requestUrl, HttpMethod.POST, entity, String.class);
             objectResponse = responseEntity.getBody();
             log.info("objectResponse:{}", objectResponse);
-            Map<String, Object> response = JsonUtil.objectToMap(objectResponse);
+            Map<String, Object> response = JSON.parseObject(objectResponse.toString());
             webServiceResponse.setResult(response);
         } catch (Exception e) {
             log.info("Exception:{}", e.getMessage());
