@@ -2,9 +2,11 @@ package com.tencent.supersonic.headless.chat.parser.llm;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.ChatApp;
+import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
 import com.tencent.supersonic.common.util.ChatAppManager;
+import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -14,15 +16,19 @@ import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.tencent.supersonic.headless.chat.parser.ParserConfig.PARSER_FORMAT_JSON_TYPE;
 
 @Service
 @Slf4j
@@ -31,6 +37,10 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
     public static final String APP_KEY = "S2SQL_PARSER";
+
+    @Autowired
+    private ParserConfig parserConfig;
+
     public static final String INSTRUCTION =
             "#Role: You are a data analyst experienced in SQL languages."
                     + "\n#Task: You will be provided with a natural language question asked by users,"
@@ -74,7 +84,12 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
         // 2.generate sql generation prompt for each self-consistency inference
         ChatApp chatApp = llmReq.getChatAppConfig().get(APP_KEY);
-        ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatApp.getChatModelConfig());
+        ChatModelConfig chatModelConfig = chatApp.getChatModelConfig();
+        if (!StringUtils.isBlank(parserConfig.getParameterValue(PARSER_FORMAT_JSON_TYPE))) {
+            chatModelConfig.setJsonFormat(true);
+            chatModelConfig.setJsonFormatType(parserConfig.getParameterValue(PARSER_FORMAT_JSON_TYPE));
+        }
+        ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatModelConfig);
         SemanticSqlExtractor extractor =
                 AiServices.create(SemanticSqlExtractor.class, chatLanguageModel);
 
