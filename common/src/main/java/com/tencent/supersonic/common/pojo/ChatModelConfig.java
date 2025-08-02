@@ -28,6 +28,8 @@ public class ChatModelConfig implements Serializable {
     private Boolean logRequests = false;
     private Boolean logResponses = false;
     private Boolean enableSearch = false;
+    private Boolean jsonFormat = false;
+    private String jsonFormatType = "json_schema";
 
     public String keyDecrypt() {
         return AESEncryptionUtil.aesDecryptECB(getApiKey());
