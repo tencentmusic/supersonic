@@ -124,7 +124,10 @@ public class DimValueAspect {
         sql = SqlReplaceHelper.replaceValue(sql, filedNameToValueMap);
         log.debug("correctorSql after replacing:{}", sql);
         querySqlReq.setSql(sql);
-        querySqlReq.getSqlInfo().setQuerySQL(sql);
+        if (StringUtils.isEmpty(querySqlReq.getSqlInfo().getParsedS2SQL())
+                && StringUtils.isEmpty(querySqlReq.getSqlInfo().getCorrectedS2SQL())) {
+            querySqlReq.getSqlInfo().setQuerySQL(sql);
+        }
         Map<String, Map<String, String>> techNameToBizName = getTechNameToBizName(dimensions);
 
         SemanticQueryResp queryResultWithColumns = (SemanticQueryResp) joinPoint.proceed();
