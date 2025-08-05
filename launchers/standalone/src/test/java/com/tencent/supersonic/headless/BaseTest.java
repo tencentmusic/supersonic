@@ -82,6 +82,7 @@ public class BaseTest extends BaseApplication {
     protected SemanticQueryReq buildQuerySqlReq(String sql) {
         QuerySqlReq querySqlCmd = new QuerySqlReq();
         querySqlCmd.setSql(sql);
+        querySqlCmd.getSqlInfo().setCorrectedS2SQL(sql);
         querySqlCmd.setModelIds(DataUtils.getMetricAgentIModelIds());
         return querySqlCmd;
     }

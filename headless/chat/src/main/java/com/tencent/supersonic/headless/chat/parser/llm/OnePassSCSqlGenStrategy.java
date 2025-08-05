@@ -87,7 +87,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         ChatModelConfig chatModelConfig = chatApp.getChatModelConfig();
         if (!StringUtils.isBlank(parserConfig.getParameterValue(PARSER_FORMAT_JSON_TYPE))) {
             chatModelConfig.setJsonFormat(true);
-            chatModelConfig.setJsonFormatType(parserConfig.getParameterValue(PARSER_FORMAT_JSON_TYPE));
+            chatModelConfig
+                    .setJsonFormatType(parserConfig.getParameterValue(PARSER_FORMAT_JSON_TYPE));
         }
         ChatLanguageModel chatLanguageModel = getChatLanguageModel(chatModelConfig);
         SemanticSqlExtractor extractor =

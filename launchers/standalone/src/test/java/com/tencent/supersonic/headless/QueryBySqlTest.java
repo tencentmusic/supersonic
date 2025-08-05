@@ -33,8 +33,7 @@ public class QueryBySqlTest extends BaseTest {
     @Test
     @SetSystemProperty(key = "s2.test", value = "true")
     public void testSumQuery() throws Exception {
-        SemanticQueryResp semanticQueryResp =
-                queryBySql("SELECT SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 ");
+        SemanticQueryResp semanticQueryResp = queryBySql("SELECT SUM(访问次数) AS 总访问次数 FROM 超音数数据集 ");
 
         assertEquals(1, semanticQueryResp.getColumns().size());
         QueryColumn queryColumn = semanticQueryResp.getColumns().get(0);
@@ -45,7 +44,7 @@ public class QueryBySqlTest extends BaseTest {
     @Test
     public void testGroupByQuery() throws Exception {
         SemanticQueryResp result =
-                queryBySql("SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
+                queryBySql("SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数数据集  GROUP BY 部门 ");
         assertEquals(2, result.getColumns().size());
         QueryColumn firstColumn = result.getColumns().get(0);
         QueryColumn secondColumn = result.getColumns().get(1);
@@ -56,8 +55,8 @@ public class QueryBySqlTest extends BaseTest {
 
     @Test
     public void testFilterQuery() throws Exception {
-        SemanticQueryResp result = queryBySql(
-                "SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 WHERE 部门 ='HR' GROUP BY 部门 ");
+        SemanticQueryResp result =
+                queryBySql("SELECT 部门, SUM(访问次数) AS 总访问次数 FROM 超音数数据集 WHERE 部门 ='HR' GROUP BY 部门 ");
         assertEquals(2, result.getColumns().size());
         QueryColumn firstColumn = result.getColumns().get(0);
         QueryColumn secondColumn = result.getColumns().get(1);
@@ -71,8 +70,7 @@ public class QueryBySqlTest extends BaseTest {
     public void testDateSumQuery() throws Exception {
         String startDate = now().plusDays(-365).toString();
         String endDate = now().plusDays(0).toString();
-        String sql =
-                "SELECT SUM(访问次数) AS 总访问次数 FROM 超音数PVUV统计 WHERE 数据日期 >= '%s' AND 数据日期 <= '%s' ";
+        String sql = "SELECT SUM(访问次数) AS 总访问次数 FROM 超音数数据集 WHERE 数据日期 >= '%s' AND 数据日期 <= '%s' ";
         SemanticQueryResp semanticQueryResp = queryBySql(String.format(sql, startDate, endDate));
         assertEquals(1, semanticQueryResp.getColumns().size());
         QueryColumn queryColumn = semanticQueryResp.getColumns().get(0);
@@ -82,9 +80,9 @@ public class QueryBySqlTest extends BaseTest {
 
     @Test
     public void testCacheQuery() throws Exception {
-        queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
+        queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数数据集  GROUP BY 部门 ");
         SemanticQueryResp result2 =
-                queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数PVUV统计  GROUP BY 部门 ");
+                queryBySql("SELECT 部门, SUM(访问次数) AS 访问次数 FROM 超音数数据集  GROUP BY 部门 ");
         assertTrue(result2.isUseCache());
     }
 
