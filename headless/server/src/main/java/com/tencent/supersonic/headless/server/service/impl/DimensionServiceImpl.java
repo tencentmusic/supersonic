@@ -67,8 +67,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     private ApplicationEventPublisher eventPublisher;
 
     public DimensionServiceImpl(DimensionRepository dimensionRepository, ModelService modelService,
-                                AliasGenerateHelper aliasGenerateHelper, DatabaseService databaseService,
-                                ModelRelaService modelRelaService, DataSetService dataSetService) {
+            AliasGenerateHelper aliasGenerateHelper, DatabaseService databaseService,
+            ModelRelaService modelRelaService, DataSetService dataSetService) {
         this.modelService = modelService;
         this.dimensionRepository = dimensionRepository;
         this.aliasGenerateHelper = aliasGenerateHelper;
@@ -86,13 +86,15 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.ADD);
 
         // should update modelDetail
-        modelService.updateModelByDimAndMetric(dimensionReq.getModelId(), Lists.newArrayList(dimensionReq), null, user);
+        modelService.updateModelByDimAndMetric(dimensionReq.getModelId(),
+                Lists.newArrayList(dimensionReq), null, user);
 
         return DimensionConverter.convert2DimensionResp(dimensionDO);
     }
 
     @Override
-    public void alterDimensionBatch(List<DimensionReq> dimensionReqs, Long modelId, User user) throws Exception {
+    public void alterDimensionBatch(List<DimensionReq> dimensionReqs, Long modelId, User user)
+            throws Exception {
         List<DimensionResp> dimensionResps = getDimensions(modelId);
         // get all dimension in model, only use bizname, because name can be changed to everything
         Map<String, DimensionResp> bizNameMap = dimensionResps.stream()
@@ -117,7 +119,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         });
 
         // the bizNames from alter dimensions
-        List<String> bizNames = dimensionReqs.stream().map(DimensionReq::getBizName).collect(Collectors.toList());
+        List<String> bizNames =
+                dimensionReqs.stream().map(DimensionReq::getBizName).collect(Collectors.toList());
         bizNameMap.keySet().forEach(bizNameInDb -> {
             if (!bizNames.contains(bizNameInDb)) {
                 dimensionToDelete.add(bizNameMap.get(bizNameInDb).getId());
@@ -148,7 +151,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                         .map(DimensionConverter::convert2DimensionDO).collect(Collectors.toList());
         dimensionRepository.createDimensionBatch(dimensionDOS);
         // should update modelDetail as well
-        modelService.updateModelByDimAndMetric(dimensionReqs.get(0).getModelId(), dimensionReqs, null,  user);
+        modelService.updateModelByDimAndMetric(dimensionReqs.get(0).getModelId(), dimensionReqs,
+                null, user);
 
         sendEventBatch(dimensionDOS, EventType.ADD);
     }
@@ -162,7 +166,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         DimensionConverter.convert(dimensionDO, dimensionReq);
         dimensionRepository.updateDimension(dimensionDO);
         // should update modelDetail as well
-        modelService.updateModelByDimAndMetric(dimensionReq.getModelId(), Lists.newArrayList(dimensionReq), null,  user);
+        modelService.updateModelByDimAndMetric(dimensionReq.getModelId(),
+                Lists.newArrayList(dimensionReq), null, user);
 
         if (!oldName.equals(dimensionDO.getName())) {
             sendEvent(getDataItem(dimensionDO), EventType.UPDATE);
@@ -172,10 +177,12 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     @Override
     public void updateDimensionBatch(List<DimensionReq> dimensionReqList, User user) {
         checkExist(dimensionReqList);
-        List<DimensionDO> dimensionDOS = dimensionReqList.stream().map(DimensionConverter::convert2DimensionDO).collect(Collectors.toList());
+        List<DimensionDO> dimensionDOS = dimensionReqList.stream()
+                .map(DimensionConverter::convert2DimensionDO).collect(Collectors.toList());
         dimensionRepository.batchUpdate(dimensionDOS);
         // should update modelDetail as well
-        modelService.updateModelByDimAndMetric(dimensionReqList.get(0).getModelId(),dimensionReqList, null, user);
+        modelService.updateModelByDimAndMetric(dimensionReqList.get(0).getModelId(),
+                dimensionReqList, null, user);
         sendEventBatch(dimensionDOS, EventType.UPDATE);
     }
 
@@ -231,7 +238,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         dimensionDO.setUpdatedBy(user.getName());
         dimensionRepository.updateDimension(dimensionDO);
         // should update modelDetail
-        modelService.deleteModelDetailByDimAndMetric(dimensionDO.getModelId(), Lists.newArrayList(dimensionDO), null);
+        modelService.deleteModelDetailByDimAndMetric(dimensionDO.getModelId(),
+                Lists.newArrayList(dimensionDO), null);
         sendEventBatch(Lists.newArrayList(dimensionDO), EventType.DELETE);
     }
 
@@ -241,7 +249,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         dimensionFilter.setDimensionIds(idList);
         List<DimensionDO> dimensionDOList = dimensionRepository.getDimensions(dimensionFilter);
         if (CollectionUtils.isEmpty(dimensionDOList)) {
-            throw new RuntimeException(String.format("the dimension %s not exist", StringUtils.join(",",idList)));
+            throw new RuntimeException(
+                    String.format("the dimension %s not exist", StringUtils.join(",", idList)));
         }
         dimensionDOList.forEach(dimensionDO -> {
             dimensionDO.setStatus(StatusEnum.DELETED.getCode());
@@ -250,7 +259,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         });
         dimensionRepository.batchUpdateStatus(dimensionDOList);
         // should update modelDetail
-        modelService.deleteModelDetailByDimAndMetric(dimensionDOList.get(0).getModelId(), dimensionDOList, null);
+        modelService.deleteModelDetailByDimAndMetric(dimensionDOList.get(0).getModelId(),
+                dimensionDOList, null);
         sendEventBatch(dimensionDOList, EventType.DELETE);
     }
 
@@ -323,7 +333,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     }
 
     private List<DimensionResp> filterByField(List<DimensionResp> dimensionResps,
-                                              List<String> fields) {
+            List<String> fields) {
         List<DimensionResp> dimensionFiltered = Lists.newArrayList();
         for (DimensionResp dimensionResp : dimensionResps) {
             for (String field : fields) {
@@ -358,7 +368,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         List<DimensionResp> dimensionResps = Lists.newArrayList();
         if (!CollectionUtils.isEmpty(dimensionDOS)) {
             dimensionResps = dimensionDOS.stream().map(
-                            dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelMap))
+                    dimensionDO -> DimensionConverter.convert2DimensionResp(dimensionDO, modelMap))
                     .collect(Collectors.toList());
         }
         return dimensionResps;

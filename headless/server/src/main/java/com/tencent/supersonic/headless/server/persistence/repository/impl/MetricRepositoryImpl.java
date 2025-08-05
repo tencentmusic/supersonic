@@ -114,14 +114,9 @@ public class MetricRepositoryImpl implements MetricRepository {
         }
         if (StringUtils.isNotBlank(metricFilter.getKey())) {
             String key = metricFilter.getKey();
-            queryWrapper.lambda()
-                    .and(wrapper -> wrapper
-                            .like(MetricDO::getName, key)
-                            .or().like(MetricDO::getBizName, key)
-                            .or().like(MetricDO::getDescription, key)
-                            .or().like(MetricDO::getAlias, key)
-                            .or().like(MetricDO::getCreatedBy, key)
-                    );
+            queryWrapper.lambda().and(wrapper -> wrapper.like(MetricDO::getName, key).or()
+                    .like(MetricDO::getBizName, key).or().like(MetricDO::getDescription, key).or()
+                    .like(MetricDO::getAlias, key).or().like(MetricDO::getCreatedBy, key));
         }
 
         return metricDOMapper.selectList(queryWrapper);

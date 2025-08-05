@@ -67,10 +67,10 @@ public class ModelServiceImpl implements ModelService {
             new ThreadPoolExecutor(0, 5, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
-                            @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
-                            DomainService domainService, UserService userService, DataSetService dataSetService,
-                            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
-                            ApplicationEventPublisher eventPublisher) {
+            @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
+            DomainService domainService, UserService userService, DataSetService dataSetService,
+            DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
+            ApplicationEventPublisher eventPublisher) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -216,7 +216,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void doBuild(ModelBuildReq modelBuildReq, DbSchema curSchema, List<DbSchema> dbSchemas,
-                         Map<String, ModelSchema> modelSchemaMap) {
+            Map<String, ModelSchema> modelSchemaMap) {
         ModelSchema modelSchema = new ModelSchema();
         List<SemanticModeller> semanticModellers = CoreComponentFactory.getSemanticModellers();
         for (SemanticModeller semanticModeller : semanticModellers) {
@@ -234,7 +234,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private List<DbSchema> convert(Map<String, List<DBColumn>> dbColumnMap,
-                                   ModelBuildReq modelBuildReq) {
+            ModelBuildReq modelBuildReq) {
         return dbColumnMap.keySet().stream()
                 .map(key -> convert(modelBuildReq, key, dbColumnMap.get(key)))
                 .collect(Collectors.toList());
@@ -383,7 +383,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     public List<ModelResp> getModelRespAuthInheritDomain(User user, Long domainId,
-                                                         AuthType authType) {
+            AuthType authType) {
         List<Long> domainIds =
                 domainService.getDomainAuthSet(user, authType).stream().filter(domainResp -> {
                     if (domainId == null) {
@@ -521,13 +521,14 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public void updateModelByDimAndMetric(Long modelId, List<DimensionReq> dimensionReqList, List<MetricReq> metricReqList, User user) {
+    public void updateModelByDimAndMetric(Long modelId, List<DimensionReq> dimensionReqList,
+            List<MetricReq> metricReqList, User user) {
         ModelDO modelDO = getModelDO(modelId);
         ModelDetail modelDetail = JsonUtil.toObject(modelDO.getModelDetail(), ModelDetail.class);
         if (!CollectionUtils.isEmpty(dimensionReqList)) {
             dimensionReqList.forEach(dimensionReq -> {
-                Optional<Dimension> dimOptional = modelDetail.getDimensions().stream()
-                        .filter(dimension -> dimension.getBizName().equals(dimensionReq.getBizName()))
+                Optional<Dimension> dimOptional = modelDetail.getDimensions().stream().filter(
+                        dimension -> dimension.getBizName().equals(dimensionReq.getBizName()))
                         .findFirst();
                 if (dimOptional.isPresent()) {
                     Dimension dimension = dimOptional.get();
@@ -547,10 +548,13 @@ public class ModelServiceImpl implements ModelService {
 
         if (!CollectionUtils.isEmpty(metricReqList)) {
             // 目前modeltail中的measure
-            Map<String, Measure> mesureMap = modelDetail.getMeasures().stream().collect(Collectors.toMap(Measure::getBizName, a -> a, (k1, k2) -> k1));
+            Map<String, Measure> mesureMap = modelDetail.getMeasures().stream()
+                    .collect(Collectors.toMap(Measure::getBizName, a -> a, (k1, k2) -> k1));
             metricReqList.forEach(metricReq -> {
-                if (null != metricReq.getMetricDefineByMeasureParams() && !CollectionUtils.isEmpty(metricReq.getMetricDefineByMeasureParams().getMeasures())) {
-                    for(Measure alterMeasure : metricReq.getMetricDefineByMeasureParams().getMeasures()) {
+                if (null != metricReq.getMetricDefineByMeasureParams() && !CollectionUtils
+                        .isEmpty(metricReq.getMetricDefineByMeasureParams().getMeasures())) {
+                    for (Measure alterMeasure : metricReq.getMetricDefineByMeasureParams()
+                            .getMeasures()) {
                         if (mesureMap.containsKey(alterMeasure.getBizName())) {
                             Measure measure = mesureMap.get(alterMeasure.getBizName());
                             BeanUtils.copyProperties(alterMeasure, measure);
@@ -569,13 +573,14 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public void deleteModelDetailByDimAndMetric(Long modelId, List<DimensionDO> dimensionList, List<MetricDO> metricReqList) {
+    public void deleteModelDetailByDimAndMetric(Long modelId, List<DimensionDO> dimensionList,
+            List<MetricDO> metricReqList) {
         ModelDO modelDO = getModelDO(modelId);
         ModelDetail modelDetail = JsonUtil.toObject(modelDO.getModelDetail(), ModelDetail.class);
         if (!CollectionUtils.isEmpty(dimensionList)) {
             dimensionList.forEach(dimensionReq -> {
-                Optional<Dimension> dimOptional = modelDetail.getDimensions().stream()
-                        .filter(dimension -> dimension.getBizName().equals(dimensionReq.getBizName()))
+                Optional<Dimension> dimOptional = modelDetail.getDimensions().stream().filter(
+                        dimension -> dimension.getBizName().equals(dimensionReq.getBizName()))
                         .findFirst();
                 if (dimOptional.isPresent()) {
                     Dimension dimension = dimOptional.get();
@@ -638,7 +643,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     public static boolean checkDataSetPermission(Set<String> orgIds, User user,
-                                                 ModelResp modelResp) {
+            ModelResp modelResp) {
         if (checkAdminPermission(orgIds, user, modelResp)) {
             return true;
         }

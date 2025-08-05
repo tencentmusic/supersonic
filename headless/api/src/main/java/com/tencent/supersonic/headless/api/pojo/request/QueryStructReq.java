@@ -3,7 +3,11 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
-import com.tencent.supersonic.common.pojo.*;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.DateConf;
+import com.tencent.supersonic.common.pojo.Filter;
+import com.tencent.supersonic.common.pojo.Order;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -21,14 +25,22 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.Offset;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.ParenthesedSelect;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -176,7 +188,7 @@ public class QueryStructReq extends SemanticQueryReq {
 
     private List<SelectItem<?>> buildSelectItems(QueryStructReq queryStructReq) {
         List<SelectItem<?>> selectItems = new ArrayList<>();
-        List<String> groups = queryStructReq.getGroups();
+        Set<String> groups = new HashSet<>(queryStructReq.getGroups());
 
         if (!CollectionUtils.isEmpty(groups)) {
             for (String group : groups) {
@@ -236,7 +248,7 @@ public class QueryStructReq extends SemanticQueryReq {
     }
 
     private GroupByElement buildGroupByElement(QueryStructReq queryStructReq) {
-        List<String> groups = queryStructReq.getGroups();
+        Set<String> groups = new HashSet<>(queryStructReq.getGroups());
         if ((!CollectionUtils.isEmpty(groups) && !queryStructReq.getAggregators().isEmpty())
                 || !queryStructReq.getMetricFilters().isEmpty()) {
             GroupByElement groupByElement = new GroupByElement();

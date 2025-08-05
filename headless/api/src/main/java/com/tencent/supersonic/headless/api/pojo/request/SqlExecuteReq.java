@@ -23,9 +23,9 @@ public class SqlExecuteReq {
     private Integer limit = 1000;
 
     public String getSql() {
-        if(StringUtils.isNotBlank(sql)){
-            sql=sql.replaceAll("^[\\n]+|[\\n]+$", "");
-            sql=StringUtils.removeEnd(sql,";");
+        if (StringUtils.isNotBlank(sql)) {
+            sql = sql.replaceAll("^[\\n]+|[\\n]+$", "");
+            sql = StringUtils.removeEnd(sql, ";");
         }
 
         return String.format(LIMIT_WRAPPER, sql, limit);

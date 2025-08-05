@@ -88,7 +88,7 @@ public class DimensionRepositoryImpl implements DimensionRepository {
         }
         if (StringUtils.isNotBlank(dimensionFilter.getKey())) {
             String key = dimensionFilter.getKey();
-            queryWrapper.and(qw->qw.lambda().like(DimensionDO::getName, key).or()
+            queryWrapper.and(qw -> qw.lambda().like(DimensionDO::getName, key).or()
                     .like(DimensionDO::getBizName, key).or().like(DimensionDO::getDescription, key)
                     .or().like(DimensionDO::getAlias, key).or()
                     .like(DimensionDO::getCreatedBy, key));

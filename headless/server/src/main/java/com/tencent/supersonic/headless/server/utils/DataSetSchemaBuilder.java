@@ -198,8 +198,7 @@ public class DataSetSchemaBuilder {
         }).collect(Collectors.toList());
     }
 
-    private static void setDefaultTimeFormat(SchemaElement dimToAdd,
-                                             String timeFormat) {
+    private static void setDefaultTimeFormat(SchemaElement dimToAdd, String timeFormat) {
         dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TIME_FORMAT, timeFormat);
     }
 }

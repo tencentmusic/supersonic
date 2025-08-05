@@ -104,7 +104,7 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
 
     @Override
     public List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList) {
-        if(domainId==null || CollectionUtils.isEmpty(statuCodesList)){
+        if (domainId == null || CollectionUtils.isEmpty(statuCodesList)) {
             return List.of();
         }
         QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();

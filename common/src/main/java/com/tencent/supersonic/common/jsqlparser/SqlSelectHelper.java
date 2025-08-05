@@ -723,6 +723,44 @@ public class SqlSelectHelper {
         return null;
     }
 
+    public static Table getTable(FromItem fromItem) {
+        Table table = null;
+        if (fromItem instanceof Table) {
+            table = (Table) fromItem;
+        } else if (fromItem instanceof ParenthesedSelect) {
+            ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
+            if (parenthesedSelect.getSelect() instanceof PlainSelect) {
+                PlainSelect subSelect = (PlainSelect) parenthesedSelect.getSelect();
+                table = getTable(subSelect.getSelectBody());
+            } else if (parenthesedSelect.getSelect() instanceof SetOperationList) {
+                table = getTable(parenthesedSelect.getSelect());
+            }
+        }
+        return table;
+    }
+
+    public static Table getTable(Select select) {
+        if (select == null) {
+            return null;
+        }
+        List<PlainSelect> plainSelectList = getWithItem(select);
+        if (!CollectionUtils.isEmpty(plainSelectList)) {
+            List<PlainSelect> selectList = new ArrayList<>(plainSelectList);
+            Table table = getTable(selectList.get(0));
+            return table;
+        }
+        if (select instanceof PlainSelect) {
+            PlainSelect plainSelect = (PlainSelect) select;
+            return getTable(plainSelect.getFromItem());
+        } else if (select instanceof SetOperationList) {
+            SetOperationList setOperationList = (SetOperationList) select;
+            if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
+                return getTable(setOperationList.getSelects().get(0));
+            }
+        }
+        return null;
+    }
+
     public static String getDbTableName(String sql) {
         Table table = getTable(sql);
         return table.getFullyQualifiedName();

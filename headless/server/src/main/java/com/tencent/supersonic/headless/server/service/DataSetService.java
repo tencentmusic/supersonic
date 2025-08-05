@@ -20,7 +20,7 @@ public interface DataSetService {
 
     List<DataSetResp> getDataSetList(MetaFilter metaFilter);
 
-    List<DataSetResp> getDataSetList(Long domainId ,List<Integer> statuCodesList);
+    List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList);
 
     void delete(Long id, User user);
 
