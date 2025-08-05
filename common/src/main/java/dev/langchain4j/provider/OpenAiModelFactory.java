@@ -22,13 +22,17 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        return OpenAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+        OpenAiChatModel.OpenAiChatModelBuilder openAiChatModelBuilder = OpenAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
                 .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
                 .apiVersion(modelConfig.getApiVersion()).temperature(modelConfig.getTemperature())
                 .topP(modelConfig.getTopP()).maxRetries(modelConfig.getMaxRetries())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses()).build();
+                .logResponses(modelConfig.getLogResponses());
+        if (modelConfig.getJsonFormat()) {
+            openAiChatModelBuilder.strictJsonSchema(true).responseFormat(modelConfig.getJsonFormatType());
+        }
+        return openAiChatModelBuilder.build();
     }
 
     @Override
