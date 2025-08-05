@@ -727,7 +727,7 @@ public class SqlReplaceHelper {
         List<PlainSelect> plainSelects = SqlSelectHelper.getPlainSelects(plainSelectList);
         for (PlainSelect plainSelect : plainSelects) {
             if (Objects.nonNull(plainSelect.getFromItem())) {
-                Table table = (Table) plainSelect.getFromItem();
+                Table table = SqlSelectHelper.getTable(plainSelect.getFromItem());
                 if (table.getName().equals(tableName)) {
                     replacePlainSelectByExpr(plainSelect, replace);
                     if (SqlSelectHelper.hasAggregateFunction(plainSelect)) {

@@ -55,7 +55,9 @@ public interface ModelService {
 
     void batchUpdateStatus(MetaBatchReq metaBatchReq, User user);
 
-    void updateModelByDimAndMetric(Long modelId, List<DimensionReq> dimensionReqList, List<MetricReq> metricReqList, User user);
+    void updateModelByDimAndMetric(Long modelId, List<DimensionReq> dimensionReqList,
+            List<MetricReq> metricReqList, User user);
 
-    void deleteModelDetailByDimAndMetric(Long modelId, List<DimensionDO> dimensionReqList, List<MetricDO> metricReqList);
+    void deleteModelDetailByDimAndMetric(Long modelId, List<DimensionDO> dimensionReqList,
+            List<MetricDO> metricReqList);
 }

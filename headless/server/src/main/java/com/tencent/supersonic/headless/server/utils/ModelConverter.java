@@ -143,7 +143,7 @@ public class ModelConverter {
     }
 
     public static ModelReq convert(ModelSchema modelSchema, ModelBuildReq modelBuildReq,
-                                   String tableName) {
+            String tableName) {
         ModelReq modelReq = new ModelReq();
         modelReq.setName(modelBuildReq.getName() != null ? modelBuildReq.getName() : tableName);
         modelReq.setBizName(
@@ -169,7 +169,7 @@ public class ModelConverter {
 
             if (getIdentifyType(fieldType) != null) {
                 Optional<Identify> optional = modelDetail.getIdentifiers().stream().filter(
-                                identify -> identify.getBizName().equals(semanticColumn.getColumnName()))
+                        identify -> identify.getBizName().equals(semanticColumn.getColumnName()))
                         .findAny();
                 if (optional.isEmpty()) {
                     Identify identify = new Identify(semanticColumn.getName(),
@@ -178,7 +178,7 @@ public class ModelConverter {
                 }
             } else if (FieldType.measure.equals(fieldType)) {
                 Optional<Measure> optional = modelDetail.getMeasures().stream().filter(
-                                measure -> measure.getBizName().equals(semanticColumn.getColumnName()))
+                        measure -> measure.getBizName().equals(semanticColumn.getColumnName()))
                         .findAny();
                 if (optional.isEmpty()) {
                     Measure measure = new Measure(semanticColumn.getName(),
@@ -188,7 +188,7 @@ public class ModelConverter {
                 }
             } else {
                 Optional<Dimension> optional = modelDetail.getDimensions().stream().filter(
-                                dimension -> dimension.getBizName().equals(semanticColumn.getColumnName()))
+                        dimension -> dimension.getBizName().equals(semanticColumn.getColumnName()))
                         .findAny();
                 if (optional.isEmpty()) {
                     Dimension dim = new Dimension(semanticColumn.getName(),
@@ -294,7 +294,8 @@ public class ModelConverter {
         List<Dimension> dimensions = modelReq.getModelDetail().getDimensions();
         List<Identify> identifiers = modelReq.getModelDetail().getIdentifiers();
         List<Field> fields = modelReq.getModelDetail().getFields();
-        List<String> fieldNames = fields.stream().map(Field::getFieldName).collect(Collectors.toList());
+        List<String> fieldNames =
+                fields.stream().map(Field::getFieldName).collect(Collectors.toList());
 
         if (measures != null) {
             for (Measure measure : measures) {
@@ -302,7 +303,8 @@ public class ModelConverter {
                         && StringUtils.isBlank(measure.getExpr())) {
                     measure.setExpr(measure.getBizName());
                 }
-                if (StringUtils.isNotBlank(measure.getBizName()) && !fieldNames.contains(measure.getBizName())) {
+                if (StringUtils.isNotBlank(measure.getBizName())
+                        && !fieldNames.contains(measure.getBizName())) {
                     fields.add(new Field(measure.getBizName(), ""));
                 }
             }
@@ -313,18 +315,21 @@ public class ModelConverter {
                         && StringUtils.isBlank(dimension.getExpr())) {
                     dimension.setExpr(dimension.getBizName());
                 }
-                if (StringUtils.isNotBlank(dimension.getBizName()) && !fieldNames.contains(dimension.getBizName())) {
+                if (StringUtils.isNotBlank(dimension.getBizName())
+                        && !fieldNames.contains(dimension.getBizName())) {
                     fields.add(new Field(dimension.getBizName(), ""));
                 }
             }
         }
         if (identifiers != null) {
             for (Identify identify : identifiers) {
-                if (StringUtils.isNotBlank(identify.getBizName()) && StringUtils.isBlank(identify.getName())) {
+                if (StringUtils.isNotBlank(identify.getBizName())
+                        && StringUtils.isBlank(identify.getName())) {
                     identify.setName(identify.getBizName());
                 }
                 identify.setIsCreateDimension(1);
-                if (StringUtils.isNotBlank(identify.getBizName()) && !fieldNames.contains(identify.getBizName())) {
+                if (StringUtils.isNotBlank(identify.getBizName())
+                        && !fieldNames.contains(identify.getBizName())) {
                     fields.add(new Field(identify.getBizName(), ""));
                 }
             }
