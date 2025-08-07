@@ -20,7 +20,9 @@ public class PluginExecutor implements ChatQueryExecutor {
             return null;
         }
         PluginSemanticQuery query = PluginQueryManager.getPluginQuery(parseInfo.getQueryMode());
-        query.setParseInfo(parseInfo);
-        return query.build();
+        query.setParseInfo(parseInfo);//  针对 react 插件 存储记忆， 为后期使用的时候能召回
+        QueryResult res = query.build();
+        query.setChatMemory(executeContext, res);
+        return res;
     }
 }

@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -22,19 +23,23 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
 
     @Override
     public ChatLanguageModel createChatModel(ChatModelConfig modelConfig) {
-        OpenAiChatModel.OpenAiChatModelBuilder openAiChatModelBuilder = OpenAiChatModel.builder()
-                .baseUrl(modelConfig.getBaseUrl()).modelName(modelConfig.getModelName())
-                .apiKey(modelConfig.keyDecrypt()).apiVersion(modelConfig.getApiVersion())
-                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
-                .maxRetries(modelConfig.getMaxRetries())
+        return OpenAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
+                .apiVersion(modelConfig.getApiVersion()).temperature(modelConfig.getTemperature())
+                .topP(modelConfig.getTopP()).maxRetries(modelConfig.getMaxRetries())
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
-                .logResponses(modelConfig.getLogResponses());
-        if (modelConfig.getJsonFormat()) {
-            openAiChatModelBuilder.strictJsonSchema(true)
-                    .responseFormat(modelConfig.getJsonFormatType());
-        }
-        return openAiChatModelBuilder.build();
+                .logResponses(modelConfig.getLogResponses()).build();
+    }
+
+    @Override
+    public OpenAiStreamingChatModel createChatStreamingModel(ChatModelConfig modelConfig) {
+        return OpenAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
     }
 
     @Override

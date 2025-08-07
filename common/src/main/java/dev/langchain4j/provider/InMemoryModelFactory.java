@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.S2OnnxEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,11 @@ public class InMemoryModelFactory implements ModelFactory, InitializingBean {
             return EmbeddingModelConstant.ALL_MINI_LM_L6_V2_MODEL;
         }
         return EmbeddingModelConstant.BGE_SMALL_ZH_MODEL;
+    }
+
+    @Override
+    public OpenAiStreamingChatModel createChatStreamingModel(ChatModelConfig modelConfig) {
+        throw new RuntimeException("待开发");
     }
 
     @Override

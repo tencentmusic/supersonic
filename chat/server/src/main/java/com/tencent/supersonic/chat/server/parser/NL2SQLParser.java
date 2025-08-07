@@ -32,6 +32,7 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,18 @@ public class NL2SQLParser implements ChatQueryParser {
     }
 
     public boolean accept(ParseContext parseContext) {
-        return parseContext.enableNL2SQL();
+        if (!parseContext.enableNL2SQL()) {
+            return false;
+        }
+        List<SemanticParseInfo> selectedParses = parseContext.getResponse().getSelectedParses();
+        if (selectedParses.stream().filter(e -> e.getQueryMode().equals("REACT")).count() > 0) {
+            // 如果是react 已经处理了，已经有结果了，这不分析成sql了，因为插件是特异性处理，更准确
+            return false;
+        }
+        if (parseContext.getResponse().getState().equals(ParseResp.ParseState.COMPLETED)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -170,11 +182,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
-
-        // derive mapping result of current question and parsing result of last question.
-        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
-        MapResp currentMapResult = chatLayerService.map(queryNLReq);
-
+        // 优化性能，则无需重写
         List<QueryResp> historyQueries =
                 getHistoryQueries(parseContext.getRequest().getChatId(), 1);
         if (historyQueries.isEmpty()) {
@@ -182,12 +190,18 @@ public class NL2SQLParser implements ChatQueryParser {
         }
         QueryResp lastQuery = historyQueries.get(0);
         SemanticParseInfo lastParseInfo = lastQuery.getParseInfos().get(0);
-        Long dataId = lastParseInfo.getDataSetId();
+        String histSQL = lastParseInfo.getSqlInfo().getCorrectedS2SQL();
+        if (StringUtils.isBlank(histSQL))
+            return;
 
+        // derive mapping result of current question and parsing result of last question.
+        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
+        MapResp currentMapResult = chatLayerService.map(queryNLReq);
+
+        Long dataId = lastParseInfo.getDataSetId();
         String curtMapStr =
                 generateSchemaPrompt(currentMapResult.getMapInfo().getMatchedElements(dataId));
         String histMapStr = generateSchemaPrompt(lastParseInfo.getElementMatches());
-        String histSQL = lastParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("current_question", currentMapResult.getQueryText());

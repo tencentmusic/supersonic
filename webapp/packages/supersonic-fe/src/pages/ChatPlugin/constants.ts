@@ -1,6 +1,7 @@
 export const PLUGIN_TYPE_MAP = {
   WEB_PAGE: 'Web页面',
   WEB_SERVICE: 'Web服务',
+  REACT: 'REACT',
 }
 
 export const PARSE_MODE_MAP = {

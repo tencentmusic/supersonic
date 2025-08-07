@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,11 @@ public class OllamaModelFactory implements ModelFactory, InitializingBean {
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut())).topP(modelConfig.getTopP())
                 .maxRetries(modelConfig.getMaxRetries()).logRequests(modelConfig.getLogRequests())
                 .logResponses(modelConfig.getLogResponses()).build();
+    }
+
+    @Override
+    public OpenAiStreamingChatModel createChatStreamingModel(ChatModelConfig modelConfig) {
+        throw new RuntimeException("待开发");
     }
 
     @Override

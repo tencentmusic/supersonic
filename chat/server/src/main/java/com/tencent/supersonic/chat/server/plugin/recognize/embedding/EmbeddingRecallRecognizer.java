@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.plugin.recognize.embedding;
 
+import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.ParseMode;
@@ -23,6 +24,19 @@ import java.util.stream.Collectors;
 /** EmbeddingRecallParser is an implementation of a recall plugin based on Embedding */
 @Slf4j
 public class EmbeddingRecallRecognizer extends PluginRecognizer {
+
+    @Override
+    protected List<ChatPlugin> getPluginList(ParseContext parseContext) { // 排除react 插件，不在这里处理
+        List<ChatPlugin> plugins = super.getPluginList(parseContext);
+        plugins = plugins.stream().filter(e -> {
+            if (e.getDataSetList().size() == 0)
+                return false;
+            if (!e.getType().equals("WEB_SERVICE") && !e.getType().equals("WEB_PAGE"))
+                return false;
+            return true;
+        }).collect(Collectors.toList());
+        return plugins;
+    }
 
     public boolean checkPreCondition(ParseContext parseContext) {
         List<ChatPlugin> plugins = getPluginList(parseContext);

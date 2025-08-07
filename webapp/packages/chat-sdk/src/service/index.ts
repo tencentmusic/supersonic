@@ -79,7 +79,8 @@ export function chatExecute(
   queryText: string,
   chatId: number,
   parseInfo: ChatContextType,
-  agentId?: number
+  agentId?: number,
+  streamingResult?:boolean
 ) {
   return axios.post<MsgDataType>(`${prefix}/chat/query/execute`, {
     queryText,
@@ -87,6 +88,15 @@ export function chatExecute(
     chatId: chatId || DEFAULT_CHAT_ID,
     queryId: parseInfo.queryId,
     parseId: parseInfo.id,
+    streamingResult:streamingResult
+  });
+}
+
+export function getExecuteSummary(
+    queryId: number
+) {
+  return axios.post<MsgDataType>(`${prefix}/chat/query/getExecuteSummary`, {
+    queryId: queryId,
   });
 }
 

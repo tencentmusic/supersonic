@@ -8,6 +8,7 @@ import DetailModal from './DetailModal';
 import { deletePlugin, getModelList, getPluginList } from './service';
 import styles from './style.less';
 import { ModelType, PluginType, PluginTypeEnum } from './type';
+import { useModel } from '@umijs/max'; //  插件只能admin 改
 
 const { Search } = Input;
 
@@ -21,6 +22,8 @@ const PluginManage = () => {
   const [loading, setLoading] = useState(false);
   const [currentPluginDetail, setCurrentPluginDetail] = useState<PluginType>();
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const { initialState = {} } = useModel('@@initialState');
+  const { currentUser = {} } = initialState as any;
 
   const initModelList = async () => {
     const res = await getModelList();
@@ -116,6 +119,9 @@ const PluginManage = () => {
       dataIndex: 'x',
       key: 'x',
       render: (_: any, record: any) => {
+        if (currentUser.staffName !='admin') {
+          return <></>;
+        }
         return (
           <div className={styles.operator}>
             <a

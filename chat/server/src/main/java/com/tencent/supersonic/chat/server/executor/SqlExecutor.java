@@ -1,7 +1,10 @@
 package com.tencent.supersonic.chat.server.executor;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
+import com.tencent.supersonic.chat.server.plugin.build.react.ReActUtils;
 import com.tencent.supersonic.chat.server.pojo.ChatContext;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
@@ -49,8 +52,13 @@ public class SqlExecutor implements ChatQueryExecutor {
                                 Text2SQLExemplar.class);
 
                 MemoryService memoryService = ContextUtils.getBean(MemoryService.class);
+                Integer agentId = executeContext.getAgent().getId();
+                if (ReActUtils.fromOtherAgent(executeContext.getParseInfo().getProperties())) { // 一个agent通过mcp 调用另一个agent ,通过分析的数据切换对的agent执行
+                    agentId = ReActUtils.deal(executeContext.getParseInfo().getProperties(),
+                            memoryService, executeContext);
+                }
                 memoryService.createMemory(ChatMemory.builder().queryId(queryResult.getQueryId())
-                        .agentId(executeContext.getAgent().getId()).status(MemoryStatus.PENDING)
+                        .agentId(agentId).status(MemoryStatus.PENDING)
                         .question(exemplar.getQuestion()).sideInfo(exemplar.getSideInfo())
                         .dbSchema(exemplar.getDbSchema()).s2sql(exemplar.getSql())
                         .createdBy(executeContext.getRequest().getUser().getName())

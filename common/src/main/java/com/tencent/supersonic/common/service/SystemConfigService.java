@@ -9,4 +9,6 @@ public interface SystemConfigService extends IService<SystemConfigDO> {
     SystemConfig getSystemConfig();
 
     void save(SystemConfig systemConfig);
+
+    String getUserCommonConfig(String configName);
 }

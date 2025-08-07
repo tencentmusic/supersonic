@@ -5,6 +5,7 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatQueryDataReq;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
@@ -48,6 +49,14 @@ public class ChatQueryController {
             HttpServletResponse response) throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.execute(chatExecuteReq);
+    }
+
+    @PostMapping("getExecuteSummary")
+    public Object getExecuteSummary(@RequestBody ChatExecuteReq chatExecuteReq,
+            HttpServletRequest request, HttpServletResponse response) {
+        chatExecuteReq.setUser(UserHolder.findUser(request, response));
+        QueryResult res = chatQueryService.getTextSummary(chatExecuteReq);
+        return res;
     }
 
     @PostMapping("/")

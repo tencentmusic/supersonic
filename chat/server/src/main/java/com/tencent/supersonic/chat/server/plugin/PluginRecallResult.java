@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.plugin;
 
+import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,8 @@ public class PluginRecallResult {
     private double score;
 
     private double distance;
+
+    private LLMResp llmResp; // ，存react 大模型的返回
+
+
 }

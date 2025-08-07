@@ -10,7 +10,7 @@ import {
   SimilarQuestionType,
 } from '../../common/type';
 import { createContext, useEffect, useRef, useState } from 'react';
-import { chatExecute, chatParse, queryData, deleteQuery, switchEntity } from '../../service';
+import {chatExecute, chatParse, queryData, deleteQuery, switchEntity, getExecuteSummary} from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
 import IconFont from '../IconFont';
@@ -139,7 +139,8 @@ const ChatItem: React.FC<Props> = ({
       (queryColumns && queryColumns.length > 0 && queryResults) ||
       queryMode === 'WEB_PAGE' ||
       queryMode === 'WEB_SERVICE' ||
-      queryMode === 'PLAIN_TEXT'
+      queryMode === 'PLAIN_TEXT' || 
+	  queryMode === 'REACT'
     ) {
       data = res.data;
       tip = '';
@@ -169,7 +170,7 @@ const ChatItem: React.FC<Props> = ({
       setExecuteLoading(true);
     }
     try {
-      const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId);
+      const res: any = await chatExecute(msg, conversationId!, parseInfoValue, agentId,true);
       const valid = updateData(res);
       onMsgDataLoaded?.(
         {
@@ -180,6 +181,21 @@ const ChatItem: React.FC<Props> = ({
         valid,
         isRefresh
       );
+      const queryId =parseInfoValue.queryId
+	  if(queryId!=undefined&&res.data.queryState !='INVALID'){
+		const getSummary=async (data: any,queryId: number )=>{
+		    const res2: any = await getExecuteSummary(queryId);
+		    if(res2.data.queryMode==null){
+			  res2.data = {...data,textSummary:res2.data.textSummary}
+		      setData(res2.data);
+		      setTimeout(()=>getSummary(data,queryId),500);
+		    }
+		    else{
+		      setData(res2.data);
+		    }
+		}
+		setTimeout(()=>getSummary(res.data,queryId),500);
+	  }
     } catch (e) {
       const tip = SEARCH_EXCEPTION_TIP;
       setExecuteTip(SEARCH_EXCEPTION_TIP);
