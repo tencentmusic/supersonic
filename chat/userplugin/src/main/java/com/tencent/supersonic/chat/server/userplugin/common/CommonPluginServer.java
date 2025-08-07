@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.userplugin.common;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.chat.server.userplugin.base.UserPluginServer;
 import com.tencent.supersonic.chat.server.userplugin.base.utils.ParamUtils;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import lombok.extern.slf4j.Slf4j;
@@ -48,20 +49,16 @@ public class CommonPluginServer extends UserPluginServer {
         }
         String url = param.get("url").toString();
         if (url != null && !url.startsWith("http")) {
-            /*try {  // demo
-                JSONObject httpRes = InterfaceServerUtils
-                        .resToObj(InterfaceServerUtils.sendPost(url, param, null));
-                if (httpRes.containsKey("errorMsg")) {
-                    res.put("textResult", httpRes.get("errorMsg"));
-                } else {
-                    res.put("textResult", httpRes.get("textResult"));
-                    res.put("resultList", httpRes.get("resultList"));
-                    res.put("columns", setColumn(httpRes.getJSONArray("columns")));
-                }
-            } catch (Exception e) {
-                res.put("textResult", "你的请求出现了异常，异常信息如下：" + e.getMessage());
-            }*/
-			res.put("textResult", "需开发做功能，请联系开发");
+            /*
+             * try { // demo JSONObject httpRes = InterfaceServerUtils
+             * .resToObj(InterfaceServerUtils.sendPost(url, param, null)); if
+             * (httpRes.containsKey("errorMsg")) { res.put("textResult", httpRes.get("errorMsg")); }
+             * else { res.put("textResult", httpRes.get("textResult")); res.put("resultList",
+             * httpRes.get("resultList")); res.put("columns",
+             * setColumn(httpRes.getJSONArray("columns"))); } } catch (Exception e) {
+             * res.put("textResult", "你的请求出现了异常，异常信息如下：" + e.getMessage()); }
+             */
+            res.put("textResult", "需开发做功能，请联系开发");
         }
         return res;
     }
