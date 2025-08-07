@@ -37,6 +37,11 @@
             <artifactId>chat-server</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency> <!-- 用户react 工具-->
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>chat-user-plugin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>chat-api</artifactId>
@@ -128,6 +133,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-properties-migrator</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency> <!--添加datasql 对 sql 的解析支持 做简易版mybatis -->
+            <groupId>net.hasor</groupId>
+            <artifactId>hasor-dataql-fx</artifactId>
+            <version>4.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>fastjson</artifactId>
+                    <groupId>com.alibaba</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
     </dependencies>

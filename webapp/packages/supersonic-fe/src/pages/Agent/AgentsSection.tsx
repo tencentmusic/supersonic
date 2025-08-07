@@ -4,6 +4,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { AgentType } from './type';
+import { useModel } from '@umijs/max'; // 助理只能admin 改
 
 type Props = {
   agents: AgentType[];
@@ -23,7 +24,8 @@ const AgentsSection: React.FC<Props> = ({
   onCreatBtnClick,
 }) => {
   const [showAgents, setShowAgents] = useState<AgentType[]>([]);
-
+  const { initialState = {} } = useModel('@@initialState');
+  const { currentUser = {} } = initialState as any;
   useEffect(() => {
     setShowAgents(agents);
   }, [agents]);
@@ -34,6 +36,9 @@ const AgentsSection: React.FC<Props> = ({
       dataIndex: 'name',
       key: 'name',
       render: (value: string, agent: AgentType) => {
+        if (currentUser.staffName !='admin') {
+          return value;
+        }
         return (
           <a
             onClick={() => {
@@ -55,6 +60,9 @@ const AgentsSection: React.FC<Props> = ({
       dataIndex: 'status',
       key: 'status',
       render: (status: number, agent: AgentType) => {
+        if (currentUser.staffName !='admin') {
+          return status === 0 ? '已禁用' : <span className={styles.online}>已启用</span>;
+        }
         return (
           <div className={styles.toggleStatus}>
             {status === 0 ? '已禁用' : <span className={styles.online}>已启用</span>}
@@ -94,6 +102,9 @@ const AgentsSection: React.FC<Props> = ({
       dataIndex: 'x',
       key: 'x',
       render: (_: any, agent: AgentType) => {
+        if (currentUser.staffName !='admin') {
+          return <></>;
+        }
         return (
           <div className={styles.operateIcons}>
             <a

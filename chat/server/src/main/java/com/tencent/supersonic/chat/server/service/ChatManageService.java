@@ -35,6 +35,8 @@ public interface ChatManageService {
 
     QueryResp getChatQuery(Long queryId);
 
+    ChatQueryDO getChatQueryDO(Long queryId);
+
     List<QueryResp> getChatQueries(Integer chatId);
 
     ShowCaseResp queryShowCase(PageQueryInfoReq pageQueryInfoReq, int agentId);

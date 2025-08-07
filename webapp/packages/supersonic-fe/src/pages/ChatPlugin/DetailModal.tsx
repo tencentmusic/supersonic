@@ -302,7 +302,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             </Button>
           </div>
         </FormItem>
-        {(pluginType === PluginTypeEnum.WEB_PAGE || pluginType === PluginTypeEnum.WEB_SERVICE) && (
+        {(pluginType === PluginTypeEnum.WEB_PAGE || pluginType === PluginTypeEnum.WEB_SERVICE || pluginType === PluginTypeEnum.REACT) && (
           <>
             <FormItem name="url" label="地址" rules={[{ required: true, message: '请输入地址' }]}>
               <Input placeholder="请输入地址" allowClear />
@@ -333,16 +333,31 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
                         <Radio value={ParamTypeEnum.CUSTOM}>自定义</Radio>
                       </Radio.Group>
                       {filter.paramType === ParamTypeEnum.CUSTOM && (
-                        <Input
-                          placeholder="请输入"
-                          value={filter.value}
-                          className={styles.filterParamValueField}
-                          onChange={(e) => {
-                            filter.value = e.target.value;
-                            setFilters([...filters]);
-                          }}
-                          allowClear
-                        />
+                        // 参数是否必填
+                        <div style={{"display":"flex","width": "350px"}}>
+                          <Input
+                            placeholder="请输入"
+                            value={filter.value}
+                            className={styles.filterParamValueField}
+                            onChange={(e) => {
+                              filter.value = e.target.value;
+                              setFilters([...filters]);
+                            }}
+                            allowClear
+                          />
+                          <Select
+                            placeholder="是否是必填参数"
+                            options={[{label: "是",value:1},{label: "否",value:0}]}
+                            className={styles.filterParamValueField}
+                            style={{"width":"100px"}}
+                            allowClear
+                            value={filter.isRequired}
+                            onChange={(value) => {
+                              filter.isRequired = value;
+                              setFilters([...filters]);
+                            }}
+                          />
+                        </div>
                       )}
                       {filter.paramType === ParamTypeEnum.SEMANTIC && (
                         <>

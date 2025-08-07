@@ -7,6 +7,7 @@ import { ISemantic } from '../../data';
 import { deleteLlmConfig } from '../../service';
 import { getLlmList } from '@/services/system';
 import dayjs from 'dayjs';
+import { useModel } from '@umijs/max'; // 个性化更新 ， 大模型配置只能admin 改
 
 type Props = {};
 
@@ -14,7 +15,8 @@ const LlmTable: React.FC<Props> = ({}) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   const [llmItem, setLlmItem] = useState<ISemantic.ILlmItem>();
   const [dataBaseList, setDataBaseList] = useState<any[]>([]);
-
+  const { initialState = {} } = useModel('@@initialState');
+  const { currentUser = {} } = initialState as any;
   const actionRef = useRef<ActionType>();
 
   const queryLlmList = async () => {
@@ -80,6 +82,9 @@ const LlmTable: React.FC<Props> = ({}) => {
         // if (!record.hasEditPermission) {
         //   return <></>;
         // }
+        if (currentUser.staffName !='admin') {
+          return <></>;
+        }
         return (
           <Space>
             <a

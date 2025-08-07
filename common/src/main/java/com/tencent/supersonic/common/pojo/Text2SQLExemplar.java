@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class Text2SQLExemplar implements Serializable {
 
     public static final String PROPERTY_KEY = "sql_exemplar";
+    public static final String PROPERTY_KEY2 = "plugin_exemplar";
 
     private String question;
 

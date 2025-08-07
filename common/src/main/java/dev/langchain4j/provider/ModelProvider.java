@@ -5,7 +5,9 @@ import com.tencent.supersonic.common.pojo.ChatModelConfig;
 import com.tencent.supersonic.common.pojo.EmbeddingModelConfig;
 import com.tencent.supersonic.common.util.ContextUtils;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -35,6 +37,20 @@ public class ModelProvider {
         ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());
         if (modelFactory != null) {
             return modelFactory.createChatModel(modelConfig);
+        }
+
+        throw new RuntimeException(
+                "Unsupported ChatLanguageModel provider: " + modelConfig.getProvider());
+    }
+
+    public static StreamingChatLanguageModel getChatStreamingModel(ChatModelConfig modelConfig) {
+        if (modelConfig == null || StringUtils.isBlank(modelConfig.getProvider())
+                || StringUtils.isBlank(modelConfig.getBaseUrl())) {
+            modelConfig = DEMO_CHAT_MODEL;
+        }
+        ModelFactory modelFactory = factories.get(modelConfig.getProvider().toUpperCase());
+        if (modelFactory != null) {
+            return modelFactory.createChatStreamingModel(modelConfig);
         }
 
         throw new RuntimeException(

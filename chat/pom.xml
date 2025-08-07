@@ -7,6 +7,7 @@
     <modules>
         <module>api</module>
         <module>server</module>
+        <module>userplugin</module>
     </modules>
 
     <parent>

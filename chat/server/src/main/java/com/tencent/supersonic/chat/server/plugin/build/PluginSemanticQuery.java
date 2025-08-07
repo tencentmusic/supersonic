@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.plugin.build;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
+import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -98,5 +99,9 @@ public abstract class PluginSemanticQuery {
 
     public void setParseInfo(SemanticParseInfo parseInfo) {
         this.parseInfo = parseInfo;
+    }
+
+    public void setChatMemory(ExecuteContext executeContext, QueryResult res) {
+        // 存储插件分析结果到记忆模型
     }
 }

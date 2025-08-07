@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemConfigDO>
@@ -39,7 +40,7 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
     }
 
     private SystemConfig getSystemConfigFromDB() {
-        List<SystemConfigDO> list = list();
+        List<SystemConfigDO> list = this.lambdaQuery().eq(SystemConfigDO::getId, 1).list();
         if (CollectionUtils.isEmpty(list)) {
             SystemConfig systemConfig = new SystemConfig();
             systemConfig.setId(1);
@@ -62,6 +63,21 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
         SystemConfigDO systemConfigDO = convert(sysConfig);
         saveOrUpdate(systemConfigDO);
         cachedSystemConfig.set(sysConfig);
+    }
+
+    @Override
+    public String getUserCommonConfig(String configName) {
+        List<SystemConfigDO> list =
+                this.lambdaQuery().eq(SystemConfigDO::getAdmin, "userCommon").list();
+        if (!CollectionUtils.isEmpty(list)) {
+            SystemConfig config = convert(list.get(0));
+            List<Parameter> params = config.getParameters().stream()
+                    .filter(e -> e.getName().equals(configName)).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(params)) {
+                return params.get(0).getValue();
+            }
+        }
+        return null;
     }
 
     private SystemConfig convert(SystemConfigDO systemConfigDO) {
