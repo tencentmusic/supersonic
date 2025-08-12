@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -79,7 +80,7 @@ public class RetrieveServiceImpl implements RetrieveService {
         Set<Long> dataSetIds = queryNLReq.getDataSetIds();
 
         ChatQueryContext chatQueryContext = new ChatQueryContext(queryNLReq);
-        chatQueryContext.setModelIdToDataSetIds(dataSetService.getModelIdToDataSetIds());
+        chatQueryContext.setModelIdToDataSetIds(modelIdToDataSetIds);
 
         Map<MatchText, List<HanlpMapResult>> regTextMap =
                 searchMatchStrategy.match(chatQueryContext, originals, dataSetIds);
