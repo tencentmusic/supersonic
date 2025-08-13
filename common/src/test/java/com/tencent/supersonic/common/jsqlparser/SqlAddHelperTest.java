@@ -338,8 +338,8 @@ class SqlAddHelperTest {
         List<String> groupByFields = new ArrayList<>();
         groupByFields.add("department");
 
-        Set<String> fieldNames = new HashSet<>();
-        fieldNames.add("pv");
+        Map<String, String> fieldNames = new HashMap<>();
+        fieldNames.put("pv", "sum");
 
         String replaceSql = SqlAddHelper.addHaving(sql, fieldNames);
 
@@ -354,6 +354,14 @@ class SqlAddHelperTest {
 
         Assert.assertEquals("SELECT department, sum(pv) FROM t_1 WHERE sys_imp_date = '2023-09-11' "
                 + "GROUP BY department HAVING sum(pv) > 2000 ORDER BY sum(pv) DESC LIMIT 10",
+                replaceSql);
+
+        sql = "SELECT 数据日期,访问用户数 FROM 超音数数据集 WHERE 访问次数 > 10 GROUP BY 数据日期";
+
+        fieldNames.put("访问次数", "sum");
+        replaceSql = SqlAddHelper.addHaving(sql, fieldNames);
+
+        Assert.assertEquals("SELECT 数据日期, 访问用户数 FROM 超音数数据集 GROUP BY 数据日期 HAVING 访问次数 > 10",
                 replaceSql);
     }
 

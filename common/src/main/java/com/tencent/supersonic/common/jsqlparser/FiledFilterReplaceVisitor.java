@@ -16,16 +16,21 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import org.apache.commons.collections.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
 
     private List<Expression> waitingForAdds = new ArrayList<>();
     private Set<String> fieldNames;
+    private Map<String, String> fieldNameMap = new HashMap<>();
+
+    private static Set<String> HAVING_AGG_TYPES = Set.of("SUM", "AVG", "MAX", "MIN", "COUNT");
+
+    public FiledFilterReplaceVisitor(Map<String, String> fieldNameMap) {
+        this.fieldNameMap = fieldNameMap;
+        this.fieldNames = fieldNameMap.keySet();
+    }
 
     public FiledFilterReplaceVisitor(Set<String> fieldNames) {
         this.fieldNames = fieldNames;
@@ -82,7 +87,22 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
         Expression leftExpression = comparisonOperator.getLeftExpression();
 
         if (!(leftExpression instanceof Function)) {
-            return result;
+            if (leftExpression instanceof Column) {
+                Column leftColumn = (Column) leftExpression;
+                String agg = fieldNameMap.get(leftColumn.getColumnName());
+                if (agg != null && HAVING_AGG_TYPES.contains(agg.toUpperCase())) {
+                    Expression expression = parseCondExpression(comparisonOperator, condExpr);
+                    if (Objects.nonNull(expression)) {
+                        result.add(expression);
+                        return result;
+                    } else {
+                        return null;
+                    }
+                }
+                return result;
+            } else {
+                return result;
+            }
         }
 
         Function leftFunction = (Function) leftExpression;
@@ -102,14 +122,24 @@ public class FiledFilterReplaceVisitor extends ExpressionVisitorAdapter {
             return null;
         }
 
+        Expression expression = parseCondExpression(comparisonOperator, condExpr);
+        if (Objects.nonNull(expression)) {
+            result.add(expression);
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    private Expression parseCondExpression(ComparisonOperator comparisonOperator, String condExpr) {
         try {
+            String comparisonOperatorStr = comparisonOperator.toString();
             ComparisonOperator parsedExpression =
                     (ComparisonOperator) CCJSqlParserUtil.parseCondExpression(condExpr);
             comparisonOperator.setLeftExpression(parsedExpression.getLeftExpression());
             comparisonOperator.setRightExpression(parsedExpression.getRightExpression());
             comparisonOperator.setASTNode(parsedExpression.getASTNode());
-            result.add(CCJSqlParserUtil.parseCondExpression(comparisonOperatorStr));
-            return result;
+            return CCJSqlParserUtil.parseCondExpression(comparisonOperatorStr);
         } catch (JSQLParserException e) {
             log.error("JSQLParserException", e);
         }

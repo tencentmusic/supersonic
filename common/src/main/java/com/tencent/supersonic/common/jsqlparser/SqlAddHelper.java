@@ -309,7 +309,7 @@ public class SqlAddHelper {
         }
     }
 
-    public static String addHaving(String sql, Set<String> fieldNames) {
+    public static String addHaving(String sql, Map<String, String> fieldNames) {
         Select selectStatement = SqlSelectHelper.getSelect(sql);
 
         if (!(selectStatement instanceof PlainSelect)) {
