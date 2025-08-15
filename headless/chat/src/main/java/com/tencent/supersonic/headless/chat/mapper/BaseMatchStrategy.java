@@ -12,12 +12,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -72,16 +77,37 @@ public abstract class BaseMatchStrategy<T extends MapResult> implements MatchStr
         }
     }
 
-    protected void executeTasks(List<Callable<Void>> tasks) {
+    protected Set<T> executeTasks(List<Supplier<List<T>>> tasks) {
+
+        Function<Supplier<List<T>>, Supplier<List<T>>> decorator = taskDecorator();
+        List<CompletableFuture<List<T>>> futures;
+        if (decorator == null) {
+            futures = tasks.stream().map(t -> CompletableFuture.supplyAsync(t, executor)).toList();
+        } else {
+            futures = tasks.stream()
+                    .map(t -> CompletableFuture.supplyAsync(decorator.apply(t), executor)).toList();
+        }
+
+        CompletableFuture<List<T>> listCompletableFuture =
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]))
+                        .thenApply(v -> futures.stream()
+                                .flatMap(listFuture -> listFuture.join().stream())
+                                .collect(Collectors.toList()));
         try {
-            executor.invokeAll(tasks);
-            for (Callable<Void> future : tasks) {
-                future.call();
-            }
-        } catch (Exception e) {
+            List<T> ts = listCompletableFuture.get();
+            Set<T> results = new HashSet<>();
+            selectResultInOneRound(results, ts);
+            return results;
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Task execution interrupted", e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    public Function<Supplier<List<T>>, Supplier<List<T>>> taskDecorator() {
+        return null;
     }
 
     public double getThreshold(Double threshold, Double minThreshold, MapModeEnum mapModeEnum) {

@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -74,6 +76,22 @@ public class DatabaseMatchStrategy extends SingleMatchStrategy<DatabaseMapResult
         allElements.addAll(chatQueryContext.getSemanticSchema().getDimensions());
         allElements.addAll(chatQueryContext.getSemanticSchema().getMetrics());
         return allElements;
+    }
+
+    @Override
+    public Function<Supplier<List<DatabaseMapResult>>, Supplier<List<DatabaseMapResult>>> taskDecorator() {
+        List<SchemaElement> schemaElements = allElements.get();
+        if (CollectionUtils.isEmpty(schemaElements)) {
+            return null;
+        }
+        return (t) -> (Supplier<List<DatabaseMapResult>>) () -> {
+            try {
+                allElements.set(schemaElements);
+                return t.get();
+            } finally {
+                allElements.remove();
+            }
+        };
     }
 
     private Double getThreshold(ChatQueryContext chatQueryContext) {

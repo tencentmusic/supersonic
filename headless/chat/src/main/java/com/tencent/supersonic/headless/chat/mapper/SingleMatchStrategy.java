@@ -11,8 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 @Service
 @Slf4j
@@ -26,8 +25,7 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
             Set<Long> detectDataSetIds) {
         Map<Integer, Integer> regOffsetToLength = mapperHelper.getRegOffsetToLength(terms);
         String text = chatQueryContext.getRequest().getQueryText();
-        Set<T> results = ConcurrentHashMap.newKeySet();
-        List<Callable<Void>> tasks = new ArrayList<>();
+        List<Supplier<List<T>>> tasks = new ArrayList<>();
 
         for (int startIndex = 0; startIndex <= text.length() - 1;) {
             for (int index = startIndex; index <= text.length();) {
@@ -35,27 +33,20 @@ public abstract class SingleMatchStrategy<T extends MapResult> extends BaseMatch
                 index = mapperHelper.getStepIndex(regOffsetToLength, index);
                 if (index <= text.length()) {
                     String detectSegment = text.substring(startIndex, index).trim();
-                    Callable<Void> task = createTask(chatQueryContext, detectDataSetIds,
-                            detectSegment, offset, results);
+                    Supplier<List<T>> task =
+                            createTask(chatQueryContext, detectDataSetIds, detectSegment, offset);
                     tasks.add(task);
                 }
             }
             startIndex = mapperHelper.getStepIndex(regOffsetToLength, startIndex);
         }
-        executeTasks(tasks);
+        Set<T> results = executeTasks(tasks);
         return new ArrayList<>(results);
     }
 
-    private Callable<Void> createTask(ChatQueryContext chatQueryContext, Set<Long> detectDataSetIds,
-            String detectSegment, int offset, Set<T> results) {
-        return () -> {
-            List<T> oneRoundResults =
-                    detectByStep(chatQueryContext, detectDataSetIds, detectSegment, offset);
-            synchronized (results) {
-                selectResultInOneRound(results, oneRoundResults);
-            }
-            return null;
-        };
+    private Supplier<List<T>> createTask(ChatQueryContext chatQueryContext,
+            Set<Long> detectDataSetIds, String detectSegment, int offset) {
+        return () -> detectByStep(chatQueryContext, detectDataSetIds, detectSegment, offset);
     }
 
     public abstract List<T> detectByStep(ChatQueryContext chatQueryContext,
