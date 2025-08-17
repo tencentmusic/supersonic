@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.chat.corrector;
 import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectFunctionHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
@@ -11,7 +12,8 @@ import net.sf.jsqlparser.expression.Expression;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Perform SQL corrections on the "Having" section in S2SQL. */
@@ -29,8 +31,9 @@ public class HavingCorrector extends BaseSemanticCorrector {
 
         SemanticSchema semanticSchema = chatQueryContext.getSemanticSchema();
 
-        Set<String> metrics = semanticSchema.getMetrics(dataSet).stream()
-                .map(schemaElement -> schemaElement.getName()).collect(Collectors.toSet());
+        Map<String, String> metrics = semanticSchema.getMetrics(dataSet).stream()
+                .collect(Collectors.toMap(SchemaElement::getName,
+                        e -> Optional.ofNullable(e.getDefaultAgg()).orElse("")));
 
         if (CollectionUtils.isEmpty(metrics)) {
             return;
