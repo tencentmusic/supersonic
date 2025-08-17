@@ -30,7 +30,7 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
                 .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
                 .logRequests(modelConfig.getLogRequests())
                 .logResponses(modelConfig.getLogResponses());
-        if (modelConfig.getJsonFormat()) {
+        if (modelConfig.getJsonFormat() != null && modelConfig.getJsonFormat()) {
             openAiChatModelBuilder.strictJsonSchema(true)
                     .responseFormat(modelConfig.getJsonFormatType());
         }
