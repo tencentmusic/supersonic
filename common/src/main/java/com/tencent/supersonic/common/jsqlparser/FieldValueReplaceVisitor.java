@@ -46,6 +46,62 @@ public class FieldValueReplaceVisitor extends ExpressionVisitorAdapter {
         replaceComparisonExpression(expr);
     }
 
+    public void visit(LikeExpression expr) {
+        Expression leftExpression = expr.getLeftExpression();
+        Expression rightExpression = expr.getRightExpression();
+
+        if (!(leftExpression instanceof Column)) {
+            return;
+        }
+        if (CollectionUtils.isEmpty(filedNameToValueMap)) {
+            return;
+        }
+        if (Objects.isNull(rightExpression) || Objects.isNull(leftExpression)) {
+            return;
+        }
+        Column column = (Column) leftExpression;
+        String columnName = column.getColumnName();
+        if (StringUtils.isEmpty(columnName)) {
+            return;
+        }
+        Map<String, String> valueMap = filedNameToValueMap.get(columnName);
+        if (Objects.isNull(valueMap) || valueMap.isEmpty()) {
+            return;
+        }
+        if (rightExpression instanceof StringValue) {
+            StringValue rightStringValue = (StringValue) rightExpression;
+            String value = rightStringValue.getValue();
+
+            // 使用split处理方式，按通配符分割字符串，对每个片段进行转换
+            String[] parts = value.split("%", -1);
+            boolean changed = false;
+
+            // 处理每个部分
+            for (int i = 0; i < parts.length; i++) {
+                if (!parts[i].isEmpty()) {
+                    String replaceValue = getReplaceValue(valueMap, parts[i]);
+                    if (StringUtils.isNotEmpty(replaceValue) && !parts[i].equals(replaceValue)) {
+                        parts[i] = replaceValue;
+                        changed = true;
+                    }
+                }
+            }
+
+            // 如果有任何部分发生变化，则重新构建字符串
+            if (changed) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < parts.length; i++) {
+                    sb.append(parts[i]);
+                    // 除了最后一个部分，其他部分后面都需要加上"%"
+                    if (i < parts.length - 1) {
+                        sb.append("%");
+                    }
+                }
+                rightStringValue.setValue(sb.toString());
+            }
+        }
+    }
+
     public void visit(InExpression inExpression) {
         if (!(inExpression.getLeftExpression() instanceof Column)) {
             return;
