@@ -24,8 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.*;
@@ -141,7 +140,6 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
      */
     public List<EmbeddingResult> detectByBatch(ChatQueryContext chatQueryContext,
             Set<Long> detectDataSetIds, Set<String> detectSegments, boolean useLlm) {
-        Set<EmbeddingResult> results = ConcurrentHashMap.newKeySet();
         int embeddingMapperBatch = Integer
                 .valueOf(mapperConfig.getParameterValue(MapperConfig.EMBEDDING_MAPPER_BATCH));
 
@@ -154,12 +152,11 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
                 Lists.partition(queryTextsList, embeddingMapperBatch);
 
         // Create and execute tasks for each batch
-        List<Callable<Void>> tasks = new ArrayList<>();
+        List<Supplier<List<EmbeddingResult>>> tasks = new ArrayList<>();
         for (List<String> queryTextsSub : queryTextsSubList) {
-            tasks.add(
-                    createTask(chatQueryContext, detectDataSetIds, queryTextsSub, results, useLlm));
+            tasks.add(createTask(chatQueryContext, detectDataSetIds, queryTextsSub, useLlm));
         }
-        executeTasks(tasks);
+        Set<EmbeddingResult> results = executeTasks(tasks);
 
         // Apply LLM filtering if enabled
         if (useLlm) {
@@ -196,20 +193,13 @@ public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> 
      * @param chatQueryContext The context of the chat query
      * @param detectDataSetIds Target dataset IDs
      * @param queryTextsSub Sub-list of query texts to process
-     * @param results Shared result set for collecting results
      * @param useLlm Whether to use LLM
-     * @return Callable task
+     * @return Supplier task
      */
-    private Callable<Void> createTask(ChatQueryContext chatQueryContext, Set<Long> detectDataSetIds,
-            List<String> queryTextsSub, Set<EmbeddingResult> results, boolean useLlm) {
-        return () -> {
-            List<EmbeddingResult> oneRoundResults = detectByQueryTextsSub(detectDataSetIds,
-                    queryTextsSub, chatQueryContext, useLlm);
-            synchronized (results) {
-                selectResultInOneRound(results, oneRoundResults);
-            }
-            return null;
-        };
+    private Supplier<List<EmbeddingResult>> createTask(ChatQueryContext chatQueryContext,
+            Set<Long> detectDataSetIds, List<String> queryTextsSub, boolean useLlm) {
+        return () -> detectByQueryTextsSub(detectDataSetIds, queryTextsSub, chatQueryContext,
+                useLlm);
     }
 
     /**
