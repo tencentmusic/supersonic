@@ -1,6 +1,5 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
-import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.DictWordType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;

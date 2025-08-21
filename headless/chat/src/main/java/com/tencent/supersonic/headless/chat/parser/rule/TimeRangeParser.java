@@ -32,7 +32,7 @@ public class TimeRangeParser implements SemanticParser {
 
     private static final Pattern RECENT_PATTERN_CN = Pattern.compile(
             ".*(?<periodStr>(近|过去)((?<enNum>\\d+)|(?<zhNum>[一二三四五六七八九十百千万亿]+))个?(?<zhPeriod>[天周月年])).*");
-    private static final Pattern DATE_PATTERN_NUMBER = Pattern.compile("(\\d{8})");
+    private static final Pattern DATE_PATTERN_NUMBER = Pattern.compile("\\b(\\d{8})\\b");
     private static final DateFormat DATE_FORMAT_NUMBER = new SimpleDateFormat("yyyyMMdd");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
