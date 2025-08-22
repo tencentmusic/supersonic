@@ -1,11 +1,13 @@
 package com.tencent.supersonic.headless.server.utils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -92,6 +94,12 @@ public class DataSetSchemaBuilder {
 
     private static Set<SchemaElement> getDimensions(DataSetSchemaResp resp) {
         Set<SchemaElement> dimensions = new HashSet<>();
+        Map<Long, Map<String, String>> dataTypeMap = Maps.newHashMap();
+        for (ModelResp modelResp : resp.getModelResps()) {
+            dataTypeMap.put(modelResp.getId(), modelResp.getModelDetail().getFields().stream()
+                    .collect(Collectors.toMap(Field::getFieldName, Field::getDataType, (k1, k2) -> k2)));
+        }
+
         for (DimSchemaResp dim : resp.getDimensions()) {
             List<String> alias = SchemaItem.getAliasList(dim.getAlias());
             List<DimValueMap> dimValueMaps = dim.getDimValueMaps();
@@ -109,7 +117,13 @@ public class DataSetSchemaBuilder {
                     .alias(alias).schemaValueMaps(schemaValueMaps).isTag(dim.getIsTag())
                     .description(dim.getDescription()).type(SchemaElementType.DIMENSION).build();
             dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TYPE, dim.getType());
-
+            // data type
+            if (dim.getDataType() != null) {
+                dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_DATA_TYPE, dim.getDataType());
+            } else {
+                dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_DATA_TYPE,
+                        dataTypeMap.get(dim.getModelId()).get(dim.getBizName()));
+            }
             if (dim.isTimeDimension()) {
                 String timeFormat =
                         String.valueOf(dim.getExt().get(DimensionConstants.DIMENSION_TIME_FORMAT));
