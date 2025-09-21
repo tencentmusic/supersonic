@@ -47,24 +47,19 @@ public class SqlQueryParser implements QueryParser {
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
         List<String> queryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
         Set<String> queryAliases = SqlSelectHelper.getAliasFields(sqlQuery.getSql());
-        Set<String> ontologyMetricsDimensions = Collections.synchronizedSet(new HashSet<String>());
-        Set<String> ontologyBizNameMetricsDimensions = Collections.synchronizedSet(new HashSet<>());
+        List<Pair<String, String>> ontologyMetricsDimensionsAndBizName = Collections.synchronizedList(new ArrayList<>());
         queryFields.removeAll(queryAliases);
         Ontology ontology = queryStatement.getOntology();
         OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);
         Set<String> queryFieldsSet = new HashSet<>(queryFields);
         ontologyQuery.getMetrics().forEach(m -> {
-            ontologyMetricsDimensions.add(m.getName());
-            ontologyBizNameMetricsDimensions.add(m.getBizName());
+            ontologyMetricsDimensionsAndBizName.add(Pair.of(m.getName(), m.getBizName()));
         });
         ontologyQuery.getDimensions().forEach(d -> {
-            ontologyMetricsDimensions.add(d.getName());
-            ontologyBizNameMetricsDimensions.add(d.getBizName());
+            ontologyMetricsDimensionsAndBizName.add(Pair.of(d.getName(), d.getBizName()));
         });
         // check if there are fields not matched with any metric or dimension
-
-        if (!(queryFieldsSet.containsAll(ontologyMetricsDimensions)
-                || queryFieldsSet.containsAll(ontologyBizNameMetricsDimensions))) {
+        if (!allFieldMatched(queryFieldsSet, ontologyMetricsDimensionsAndBizName)) {
             List<String> semanticFields = Lists.newArrayList();
             ontologyQuery.getMetrics().forEach(m -> semanticFields.add(m.getName()));
             ontologyQuery.getDimensions().forEach(d -> semanticFields.add(d.getName()));
@@ -101,6 +96,16 @@ public class SqlQueryParser implements QueryParser {
         }
 
         log.info("parse sqlQuery [{}] ", sqlQuery);
+    }
+
+    private boolean allFieldMatched(Set<String> queryFields,
+            List<Pair<String, String>> ontologyMetricsDimensionsAndBizName) {
+        for (Pair<String, String> pair : ontologyMetricsDimensionsAndBizName) {
+            if (!(queryFields.contains(pair.getLeft()) || queryFields.contains(pair.getRight()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void aliasesWithBackticks(QueryStatement queryStatement) {
