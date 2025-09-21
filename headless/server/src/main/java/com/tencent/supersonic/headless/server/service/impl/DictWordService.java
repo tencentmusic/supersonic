@@ -48,7 +48,7 @@ public class DictWordService {
             return;
         }
         setPreDictWords(dictWords);
-        knowledgeBaseService.reloadAllData(getAllDictWords());
+        knowledgeBaseService.reloadAllData(dictWords);
         long duration = System.currentTimeMillis() - startTime;
         log.info("Dictionary has been regularly reloaded in {} milliseconds", duration);
     }
