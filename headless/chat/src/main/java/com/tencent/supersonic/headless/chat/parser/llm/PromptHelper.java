@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.common.pojo.DimensionConstants.*;
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
 
 @Component
@@ -141,6 +142,9 @@ public class PromptHelper {
                 StringBuilder alias = new StringBuilder();
                 dimension.getAlias().forEach(a -> alias.append(a).append(";"));
                 dimensionStr.append(" ALIAS '").append(alias).append("'");
+            }
+            if (Objects.nonNull(dimension.getExtInfo().get(DIMENSION_DATA_TYPE))) {
+                dimensionStr.append(" DATATYPE '").append(dimension.getExtInfo().get(DIMENSION_DATA_TYPE)).append("'");
             }
             if (StringUtils.isNotEmpty(dimension.getTimeFormat())) {
                 dimensionStr.append(" FORMAT '").append(dimension.getTimeFormat()).append("'");
