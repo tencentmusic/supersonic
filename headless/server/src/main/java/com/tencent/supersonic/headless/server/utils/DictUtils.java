@@ -422,33 +422,25 @@ public class DictUtils {
         return joiner.toString();
     }
 
-    public String defaultDateFilter(DateConf dateConf) {
-        String format = itemValueDateFormat;
-        String start = LocalDate.now().minusDays(itemValueDateStart)
-                .format(DateTimeFormatter.ofPattern(format));
-        String end = LocalDate.now().minusDays(itemValueDateEnd)
-                .format(DateTimeFormatter.ofPattern(format));
-        if (Objects.nonNull(dateConf)) {
-            return String.format("( %s >= '%s' and %s <= '%s' )", dateConf.getDateField(), start,
-                    dateConf.getDateField(), end);
-        } else {
-            return String.format("( %s >= '%s' and %s <= '%s' )", "dt", start, "dt", end);
-        }
-    }
-
     private String generateDictDateFilter(DictItemResp dictItemResp) {
-        ItemValueConfig config = dictItemResp.getConfig();
-        if (config == null) {
+        Dimension partitionTimeDimension = getPartitionTimeDimension(dictItemResp.getModelId());
+        // 如果没有设置数据时间维度，则无法做时间分区过滤
+        if (partitionTimeDimension == null) {
             return "";
         }
 
-        if (!partitionedModel(dictItemResp.getModelId())) {
-            return "";
-        }
-        // 未进行设置
+        ItemValueConfig config = dictItemResp.getConfig();
+        // 默认使用数据时间维度进行时间分区过滤
         if (Objects.isNull(config) || Objects.isNull(config.getDateConf())) {
-            return defaultDateFilter(null);
+            String startDate = LocalDate.now().minusDays(itemValueDateStart)
+                    .format(DateTimeFormatter.ofPattern(partitionTimeDimension.getDateFormat()));
+            String endDate = LocalDate.now().minusDays(itemValueDateEnd)
+                    .format(DateTimeFormatter.ofPattern(partitionTimeDimension.getDateFormat()));
+            return String.format("( %s >= '%s' and %s <= '%s' )",
+                    partitionTimeDimension.getBizName(), startDate,
+                    partitionTimeDimension.getBizName(), endDate);
         }
+
         // 全表扫描
         if (DateConf.DateMode.ALL.equals(config.getDateConf().getDateMode())) {
             return "";
@@ -467,15 +459,15 @@ public class DictUtils {
         return "";
     }
 
-    private boolean partitionedModel(Long modelId) {
+    private Dimension getPartitionTimeDimension(Long modelId) {
         ModelResp model = modelService.getModel(modelId);
         if (Objects.nonNull(model)) {
             List<Dimension> timeDims = model.getTimeDimension();
             if (!CollectionUtils.isEmpty(timeDims)) {
-                return true;
+                return timeDims.get(0);
             }
         }
-        return false;
+        return null;
     }
 
     private String generateDictDateFilterRecent(DictItemResp dictItemResp) {
