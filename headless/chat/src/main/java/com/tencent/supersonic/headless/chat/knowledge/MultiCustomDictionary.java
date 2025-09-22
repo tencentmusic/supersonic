@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import static com.hankcs.hanlp.utility.Predefine.logger;
 
@@ -40,7 +41,7 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
 
     public static int MAX_SIZE = 10;
     public static Boolean removeDuplicates = true;
-    public static ConcurrentHashMap<String, PriorityQueue<Term>> NATURE_TO_VALUES =
+    public static ConcurrentHashMap<String, PriorityBlockingQueue<Term>> NATURE_TO_VALUES =
             new ConcurrentHashMap<>();
     private static boolean addToSuggesterTrie = true;
 
@@ -146,9 +147,10 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                 }
                 for (int i = 0; i < attribute.nature.length; i++) {
                     Nature nature = attribute.nature[i];
-                    PriorityQueue<Term> priorityQueue = NATURE_TO_VALUES.get(nature.toString());
+                    PriorityBlockingQueue<Term> priorityQueue =
+                            NATURE_TO_VALUES.get(nature.toString());
                     if (Objects.isNull(priorityQueue)) {
-                        priorityQueue = new PriorityQueue<>(MAX_SIZE,
+                        priorityQueue = new PriorityBlockingQueue<>(MAX_SIZE,
                                 Comparator.comparingInt(Term::getFrequency).reversed());
                         NATURE_TO_VALUES.put(nature.toString(), priorityQueue);
                     }

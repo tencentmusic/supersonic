@@ -47,7 +47,8 @@ public class SqlQueryParser implements QueryParser {
         SqlQuery sqlQuery = queryStatement.getSqlQuery();
         List<String> queryFields = SqlSelectHelper.getAllSelectFields(sqlQuery.getSql());
         Set<String> queryAliases = SqlSelectHelper.getAliasFields(sqlQuery.getSql());
-        List<Pair<String, String>> ontologyMetricsDimensionsAndBizName = Collections.synchronizedList(new ArrayList<>());
+        List<Pair<String, String>> ontologyMetricsDimensionsAndBizName =
+                Collections.synchronizedList(new ArrayList<>());
         queryFields.removeAll(queryAliases);
         Ontology ontology = queryStatement.getOntology();
         OntologyQuery ontologyQuery = buildOntologyQuery(ontology, queryFields);

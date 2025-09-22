@@ -682,10 +682,8 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     }
 
     private DataEvent getDataEvent(List<MetricDO> metricDOS, EventType eventType) {
-        List<DataItem> dataItems =
-                metricDOS.stream().map(this::getDataItem)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+        List<DataItem> dataItems = metricDOS.stream().map(this::getDataItem)
+                .filter(Objects::nonNull).collect(Collectors.toList());
         return new DataEvent(this, dataItems, eventType);
     }
 
