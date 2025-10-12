@@ -32,6 +32,7 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +171,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
-        
+
         List<QueryResp> historyQueries =
                 getHistoryQueries(parseContext.getRequest().getChatId(), 1);
         if (historyQueries.isEmpty()) {
@@ -184,7 +185,7 @@ public class NL2SQLParser implements ChatQueryParser {
 
         // derive mapping result of current question and parsing result of last question.
         ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
-        MapResp currentMapResult = chatLayerService.map(queryNLReq); //  优化性能 ,只有满足条件才mapping
+        MapResp currentMapResult = chatLayerService.map(queryNLReq); // 优化性能 ,只有满足条件才mapping
 
         Long dataId = lastParseInfo.getDataSetId();
         String curtMapStr =

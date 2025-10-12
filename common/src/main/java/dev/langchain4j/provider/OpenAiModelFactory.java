@@ -37,6 +37,7 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
         }
         return openAiChatModelBuilder.build();
     }
+
     @Override
     public OpenAiStreamingChatModel createChatStreamingModel(ChatModelConfig modelConfig) {
         return OpenAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
@@ -46,6 +47,7 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
                 .logRequests(modelConfig.getLogRequests())
                 .logResponses(modelConfig.getLogResponses()).build();
     }
+
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModel) {
         return OpenAiEmbeddingModel.builder().baseUrl(embeddingModel.getBaseUrl())
