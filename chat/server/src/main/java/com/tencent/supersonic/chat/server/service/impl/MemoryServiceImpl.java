@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryDeleteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
@@ -26,6 +27,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -108,14 +110,21 @@ public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
     }
 
     @Override
-    public void batchDelete(List<Long> ids) {
+    public void batchDelete(ChatMemoryDeleteReq chatMemoryDeleteReq, User user) {
         QueryWrapper<ChatMemoryDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().in(ChatMemoryDO::getId, ids);
+        if (!CollectionUtils.isEmpty(chatMemoryDeleteReq.getIds())) {
+            queryWrapper.lambda().in(ChatMemoryDO::getId, chatMemoryDeleteReq.getIds());
+        }
+        if (chatMemoryDeleteReq.getAgentId() != null) {
+            queryWrapper.lambda().eq(ChatMemoryDO::getAgentId, chatMemoryDeleteReq.getAgentId());
+        }
         List<ChatMemoryDO> chatMemoryDOS = chatMemoryRepository.getMemories(queryWrapper);
+        List<Long> ids = new ArrayList<>();
         chatMemoryDOS.forEach(chatMemoryDO -> {
             if (MemoryStatus.ENABLED.toString().equals(chatMemoryDO.getStatus().trim())) {
                 disableMemory(chatMemoryDO);
             }
+            ids.add(chatMemoryDO.getId());
         });
         chatMemoryRepository.batchDelete(ids);
     }

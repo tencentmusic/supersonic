@@ -144,7 +144,8 @@ public class PromptHelper {
                 dimensionStr.append(" ALIAS '").append(alias).append("'");
             }
             if (Objects.nonNull(dimension.getExtInfo().get(DIMENSION_DATA_TYPE))) {
-                dimensionStr.append(" DATATYPE '").append(dimension.getExtInfo().get(DIMENSION_DATA_TYPE)).append("'");
+                dimensionStr.append(" DATATYPE '")
+                        .append(dimension.getExtInfo().get(DIMENSION_DATA_TYPE)).append("'");
             }
             if (StringUtils.isNotEmpty(dimension.getTimeFormat())) {
                 dimensionStr.append(" FORMAT '").append(dimension.getTimeFormat()).append("'");

@@ -96,8 +96,9 @@ public class DataSetSchemaBuilder {
         Set<SchemaElement> dimensions = new HashSet<>();
         Map<Long, Map<String, String>> dataTypeMap = Maps.newHashMap();
         for (ModelResp modelResp : resp.getModelResps()) {
-            dataTypeMap.put(modelResp.getId(), modelResp.getModelDetail().getFields().stream()
-                    .collect(Collectors.toMap(Field::getFieldName, Field::getDataType, (k1, k2) -> k2)));
+            dataTypeMap.put(modelResp.getId(),
+                    modelResp.getModelDetail().getFields().stream().collect(Collectors
+                            .toMap(Field::getFieldName, Field::getDataType, (k1, k2) -> k2)));
         }
 
         for (DimSchemaResp dim : resp.getDimensions()) {
@@ -119,7 +120,8 @@ public class DataSetSchemaBuilder {
             dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TYPE, dim.getType());
             // data type
             if (dim.getDataType() != null) {
-                dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_DATA_TYPE, dim.getDataType());
+                dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_DATA_TYPE,
+                        dim.getDataType());
             } else {
                 dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_DATA_TYPE,
                         dataTypeMap.get(dim.getModelId()).get(dim.getBizName()));

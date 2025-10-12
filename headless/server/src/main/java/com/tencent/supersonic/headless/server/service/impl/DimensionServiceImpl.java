@@ -519,7 +519,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
 
     private DataItem getDataItem(DimensionDO dimensionDO) {
         ModelResp modelResp = modelService.getModel(dimensionDO.getModelId());
-        if(modelResp == null) {
+        if (modelResp == null) {
             return null;
         }
         DimensionResp dimensionResp = DimensionConverter.convert2DimensionResp(dimensionDO,
@@ -530,10 +530,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
     }
 
     private DataEvent getDataEvent(List<DimensionDO> dimensionDOS, EventType eventType) {
-        List<DataItem> dataItems =
-                dimensionDOS.stream().map(this::getDataItem)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+        List<DataItem> dataItems = dimensionDOS.stream().map(this::getDataItem)
+                .filter(Objects::nonNull).collect(Collectors.toList());
         return new DataEvent(this, dataItems, eventType);
     }
 

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.service;
 
 import com.github.pagehelper.PageInfo;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryDeleteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
@@ -14,7 +15,7 @@ public interface MemoryService {
 
     void updateMemory(ChatMemoryUpdateReq chatMemoryUpdateReq, User user);
 
-    void batchDelete(List<Long> ids);
+    void batchDelete(ChatMemoryDeleteReq chatMemoryDeleteReq, User user);
 
     PageInfo<ChatMemory> pageMemories(PageMemoryReq pageMemoryReq);
 

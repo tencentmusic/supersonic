@@ -35,9 +35,7 @@ public class ChatMemoryRepositoryImpl implements ChatMemoryRepository {
         if (CollectionUtils.isEmpty(ids)) {
             return;
         }
-        for (Long id : ids) {
-            chatMemoryMapper.deleteById(id);
-        }
+        chatMemoryMapper.deleteByIds(ids);
     }
 
     @Override

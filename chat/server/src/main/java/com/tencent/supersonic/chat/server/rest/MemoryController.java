@@ -4,12 +4,12 @@ import com.github.pagehelper.PageInfo;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryReviewResult;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryCreateReq;
+import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryDeleteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryUpdateReq;
 import com.tencent.supersonic.chat.api.pojo.request.PageMemoryReq;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.headless.api.pojo.request.MetaBatchReq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +53,10 @@ public class MemoryController {
     }
 
     @PostMapping("batchDelete")
-    public Boolean batchDelete(@RequestBody MetaBatchReq metaBatchReq) {
-        memoryService.batchDelete(metaBatchReq.getIds());
+    public Boolean deleteMemory(@RequestBody ChatMemoryDeleteReq chatMemoryDeleteReq,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        memoryService.batchDelete(chatMemoryDeleteReq, user);
         return true;
     }
 }
