@@ -170,11 +170,7 @@ public class NL2SQLParser implements ChatQueryParser {
         if (Objects.isNull(chatApp) || !chatApp.isEnable()) {
             return;
         }
-
-        // derive mapping result of current question and parsing result of last question.
-        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
-        MapResp currentMapResult = chatLayerService.map(queryNLReq);
-
+        
         List<QueryResp> historyQueries =
                 getHistoryQueries(parseContext.getRequest().getChatId(), 1);
         if (historyQueries.isEmpty()) {
@@ -182,12 +178,18 @@ public class NL2SQLParser implements ChatQueryParser {
         }
         QueryResp lastQuery = historyQueries.get(0);
         SemanticParseInfo lastParseInfo = lastQuery.getParseInfos().get(0);
-        Long dataId = lastParseInfo.getDataSetId();
+        String histSQL = lastParseInfo.getSqlInfo().getCorrectedS2SQL();
+        if (StringUtils.isBlank(histSQL)) // 优化性能,如果问答不是chat bi 则无需重写，因为数据都不全
+            return;
 
+        // derive mapping result of current question and parsing result of last question.
+        ChatLayerService chatLayerService = ContextUtils.getBean(ChatLayerService.class);
+        MapResp currentMapResult = chatLayerService.map(queryNLReq); //  优化性能 ,只有满足条件才mapping
+
+        Long dataId = lastParseInfo.getDataSetId();
         String curtMapStr =
                 generateSchemaPrompt(currentMapResult.getMapInfo().getMatchedElements(dataId));
         String histMapStr = generateSchemaPrompt(lastParseInfo.getElementMatches());
-        String histSQL = lastParseInfo.getSqlInfo().getCorrectedS2SQL();
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("current_question", currentMapResult.getQueryText());

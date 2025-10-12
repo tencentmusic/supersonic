@@ -117,9 +117,17 @@ public class MultiCustomDictionary extends DynamicCustomDictionary {
                         dictWord.setAlias(word.toLowerCase());
                         String[] split = nature.split(DictWordType.NATURE_SPILT);
                         if (split.length >= 2) {
-                            Long dimId = Long.parseLong(
-                                    nature.split(DictWordType.NATURE_SPILT)[split.length - 1]);
-                            KnowledgeBaseService.addDimValueAlias(dimId, Arrays.asList(dictWord));
+                            try {
+                                Long dimId = Long.parseLong(
+                                        nature.split(DictWordType.NATURE_SPILT)[split.length - 1]);
+                                KnowledgeBaseService.addDimValueAlias(dimId,
+                                        Arrays.asList(dictWord));
+                            } catch (NumberFormatException e) {
+                                logger.warning(path + " : 非标准文件，不存入KnowledgeBaseService");
+                                return true;
+                            }
+
+
                         }
                     }
                 }

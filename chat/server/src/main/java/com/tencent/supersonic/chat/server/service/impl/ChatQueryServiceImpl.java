@@ -1,5 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.chat.api.pojo.request.ChatExecuteReq;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
@@ -9,8 +11,10 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
+import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
+import com.tencent.supersonic.chat.server.processor.execute.DataInterpretProcessor;
 import com.tencent.supersonic.chat.server.processor.execute.ExecuteResultProcessor;
 import com.tencent.supersonic.chat.server.processor.parse.ParseResultProcessor;
 import com.tencent.supersonic.chat.server.service.AgentService;
@@ -141,6 +145,21 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
 
         return queryResult;
+    }
+
+    @Override
+    public QueryResult getTextSummary(ChatExecuteReq chatExecuteReq) {
+        String text = DataInterpretProcessor.getTextSummary(chatExecuteReq.getQueryId());
+        if (StringUtils.isNotBlank(text)) {
+            QueryResult res = new QueryResult();
+            res.setTextSummary(text);
+            res.setQueryId(chatExecuteReq.getQueryId());
+            return res;
+        } else {
+            ChatQueryDO chatQueryDo = chatManageService.getChatQueryDO(chatExecuteReq.getQueryId());
+            QueryResult res = JSON.parseObject(chatQueryDo.getQueryResult(), QueryResult.class);
+            return res;
+        }
     }
 
     @Override

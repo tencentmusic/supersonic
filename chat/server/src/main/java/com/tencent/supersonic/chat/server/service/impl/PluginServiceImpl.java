@@ -108,6 +108,7 @@ public class PluginServiceImpl implements PluginService {
         if (StringUtils.isNotBlank(pluginQueryReq.getCreatedBy())) {
             queryWrapper.lambda().eq(PluginDO::getCreatedBy, pluginQueryReq.getCreatedBy());
         }
+        queryWrapper.orderByAsc("name");
         List<PluginDO> pluginDOS = pluginRepository.query(queryWrapper);
         if (StringUtils.isNotBlank(pluginQueryReq.getPattern())) {
             pluginDOS = pluginDOS.stream()

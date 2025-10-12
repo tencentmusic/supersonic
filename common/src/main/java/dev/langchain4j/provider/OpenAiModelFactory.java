@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,15 @@ public class OpenAiModelFactory implements ModelFactory, InitializingBean {
         }
         return openAiChatModelBuilder.build();
     }
-
+    @Override
+    public OpenAiStreamingChatModel createChatStreamingModel(ChatModelConfig modelConfig) {
+        return OpenAiStreamingChatModel.builder().baseUrl(modelConfig.getBaseUrl())
+                .modelName(modelConfig.getModelName()).apiKey(modelConfig.keyDecrypt())
+                .temperature(modelConfig.getTemperature()).topP(modelConfig.getTopP())
+                .timeout(Duration.ofSeconds(modelConfig.getTimeOut()))
+                .logRequests(modelConfig.getLogRequests())
+                .logResponses(modelConfig.getLogResponses()).build();
+    }
     @Override
     public EmbeddingModel createEmbeddingModel(EmbeddingModelConfig embeddingModel) {
         return OpenAiEmbeddingModel.builder().baseUrl(embeddingModel.getBaseUrl())
