@@ -24,6 +24,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -200,7 +201,7 @@ public class SearchService {
     public static List<String> getDimensionValue(DimensionValueReq dimensionValueReq) {
         String nature = DictWordType.NATURE_SPILT + dimensionValueReq.getModelId()
                 + DictWordType.NATURE_SPILT + dimensionValueReq.getElementID();
-        PriorityQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
+        PriorityBlockingQueue<Term> terms = MultiCustomDictionary.NATURE_TO_VALUES.get(nature);
         if (CollectionUtils.isEmpty(terms)) {
             return new ArrayList<>();
         }
