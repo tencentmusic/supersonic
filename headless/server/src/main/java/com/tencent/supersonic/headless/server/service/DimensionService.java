@@ -52,7 +52,7 @@ public interface DimensionService {
 
     List<DimValueMap> mockDimensionValueAlias(DimensionReq dimensionReq, User user);
 
-    void sendDimensionEventBatch(List<Long> modelIds, EventType eventType);
+    void sendDimensionEventBatch(List<Long> modelIds, EventType eventType, User user);
 
     DataEvent getAllDataEvents();
 

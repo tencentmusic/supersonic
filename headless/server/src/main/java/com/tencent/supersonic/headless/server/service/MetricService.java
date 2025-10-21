@@ -70,7 +70,7 @@ public interface MetricService {
 
     MetricQueryDefaultConfig getMetricQueryDefaultConfig(Long metricId, User user);
 
-    void sendMetricEventBatch(List<Long> modelIds, EventType eventType);
+    void sendMetricEventBatch(List<Long> modelIds, EventType eventType, User user);
 
     List<MetricResp> queryMetrics(MetricsFilter metricsFilter);
 

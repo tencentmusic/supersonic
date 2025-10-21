@@ -95,7 +95,7 @@ public class ModelServiceImpl implements ModelService {
         // create or update metric
         List<MetricReq> metricReqs = ModelConverter.convertMetricList(modelDO);
         metricService.alterMetricBatch(metricReqs, modelDO.getId(), user);
-        sendEvent(modelDO, EventType.ADD);
+        sendEvent(modelDO, EventType.ADD, user);
         return ModelConverter.convert(modelDO);
     }
 
@@ -129,7 +129,7 @@ public class ModelServiceImpl implements ModelService {
         // create or update metric
         List<MetricReq> metricReqs = ModelConverter.convertMetricList(modelDO);
         metricService.alterMetricBatch(metricReqs, modelDO.getId(), user);
-        sendEvent(modelDO, EventType.UPDATE);
+        sendEvent(modelDO, EventType.UPDATE, user);
         return ModelConverter.convert(modelDO);
     }
 
@@ -507,14 +507,14 @@ public class ModelServiceImpl implements ModelService {
             if (StatusEnum.OFFLINE.getCode().equals(metaBatchReq.getStatus())
                     || StatusEnum.DELETED.getCode().equals(metaBatchReq.getStatus())) {
                 metricService.sendMetricEventBatch(Lists.newArrayList(modelDO.getId()),
-                        EventType.DELETE);
+                        EventType.DELETE, user);
                 dimensionService.sendDimensionEventBatch(Lists.newArrayList(modelDO.getId()),
-                        EventType.DELETE);
+                        EventType.DELETE, user);
             } else if (StatusEnum.ONLINE.getCode().equals(metaBatchReq.getStatus())) {
                 metricService.sendMetricEventBatch(Lists.newArrayList(modelDO.getId()),
-                        EventType.ADD);
+                        EventType.ADD, user);
                 dimensionService.sendDimensionEventBatch(Lists.newArrayList(modelDO.getId()),
-                        EventType.ADD);
+                        EventType.ADD, user);
             }
         }).collect(Collectors.toList());
         modelRepository.batchUpdate(modelDOS);
@@ -670,9 +670,10 @@ public class ModelServiceImpl implements ModelService {
         return false;
     }
 
-    private void sendEvent(ModelDO modelDO, EventType eventType) {
+    private void sendEvent(ModelDO modelDO, EventType eventType, User user) {
         DataItem dataItem = getDataItem(modelDO);
-        eventPublisher.publishEvent(new DataEvent(this, Lists.newArrayList(dataItem), eventType));
+        eventPublisher.publishEvent(
+                new DataEvent(this, Lists.newArrayList(dataItem), eventType, user.getName()));
     }
 
     private DataItem getDataItem(ModelDO modelDO) {
