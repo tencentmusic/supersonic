@@ -7,6 +7,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.dify.DifyAiChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,11 @@ public class DifyModelFactory implements ModelFactory, InitializingBean {
         return DifyAiChatModel.builder().baseUrl(modelConfig.getBaseUrl())
                 .apiKey(AESEncryptionUtil.aesDecryptECB(modelConfig.getApiKey()))
                 .modelName(modelConfig.getModelName()).timeOut(modelConfig.getTimeOut()).build();
+    }
+
+    @Override
+    public OpenAiStreamingChatModel createChatStreamingModel(ChatModelConfig modelConfig) {
+        throw new RuntimeException("待开发");
     }
 
     @Override

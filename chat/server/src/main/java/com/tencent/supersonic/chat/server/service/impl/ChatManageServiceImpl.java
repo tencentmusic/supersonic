@@ -124,6 +124,11 @@ public class ChatManageServiceImpl implements ChatManageService {
     }
 
     @Override
+    public ChatQueryDO getChatQueryDO(Long queryId) {
+        return chatQueryRepository.getChatQueryDO(queryId);
+    }
+
+    @Override
     public List<QueryResp> getChatQueries(Integer chatId) {
         List<QueryResp> queries = chatQueryRepository.getChatQueries(chatId);
         fillParseInfo(queries);

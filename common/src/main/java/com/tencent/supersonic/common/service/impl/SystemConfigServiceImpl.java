@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemConfigDO>
@@ -38,8 +39,8 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
         return systemConfigDb;
     }
 
-    private SystemConfig getSystemConfigFromDB() {
-        List<SystemConfigDO> list = list();
+    private SystemConfig getSystemConfigFromDB() { // 加上id ，如果有多条记录，会出错
+        List<SystemConfigDO> list = this.lambdaQuery().eq(SystemConfigDO::getId, 1).list();
         if (CollectionUtils.isEmpty(list)) {
             SystemConfig systemConfig = new SystemConfig();
             systemConfig.setId(1);
