@@ -138,7 +138,12 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
-    public void deleteDatabase(Long databaseId) {
+    public void deleteDatabase(Long databaseId, User user) {
+        DatabaseResp databaseResp = getDatabase(databaseId);
+        if (!checkAdminPermission(user, databaseResp)) {
+            throw new RuntimeException("没有权限删除该数据库");
+        }
+
         ModelFilter modelFilter = new ModelFilter();
         modelFilter.setDatabaseId(databaseId);
         modelFilter.setIncludesDetail(false);

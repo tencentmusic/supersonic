@@ -15,5 +15,5 @@ public interface ChatModelService {
 
     ChatModel updateChatModel(ChatModel chatModel, User user);
 
-    void deleteChatModel(Integer id);
+    void deleteChatModel(Integer id, User user);
 }

@@ -64,8 +64,10 @@ public class DatabaseController {
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteDatabase(@PathVariable("id") Long id) {
-        databaseService.deleteDatabase(id);
+    public boolean deleteDatabase(@PathVariable("id") Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        databaseService.deleteDatabase(id, user);
         return true;
     }
 

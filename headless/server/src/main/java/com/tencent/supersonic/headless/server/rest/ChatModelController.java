@@ -46,8 +46,10 @@ public class ChatModelController {
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteModel(@PathVariable("id") Integer id) {
-        chatModelService.deleteChatModel(id);
+    public boolean deleteModel(@PathVariable("id") Integer id,
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
+        chatModelService.deleteChatModel(id, user);
         return true;
     }
 

@@ -79,7 +79,12 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
     }
 
     @Override
-    public void deleteChatModel(Integer id) {
+    public void deleteChatModel(Integer id, User user) {
+        ChatModel chatModel = getChatModel(id);
+        if (!checkAdminPermission(user, chatModel)) {
+            throw new RuntimeException("没有权限删除该大模型");
+        }
+
         removeById(id);
     }
 
@@ -102,5 +107,14 @@ public class ChatModelServiceImpl extends ServiceImpl<ChatModelMapper, ChatModel
         BeanUtils.copyProperties(chatModel, chatModelDO);
         chatModelDO.setConfig(JsonUtil.toString(chatModel.getConfig()));
         return chatModelDO;
+    }
+
+    private boolean checkAdminPermission(User user, ChatModel chatModel) {
+        String admin = chatModel.getAdmin();
+        if (user.isSuperAdmin()) {
+            return true;
+        }
+        return admin != null && admin.equals(user.getName())
+                || chatModel.getCreatedBy().equals(user.getName());
     }
 }

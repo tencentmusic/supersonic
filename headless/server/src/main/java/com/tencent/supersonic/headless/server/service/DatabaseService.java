@@ -34,7 +34,7 @@ public interface DatabaseService {
 
     List<DatabaseResp> getDatabaseList(User user);
 
-    void deleteDatabase(Long databaseId);
+    void deleteDatabase(Long databaseId, User user);
 
     List<String> getCatalogs(Long id) throws SQLException;
 
