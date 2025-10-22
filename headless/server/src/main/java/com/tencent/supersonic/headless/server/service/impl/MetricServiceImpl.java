@@ -157,44 +157,15 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
                 .collect(Collectors.toMap(MetricResp::getBizName, a -> a, (k1, k2) -> k1));
 
         List<MetricReq> metricToInsert = Lists.newArrayList();
-        List<MetricReq> metricToUpdate = Lists.newArrayList();
-        List<Long> metricToDelete = Lists.newArrayList();
-
-        metricReqs.stream().forEach(metric -> {
+        metricReqs.forEach(metric -> {
             if (!bizNameMap.containsKey(metric.getBizName())) {
                 metricToInsert.add(metric);
-            } else {
-                MetricResp metricRespByBizName = bizNameMap.get(metric.getBizName());
-                if (null != metricRespByBizName && isChange(metric, metricRespByBizName)) {
-                    metric.setId(metricRespByBizName.getId());
-                    metric.updatedBy(user.getName());
-                    metricToUpdate.add(metric);
-                }
-            }
-        });
-
-        // the bizNames from alter dimensions
-        List<String> bizNames =
-                metricReqs.stream().map(MetricReq::getBizName).collect(Collectors.toList());
-        bizNameMap.keySet().forEach(bizNameInDb -> {
-            if (!bizNames.contains(bizNameInDb)) {
-                metricToDelete.add(bizNameMap.get(bizNameInDb).getId());
             }
         });
 
         // insert
         if (!CollectionUtils.isEmpty(metricToInsert)) {
             createMetricBatch(metricToInsert, user);
-        }
-
-        // update
-        if (!CollectionUtils.isEmpty(metricToUpdate)) {
-            updateMetricBatch(metricToUpdate, user);
-        }
-
-        // delete
-        if (!CollectionUtils.isEmpty(metricToDelete)) {
-            deleteMetricBatch(metricToDelete, user);
         }
 
     }

@@ -116,45 +116,17 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                 .collect(Collectors.toMap(DimensionResp::getBizName, a -> a, (k1, k2) -> k1));
 
         List<DimensionReq> dimensionToInsert = Lists.newArrayList();
-        List<DimensionReq> dimensionToUpdate = Lists.newArrayList();
-        List<Long> dimensionToDelete = Lists.newArrayList();
 
         // look for which dimension need to insert, update, delete
-        dimensionReqs.stream().forEach(dimension -> {
+        dimensionReqs.forEach(dimension -> {
             if (!bizNameMap.containsKey(dimension.getBizName())) {
                 dimensionToInsert.add(dimension);
-            } else {
-                DimensionResp dimensionRespByBizName = bizNameMap.get(dimension.getBizName());
-                if (null != dimensionRespByBizName && isChange(dimension, dimensionRespByBizName)) {
-                    dimension.setId(dimensionRespByBizName.getId());
-                    dimension.updatedBy(user.getName());
-                    dimensionToUpdate.add(dimension);
-                }
-            }
-        });
-
-        // the bizNames from alter dimensions
-        List<String> bizNames =
-                dimensionReqs.stream().map(DimensionReq::getBizName).collect(Collectors.toList());
-        bizNameMap.keySet().forEach(bizNameInDb -> {
-            if (!bizNames.contains(bizNameInDb)) {
-                dimensionToDelete.add(bizNameMap.get(bizNameInDb).getId());
             }
         });
 
         // insert
         if (!CollectionUtils.isEmpty(dimensionToInsert)) {
             createDimensionBatch(dimensionToInsert, user);
-        }
-
-        // update
-        if (!CollectionUtils.isEmpty(dimensionToUpdate)) {
-            updateDimensionBatch(dimensionToUpdate, user);
-        }
-
-        // delete
-        if (!CollectionUtils.isEmpty(dimensionToDelete)) {
-            deleteDimensionBatch(dimensionToDelete, user);
         }
 
     }
