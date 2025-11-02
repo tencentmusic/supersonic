@@ -42,6 +42,6 @@ public class TextSegmentConvert {
         if (Objects.isNull(textSegment) || Objects.isNull(textSegment.metadata())) {
             return null;
         }
-        return textSegment.metadata().get(QUERY_ID);
+        return textSegment.metadata().getString(QUERY_ID);
     }
 }
