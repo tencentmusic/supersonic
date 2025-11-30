@@ -52,7 +52,8 @@ public class PlainTextExecutor implements ChatQueryExecutor {
 
         String promptStr = String.format(chatApp.getPrompt(), getHistoryInputs(executeContext),
                 executeContext.getRequest().getQueryText());
-        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
+        // 直接使用字符串创建 Prompt，避免 PromptTemplate 解析,比如用户输入中包含了{{}}
+        Prompt prompt = new Prompt(promptStr);
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(chatApp.getChatModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
