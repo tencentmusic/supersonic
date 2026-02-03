@@ -26,8 +26,6 @@ public class Tenant {
 
     private String status;
 
-    private Long planId;
-
     private String contactEmail;
 
     private String contactName;
@@ -38,17 +36,10 @@ public class Tenant {
 
     private String settings;
 
-    private Integer maxUsers;
-
-    private Integer maxDatasets;
-
-    private Integer maxModels;
-
-    private Integer maxAgents;
-
-    private Integer maxApiCallsPerDay;
-
-    private Long maxTokensPerMonth;
+    /**
+     * Enriched at query time, not persisted.
+     */
+    private String subscriptionPlanName;
 
     private Timestamp createdAt;
 
@@ -58,17 +49,4 @@ public class Tenant {
 
     private String updatedBy;
 
-    /**
-     * Check if a resource limit is unlimited (-1 means unlimited)
-     */
-    public boolean isUnlimited(Integer limit) {
-        return limit == null || limit == -1;
-    }
-
-    /**
-     * Check if token limit is unlimited
-     */
-    public boolean hasUnlimitedTokens() {
-        return maxTokensPerMonth == null || maxTokensPerMonth == -1;
-    }
 }

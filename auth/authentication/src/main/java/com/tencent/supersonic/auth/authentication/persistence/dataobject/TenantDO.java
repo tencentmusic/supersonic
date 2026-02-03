@@ -25,8 +25,6 @@ public class TenantDO {
 
     private String status;
 
-    private Long planId;
-
     private String contactEmail;
 
     private String contactName;
@@ -36,18 +34,6 @@ public class TenantDO {
     private String logoUrl;
 
     private String settings;
-
-    private Integer maxUsers;
-
-    private Integer maxDatasets;
-
-    private Integer maxModels;
-
-    private Integer maxAgents;
-
-    private Integer maxApiCallsPerDay;
-
-    private Long maxTokensPerMonth;
 
     private Timestamp createdAt;
 

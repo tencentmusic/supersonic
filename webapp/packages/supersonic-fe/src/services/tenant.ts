@@ -12,12 +12,8 @@ export interface Tenant {
   contactPhone?: string;
   logoUrl?: string;
   settings?: string;
-  maxUsers: number;
-  maxDatasets: number;
-  maxModels: number;
-  maxAgents: number;
-  maxApiCallsPerDay: number;
-  maxTokensPerMonth: number;
+  /** Enriched at query time, not persisted */
+  subscriptionPlanName?: string;
   createdAt?: string;
   createdBy?: string;
   updatedAt?: string;

@@ -39,18 +39,11 @@ CREATE TABLE IF NOT EXISTS `s2_tenant` (
     `code` VARCHAR(100) NOT NULL,
     `description` VARCHAR(500) DEFAULT NULL,
     `status` VARCHAR(20) DEFAULT 'ACTIVE',
-    `plan_id` BIGINT DEFAULT NULL,
     `contact_email` VARCHAR(255) DEFAULT NULL,
     `contact_name` VARCHAR(100) DEFAULT NULL,
     `contact_phone` VARCHAR(50) DEFAULT NULL,
     `logo_url` VARCHAR(500) DEFAULT NULL,
     `settings` TEXT DEFAULT NULL,
-    `max_users` INT DEFAULT -1,
-    `max_datasets` INT DEFAULT -1,
-    `max_models` INT DEFAULT -1,
-    `max_agents` INT DEFAULT -1,
-    `max_api_calls_per_day` INT DEFAULT -1,
-    `max_tokens_per_month` BIGINT DEFAULT -1,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `created_by` VARCHAR(100) DEFAULT NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1069,12 +1062,15 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_deployment` (
     `status` VARCHAR(20) NOT NULL,
     `result_detail` CLOB DEFAULT NULL,
     `error_message` TEXT DEFAULT NULL,
+    `current_step` VARCHAR(50) DEFAULT NULL,
     `start_time` TIMESTAMP DEFAULT NULL,
     `end_time` TIMESTAMP DEFAULT NULL,
     `tenant_id` BIGINT NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `created_by` VARCHAR(100) DEFAULT NULL,
-    PRIMARY KEY (`id`)
+    `active_lock` VARCHAR(100) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT uk_deployment_active_lock UNIQUE (`active_lock`)
 );
 COMMENT ON TABLE s2_semantic_deployment IS '语义模板部署记录表';
 CREATE INDEX idx_semantic_deployment_template ON s2_semantic_deployment(`template_id`);

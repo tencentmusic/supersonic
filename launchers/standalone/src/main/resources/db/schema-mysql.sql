@@ -38,25 +38,17 @@ CREATE TABLE IF NOT EXISTS `s2_tenant` (
     `code` varchar(100) NOT NULL COMMENT '租户编码',
     `description` varchar(500) DEFAULT NULL COMMENT '租户描述',
     `status` varchar(20) DEFAULT 'ACTIVE' COMMENT '租户状态: ACTIVE, SUSPENDED, DELETED',
-    `plan_id` bigint(20) DEFAULT NULL COMMENT '当前订阅计划ID',
     `contact_email` varchar(255) DEFAULT NULL COMMENT '联系邮箱',
     `contact_name` varchar(100) DEFAULT NULL COMMENT '联系人姓名',
     `contact_phone` varchar(50) DEFAULT NULL COMMENT '联系电话',
     `logo_url` varchar(500) DEFAULT NULL COMMENT 'Logo URL',
     `settings` text DEFAULT NULL COMMENT '租户设置(JSON)',
-    `max_users` int(11) DEFAULT -1 COMMENT '最大用户数覆盖',
-    `max_datasets` int(11) DEFAULT -1 COMMENT '最大数据集覆盖',
-    `max_models` int(11) DEFAULT -1 COMMENT '最大模型数覆盖',
-    `max_agents` int(11) DEFAULT -1 COMMENT '最大智能体覆盖',
-    `max_api_calls_per_day` int(11) DEFAULT -1 COMMENT '每日API调用覆盖',
-    `max_tokens_per_month` bigint(20) DEFAULT -1 COMMENT '每月Token覆盖',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `created_by` varchar(100) DEFAULT NULL,
     `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `updated_by` varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_tenant_code` (`code`),
-    KEY `idx_tenant_plan` (`plan_id`)
+    UNIQUE KEY `uk_tenant_code` (`code`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='租户主表';
 
 -- 租户订阅记录表
@@ -1094,13 +1086,16 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_deployment` (
     `status` varchar(20) NOT NULL COMMENT '状态: PENDING/RUNNING/SUCCESS/FAILED',
     `result_detail` longtext DEFAULT NULL COMMENT 'JSON: 创建的对象详情',
     `error_message` text DEFAULT NULL COMMENT '错误信息',
+    `current_step` varchar(50) DEFAULT NULL COMMENT '当前执行步骤',
     `start_time` datetime DEFAULT NULL COMMENT '开始时间',
     `end_time` datetime DEFAULT NULL COMMENT '结束时间',
     `tenant_id` bigint(20) NOT NULL COMMENT '租户ID',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `created_by` varchar(100) DEFAULT NULL,
+    `active_lock` varchar(100) DEFAULT NULL COMMENT '部署并发锁: PENDING/RUNNING时为templateId_tenantId, 否则为NULL',
     PRIMARY KEY (`id`),
     KEY `idx_semantic_deployment_template` (`template_id`),
     KEY `idx_semantic_deployment_tenant` (`tenant_id`),
-    KEY `idx_semantic_deployment_status` (`status`)
+    KEY `idx_semantic_deployment_status` (`status`),
+    UNIQUE KEY `uk_deployment_active_lock` (`active_lock`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='语义模板部署记录表';
