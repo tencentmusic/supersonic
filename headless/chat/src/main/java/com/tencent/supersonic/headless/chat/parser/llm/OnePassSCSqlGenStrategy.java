@@ -16,11 +16,10 @@ import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.AiServices;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -38,8 +37,7 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
 
     public static final String APP_KEY = "S2SQL_PARSER";
 
-    @Autowired
-    private ParserConfig parserConfig;
+    private final ParserConfig parserConfig;
 
     public static final String INSTRUCTION =
             "#Role: You are a data analyst experienced in SQL languages."
@@ -56,7 +54,8 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
                     + "\n#Exemplars: {{exemplar}}"
                     + "\n#Query: Question:{{question}},Schema:{{schema}},SideInfo:{{information}}";
 
-    public OnePassSCSqlGenStrategy() {
+    public OnePassSCSqlGenStrategy(ParserConfig parserConfig) {
+        this.parserConfig = parserConfig;
         ChatAppManager.register(APP_KEY, ChatApp.builder().prompt(INSTRUCTION).name("语义SQL解析")
                 .appModule(AppModule.CHAT).description("通过大模型做语义解析生成S2SQL").enable(true).build());
     }

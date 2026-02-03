@@ -40,10 +40,9 @@
         <mybatis.version>3.5.19</mybatis.version>
         <guava.version>32.0.0-jre</guava.version>
         <hanlp.version>portable-1.8.4</hanlp.version>
-        <hadoop.version>2.7.2</hadoop.version>
-        <commons.lang.version>2.6</commons.lang.version>
+        <hadoop.version>3.3.6</hadoop.version>
         <commons.lang3.version>3.7</commons.lang3.version>
-        <org.testng.version>6.13.1</org.testng.version>
+        <org.testng.version>7.10.2</org.testng.version>
         <yaml.utils.version>2.14.1</yaml.utils.version>
         <jjwt.version>0.12.6</jjwt.version>
         <alibaba.druid.version>1.2.24</alibaba.druid.version>
@@ -61,15 +60,14 @@
 <!--        <httpmime.version>4.5.6</httpmime.version>-->
         <transmittable.version>2.14.5</transmittable.version>
         <commons.compress.version>1.27.1</commons.compress.version>
-        <jetty.util.version>6.1.26</jetty.util.version>
         <!--<spring.version>2.7.2</spring.version>-->
         <jsonpath.version>2.8.0</jsonpath.version>
         <calcite.version>1.38.0</calcite.version>
         <calcite.avatica.version>1.26.0</calcite.avatica.version>
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
-        <easyexcel.version>2.2.11</easyexcel.version>
-        <poi.version>3.17</poi.version>
+        <easyexcel.version>4.0.3</easyexcel.version>
+        <poi.version>5.2.5</poi.version>
         <langchain4j.version>0.36.2</langchain4j.version>
         <langchain4j.embedding.version>0.36.2</langchain4j.embedding.version>
 <!--        <postgresql.version>42.7.1</postgresql.version>-->
