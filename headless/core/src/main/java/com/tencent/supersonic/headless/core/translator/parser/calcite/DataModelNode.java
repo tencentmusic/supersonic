@@ -43,14 +43,7 @@ public class DataModelNode extends SemanticNode {
             }
         } else if (dataModel.getModelDetail().getTableQuery() != null
                 && !dataModel.getModelDetail().getTableQuery().isEmpty()) {
-            if (dataModel.getModelDetail().getDbType()
-                    .equalsIgnoreCase(EngineType.POSTGRESQL.getName())) {
-                String fullTableName = String.join(".public.",
-                        dataModel.getModelDetail().getTableQuery().split("\\."));
-                sqlTable = "SELECT * FROM " + fullTableName;
-            } else {
-                sqlTable = "SELECT * FROM " + dataModel.getModelDetail().getTableQuery();
-            }
+            sqlTable = "SELECT * FROM " + dataModel.getModelDetail().getTableQuery();
         }
 
         // String filterSql = dataModel.getFilterSql();
