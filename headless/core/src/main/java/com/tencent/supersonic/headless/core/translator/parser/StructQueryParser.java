@@ -42,8 +42,9 @@ public class StructQueryParser implements QueryParser {
         if (!sqlGenerateUtils.isSupportWith(queryStatement.getOntology().getDatabaseType(),
                 queryStatement.getOntology().getDatabaseVersion())) {
             sqlQuery.setSupportWith(false);
-            sql = String.format("select %s from %s t0 %s %s %s",
+            sql = String.format("select %s from %s %s %s %s %s",
                     sqlGenerateUtils.getSelect(structQuery), dsTable,
+                    sqlGenerateUtils.generateWhere(structQuery, null),
                     sqlGenerateUtils.getGroupBy(structQuery),
                     sqlGenerateUtils.getOrderBy(structQuery),
                     sqlGenerateUtils.getLimit(structQuery));
