@@ -55,7 +55,7 @@ const DatabaseSettingModal: React.FC<CreateFormProps> = ({
 
   return (
     <Modal
-      width={600}
+      width={720}
       destroyOnClose
       title="数据库连接设置"
       style={{ top: 48 }}

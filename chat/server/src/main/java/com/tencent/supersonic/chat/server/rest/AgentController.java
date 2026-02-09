@@ -8,7 +8,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,10 +23,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping({"/api/chat/agent", "/openapi/chat/agent"})
+@RequiredArgsConstructor
 public class AgentController {
 
-    @Autowired
-    private AgentService agentService;
+    private final AgentService agentService;
 
     @PostMapping
     public Agent createAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS s2_database (
     version VARCHAR(64) DEFAULT NULL,
     type VARCHAR(20) NOT NULL,
     config TEXT NOT NULL,
+    pool_config TEXT DEFAULT NULL,
     tenant_id BIGINT NOT NULL DEFAULT 1,
     admin VARCHAR(500) DEFAULT NULL,
     viewer VARCHAR(500) DEFAULT NULL,
@@ -29,6 +30,7 @@ COMMENT ON TABLE s2_database IS '数据库实例表';
 COMMENT ON COLUMN s2_database.name IS '数据库名称';
 COMMENT ON COLUMN s2_database.type IS '数据库类型：mysql,clickhouse,postgresql等';
 COMMENT ON COLUMN s2_database.config IS '连接配置JSON';
+COMMENT ON COLUMN s2_database.pool_config IS 'JSON configuration for connection pool settings';
 CREATE INDEX IF NOT EXISTS idx_database_tenant ON s2_database(tenant_id);
 
 -- ========================================

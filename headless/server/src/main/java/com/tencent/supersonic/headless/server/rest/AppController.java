@@ -10,7 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.response.AppResp;
 import com.tencent.supersonic.headless.server.service.AppService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/semantic/app")
+@RequiredArgsConstructor
 public class AppController {
 
-    @Autowired
-    private AppService appService;
+    private final AppService appService;
 
     @PostMapping
     public boolean save(@RequestBody AppReq app, HttpServletRequest request,

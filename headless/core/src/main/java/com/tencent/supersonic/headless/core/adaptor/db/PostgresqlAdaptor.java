@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PostgresqlAdaptor extends BaseDbAdaptor {
@@ -146,4 +149,66 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         }
     }
 
+    /**
+     * PostgreSQL UPSERT using INSERT ... ON CONFLICT DO UPDATE syntax.
+     */
+    @Override
+    public String buildUpsertSql(String tableName, List<String> columns, List<String> primaryKeys) {
+        if (primaryKeys == null || primaryKeys.isEmpty()) {
+            // No primary keys - fall back to simple INSERT
+            return super.buildUpsertSql(tableName, columns, primaryKeys);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO ").append(tableName).append(" (");
+        sb.append(String.join(", ", columns));
+        sb.append(") VALUES (");
+        sb.append(String.join(", ", columns.stream().map(c -> "?").toList()));
+        sb.append(") ON CONFLICT (");
+        sb.append(String.join(", ", primaryKeys));
+        sb.append(") DO UPDATE SET ");
+
+        // Update all non-primary-key columns
+        List<String> updateCols = columns.stream().filter(col -> !primaryKeys.contains(col))
+                .collect(Collectors.toList());
+
+        if (updateCols.isEmpty()) {
+            // All columns are primary keys - use DO NOTHING instead
+            return sb.toString().replace(") DO UPDATE SET ", ") DO NOTHING");
+        }
+
+        sb.append(updateCols.stream().map(col -> col + " = EXCLUDED." + col)
+                .collect(Collectors.joining(", ")));
+
+        return sb.toString();
+    }
+
+    /**
+     * Parse PostgreSQL EXPLAIN output for row count estimate. PostgreSQL EXPLAIN shows "rows=N" in
+     * the plan output.
+     */
+    @Override
+    public long parseExplainRowCount(List<String> explainResult) {
+        if (explainResult == null || explainResult.isEmpty()) {
+            return -1L;
+        }
+        // PostgreSQL EXPLAIN shows "rows=N" in its output
+        Pattern rowsPattern = Pattern.compile("rows=(\\d+)", Pattern.CASE_INSENSITIVE);
+        long totalRows = 0;
+        boolean found = false;
+
+        for (String line : explainResult) {
+            Matcher matcher = rowsPattern.matcher(line);
+            // Take the first rows= value (top-level plan node)
+            if (matcher.find() && !found) {
+                try {
+                    totalRows = Long.parseLong(matcher.group(1));
+                    found = true;
+                } catch (NumberFormatException e) {
+                    // Continue searching
+                }
+            }
+        }
+        return found ? totalRows : -1L;
+    }
 }

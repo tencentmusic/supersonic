@@ -8,7 +8,7 @@ import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,10 +22,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat/plugin")
+@RequiredArgsConstructor
 public class PluginController {
 
-    @Autowired
-    protected PluginService pluginService;
+    private final PluginService pluginService;
 
     @PostMapping
     public boolean createPlugin(@RequestBody ChatPlugin plugin,

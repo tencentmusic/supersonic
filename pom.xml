@@ -82,6 +82,7 @@
         <stax2.version>4.2.2</stax2.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
         <jgrapht.version>1.5.2</jgrapht.version>
+        <redisson.version>3.40.2</redisson.version>
     </properties>
 
     <dependencyManagement>

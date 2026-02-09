@@ -264,6 +264,20 @@ const ROUTES = [
     envEnableList: [ENV_KEY.SEMANTIC],
     access: ROUTE_AUTH_CODES.MENU_SEMANTIC_TEMPLATE,
   },
+  {
+    path: '/report-schedule',
+    name: 'reportSchedule',
+    component: './ReportSchedule',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
+    path: '/delivery-config',
+    name: 'deliveryConfig',
+    component: './DeliveryConfig',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  // Connection 功能已整合到数据库管理页面 (SemanticModel/Database)
+  // 后端 API /api/v1/connections 保留，前端入口改为数据库详情中的"同步配置"Tab
   // ========== 平台管理 (Platform Admin) ==========
   {
     path: '/platform',
@@ -277,7 +291,7 @@ const ROUTES = [
       {
         path: '/platform/tenants',
         name: 'tenants',
-        component: './Platform/TenantManagement',
+        component: './AdminTenant',
         access: ROUTE_AUTH_CODES.PLATFORM_TENANT_MANAGE,
       },
       {

@@ -47,7 +47,7 @@ BEGIN
     -- s2_user_organization.tenant_id (如果不存在)
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns
                    WHERE table_schema = DATABASE() AND table_name = 's2_user_organization' AND column_name = 'tenant_id') THEN
-        ALTER TABLE `s2_user_organization` ADD COLUMN `tenant_id` bigint(20) NOT NULL DEFAULT 1 COMMENT '租户ID';
+        ALTER TABLE `s2_user_organization` ADD COLUMN `tenant_id` bigint NOT NULL DEFAULT 1 COMMENT '租户ID';
         CREATE INDEX `idx_user_org_tenant` ON `s2_user_organization` (`tenant_id`);
     END IF;
 END //

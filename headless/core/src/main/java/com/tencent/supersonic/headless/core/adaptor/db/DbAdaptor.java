@@ -25,4 +25,23 @@ public interface DbAdaptor {
             String tableName) throws SQLException;
 
     FieldType classifyColumnType(String typeName);
+
+    /**
+     * Build an UPSERT (INSERT ... ON CONFLICT UPDATE) SQL statement for the given table, columns
+     * and primary keys. This handles duplicates by updating existing rows instead of failing.
+     *
+     * @param tableName the target table name
+     * @param columns list of column names to insert/update
+     * @param primaryKeys list of primary key column names for conflict detection
+     * @return the database-specific UPSERT SQL with placeholders (?)
+     */
+    String buildUpsertSql(String tableName, List<String> columns, List<String> primaryKeys);
+
+    /**
+     * Parse row count estimate from EXPLAIN output. Returns -1 if estimation is not possible.
+     *
+     * @param explainResult the result rows from EXPLAIN query
+     * @return estimated row count, or -1 if unknown
+     */
+    long parseExplainRowCount(List<String> explainResult);
 }

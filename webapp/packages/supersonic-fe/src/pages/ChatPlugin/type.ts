@@ -10,6 +10,7 @@ export enum PluginTypeEnum {
   WEB_PAGE = 'WEB_PAGE',
   WEB_SERVICE = 'WEB_SERVICE',
   NL2SQL_LLM = 'NL2SQL_LLM',
+  REPORT_SCHEDULE = 'REPORT_SCHEDULE',
 }
 
 export enum ParseModeEnum {

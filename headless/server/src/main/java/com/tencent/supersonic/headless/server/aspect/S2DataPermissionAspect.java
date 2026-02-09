@@ -29,6 +29,7 @@ import com.tencent.supersonic.headless.server.service.DataSetAuthService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.QueryStructUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -38,7 +39,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -54,20 +54,15 @@ import java.util.stream.Collectors;
 @Component
 @Aspect
 @Slf4j
+@RequiredArgsConstructor
 public class S2DataPermissionAspect {
 
-    @Autowired
-    private QueryStructUtils queryStructUtils;
-    @Autowired
-    private ModelService modelService;
-    @Autowired
-    private SchemaService schemaService;
-    @Autowired
-    private AuthService authService;
-    @Autowired
-    private DataSetAuthService dataSetAuthService;
-    @Autowired
-    private SensitiveLevelConfig sensitiveLevelConfig;
+    private final QueryStructUtils queryStructUtils;
+    private final ModelService modelService;
+    private final SchemaService schemaService;
+    private final AuthService authService;
+    private final DataSetAuthService dataSetAuthService;
+    private final SensitiveLevelConfig sensitiveLevelConfig;
 
     @Pointcut("@annotation(com.tencent.supersonic.headless.server.annotation.S2DataPermission)")
     private void s2PermissionCheck() {}

@@ -9,17 +9,17 @@ import com.tencent.supersonic.chat.server.persistence.dataobject.ChatDO;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping({"/api/chat/manage", "/openapi/chat/manage"})
+@RequiredArgsConstructor
 public class ChatController {
 
-    @Autowired
-    private ChatManageService chatService;
+    private final ChatManageService chatService;
 
     @PostMapping("/save")
     public Long save(@RequestParam(value = "chatName") String chatName,

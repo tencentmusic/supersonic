@@ -35,25 +35,18 @@ COMMENT ON COLUMN s2_subscription_plan.name IS '计划名称';
 COMMENT ON COLUMN s2_subscription_plan.code IS '计划编码';
 COMMENT ON COLUMN s2_subscription_plan.max_users IS '最大用户数 (-1=无限制)';
 
--- 租户表
+-- 租户表 (quota columns removed - plan quotas managed via s2_tenant_subscription + s2_subscription_plan)
 CREATE TABLE IF NOT EXISTS s2_tenant (
     id BIGSERIAL NOT NULL,
     name VARCHAR(255) NOT NULL,
     code VARCHAR(100) NOT NULL,
     description VARCHAR(500) DEFAULT NULL,
     status VARCHAR(20) DEFAULT 'ACTIVE',
-    plan_id BIGINT DEFAULT NULL,
     contact_email VARCHAR(255) DEFAULT NULL,
     contact_name VARCHAR(100) DEFAULT NULL,
     contact_phone VARCHAR(50) DEFAULT NULL,
     logo_url VARCHAR(500) DEFAULT NULL,
     settings TEXT DEFAULT NULL,
-    max_users INTEGER DEFAULT -1,
-    max_datasets INTEGER DEFAULT -1,
-    max_models INTEGER DEFAULT -1,
-    max_agents INTEGER DEFAULT -1,
-    max_api_calls_per_day INTEGER DEFAULT -1,
-    max_tokens_per_month BIGINT DEFAULT -1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(100) DEFAULT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -64,7 +57,6 @@ CREATE TABLE IF NOT EXISTS s2_tenant (
 COMMENT ON TABLE s2_tenant IS '租户主表';
 COMMENT ON COLUMN s2_tenant.name IS '租户名称';
 COMMENT ON COLUMN s2_tenant.code IS '租户编码';
-COMMENT ON COLUMN s2_tenant.plan_id IS '订阅计划ID';
 
 -- 租户订阅记录表
 CREATE TABLE IF NOT EXISTS s2_tenant_subscription (

@@ -18,9 +18,9 @@ INSERT INTO `s2_subscription_plan` (`id`, `name`, `code`, `description`, `price_
 AS new_values
 ON DUPLICATE KEY UPDATE `name`=new_values.`name`, `description`=new_values.`description`;
 
--- 插入默认租户
-INSERT INTO `s2_tenant` (`id`, `name`, `code`, `description`, `status`, `plan_id`, `created_by`) VALUES
-(1, '默认租户', 'default', '系统默认租户', 'ACTIVE', 1, 'system')
+-- 插入默认租户 (plan_id removed - plan is tracked via s2_tenant_subscription)
+INSERT INTO `s2_tenant` (`id`, `name`, `code`, `description`, `status`, `created_by`) VALUES
+(1, '默认租户', 'default', '系统默认租户', 'ACTIVE', 'system')
 AS new_values
 ON DUPLICATE KEY UPDATE `name`=new_values.`name`;
 

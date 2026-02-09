@@ -8,8 +8,8 @@ import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -22,16 +22,12 @@ import java.util.List;
 @Component
 @Order(0)
 @Slf4j
+@RequiredArgsConstructor
 public class BuiltinDatabaseInitializer implements CommandLineRunner {
 
-    @Autowired
-    private DatabaseService databaseService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private DataSourceProperties dataSourceProperties;
+    private final DatabaseService databaseService;
+    private final UserService userService;
+    private final DataSourceProperties dataSourceProperties;
 
     @Value("${spring.datasource.driver-class-name:}")
     private String driverClassName;

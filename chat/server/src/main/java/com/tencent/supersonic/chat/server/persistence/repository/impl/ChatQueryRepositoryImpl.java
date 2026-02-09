@@ -22,10 +22,10 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.common.util.PageUtils;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.response.ParseTimeCostResp;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -39,16 +39,14 @@ import java.util.stream.Collectors;
 @Repository
 @Primary
 @Slf4j
+@RequiredArgsConstructor
 public class ChatQueryRepositoryImpl implements ChatQueryRepository {
 
-    @Autowired
-    private ChatQueryDOMapper chatQueryDOMapper;
+    private final ChatQueryDOMapper chatQueryDOMapper;
 
-    @Autowired
-    private ChatParseMapper chatParseMapper;
+    private final ChatParseMapper chatParseMapper;
 
-    @Autowired
-    private ShowCaseCustomMapper showCaseCustomMapper;
+    private final ShowCaseCustomMapper showCaseCustomMapper;
 
     @Override
     public PageInfo<QueryResp> getChatQuery(PageQueryInfoReq pageQueryInfoReq, Long chatId) {

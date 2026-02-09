@@ -4,7 +4,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -12,12 +11,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CaffeineCacheManager implements CacheManager {
 
-    @Autowired
-    private CacheCommonConfig cacheCommonConfig;
+    private final CacheCommonConfig cacheCommonConfig;
 
-    @Autowired
-    @Qualifier("caffeineCache")
-    private Cache<String, Object> caffeineCache;
+    private final Cache<String, Object> caffeineCache;
+
+    public CaffeineCacheManager(CacheCommonConfig cacheCommonConfig,
+            @Qualifier("caffeineCache") Cache<String, Object> caffeineCache) {
+        this.cacheCommonConfig = cacheCommonConfig;
+        this.caffeineCache = caffeineCache;
+    }
 
     @Override
     public Boolean put(String key, Object value) {

@@ -20,10 +20,10 @@ import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.RetrieveService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.utils.ChatWorkflowEngine;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -32,15 +32,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class S2ChatLayerService implements ChatLayerService {
-    @Autowired
-    private SchemaService schemaService;
-    @Autowired
-    private DataSetService dataSetService;
-    @Autowired
-    private RetrieveService retrieveService;
-    @Autowired
-    private ChatWorkflowEngine chatWorkflowEngine;
+    private final SchemaService schemaService;
+    private final DataSetService dataSetService;
+    private final RetrieveService retrieveService;
+    private final ChatWorkflowEngine chatWorkflowEngine;
 
     @Override
     public MapResp map(QueryNLReq queryNLReq) {

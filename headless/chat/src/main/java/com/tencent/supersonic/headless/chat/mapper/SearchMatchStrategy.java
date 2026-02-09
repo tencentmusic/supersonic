@@ -6,8 +6,8 @@ import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.SearchService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,15 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * SearchMatchStrategy encapsulates a concrete matching algorithm executed during search process.
  */
 @Service
+@RequiredArgsConstructor
 public class SearchMatchStrategy extends BaseMatchStrategy<HanlpMapResult> {
 
     private static final int SEARCH_SIZE = 3;
 
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    private final KnowledgeBaseService knowledgeBaseService;
 
-    @Autowired
-    private MapperHelper mapperHelper;
+    private final MapperHelper mapperHelper;
 
     @Override
     public Map<MatchText, List<HanlpMapResult>> match(ChatQueryContext chatQueryContext,

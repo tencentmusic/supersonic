@@ -111,12 +111,130 @@ export enum MsgValidTypeEnum {
   INVALID = 3,
 }
 
+export type ConfirmActionType = {
+  action: string;
+  params: Record<string, any>;
+};
+
+export type ScheduleSummaryType = {
+  id: number;
+  name: string;
+  datasetId: number;
+  datasetName?: string;
+  cronExpression: string;
+  cronDescription: string;
+  enabled: boolean;
+  lastExecutionTime?: string;
+  lastExecutionStatus?: string;
+};
+
+export type ExecutionSummaryType = {
+  id: number;
+  startTime: string;
+  endTime?: string;
+  status: string;
+  errorMessage?: string;
+};
+
+// Dashboard data types for daily operations reports
+export type KpiMetricType = {
+  name: string;
+  bizName: string;
+  value: number;
+  previousValue?: number;
+  trend?: 'up' | 'down' | 'flat';
+  trendPercent?: number;
+  unit?: string;
+  description?: string;
+};
+
+export type TrendDataPointType = {
+  date: string;
+  [metricBizName: string]: string | number;
+};
+
+// Dashboard analysis types
+export type AnomalyType = {
+  metricName: string;
+  metricBizName: string;
+  date: string;
+  value: number;
+  expectedValue: number;
+  deviationPercent: number;
+  severity: 'HIGH' | 'MEDIUM' | 'LOW';
+  description: string;
+};
+
+export type InsightType = {
+  type: 'TREND' | 'THRESHOLD' | 'CONSECUTIVE' | 'VOLATILITY';
+  metricName: string;
+  metricBizName: string;
+  title: string;
+  description: string;
+  confidence: number;
+};
+
+export type AttributionType = {
+  metricName: string;
+  metricBizName: string;
+  dimensionName: string;
+  dimensionBizName: string;
+  dimensionValue: string;
+  currentValue: number;
+  previousValue: number;
+  change: number;
+  changePercent: number;
+  contribution: number;
+  direction: 'INCREASE' | 'DECREASE';
+};
+
+export type AnalysisResultType = {
+  summary: string;
+  llmInsight?: string;  // LLM-generated analysis insight
+  anomalies: AnomalyType[];
+  insights: InsightType[];
+  attributions?: AttributionType[];  // Attribution analysis results
+  overallStatus: 'GOOD' | 'WARNING' | 'CRITICAL';
+  anomalyCount: number;
+  insightCount: number;
+};
+
+export type DashboardDataType = {
+  kpiMetrics: KpiMetricType[];
+  trendData: TrendDataPointType[];
+  trendMetrics: string[];
+  detailColumns: Array<{
+    name: string;
+    bizName: string;
+    type: string;
+  }>;
+  detailData: any[];
+  title?: string;
+  reportDate?: string;
+  analysis?: AnalysisResultType;
+};
+
 export type PluginResonseType = {
   description: string;
   webPage: { url: string; paramOptions: any; params: any; valueParams: any };
   pluginId: number;
   pluginType: string;
   name: string;
+  // Report Schedule plugin fields
+  intent?: string;
+  message?: string;
+  success?: boolean;
+  needConfirm?: boolean;
+  confirmAction?: ConfirmActionType;
+  scheduleId?: number;
+  scheduleName?: string;
+  cronExpression?: string;
+  cronDescription?: string;
+  nextExecutionTime?: string;
+  schedules?: ScheduleSummaryType[];
+  executions?: ExecutionSummaryType[];
+  // Dashboard plugin fields
+  dashboardData?: DashboardDataType;
 };
 
 export type MetricInfoType = {

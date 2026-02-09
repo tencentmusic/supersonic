@@ -8,10 +8,10 @@ import com.tencent.supersonic.headless.chat.knowledge.helper.NatureHelper;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,12 +24,11 @@ import java.util.stream.Stream;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MetaEmbeddingService {
 
-    @Autowired
-    private EmbeddingService embeddingService;
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
+    private final EmbeddingService embeddingService;
+    private final EmbeddingConfig embeddingConfig;
 
     public List<RetrieveQueryResult> retrieveQuery(RetrieveQuery retrieveQuery, int num,
             Map<Long, List<Long>> modelIdToDataSetIds, Set<Long> detectDataSetIds) {

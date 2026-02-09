@@ -18,6 +18,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,20 +35,18 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implements AgentService {
 
-    @Autowired
-    private MemoryService memoryService;
+    private final MemoryService memoryService;
 
     @Autowired
     @Lazy
     private ChatQueryService chatQueryService;
 
-    @Autowired
-    private ChatModelService chatModelService;
+    private final ChatModelService chatModelService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     @Qualifier("chatExecutor")

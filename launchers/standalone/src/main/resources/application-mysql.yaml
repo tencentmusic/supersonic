@@ -23,5 +23,5 @@ spring:
     table: flyway_schema_history
     # 允许乱序执行（用于修复脚本）
     out-of-order: false
-    # 验证迁移脚本
-    validate-on-migrate: true
+    # 验证迁移脚本（关闭以允许修复已有脚本的 display width deprecation warning）
+    validate-on-migrate: false

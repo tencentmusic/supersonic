@@ -156,15 +156,46 @@ public class JdbcDataSourceUtils {
         return jdbcDataSource.getDataSource(database);
     }
 
+    /**
+     * Get a pool-type-specific data source. Each pool type gets its own isolated connection pool.
+     *
+     * @param database the database configuration
+     * @param poolType the pool type name (INTERACTIVE, REPORT, EXPORT, SYNC)
+     * @param maxActive optional override for max active connections
+     * @param maxWaitMs optional override for max wait time in ms
+     * @return the pooled data source
+     */
+    public DataSource getDataSource(DatabaseResp database, String poolType, Integer maxActive,
+            Integer maxWaitMs) throws RuntimeException {
+        return jdbcDataSource.getDataSource(database, poolType, maxActive, maxWaitMs);
+    }
+
     public Connection getConnection(DatabaseResp database) throws RuntimeException {
-        Connection conn = getConnectionWithRetry(database);
+        return getConnection(database, null, null, null);
+    }
+
+    /**
+     * Get a connection from a pool-type-specific data source.
+     *
+     * @param database the database configuration
+     * @param poolType the pool type name (INTERACTIVE, REPORT, EXPORT, SYNC), null for default
+     * @param maxActive optional override for max active connections
+     * @param maxWaitMs optional override for max wait time in ms
+     * @return a database connection
+     */
+    public Connection getConnection(DatabaseResp database, String poolType, Integer maxActive,
+            Integer maxWaitMs) throws RuntimeException {
+        Connection conn = getConnectionWithRetry(database, poolType, maxActive, maxWaitMs);
         if (conn == null) {
             try {
                 releaseDataSource(database);
-                DataSource dataSource = getDataSource(database);
+                DataSource dataSource =
+                        poolType != null ? getDataSource(database, poolType, maxActive, maxWaitMs)
+                                : getDataSource(database);
                 return dataSource.getConnection();
             } catch (Exception e) {
-                log.error("Get connection error, jdbcUrl:{}, e:{}", database.getUrl(), e);
+                log.error("Get connection error, jdbcUrl:{}, poolType:{}, e:{}", database.getUrl(),
+                        poolType, e);
                 throw new RuntimeException("Get connection error, jdbcUrl:" + database.getUrl()
                         + " you can try again later or reset datasource");
             }
@@ -173,6 +204,11 @@ public class JdbcDataSourceUtils {
     }
 
     private Connection getConnectionWithRetry(DatabaseResp database) {
+        return getConnectionWithRetry(database, null, null, null);
+    }
+
+    private Connection getConnectionWithRetry(DatabaseResp database, String poolType,
+            Integer maxActive, Integer maxWaitMs) {
         int rc = 1;
         for (;;) {
 
@@ -181,7 +217,10 @@ public class JdbcDataSourceUtils {
             }
 
             try {
-                Connection connection = getDataSource(database).getConnection();
+                DataSource ds =
+                        poolType != null ? getDataSource(database, poolType, maxActive, maxWaitMs)
+                                : getDataSource(database);
+                Connection connection = ds.getConnection();
                 if (connection != null && connection.isValid(5)) {
                     return connection;
                 }

@@ -3,9 +3,9 @@ package com.tencent.supersonic.headless.chat.mapper;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.HanlpMapResult;
 import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.MAPPER_DI
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class HanlpDictMatchStrategy extends SingleMatchStrategy<HanlpMapResult> {
 
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    private final KnowledgeBaseService knowledgeBaseService;
 
     public List<HanlpMapResult> detectByStep(ChatQueryContext chatQueryContext,
             Set<Long> detectDataSetIds, String detectSegment, int offset) {

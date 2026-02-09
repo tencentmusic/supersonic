@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import com.tencent.supersonic.headless.server.service.TermService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +22,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/term")
+@RequiredArgsConstructor
 public class TermController {
 
-    @Autowired
-    private TermService termService;
+    private final TermService termService;
 
     @PostMapping("/saveOrUpdate")
     public boolean saveOrUpdate(@RequestBody TermReq termReq, HttpServletRequest request,

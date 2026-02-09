@@ -3,7 +3,7 @@ package com.tencent.supersonic.headless.server.rest;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +17,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/modelRela")
+@RequiredArgsConstructor
 public class ModelRelaController {
 
-    @Autowired
-    private ModelRelaService modelRelaService;
+    private final ModelRelaService modelRelaService;
 
     @PostMapping
     public boolean save(@RequestBody ModelRela modelRela, User user) {

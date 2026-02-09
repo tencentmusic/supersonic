@@ -46,7 +46,7 @@ public abstract class PluginSemanticQuery {
         List<SchemaElementMatch> schemaElementMatchList = parseInfo.getElementMatches().stream()
                 .filter(schemaElementMatch -> schemaElementMatch.getFrequency() != null)
                 .sorted(Comparator.comparingLong(SchemaElementMatch::getFrequency).reversed())
-                .collect(Collectors.toList());
+                .toList();
         if (!CollectionUtils.isEmpty(schemaElementMatchList)) {
             schemaElementMatchList.stream().filter(schemaElementMatch -> SchemaElementType.VALUE
                     .equals(schemaElementMatch.getElement().getType())

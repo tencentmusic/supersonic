@@ -24,6 +24,7 @@ import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
 import com.tencent.supersonic.headless.server.service.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,11 +40,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         implements DataSetService {
 
-    @Autowired
-    private DomainService domainService;
+    private final DomainService domainService;
 
     @Lazy
     @Autowired
@@ -53,8 +54,7 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     @Autowired
     private MetricService metricService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Override
     public DataSetResp save(DataSetReq dataSetReq, User user) {

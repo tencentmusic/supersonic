@@ -129,6 +129,31 @@ public abstract class BaseDbAdaptor implements DbAdaptor {
         };
     }
 
+    /**
+     * Default UPSERT implementation - falls back to simple INSERT. Subclasses should override with
+     * database-specific syntax.
+     */
+    @Override
+    public String buildUpsertSql(String tableName, List<String> columns, List<String> primaryKeys) {
+        // Default fallback: just INSERT (will fail on duplicates)
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO ").append(tableName).append(" (");
+        sb.append(String.join(", ", columns));
+        sb.append(") VALUES (");
+        sb.append(String.join(", ", columns.stream().map(c -> "?").toList()));
+        sb.append(")");
+        return sb.toString();
+    }
+
+    /**
+     * Default EXPLAIN row count parser - returns -1 (unknown). Subclasses should override with
+     * database-specific parsing logic.
+     */
+    @Override
+    public long parseExplainRowCount(List<String> explainResult) {
+        return -1L;
+    }
+
     public Properties getProperties(ConnectInfo connectionInfo) {
         final Properties properties = new Properties();
         String url = connectionInfo.getUrl().toLowerCase();

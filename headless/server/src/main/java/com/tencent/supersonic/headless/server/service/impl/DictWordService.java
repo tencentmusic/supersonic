@@ -9,8 +9,8 @@ import com.tencent.supersonic.headless.chat.knowledge.KnowledgeBaseService;
 import com.tencent.supersonic.headless.chat.knowledge.builder.WordBuilderFactory;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -23,12 +23,11 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Data
+@RequiredArgsConstructor
 public class DictWordService {
 
-    @Autowired
-    private SchemaService schemaService;
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    private final SchemaService schemaService;
+    private final KnowledgeBaseService knowledgeBaseService;
 
     private List<DictWord> preDictWords = new ArrayList<>();
 

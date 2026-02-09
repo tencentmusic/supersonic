@@ -7,8 +7,8 @@ import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.service.EmbeddingService;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -19,13 +19,11 @@ import java.util.List;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class MetaEmbeddingListener {
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
-
-    @Autowired
-    private EmbeddingService embeddingService;
+    private final EmbeddingConfig embeddingConfig;
+    private final EmbeddingService embeddingService;
 
     @Value("${s2.embedding.operation.sleep.time:3000}")
     private Integer embeddingOperationSleepTime;

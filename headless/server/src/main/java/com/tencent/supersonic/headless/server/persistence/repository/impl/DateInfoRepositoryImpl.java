@@ -9,9 +9,9 @@ import com.tencent.supersonic.headless.api.pojo.request.DateInfoReq;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DateInfoDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DateInfoMapper;
 import com.tencent.supersonic.headless.server.persistence.repository.DateInfoRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -22,12 +22,12 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class DateInfoRepositoryImpl implements DateInfoRepository {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
-    private DateInfoMapper dateInfoMapper;
+    private final DateInfoMapper dateInfoMapper;
 
     @Override
     public Integer upsertDateInfo(List<DateInfoReq> dateInfoCommends) {

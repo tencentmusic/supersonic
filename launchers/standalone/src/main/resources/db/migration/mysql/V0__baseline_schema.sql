@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `s2_database` (
     `version` varchar(64) DEFAULT NULL COMMENT '版本',
     `type` varchar(20) NOT NULL COMMENT '类型: mysql, clickhouse, tdw等',
     `config` text NOT NULL COMMENT '配置信息(JSON)',
+    `pool_config` text DEFAULT NULL COMMENT 'JSON configuration for connection pool settings per pool type',
     `tenant_id` bigint NOT NULL DEFAULT 1 COMMENT '租户ID',
     `admin` varchar(500) DEFAULT NULL COMMENT '管理员',
     `viewer` varchar(500) DEFAULT NULL COMMENT '查看者',

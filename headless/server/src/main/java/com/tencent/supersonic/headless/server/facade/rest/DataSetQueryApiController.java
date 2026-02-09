@@ -8,8 +8,8 @@ import com.tencent.supersonic.headless.server.facade.service.SemanticLayerServic
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/semantic/query")
 @Slf4j
+@RequiredArgsConstructor
 public class DataSetQueryApiController {
 
-    @Autowired
-    private DataSetService dataSetService;
-    @Autowired
-    private SemanticLayerService semanticLayerService;
+    private final DataSetService dataSetService;
+
+    private final SemanticLayerService semanticLayerService;
 
     @PostMapping("/dataSet")
     public Object queryByDataSet(@RequestBody QueryDataSetReq queryDataSetReq,

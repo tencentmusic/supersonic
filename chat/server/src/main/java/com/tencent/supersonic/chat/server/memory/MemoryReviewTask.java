@@ -21,7 +21,6 @@ import dev.langchain4j.provider.ModelProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -49,16 +48,15 @@ public class MemoryReviewTask {
 
     private static final Pattern OUTPUT_PATTERN = Pattern.compile("opinion=(.*),.*comment=(.*)");
 
-    @Autowired
-    private MemoryService memoryService;
+    private final MemoryService memoryService;
+    private final AgentService agentService;
+    private final UserService userService;
 
-    @Autowired
-    private AgentService agentService;
-
-    @Autowired
-    private UserService userService;
-
-    public MemoryReviewTask() {
+    public MemoryReviewTask(MemoryService memoryService, AgentService agentService,
+            UserService userService) {
+        this.memoryService = memoryService;
+        this.agentService = agentService;
+        this.userService = userService;
         ChatAppManager.register(APP_KEY,
                 ChatApp.builder().prompt(INSTRUCTION).name("记忆启用评估").appModule(AppModule.CHAT)
                         .description("通过大模型对记忆做正确性评估以决定是否启用").enable(false).build());

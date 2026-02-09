@@ -11,8 +11,8 @@ import com.tencent.supersonic.headless.server.service.DownloadService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,16 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/semantic/query")
 @Slf4j
+@RequiredArgsConstructor
 public class MetricQueryApiController {
 
-    @Autowired
-    private SemanticLayerService semanticLayerService;
+    private final SemanticLayerService semanticLayerService;
 
-    @Autowired
-    private MetricService metricService;
+    private final MetricService metricService;
 
-    @Autowired
-    private DownloadService downloadService;
+    private final DownloadService downloadService;
 
     @PostMapping("/metric")
     public Object queryByMetric(@RequestBody QueryMetricReq queryMetricReq,

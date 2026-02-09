@@ -255,19 +255,32 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
             }}
           />
         </FormItem>
-        <FormItem label="函数名称">
-          <Input
-            value={functionName}
-            onChange={(e) => {
-              setFunctionName(e.target.value);
-            }}
-            placeholder="请输入函数名称，只能包含因为字母和下划线"
-            allowClear
-          />
-        </FormItem>
-        <FormItem name="pattern" label="函数描述">
-          <TextArea placeholder="请输入函数描述，多个描述换行分隔" allowClear />
-        </FormItem>
+        {/* 函数名称和描述仅对 WEB_PAGE 和 WEB_SERVICE 类型显示 */}
+        {(pluginType === PluginTypeEnum.WEB_PAGE || pluginType === PluginTypeEnum.WEB_SERVICE) && (
+          <>
+            <FormItem label="函数名称">
+              <Input
+                value={functionName}
+                onChange={(e) => {
+                  setFunctionName(e.target.value);
+                }}
+                placeholder="请输入函数名称，只能包含英文字母和下划线"
+                allowClear
+              />
+            </FormItem>
+            <FormItem name="pattern" label="函数描述">
+              <TextArea placeholder="请输入函数描述，多个描述换行分隔" allowClear />
+            </FormItem>
+          </>
+        )}
+        {/* 定时报表类型显示不同的字段 */}
+        {pluginType === PluginTypeEnum.REPORT_SCHEDULE && (
+          <>
+            <FormItem name="pattern" label="触发描述">
+              <TextArea placeholder="请输入触发该报表的问法描述" allowClear />
+            </FormItem>
+          </>
+        )}
         <FormItem name="exampleQuestions" label="示例问题">
           <div className={styles.paramsSection}>
             {examples.map((example) => {

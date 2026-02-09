@@ -11,8 +11,8 @@ import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactory;
 import dev.langchain4j.store.embedding.EmbeddingStoreFactoryProvider;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,19 +23,13 @@ import java.util.List;
 @Component
 @Slf4j
 @Order(2)
+@RequiredArgsConstructor
 public class MetaEmbeddingTask implements CommandLineRunner {
 
-    @Autowired
-    private EmbeddingService embeddingService;
-
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
-
-    @Autowired
-    private MetricService metricService;
-
-    @Autowired
-    private DimensionService dimensionService;
+    private final EmbeddingService embeddingService;
+    private final EmbeddingConfig embeddingConfig;
+    private final MetricService metricService;
+    private final DimensionService dimensionService;
 
     @PreDestroy
     public void onShutdown() {

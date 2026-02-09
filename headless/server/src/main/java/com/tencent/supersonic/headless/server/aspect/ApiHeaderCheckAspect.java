@@ -7,13 +7,13 @@ import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import com.tencent.supersonic.headless.api.pojo.response.AppDetailResp;
 import com.tencent.supersonic.headless.server.service.AppService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Order(1)
 @Slf4j
+@RequiredArgsConstructor
 public class ApiHeaderCheckAspect {
 
     public static final String APPID = "appId";
@@ -29,8 +30,7 @@ public class ApiHeaderCheckAspect {
 
     private static final String SIGNATURE = "signature";
 
-    @Autowired
-    private AppService appService;
+    private final AppService appService;
 
     @Pointcut("@annotation(com.tencent.supersonic.headless.server.annotation.ApiHeaderCheck)")
     private void apiPermissionCheck() {}

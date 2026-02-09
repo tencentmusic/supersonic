@@ -14,9 +14,9 @@ import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 /** query controller */
 @RestController
 @RequestMapping({"/api/chat/query", "/openapi/chat/query"})
+@RequiredArgsConstructor
 public class ChatQueryController {
 
-    @Autowired
-    private ChatQueryService chatQueryService;
+    private final ChatQueryService chatQueryService;
 
     @PostMapping("search")
     public Object search(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,

@@ -12,6 +12,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class H2Adaptor extends BaseDbAdaptor {
@@ -64,5 +67,61 @@ public class H2Adaptor extends BaseDbAdaptor {
     @Override
     public String rewriteSql(String sql) {
         return sql;
+    }
+
+    /**
+     * H2 UPSERT using MERGE INTO syntax.
+     */
+    @Override
+    public String buildUpsertSql(String tableName, List<String> columns, List<String> primaryKeys) {
+        if (primaryKeys == null || primaryKeys.isEmpty()) {
+            // No primary keys - fall back to simple INSERT
+            return super.buildUpsertSql(tableName, columns, primaryKeys);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("MERGE INTO ").append(tableName).append(" (");
+        sb.append(String.join(", ", columns));
+        sb.append(") KEY (");
+        sb.append(String.join(", ", primaryKeys));
+        sb.append(") VALUES (");
+        sb.append(String.join(", ", columns.stream().map(c -> "?").toList()));
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    /**
+     * Parse H2 EXPLAIN output for row count estimate. H2 EXPLAIN PLAN shows scanCount in its
+     * output.
+     */
+    @Override
+    public long parseExplainRowCount(List<String> explainResult) {
+        if (explainResult == null || explainResult.isEmpty()) {
+            return -1L;
+        }
+        // H2 EXPLAIN shows "scanCount: N" or row estimates in its plan
+        Pattern scanPattern = Pattern.compile("scanCount:\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
+        Pattern rowsPattern = Pattern.compile("rows:\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
+
+        for (String line : explainResult) {
+            Matcher matcher = scanPattern.matcher(line);
+            if (matcher.find()) {
+                try {
+                    return Long.parseLong(matcher.group(1));
+                } catch (NumberFormatException e) {
+                    // Continue searching
+                }
+            }
+            matcher = rowsPattern.matcher(line);
+            if (matcher.find()) {
+                try {
+                    return Long.parseLong(matcher.group(1));
+                } catch (NumberFormatException e) {
+                    // Continue searching
+                }
+            }
+        }
+        return -1L;
     }
 }

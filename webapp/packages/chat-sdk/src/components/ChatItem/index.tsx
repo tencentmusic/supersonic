@@ -558,6 +558,7 @@ const ChatItem: React.FC<Props> = ({
                     executeItemNode={executeItemNode}
                     isDeveloper={isDeveloper}
                     renderCustomExecuteNode={renderCustomExecuteNode}
+                    onSendMsg={onSendMsg}
                   />
                 </div>
               </Spin>

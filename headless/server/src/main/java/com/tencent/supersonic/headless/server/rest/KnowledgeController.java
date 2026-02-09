@@ -20,7 +20,7 @@ import com.tencent.supersonic.headless.server.task.MetaEmbeddingTask;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,25 +32,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/knowledge")
+@RequiredArgsConstructor
 public class KnowledgeController {
 
-    @Autowired
-    private DictTaskService taskService;
+    private final DictTaskService taskService;
 
-    @Autowired
-    private DictConfService confService;
+    private final DictConfService confService;
 
-    @Autowired
-    private MetaEmbeddingTask metaEmbeddingTask;
+    private final MetaEmbeddingTask metaEmbeddingTask;
 
-    @Autowired
-    private DictionaryReloadTask dictionaryReloadTask;
+    private final DictionaryReloadTask dictionaryReloadTask;
 
-    @Autowired
-    private ExemplarService exemplarService;
+    private final ExemplarService exemplarService;
 
-    @Autowired
-    private EmbeddingService embeddingService;
+    private final EmbeddingService embeddingService;
 
     /**
      * addDictConf-新增item的字典配置 Add configuration information for dictionary entries

@@ -13,7 +13,7 @@ import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.headless.server.utils.ModelConfigHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,9 +27,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping({"/api/chat/model", "/openapi/chat/model"})
+@RequiredArgsConstructor
 public class ChatModelController {
-    @Autowired
-    private ChatModelService chatModelService;
+
+    private final ChatModelService chatModelService;
 
     @PostMapping
     public ChatModel createModel(@RequestBody ChatModel model,

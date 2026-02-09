@@ -9,14 +9,14 @@
 -- ========================================
 
 CREATE TABLE IF NOT EXISTS `s2_organization` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `parent_id` bigint(20) DEFAULT 0 COMMENT '父组织ID，根组织为0',
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `parent_id` bigint DEFAULT 0 COMMENT '父组织ID，根组织为0',
     `name` varchar(100) NOT NULL COMMENT '组织名称',
     `full_name` varchar(500) DEFAULT NULL COMMENT '组织全名（包含父级路径）',
-    `is_root` tinyint(1) DEFAULT 0 COMMENT '是否为根组织',
-    `sort_order` int(11) DEFAULT 0 COMMENT '排序序号',
-    `status` tinyint(1) DEFAULT 1 COMMENT '状态: 1=启用, 0=禁用',
-    `tenant_id` bigint(20) NOT NULL DEFAULT 1 COMMENT '租户ID',
+    `is_root` tinyint DEFAULT 0 COMMENT '是否为根组织',
+    `sort_order` int DEFAULT 0 COMMENT '排序序号',
+    `status` tinyint DEFAULT 1 COMMENT '状态: 1=启用, 0=禁用',
+    `tenant_id` bigint NOT NULL DEFAULT 1 COMMENT '租户ID',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `created_by` varchar(100) DEFAULT NULL,
     `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -31,10 +31,10 @@ CREATE TABLE IF NOT EXISTS `s2_organization` (
 -- ========================================
 
 CREATE TABLE IF NOT EXISTS `s2_user_organization` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-    `organization_id` bigint(20) NOT NULL COMMENT '组织ID',
-    `is_primary` tinyint(1) DEFAULT 0 COMMENT '是否为主组织',
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `user_id` bigint NOT NULL COMMENT '用户ID',
+    `organization_id` bigint NOT NULL COMMENT '组织ID',
+    `is_primary` tinyint DEFAULT 0 COMMENT '是否为主组织',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `created_by` varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`),

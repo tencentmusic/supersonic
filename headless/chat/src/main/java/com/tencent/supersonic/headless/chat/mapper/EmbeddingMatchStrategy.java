@@ -16,11 +16,11 @@ import dev.langchain4j.provider.ModelProvider;
 import dev.langchain4j.store.embedding.Retrieval;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,13 +35,12 @@ import static com.tencent.supersonic.headless.chat.mapper.MapperConfig.*;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class EmbeddingMatchStrategy extends BatchMatchStrategy<EmbeddingResult> {
 
-    @Autowired
-    protected MapperConfig mapperConfig;
+    private final MapperConfig mapperConfig;
 
-    @Autowired
-    private MetaEmbeddingService metaEmbeddingService;
+    private final MetaEmbeddingService metaEmbeddingService;
 
     private static final String LLM_FILTER_PROMPT =
             """

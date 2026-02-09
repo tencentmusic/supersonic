@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.server.task;
 
 import com.tencent.supersonic.headless.server.service.impl.DictWordService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Order(2)
+@RequiredArgsConstructor
 public class DictionaryReloadTask implements CommandLineRunner {
 
-    @Autowired
-    private DictWordService dictWordService;
+    private final DictWordService dictWordService;
 
     @Override
     public void run(String... args) {

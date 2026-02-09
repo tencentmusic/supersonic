@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.service.SchemaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,10 +18,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/semantic/schema")
+@RequiredArgsConstructor
 public class SchemaController {
 
-    @Autowired
-    private SchemaService schemaService;
+    private final SchemaService schemaService;
 
     @GetMapping("/domain/list")
     public List<DomainResp> getDomainList(HttpServletRequest request,

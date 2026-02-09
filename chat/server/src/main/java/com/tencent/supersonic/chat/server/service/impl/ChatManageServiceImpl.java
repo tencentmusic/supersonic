@@ -24,8 +24,8 @@ import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -36,18 +36,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ChatManageServiceImpl implements ChatManageService {
 
-    @Autowired
-    private ChatRepository chatRepository;
-    @Autowired
-    private ChatQueryRepository chatQueryRepository;
-    @Autowired
-    private MemoryService memoryService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private TenantConfig tenantConfig;
+    private final ChatRepository chatRepository;
+    private final ChatQueryRepository chatQueryRepository;
+    private final MemoryService memoryService;
+    private final UserService userService;
+    private final TenantConfig tenantConfig;
 
     @Override
     public Long addChat(User user, String chatName, Integer agentId) {

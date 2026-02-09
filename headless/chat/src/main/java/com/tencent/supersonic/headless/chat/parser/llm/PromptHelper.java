@@ -8,9 +8,9 @@ import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -22,13 +22,12 @@ import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class PromptHelper {
 
-    @Autowired
-    private ParserConfig parserConfig;
+    private final ParserConfig parserConfig;
 
-    @Autowired
-    private ExemplarService exemplarService;
+    private final ExemplarService exemplarService;
 
     public List<List<Text2SQLExemplar>> getFewShotExemplars(LLMReq llmReq) {
         int exemplarRecallNumber =

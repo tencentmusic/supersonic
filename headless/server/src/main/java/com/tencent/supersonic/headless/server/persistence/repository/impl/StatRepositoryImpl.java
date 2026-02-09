@@ -107,7 +107,7 @@ public class StatRepositoryImpl implements StatRepository {
                     }
                 });
             } catch (Exception e) {
-                log.warn("e:{}", e);
+                log.warn("e:{}", e.getMessage());
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.persistence.dataobject;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -48,6 +49,9 @@ public class DatabaseDO {
 
     /** 配置信息 */
     private String config;
+
+    /** 连接池配置 (JSON) */
+    private String poolConfig;
 
     /** @return id */
     public Long getId() {

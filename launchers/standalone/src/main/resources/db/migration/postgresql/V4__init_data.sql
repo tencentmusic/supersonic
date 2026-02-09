@@ -25,9 +25,9 @@ INSERT INTO s2_subscription_plan (name, code, description, price_monthly, price_
 SELECT '企业版', 'ENTERPRISE', '企业版，无限制功能', 299.00, 2990.00, -1, -1, -1, -1, -1, -1, 0, 'ACTIVE'
     WHERE NOT EXISTS (SELECT 1 FROM s2_subscription_plan WHERE code = 'ENTERPRISE');
 
--- 默认租户
-INSERT INTO s2_tenant (id, name, code, description, status, plan_id, created_by)
-SELECT 1, '默认租户', 'default', '系统默认租户', 'ACTIVE', 1, 'system'
+-- 默认租户 (plan_id removed - plan is tracked via s2_tenant_subscription)
+INSERT INTO s2_tenant (id, name, code, description, status, created_by)
+SELECT 1, '默认租户', 'default', '系统默认租户', 'ACTIVE', 'system'
     WHERE NOT EXISTS (SELECT 1 FROM s2_tenant WHERE code = 'default');
 
 -- 默认租户订阅

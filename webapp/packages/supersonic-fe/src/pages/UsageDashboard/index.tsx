@@ -28,6 +28,11 @@ import {
   Tenant,
   TenantUsage,
 } from '@/services/tenant';
+import type { SubscriptionPlan, TenantSubscription } from '@/services/tenant';
+import {
+  getCurrentSubscription,
+  getSubscriptionPlans,
+} from '@/services/subscription';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import styles from './style.less';
@@ -39,6 +44,8 @@ const UsageDashboard: React.FC = () => {
   const [todayUsage, setTodayUsage] = useState<TenantUsage | null>(null);
   const [monthlyUsage, setMonthlyUsage] = useState<TenantUsage | null>(null);
   const [rangeUsage, setRangeUsage] = useState<TenantUsage[]>([]);
+  const [subscription, setSubscription] = useState<TenantSubscription | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().subtract(7, 'day'),
@@ -58,10 +65,12 @@ const UsageDashboard: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [tenantRes, todayRes, monthlyRes] = await Promise.all([
+      const [tenantRes, todayRes, monthlyRes, subscriptionRes, plansRes] = await Promise.all([
         getCurrentTenant(),
         getTenantUsageToday(),
         getTenantUsageMonthly(dayjs().year(), dayjs().month() + 1),
+        getCurrentSubscription(),
+        getSubscriptionPlans(),
       ]);
 
       if (tenantRes.code === 200 && tenantRes.data) {
@@ -74,6 +83,14 @@ const UsageDashboard: React.FC = () => {
 
       if (monthlyRes.code === 200 && monthlyRes.data) {
         setMonthlyUsage(monthlyRes.data);
+      }
+
+      if (subscriptionRes.code === 200 && subscriptionRes.data) {
+        setSubscription(subscriptionRes.data);
+      }
+
+      if (plansRes.code === 200 && plansRes.data) {
+        setPlans(plansRes.data);
       }
 
       await loadRangeUsage();
@@ -178,13 +195,21 @@ const UsageDashboard: React.FC = () => {
     );
   }
 
+  const currentPlan = subscription
+    ? plans.find((p) => p.id === subscription.planId) || null
+    : null;
+
+  const maxApiCallsPerDay = currentPlan?.maxApiCallsPerDay || 0;
+  const maxTokensPerMonth = currentPlan?.maxTokensPerMonth || 0;
+  const maxUsers = currentPlan?.maxUsers || 0;
+
   const apiCallsPercent = getUsagePercent(
     todayUsage?.apiCalls || 0,
-    tenant?.maxApiCallsPerDay || 0,
+    maxApiCallsPerDay,
   );
   const tokensPercent = getUsagePercent(
     monthlyUsage?.tokensUsed || 0,
-    tenant?.maxTokensPerMonth || 0,
+    maxTokensPerMonth,
   );
 
   return (
@@ -201,7 +226,7 @@ const UsageDashboard: React.FC = () => {
                     value={todayUsage?.apiCalls || 0}
                     prefix={<ApiOutlined className={styles.iconBlue} />}
                     suffix={
-                      <span className={styles.limit}>/ {formatNumber(tenant?.maxApiCallsPerDay || 0)}</span>
+                      <span className={styles.limit}>/ {maxApiCallsPerDay === -1 ? '不限' : formatNumber(maxApiCallsPerDay)}</span>
                     }
                   />
                   <Progress
@@ -237,7 +262,7 @@ const UsageDashboard: React.FC = () => {
                     title="活跃用户"
                     value={todayUsage?.activeUsers || 0}
                     prefix={<TeamOutlined className={styles.iconOrange} />}
-                    suffix={<span className={styles.limit}>/ {tenant?.maxUsers || 0}</span>}
+                    suffix={<span className={styles.limit}>/ {maxUsers === -1 ? '不限' : maxUsers}</span>}
                   />
                 </Card>
               </Col>
@@ -257,7 +282,7 @@ const UsageDashboard: React.FC = () => {
                     prefix={<CloudOutlined className={styles.iconPurple} />}
                     suffix={
                       <span className={styles.limit}>
-                        / {formatNumber(tenant?.maxTokensPerMonth || 0)}
+                        / {maxTokensPerMonth === -1 ? '不限' : formatNumber(maxTokensPerMonth)}
                       </span>
                     }
                   />

@@ -38,5 +38,7 @@ export default {
   'menu.tenant.tenantSettings': '租户设置',
   'menu.tenant.usage': '用量统计',
 
+  'menu.reportSchedule': '报表调度',
+  'menu.deliveryConfig': '推送配置',
   'menu.datasetPermission': '数据集权限',
 };

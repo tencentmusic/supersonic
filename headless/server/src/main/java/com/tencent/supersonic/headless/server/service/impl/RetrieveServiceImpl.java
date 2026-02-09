@@ -23,9 +23,9 @@ import com.tencent.supersonic.headless.chat.mapper.SearchMatchStrategy;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.RetrieveService;
 import com.tencent.supersonic.headless.server.service.SchemaService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,24 +43,20 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RetrieveServiceImpl implements RetrieveService {
 
     private static final int RESULT_SIZE = 10;
 
-    @Autowired
-    private DataSetService dataSetService;
+    private final DataSetService dataSetService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private SchemaService schemaService;
+    private final SchemaService schemaService;
 
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    private final KnowledgeBaseService knowledgeBaseService;
 
-    @Autowired
-    private SearchMatchStrategy searchMatchStrategy;
+    private final SearchMatchStrategy searchMatchStrategy;
 
     @Override
     public List<SearchResult> retrieve(QueryNLReq queryNLReq) {

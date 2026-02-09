@@ -17,24 +17,22 @@ import com.tencent.supersonic.headless.server.service.CanvasService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CanvasServiceImpl extends ServiceImpl<CanvasDOMapper, CanvasDO>
         implements CanvasService {
 
-    @Autowired
-    private ModelService modelService;
+    private final ModelService modelService;
 
-    @Autowired
-    private DimensionService dimensionService;
+    private final DimensionService dimensionService;
 
-    @Autowired
-    private MetricService metricService;
+    private final MetricService metricService;
 
     @Override
     public List<CanvasDO> getCanvasList(Long domainId) {

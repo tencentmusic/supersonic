@@ -8,9 +8,9 @@ import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMResp;
 import com.tencent.supersonic.headless.chat.utils.ComponentFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -21,10 +21,10 @@ import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class LLMRequestService {
 
-    @Autowired
-    private ParserConfig parserConfig;
+    private final ParserConfig parserConfig;
 
     public Long getDataSetId(ChatQueryContext queryCtx) {
         DataSetResolver dataSetResolver = ComponentFactory.getModelResolver();

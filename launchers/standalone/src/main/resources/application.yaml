@@ -13,11 +13,36 @@ spring:
   config:
     import:
       - classpath:s2-config.yaml
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      # password: ${REDIS_PASSWORD}  # uncomment if your Redis requires authentication
+      # Sentinel mode (uncomment and set values):
+      # sentinel:
+      #   master: ${REDIS_SENTINEL_MASTER:mymaster}
+      #   nodes: ${REDIS_SENTINEL_NODES:host1:26379,host2:26379,host3:26379}
+      # Cluster mode (uncomment and set values):
+      # cluster:
+      #   nodes: ${REDIS_CLUSTER_NODES:host1:6379,host2:6379,host3:6379}
+      #   max-redirects: 3
   main:
     allow-circular-references: true
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org.quartz.scheduler.instanceName: SuperSonicScheduler
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.jobStore.isClustered: true
+      org.quartz.jobStore.clusterCheckinInterval: 15000
+      org.quartz.jobStore.misfireThreshold: 60000
+      org.quartz.threadPool.threadCount: 5
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 
@@ -58,6 +83,10 @@ knife4j:
 
 # SuperSonic configuration
 s2:
+  # OAuth storage configuration (redis or caffeine, default: caffeine)
+  oauth:
+    storage:
+      type: ${S2_OAUTH_STORAGE_TYPE:redis}
   # Permission configuration
   permission:
     sensitive:
@@ -109,6 +138,12 @@ s2:
       - s2_available_date_info
       - s2_collect
       - s2_metric_query_default_config
+      # Report execution (via schedule_id -> s2_report_schedule)
+      - s2_report_execution
+      # Export task (via user_id)
+      - s2_export_task
+      # Data sync execution (via sync_config_id -> s2_data_sync_config)
+      - s2_data_sync_execution
       # User related (via user_id -> s2_user)
       - s2_oauth_token
       - s2_refresh_token
@@ -129,3 +164,18 @@ s2:
       # Health and monitoring
       - /health
       - /actuator/**
+  # Export configuration
+  export:
+    worker-threads: 3
+    max-queue-size: 50
+    sync-threshold: 5000
+    file-expire-days: 7
+    storage-type: local
+    local-dir: ${java.io.tmpdir}/supersonic-export
+  # Report execution configuration
+  report:
+    max-concurrent-per-tenant: 3
+  # Data sync configuration
+  data-sync:
+    max-concurrent-per-tenant: 2
+    max-full-sync-per-dataset: 1

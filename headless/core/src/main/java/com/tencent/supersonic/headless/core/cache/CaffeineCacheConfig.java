@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.core.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
+@RequiredArgsConstructor
 public class CaffeineCacheConfig {
 
-    @Autowired
-    private CacheCommonConfig cacheCommonConfig;
+    private final CacheCommonConfig cacheCommonConfig;
 
     @Value("${s2.caffeine.initial.capacity:500}")
     private Integer caffeineInitialCapacity;

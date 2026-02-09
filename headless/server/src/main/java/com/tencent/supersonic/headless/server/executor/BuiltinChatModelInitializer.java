@@ -6,9 +6,9 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ChatModelService;
 import dev.langchain4j.provider.ModelProvider;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
@@ -19,16 +19,12 @@ import java.util.List;
 @Component
 @Order(1)
 @Slf4j
+@RequiredArgsConstructor
 public class BuiltinChatModelInitializer implements CommandLineRunner {
 
-    @Autowired
-    private ChatModelService chatModelService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private Environment environment;
+    private final ChatModelService chatModelService;
+    private final UserService userService;
+    private final Environment environment;
 
     @Getter
     private ChatModel demoChatModel;

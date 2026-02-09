@@ -9,7 +9,7 @@
 -- ========================================
 
 CREATE TABLE IF NOT EXISTS `s2_semantic_template` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `id` bigint NOT NULL AUTO_INCREMENT,
     `name` varchar(100) NOT NULL COMMENT '模板名称',
     `biz_name` varchar(100) NOT NULL COMMENT '模板代码',
     `description` varchar(500) DEFAULT NULL COMMENT '模板描述',
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_template` (
     `preview_image` varchar(500) DEFAULT NULL COMMENT '预览图URL',
     `status` tinyint DEFAULT 0 COMMENT '状态: 0-草稿 1-已部署',
     `is_builtin` tinyint DEFAULT 0 COMMENT '是否内置模板: 0-租户自定义 1-系统内置',
-    `tenant_id` bigint(20) NOT NULL DEFAULT 1 COMMENT '租户ID: 1表示系统级(内置模板)',
+    `tenant_id` bigint NOT NULL DEFAULT 1 COMMENT '租户ID: 1表示系统级(内置模板)',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `created_by` varchar(100) DEFAULT NULL,
     `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -34,17 +34,17 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_template` (
 -- ========================================
 
 CREATE TABLE IF NOT EXISTS `s2_semantic_deployment` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `template_id` bigint(20) NOT NULL COMMENT '模板ID',
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `template_id` bigint NOT NULL COMMENT '模板ID',
     `template_name` varchar(100) DEFAULT NULL COMMENT '模板名称快照',
-    `database_id` bigint(20) DEFAULT NULL COMMENT '目标数据库ID',
+    `database_id` bigint DEFAULT NULL COMMENT '目标数据库ID',
     `param_config` text DEFAULT NULL COMMENT 'JSON: 用户自定义参数',
     `status` varchar(20) NOT NULL COMMENT '状态: PENDING/RUNNING/SUCCESS/FAILED',
     `result_detail` longtext DEFAULT NULL COMMENT 'JSON: 创建的对象详情',
     `error_message` text DEFAULT NULL COMMENT '错误信息',
     `start_time` datetime DEFAULT NULL COMMENT '开始时间',
     `end_time` datetime DEFAULT NULL COMMENT '结束时间',
-    `tenant_id` bigint(20) NOT NULL COMMENT '租户ID',
+    `tenant_id` bigint NOT NULL COMMENT '租户ID',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
     `created_by` varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`),

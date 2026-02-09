@@ -19,10 +19,10 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.ExemplarService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -35,19 +35,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MemoryServiceImpl implements MemoryService, CommandLineRunner {
 
-    @Autowired
-    private ChatMemoryRepository chatMemoryRepository;
+    private final ChatMemoryRepository chatMemoryRepository;
 
-    @Autowired
-    private ChatMemoryMapper chatMemoryMapper;
+    private final ChatMemoryMapper chatMemoryMapper;
 
-    @Autowired
-    private ExemplarService exemplarService;
+    private final ExemplarService exemplarService;
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
+    private final EmbeddingConfig embeddingConfig;
 
     @Override
     public void createMemory(ChatMemory memory) {

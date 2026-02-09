@@ -12,9 +12,9 @@ import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,13 +28,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/semantic/query")
 @Slf4j
+@RequiredArgsConstructor
 public class SqlQueryApiController {
 
-    @Autowired
-    private SemanticLayerService semanticLayerService;
+    private final SemanticLayerService semanticLayerService;
 
-    @Autowired
-    private ChatLayerService chatLayerService;
+    private final ChatLayerService chatLayerService;
 
     @PostMapping("/sql")
     public Object queryBySql(@RequestBody QuerySqlReq querySqlReq, HttpServletRequest request,

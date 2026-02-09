@@ -12,7 +12,7 @@ import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.pojo.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,10 +22,10 @@ import java.util.Date;
 
 @RestController
 @RequestMapping({"/api/chat/memory"})
+@RequiredArgsConstructor
 public class MemoryController {
 
-    @Autowired
-    private MemoryService memoryService;
+    private final MemoryService memoryService;
 
     @PostMapping("/createMemory")
     public Boolean createMemory(@RequestBody ChatMemoryCreateReq chatMemoryCreateReq,

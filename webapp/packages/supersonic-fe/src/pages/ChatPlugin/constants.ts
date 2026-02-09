@@ -1,6 +1,7 @@
 export const PLUGIN_TYPE_MAP = {
   WEB_PAGE: 'Web页面',
   WEB_SERVICE: 'Web服务',
+  REPORT_SCHEDULE: '定时报表',
 }
 
 export const PARSE_MODE_MAP = {

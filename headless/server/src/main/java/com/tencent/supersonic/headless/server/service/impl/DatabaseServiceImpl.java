@@ -26,6 +26,7 @@ import com.tencent.supersonic.headless.server.pojo.*;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.utils.DatabaseConverter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +40,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseDO>
         implements DatabaseService {
 
-    @Autowired
-    private SqlUtils sqlUtils;
+    private final SqlUtils sqlUtils;
 
     @Lazy
     @Autowired
