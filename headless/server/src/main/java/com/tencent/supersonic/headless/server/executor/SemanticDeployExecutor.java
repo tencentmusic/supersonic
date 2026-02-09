@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.Dimension;
@@ -19,10 +20,12 @@ import com.tencent.supersonic.headless.api.pojo.ModelDetail;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
+import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.DomainReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelReq;
 import com.tencent.supersonic.headless.api.pojo.request.TermReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.DatabaseResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
@@ -42,15 +45,16 @@ import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig.ModelC
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig.ModelRelationConfig;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig.TermConfig;
 import com.tencent.supersonic.headless.server.service.DataSetService;
+import com.tencent.supersonic.headless.server.service.DatabaseService;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.service.ModelRelaService;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import com.tencent.supersonic.headless.server.service.TermService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -58,32 +62,94 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SemanticDeployExecutor {
 
-    @Autowired
-    private DomainService domainService;
+    private final DomainService domainService;
+    private final ModelService modelService;
+    private final ModelRelaService modelRelaService;
+    private final DimensionService dimensionService;
+    private final MetricService metricService;
+    private final DataSetService dataSetService;
+    private final TermService termService;
+    private final DatabaseService databaseService;
 
-    @Autowired
-    private ModelService modelService;
+    /**
+     * Validate deployment prerequisites before actually deploying. Checks database connectivity and
+     * table existence.
+     */
+    public void validate(SemanticTemplate template, SemanticDeployParam param, User user) {
+        SemanticTemplateConfig config = template.getTemplateConfig();
+        if (config == null) {
+            throw new InvalidArgumentException("Template config is null");
+        }
 
-    @Autowired
-    private ModelRelaService modelRelaService;
+        // Agent-only templates (domain == null) skip database validation
+        if (config.getDomain() == null) {
+            return;
+        }
 
-    @Autowired
-    private DimensionService dimensionService;
+        Long databaseId = param.getDatabaseId();
+        if (databaseId == null) {
+            throw new InvalidArgumentException("请选择目标数据库");
+        }
 
-    @Autowired
-    private MetricService metricService;
+        // Verify database exists
+        DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
+        if (databaseResp == null) {
+            throw new InvalidArgumentException("数据库不存在: " + databaseId);
+        }
 
-    @Autowired
-    private DataSetService dataSetService;
+        // Test database connectivity
+        DatabaseReq testReq = new DatabaseReq();
+        testReq.setId(databaseResp.getId());
+        testReq.setName(databaseResp.getName());
+        testReq.setType(databaseResp.getType());
+        testReq.setUrl(databaseResp.getUrl());
+        testReq.setUsername(databaseResp.getUsername());
+        testReq.setPassword(databaseResp.getPassword());
+        testReq.setDatabase(databaseResp.getDatabase());
+        testReq.setSchema(databaseResp.getSchema());
+        testReq.setVersion(databaseResp.getVersion());
+        if (!databaseService.testConnect(testReq, user)) {
+            throw new InvalidArgumentException("数据库连接失败，请检查数据库配置: " + databaseResp.getName());
+        }
 
-    @Autowired
-    private TermService termService;
+        // Check table existence for models that reference real tables
+        if (!CollectionUtils.isEmpty(config.getModels())) {
+            List<String> availableTables;
+            try {
+                availableTables = databaseService.getTables(databaseId, databaseResp.getSchema(),
+                        databaseResp.getDatabase());
+            } catch (Exception e) {
+                log.warn("Failed to fetch table list from database {}, skipping table validation",
+                        databaseId, e);
+                return;
+            }
+
+            List<String> missingTables = new ArrayList<>();
+            for (ModelConfig modelConfig : config.getModels()) {
+                String tableName = resolveParam(modelConfig.getTableName(), param);
+                // Only check models with explicit tableName and no custom sqlQuery
+                if (StringUtils.isNotBlank(tableName)
+                        && StringUtils.isBlank(modelConfig.getSqlQuery())) {
+                    if (!availableTables.contains(tableName)) {
+                        missingTables.add(tableName);
+                    }
+                }
+            }
+
+            if (!missingTables.isEmpty()) {
+                throw new InvalidArgumentException(
+                        "以下数据表在目标数据库中不存在: " + String.join(", ", missingTables));
+            }
+        }
+    }
 
     /**
      * Preview deployment - returns what will be created without actually creating
@@ -147,6 +213,15 @@ public class SemanticDeployExecutor {
      */
     public SemanticDeployResult execute(SemanticTemplate template, SemanticDeployParam param,
             User user) {
+        return execute(template, param, user, step -> {
+        });
+    }
+
+    /**
+     * Execute deployment with progress callback reporting each step.
+     */
+    public SemanticDeployResult execute(SemanticTemplate template, SemanticDeployParam param,
+            User user, Consumer<String> progressCallback) {
         SemanticDeployResult result = new SemanticDeployResult();
         SemanticTemplateConfig config = template.getTemplateConfig();
 
@@ -158,11 +233,13 @@ public class SemanticDeployExecutor {
             // 1. Create semantic objects (Domain, Models, DataSet, Terms) if domain is configured
             // Agent-only templates (domain == null) skip this entire block
             if (config.getDomain() != null) {
+                progressCallback.accept("CREATING_DOMAIN");
                 DomainResp domain = createDomain(config.getDomain(), param, user);
                 result.setDomainId(domain.getId());
                 result.setDomainName(domain.getName());
 
                 // 2. Create Models
+                progressCallback.accept("CREATING_MODELS");
                 Map<String, ModelResp> modelMap = new HashMap<>();
                 if (!CollectionUtils.isEmpty(config.getModels())) {
                     for (ModelConfig modelConfig : config.getModels()) {
@@ -180,6 +257,7 @@ public class SemanticDeployExecutor {
                 }
 
                 // 3. Create Model Relations
+                progressCallback.accept("CREATING_RELATIONS");
                 if (!CollectionUtils.isEmpty(config.getModelRelations())) {
                     for (ModelRelationConfig relaConfig : config.getModelRelations()) {
                         ModelResp fromModel = modelMap.get(relaConfig.getFromModelBizName());
@@ -194,12 +272,14 @@ public class SemanticDeployExecutor {
                 collectMetricsAndDimensions(domain.getId(), result);
 
                 // 5. Create DataSet
+                progressCallback.accept("CREATING_DATASET");
                 DataSetResp dataSet = createDataSet(config.getDataSet(), domain, param, user);
                 result.setDataSetId(dataSet.getId());
                 result.setDataSetName(dataSet.getName());
 
                 // 6. Create Terms
                 if (!CollectionUtils.isEmpty(config.getTerms())) {
+                    progressCallback.accept("CREATING_TERMS");
                     for (TermConfig termConfig : config.getTerms()) {
                         createTerm(termConfig, domain, user);
 
@@ -214,6 +294,7 @@ public class SemanticDeployExecutor {
             // 7. Store AgentConfig for later creation through chat module
             // Works for both full templates and agent-only templates
             if (config.getAgent() != null) {
+                progressCallback.accept("CREATING_AGENT");
                 SemanticDeployResult.AgentConfigResult agentConfigResult =
                         new SemanticDeployResult.AgentConfigResult();
                 agentConfigResult.setName(resolveParam(config.getAgent().getName(), param));
@@ -228,14 +309,73 @@ public class SemanticDeployExecutor {
                 result.setAgentConfig(agentConfigResult);
             }
 
+            progressCallback.accept("COMPLETED");
             log.info("Successfully deployed template: {}", template.getName());
 
         } catch (Exception e) {
-            log.error("Failed to deploy template: {}", template.getName(), e);
+            log.error("Failed to deploy template: {}, rolling back created objects",
+                    template.getName(), e);
+            progressCallback.accept("ROLLING_BACK");
+            rollback(result, user);
             throw new RuntimeException("Failed to deploy template: " + e.getMessage(), e);
         }
 
         return result;
+    }
+
+    private void rollback(SemanticDeployResult result, User user) {
+        log.info("Rolling back deployed objects: domainId={}, modelCount={}, dataSetId={}",
+                result.getDomainId(), result.getModels().size(), result.getDataSetId());
+
+        // Reverse order: Terms → DataSet → Models (cascades relations/metrics/dimensions) → Domain
+
+        // 1. Delete terms by domainId
+        if (result.getDomainId() != null) {
+            try {
+                List<com.tencent.supersonic.headless.api.pojo.response.TermResp> terms =
+                        termService.getTerms(result.getDomainId(), null);
+                for (com.tencent.supersonic.headless.api.pojo.response.TermResp term : terms) {
+                    try {
+                        termService.delete(term.getId());
+                    } catch (Exception ex) {
+                        log.warn("Rollback: failed to delete term id={}", term.getId(), ex);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Rollback: failed to query terms for domainId={}", result.getDomainId(),
+                        e);
+            }
+        }
+
+        // 2. Delete DataSet
+        if (result.getDataSetId() != null) {
+            try {
+                dataSetService.delete(result.getDataSetId(), user);
+                log.info("Rollback: deleted dataSet id={}", result.getDataSetId());
+            } catch (Exception e) {
+                log.warn("Rollback: failed to delete dataSet id={}", result.getDataSetId(), e);
+            }
+        }
+
+        // 3. Delete Models (deleting a model cascades to its relations/metrics/dimensions)
+        for (SemanticDeployResult.CreatedModel model : result.getModels()) {
+            try {
+                modelService.deleteModel(model.getId(), user);
+                log.info("Rollback: deleted model id={}", model.getId());
+            } catch (Exception e) {
+                log.warn("Rollback: failed to delete model id={}", model.getId(), e);
+            }
+        }
+
+        // 4. Delete Domain
+        if (result.getDomainId() != null) {
+            try {
+                domainService.deleteDomain(result.getDomainId());
+                log.info("Rollback: deleted domain id={}", result.getDomainId());
+            } catch (Exception e) {
+                log.warn("Rollback: failed to delete domain id={}", result.getDomainId(), e);
+            }
+        }
     }
 
     private DomainResp createDomain(DomainConfig config, SemanticDeployParam param, User user) {
@@ -294,6 +434,9 @@ public class SemanticDeployExecutor {
                         new Dimension(dimConfig.getName(), dimConfig.getBizName(), dimType, 1);
                 if (StringUtils.isNotBlank(dimConfig.getExpr())) {
                     dimension.setExpr(resolveParam(dimConfig.getExpr(), param));
+                }
+                if (StringUtils.isNotBlank(dimConfig.getAlias())) {
+                    dimension.setAlias(dimConfig.getAlias());
                 }
                 if (dimType == DimensionType.partition_time || dimType == DimensionType.time) {
                     dimension.setTypeParams(new DimensionTimeTypeParams());

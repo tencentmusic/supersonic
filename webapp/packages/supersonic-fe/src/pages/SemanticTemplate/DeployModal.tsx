@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Form,
@@ -16,26 +16,39 @@ import {
   SemanticTemplate,
   SemanticDeployParam,
   SemanticPreviewResult,
-  SemanticDeployment,
   previewDeployment,
   executeDeployment,
+  getDeploymentById,
 } from '@/services/semanticTemplate';
 import { getDatabaseList } from '@/pages/SemanticModel/service';
-import { saveAgent } from '@/pages/Agent/service';
-import { AgentToolTypeEnum, ChatAppConfig } from '@/pages/Agent/type';
-import { getLlmModelAppList, getLlmList } from '@/services/system';
 
 interface DeployModalProps {
   visible: boolean;
   template: SemanticTemplate | null;
+  hasExistingDeployment?: boolean;
   onCancel: () => void;
   onSuccess: () => void;
   onPreviewResult: (data: SemanticPreviewResult) => void;
 }
 
+const POLL_INTERVAL = 2000;
+const MAX_POLL_COUNT = 150;
+
+const stepLabels: Record<string, string> = {
+  CREATING_DOMAIN: '正在创建主题域...',
+  CREATING_MODELS: '正在创建模型...',
+  CREATING_RELATIONS: '正在创建模型关联...',
+  CREATING_DATASET: '正在创建数据集...',
+  CREATING_TERMS: '正在创建术语...',
+  CREATING_AGENT: '正在配置智能助手...',
+  ROLLING_BACK: '部署失败，正在回滚...',
+  COMPLETED: '部署完成',
+};
+
 const DeployModal: React.FC<DeployModalProps> = ({
   visible,
   template,
+  hasExistingDeployment = false,
   onCancel,
   onSuccess,
   onPreviewResult,
@@ -45,10 +58,15 @@ const DeployModal: React.FC<DeployModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [deployLoading, setDeployLoading] = useState(false);
+  const [deployStatus, setDeployStatus] = useState<string>('');
+  const [allowRedeploy, setAllowRedeploy] = useState(false);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (visible) {
       loadDatabases();
+      setDeployStatus('');
+      setAllowRedeploy(false);
       // Set default values for config params
       if (template?.templateConfig?.configParams) {
         const defaultValues: Record<string, string> = {};
@@ -59,8 +77,24 @@ const DeployModal: React.FC<DeployModalProps> = ({
         });
         form.setFieldsValue({ params: defaultValues });
       }
+    } else {
+      // Cleanup timer when modal closes
+      stopPolling();
     }
   }, [visible, template]);
+
+  useEffect(() => {
+    return () => {
+      stopPolling();
+    };
+  }, []);
+
+  const stopPolling = () => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  };
 
   const loadDatabases = async () => {
     setLoading(true);
@@ -104,104 +138,79 @@ const DeployModal: React.FC<DeployModalProps> = ({
     try {
       const values = await form.validateFields();
       setDeployLoading(true);
+      setDeployStatus('正在提交部署...');
       const param: SemanticDeployParam = {
         databaseId: values.databaseId,
+        allowRedeploy: hasExistingDeployment ? allowRedeploy : undefined,
         params: values.params || {},
       };
       const res: any = await executeDeployment(template!.id, param);
       // API response is wrapped in { code, data, msg } format
-      if (res?.code === 200) {
-        const deployment: SemanticDeployment = res.data;
-
-        // Auto-create Agent if agentConfig is returned and user wants to create it
-        if (values.createAgent && deployment.resultDetail?.agentConfig) {
-          try {
-            await createAgentFromConfig(deployment.resultDetail.agentConfig);
-            message.success('部署成功，Agent已创建');
-          } catch (agentError) {
-            message.warning('部署成功，但创建Agent失败，请手动创建');
-          }
-        } else {
-          message.success('部署成功');
-        }
-
-        onSuccess();
+      if (res?.code === 200 && res?.data) {
+        const deploymentId = res.data.id;
+        setDeployStatus('正在部署...');
+        startPolling(deploymentId);
       } else {
-        message.error(res?.msg || '执行部署失败');
+        message.error(res?.msg || '提交部署失败');
+        setDeployLoading(false);
+        setDeployStatus('');
       }
     } catch (error: any) {
       if (error.errorFields) {
         // Form validation error
         return;
       }
-      message.error('执行部署失败');
-    } finally {
+      message.error('提交部署失败');
       setDeployLoading(false);
+      setDeployStatus('');
     }
   };
 
-  const createAgentFromConfig = async (agentConfig: any) => {
-    const toolConfig = {
-      tools: [
-        {
-          id: `dataset_${agentConfig.dataSetId}`,
-          type: AgentToolTypeEnum.DATASET,
-          name: agentConfig.dataSetName || agentConfig.name,
-          dataSetIds: [agentConfig.dataSetId],
-        },
-      ],
-    };
+  const startPolling = (deploymentId: number) => {
+    let pollCount = 0;
 
-    // 获取默认的 ChatApp 配置
-    let chatAppConfig: ChatAppConfig = {};
-    try {
-      // 获取 LLM 模型列表，选择第一个作为默认
-      const llmListRes: any = await getLlmList();
-      let defaultLlmId: number | undefined;
-      if (llmListRes?.code === 200 && llmListRes?.data?.length > 0) {
-        defaultLlmId = llmListRes.data[0].id;
-      } else {
-        console.warn('没有可用的 LLM 模型配置，Agent 的 LLM 功能可能无法正常使用');
+    pollTimerRef.current = setInterval(async () => {
+      pollCount++;
+
+      if (pollCount > MAX_POLL_COUNT) {
+        stopPolling();
+        setDeployLoading(false);
+        setDeployStatus('');
+        message.warning('部署超时，请在部署历史中查看最终状态');
+        return;
       }
 
-      // 获取系统预定义的 ChatApp 配置
-      const appListRes: any = await getLlmModelAppList();
-      if (appListRes?.code === 200 && appListRes?.data) {
-        chatAppConfig = Object.keys(appListRes.data).reduce(
-          (config: ChatAppConfig, key: string) => {
-            const appConfig = appListRes.data[key];
-            return {
-              ...config,
-              [key]: {
-                ...appConfig,
-                // 设置默认的 LLM 模型 ID（如果有的话）
-                chatModelId: defaultLlmId,
-              },
-            };
-          },
-          {},
-        );
+      try {
+        const res: any = await getDeploymentById(deploymentId);
+        const deployment = res?.code === 200 ? res.data : res;
+        if (!deployment) return;
+
+        if (deployment.status === 'SUCCESS') {
+          stopPolling();
+          setDeployLoading(false);
+          setDeployStatus('');
+          message.success('部署成功');
+          onSuccess();
+        } else if (deployment.status === 'FAILED') {
+          stopPolling();
+          setDeployLoading(false);
+          setDeployStatus('');
+          message.error(deployment.errorMessage || '部署失败');
+        } else if (deployment.status === 'CANCELLED') {
+          stopPolling();
+          setDeployLoading(false);
+          setDeployStatus('');
+          message.warning('部署已取消');
+        } else if (deployment.status === 'RUNNING') {
+          const stepText = deployment.currentStep
+            ? stepLabels[deployment.currentStep] || '正在部署...'
+            : '正在部署...';
+          setDeployStatus(stepText);
+        }
+      } catch (error) {
+        // Polling error, continue trying
       }
-    } catch (e) {
-      console.warn('Failed to load ChatApp config, using empty config', e);
-    }
-
-    const agent = {
-      name: agentConfig.name,
-      description: agentConfig.description,
-      examples: agentConfig.examples || [],
-      enableSearch: agentConfig.enableSearch ? 1 : 0,
-      status: 1,
-      toolConfig: JSON.stringify(toolConfig),
-      chatAppConfig,
-      isOpen: 0,
-    };
-
-    const agentRes: any = await saveAgent(agent as any);
-    if (agentRes?.code !== 200) {
-      throw new Error(agentRes?.msg || '创建Agent失败');
-    }
-    return agentRes.data;
+    }, POLL_INTERVAL);
   };
 
   const renderConfigParams = () => {
@@ -241,11 +250,15 @@ const DeployModal: React.FC<DeployModalProps> = ({
       title={`部署模板: ${template?.name}`}
       open={visible}
       width={700}
-      onCancel={onCancel}
+      onCancel={deployLoading ? undefined : onCancel}
+      closable={!deployLoading}
+      maskClosable={!deployLoading}
       footer={
         <Space>
-          <Button onClick={onCancel}>取消</Button>
-          <Button loading={previewLoading} onClick={handlePreview}>
+          <Button onClick={onCancel} disabled={deployLoading}>
+            取消
+          </Button>
+          <Button loading={previewLoading} onClick={handlePreview} disabled={deployLoading}>
             预览
           </Button>
           <Button type="primary" loading={deployLoading} onClick={handleDeploy}>
@@ -254,16 +267,34 @@ const DeployModal: React.FC<DeployModalProps> = ({
         </Space>
       }
     >
-      <Spin spinning={loading}>
+      <Spin spinning={loading || deployLoading} tip={deployStatus || undefined}>
         <Alert
           message="部署说明"
-          description="部署将在选定的数据库中创建完整的语义层结构，包括主题域、模型、指标、数据集。如果勾选「自动创建 Agent」，还会创建一个可在 Chat 中使用的智能助手。"
+          description="部署将在选定的数据库中创建完整的语义层结构，包括主题域、模型、指标、数据集。如果模板包含 Agent 配置，还会自动创建一个可在 Chat 中使用的智能助手。"
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
         />
 
-        <Form form={form} layout="vertical" name="deployForm" initialValues={{ createAgent: true }}>
+        {hasExistingDeployment && (
+          <Alert
+            message="该模板已有成功部署记录"
+            description="重新部署可能会创建重复的语义对象。建议先删除之前部署的对象再重新部署。"
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+            action={
+              <Checkbox
+                checked={allowRedeploy}
+                onChange={(e) => setAllowRedeploy(e.target.checked)}
+              >
+                允许重新部署
+              </Checkbox>
+            }
+          />
+        )}
+
+        <Form form={form} layout="vertical" name="deployForm">
           <Form.Item
             name="databaseId"
             label="目标数据库"
@@ -279,11 +310,6 @@ const DeployModal: React.FC<DeployModalProps> = ({
           </Form.Item>
 
           {renderConfigParams()}
-
-          <Divider>Agent 配置</Divider>
-          <Form.Item name="createAgent" valuePropName="checked">
-            <Checkbox>自动创建 Agent（可在 Chat 中直接使用）</Checkbox>
-          </Form.Item>
         </Form>
       </Spin>
     </Modal>

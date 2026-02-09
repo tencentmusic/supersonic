@@ -3,7 +3,7 @@ import { Drawer, Table, Tag, Button, Space, message, Modal, Descriptions } from 
 import type { ColumnsType } from 'antd/es/table';
 import moment from 'moment';
 import { useModel } from '@umijs/max';
-import { getDeploymentHistory, getAllDeploymentHistory, SemanticDeployment } from '@/services/semanticTemplate';
+import { getDeploymentHistory, getAllDeploymentHistory, cancelDeployment, SemanticDeployment } from '@/services/semanticTemplate';
 
 interface DeployHistoryProps {
   visible: boolean;
@@ -15,6 +15,7 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   RUNNING: { color: 'processing', text: '执行中' },
   SUCCESS: { color: 'success', text: '成功' },
   FAILED: { color: 'error', text: '失败' },
+  CANCELLED: { color: 'warning', text: '已取消' },
 };
 
 const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
@@ -59,6 +60,26 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
   const showDetail = (record: SemanticDeployment) => {
     setSelectedDeployment(record);
     setDetailVisible(true);
+  };
+
+  const handleCancel = async (record: SemanticDeployment) => {
+    Modal.confirm({
+      title: '确认取消部署',
+      content: `确定要取消部署「${record.templateName}」吗？`,
+      onOk: async () => {
+        try {
+          const res: any = await cancelDeployment(record.id);
+          if (res?.code === 200) {
+            message.success('已取消部署');
+            loadHistory();
+          } else {
+            message.error(res?.msg || '取消部署失败');
+          }
+        } catch (error) {
+          message.error('取消部署失败');
+        }
+      },
+    });
   };
 
   const columns: ColumnsType<SemanticDeployment> = [
@@ -113,11 +134,18 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
     {
       title: '操作',
       key: 'actions',
-      width: 80,
+      width: 120,
       render: (_, record) => (
-        <Button type="link" size="small" onClick={() => showDetail(record)}>
-          详情
-        </Button>
+        <Space size="small">
+          <Button type="link" size="small" onClick={() => showDetail(record)}>
+            详情
+          </Button>
+          {(record.status === 'PENDING' || record.status === 'RUNNING') && (
+            <Button type="link" size="small" danger onClick={() => handleCancel(record)}>
+              取消
+            </Button>
+          )}
+        </Space>
       ),
     },
   ];
@@ -205,7 +233,7 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
                 )}
               </>
             )}
-            {selectedDeployment.status === 'FAILED' && selectedDeployment.errorMessage && (
+            {(selectedDeployment.status === 'FAILED' || selectedDeployment.status === 'CANCELLED') && selectedDeployment.errorMessage && (
               <Descriptions.Item label="错误信息">
                 <span style={{ color: '#ff4d4f' }}>{selectedDeployment.errorMessage}</span>
               </Descriptions.Item>

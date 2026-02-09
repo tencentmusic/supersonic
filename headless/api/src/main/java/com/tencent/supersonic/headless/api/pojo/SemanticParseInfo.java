@@ -69,9 +69,9 @@ public class SemanticParseInfo implements Serializable {
             if (Math.abs(difference) < 0.0005) { // 看完全匹配的个数，实践证明，可以用户输入规范后，该逻辑具有优势
                 if (!o1.getDataSetId().equals(o2.getDataSetId())) {
                     List<SchemaElementMatch> elementMatches1 = o1.getElementMatches().stream()
-                            .filter(e -> e.getSimilarity() == 1).collect(Collectors.toList());
+                            .filter(e -> e.getSimilarity() == 1).toList();
                     List<SchemaElementMatch> elementMatches2 = o2.getElementMatches().stream()
-                            .filter(e -> e.getSimilarity() == 1).collect(Collectors.toList());
+                            .filter(e -> e.getSimilarity() == 1).toList();
                     if (elementMatches1.size() > elementMatches2.size()) {
                         return -1;
                     } else if (elementMatches1.size() < elementMatches2.size()) {

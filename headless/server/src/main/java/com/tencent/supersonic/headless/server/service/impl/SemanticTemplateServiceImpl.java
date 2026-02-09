@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.server.event.TemplateDeployedEvent;
 import com.tencent.supersonic.headless.server.executor.SemanticDeployExecutor;
 import com.tencent.supersonic.headless.server.persistence.dataobject.SemanticDeploymentDO;
@@ -20,17 +21,24 @@ import com.tencent.supersonic.headless.server.pojo.SemanticPreviewResult;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplate;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateListResp;
+import com.tencent.supersonic.headless.server.service.DomainService;
 import com.tencent.supersonic.headless.server.service.SemanticTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,18 +49,26 @@ public class SemanticTemplateServiceImpl extends
     private static final Integer STATUS_DRAFT = 0;
     private static final Integer STATUS_DEPLOYED = 1;
 
+    private final Map<Long, Future<?>> runningDeployments = new ConcurrentHashMap<>();
+
     private final SemanticDeploymentMapper deploymentMapper;
     private final SemanticDeployExecutor deployExecutor;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TenantConfig tenantConfig;
+    private final ThreadPoolExecutor deployPool;
+    private final DomainService domainService;
 
     public SemanticTemplateServiceImpl(SemanticDeploymentMapper deploymentMapper,
             @Lazy SemanticDeployExecutor deployExecutor,
-            ApplicationEventPublisher applicationEventPublisher, TenantConfig tenantConfig) {
+            ApplicationEventPublisher applicationEventPublisher, TenantConfig tenantConfig,
+            @Qualifier("deployExecutor") ThreadPoolExecutor deployPool,
+            DomainService domainService) {
         this.deploymentMapper = deploymentMapper;
         this.deployExecutor = deployExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
         this.tenantConfig = tenantConfig;
+        this.deployPool = deployPool;
+        this.domainService = domainService;
     }
 
     @Override
@@ -169,15 +185,17 @@ public class SemanticTemplateServiceImpl extends
     }
 
     @Override
-    @Transactional
-    public SemanticDeployment executeDeployment(Long templateId, SemanticDeployParam param,
+    public SemanticDeployment submitDeployment(Long templateId, SemanticDeployParam param,
             User user) {
         SemanticTemplate template = getTemplateById(templateId, user);
         Long tenantId = getTenantId(user);
 
-        if (hasSuccessfulDeployment(templateId, tenantId)) {
-            throw new InvalidArgumentException("该模板已成功部署过，不能重复部署。如需重新部署，请先删除之前部署创建的语义对象。");
+        if (!param.isAllowRedeploy() && isDeploymentStillActive(templateId, tenantId)) {
+            throw new InvalidArgumentException("该模板已成功部署且语义对象仍然存在。如需重新部署，请勾选「允许重新部署」。");
         }
+
+        // Synchronous pre-deployment validation (fails fast before creating record)
+        deployExecutor.validate(template, param, user);
 
         SemanticDeployment deployment = new SemanticDeployment();
         deployment.setTemplateId(templateId);
@@ -190,7 +208,112 @@ public class SemanticTemplateServiceImpl extends
         deployment.setCreatedAt(new Date());
 
         SemanticDeploymentDO deploymentDO = convertToDeploymentDO(deployment);
-        deploymentMapper.insert(deploymentDO);
+        try {
+            deploymentMapper.insert(deploymentDO);
+        } catch (DuplicateKeyException e) {
+            throw new InvalidArgumentException("该模板已有正在执行的部署任务，请等待完成后再试。");
+        }
+        deployment.setId(deploymentDO.getId());
+
+        // Submit async execution on dedicated deploy thread pool
+        final Long capturedTenantId = tenantId;
+        final Long deploymentId = deployment.getId();
+        Future<?> future = deployPool.submit(() -> {
+            try {
+                executeDeploymentAsync(deploymentId, template, param, user, capturedTenantId);
+            } finally {
+                runningDeployments.remove(deploymentId);
+            }
+        });
+        runningDeployments.put(deploymentId, future);
+
+        return deployment;
+    }
+
+    private void executeDeploymentAsync(Long deploymentId, SemanticTemplate template,
+            SemanticDeployParam param, User user, Long tenantId) {
+        try {
+            TenantContext.setTenantId(tenantId);
+
+            SemanticDeploymentDO deploymentDO = deploymentMapper.selectById(deploymentId);
+            if (deploymentDO == null) {
+                log.error("Deployment record not found for async execution: {}", deploymentId);
+                return;
+            }
+
+            SemanticDeployment deployment = convertToDeployment(deploymentDO);
+            deployment.setStatus(SemanticDeployment.DeploymentStatus.RUNNING);
+            deployment.setStartTime(new Date());
+            updateDeploymentStatus(deployment);
+
+            try {
+                SemanticDeployResult result = deployExecutor.execute(template, param, user,
+                        step -> updateDeploymentStep(deployment, step));
+
+                applicationEventPublisher.publishEvent(new TemplateDeployedEvent(this, result,
+                        template.getTemplateConfig(), user));
+
+                deployment.setResultDetail(result);
+                deployment.setStatus(SemanticDeployment.DeploymentStatus.SUCCESS);
+                deployment.setEndTime(new Date());
+
+                SemanticTemplateDO templateDO = baseMapper.selectById(template.getId());
+                if (templateDO != null && templateDO.getIsBuiltin() == 0) {
+                    templateDO.setStatus(STATUS_DEPLOYED);
+                    templateDO.setUpdatedAt(new Date());
+                    templateDO.setUpdatedBy(user.getName());
+                    baseMapper.updateById(templateDO);
+                    log.info("Template {} status updated to DEPLOYED after successful deployment",
+                            template.getId());
+                }
+            } catch (Exception e) {
+                // Re-read status in case cancelDeployment() already set it to CANCELLED
+                SemanticDeploymentDO latestDO = deploymentMapper.selectById(deploymentId);
+                if (latestDO != null && SemanticDeployment.DeploymentStatus.CANCELLED.name()
+                        .equals(latestDO.getStatus())) {
+                    log.info("Deployment {} was cancelled, skipping FAILED update", deploymentId);
+                    return;
+                }
+                log.error("Failed to deploy template: {}", template.getId(), e);
+                deployment.setStatus(SemanticDeployment.DeploymentStatus.FAILED);
+                deployment.setErrorMessage(e.getMessage());
+                deployment.setEndTime(new Date());
+            }
+
+            updateDeploymentStatus(deployment);
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Override
+    public SemanticDeployment executeDeployment(Long templateId, SemanticDeployParam param,
+            User user) {
+        SemanticTemplate template = getTemplateById(templateId, user);
+        Long tenantId = getTenantId(user);
+
+        if (!param.isAllowRedeploy() && isDeploymentStillActive(templateId, tenantId)) {
+            throw new InvalidArgumentException("该模板已成功部署且语义对象仍然存在。如需重新部署，请勾选「允许重新部署」。");
+        }
+
+        deployExecutor.validate(template, param, user);
+
+        SemanticDeployment deployment = new SemanticDeployment();
+        deployment.setTemplateId(templateId);
+        deployment.setTemplateName(template.getName());
+        deployment.setDatabaseId(param.getDatabaseId());
+        deployment.setParamConfig(param);
+        deployment.setStatus(SemanticDeployment.DeploymentStatus.PENDING);
+        deployment.setTenantId(tenantId);
+        deployment.setCreatedBy(user.getName());
+        deployment.setCreatedAt(new Date());
+
+        SemanticDeploymentDO deploymentDO = convertToDeploymentDO(deployment);
+        try {
+            deploymentMapper.insert(deploymentDO);
+        } catch (DuplicateKeyException e) {
+            throw new InvalidArgumentException("该模板已有正在执行的部署任务，请等待完成后再试。");
+        }
         deployment.setId(deploymentDO.getId());
 
         try {
@@ -198,9 +321,9 @@ public class SemanticTemplateServiceImpl extends
             deployment.setStartTime(new Date());
             updateDeploymentStatus(deployment);
 
-            SemanticDeployResult result = deployExecutor.execute(template, param, user);
+            SemanticDeployResult result = deployExecutor.execute(template, param, user,
+                    step -> updateDeploymentStep(deployment, step));
 
-            // Publish event for chat module to create Agent/Plugin
             applicationEventPublisher.publishEvent(
                     new TemplateDeployedEvent(this, result, template.getTemplateConfig(), user));
 
@@ -233,6 +356,14 @@ public class SemanticTemplateServiceImpl extends
         deploymentMapper.updateById(deploymentDO);
     }
 
+    private void updateDeploymentStep(SemanticDeployment deployment, String step) {
+        deployment.setCurrentStep(step);
+        SemanticDeploymentDO deploymentDO = new SemanticDeploymentDO();
+        deploymentDO.setId(deployment.getId());
+        deploymentDO.setCurrentStep(step);
+        deploymentMapper.updateById(deploymentDO);
+    }
+
     @Override
     public List<SemanticDeployment> getDeploymentHistory(User user) {
         Long tenantId = getTenantId(user);
@@ -256,6 +387,41 @@ public class SemanticTemplateServiceImpl extends
         }
 
         return convertToDeployment(deploymentDO);
+    }
+
+    @Override
+    public SemanticDeployment cancelDeployment(Long deploymentId, User user) {
+        SemanticDeploymentDO deploymentDO = deploymentMapper.selectById(deploymentId);
+        if (deploymentDO == null) {
+            throw new InvalidArgumentException("Deployment not found: " + deploymentId);
+        }
+
+        Long tenantId = getTenantId(user);
+        if (!deploymentDO.getTenantId().equals(tenantId) && !user.isSuperAdmin()) {
+            throw new InvalidArgumentException("No permission to cancel this deployment");
+        }
+
+        SemanticDeployment.DeploymentStatus status =
+                SemanticDeployment.DeploymentStatus.valueOf(deploymentDO.getStatus());
+        if (status != SemanticDeployment.DeploymentStatus.PENDING
+                && status != SemanticDeployment.DeploymentStatus.RUNNING) {
+            throw new InvalidArgumentException("只能取消 PENDING 或 RUNNING 状态的部署");
+        }
+
+        // Interrupt the async thread if running
+        Future<?> future = runningDeployments.remove(deploymentId);
+        if (future != null) {
+            future.cancel(true);
+        }
+
+        SemanticDeployment deployment = convertToDeployment(deploymentDO);
+        deployment.setStatus(SemanticDeployment.DeploymentStatus.CANCELLED);
+        deployment.setErrorMessage("用户取消部署");
+        deployment.setEndTime(new Date());
+        updateDeploymentStatus(deployment);
+
+        log.info("Deployment {} cancelled by user {}", deploymentId, user.getName());
+        return deployment;
     }
 
     @Override
@@ -324,12 +490,38 @@ public class SemanticTemplateServiceImpl extends
         return tenantConfig.getDefaultTenantId();
     }
 
-    private boolean hasSuccessfulDeployment(Long templateId, Long tenantId) {
+    /**
+     * Check if a previous deployment is still active (domain still exists). Returns false if no
+     * successful deployment exists or if the deployed domain has been deleted.
+     */
+    private boolean isDeploymentStillActive(Long templateId, Long tenantId) {
         QueryWrapper<SemanticDeploymentDO> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(SemanticDeploymentDO::getTemplateId, templateId)
-                .eq(SemanticDeploymentDO::getTenantId, tenantId).eq(SemanticDeploymentDO::getStatus,
-                        SemanticDeployment.DeploymentStatus.SUCCESS.name());
-        return deploymentMapper.selectCount(wrapper) > 0;
+                .eq(SemanticDeploymentDO::getTenantId, tenantId)
+                .eq(SemanticDeploymentDO::getStatus,
+                        SemanticDeployment.DeploymentStatus.SUCCESS.name())
+                .orderByDesc(SemanticDeploymentDO::getCreatedAt).last("LIMIT 1");
+        SemanticDeploymentDO lastSuccess = deploymentMapper.selectOne(wrapper);
+
+        if (lastSuccess == null) {
+            return false;
+        }
+
+        // Check if the deployed domain still exists
+        SemanticDeployment deployment = convertToDeployment(lastSuccess);
+        SemanticDeployResult result = deployment.getResultDetail();
+        if (result != null && result.getDomainId() != null) {
+            DomainResp domain = domainService.getDomain(result.getDomainId());
+            if (domain == null) {
+                log.info(
+                        "Previous deployment domain {} has been deleted, allowing redeploy "
+                                + "for template {} in tenant {}",
+                        result.getDomainId(), templateId, tenantId);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private SemanticTemplate convertToTemplate(SemanticTemplateDO templateDO) {
@@ -376,13 +568,22 @@ public class SemanticTemplateServiceImpl extends
 
     private SemanticDeploymentDO convertToDeploymentDO(SemanticDeployment deployment) {
         SemanticDeploymentDO deploymentDO = new SemanticDeploymentDO();
-        BeanUtils.copyProperties(deployment, deploymentDO, "status", "paramConfig", "resultDetail");
+        BeanUtils.copyProperties(deployment, deploymentDO, "status", "paramConfig", "resultDetail",
+                "activeLock");
         deploymentDO.setStatus(deployment.getStatus().name());
         if (deployment.getParamConfig() != null) {
             deploymentDO.setParamConfig(JsonUtil.toString(deployment.getParamConfig()));
         }
         if (deployment.getResultDetail() != null) {
             deploymentDO.setResultDetail(JsonUtil.toString(deployment.getResultDetail()));
+        }
+        // activeLock is non-null only for PENDING/RUNNING, enabling DB unique constraint
+        SemanticDeployment.DeploymentStatus status = deployment.getStatus();
+        if (status == SemanticDeployment.DeploymentStatus.PENDING
+                || status == SemanticDeployment.DeploymentStatus.RUNNING) {
+            deploymentDO.setActiveLock(deployment.getTemplateId() + "_" + deployment.getTenantId());
+        } else {
+            deploymentDO.setActiveLock(null);
         }
         return deploymentDO;
     }

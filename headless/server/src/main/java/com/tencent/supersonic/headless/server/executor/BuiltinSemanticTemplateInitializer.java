@@ -19,8 +19,8 @@ import com.tencent.supersonic.headless.server.pojo.*;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig.*;
 import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.service.impl.DictWordService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -36,37 +36,19 @@ import java.util.stream.Collectors;
 @Component
 @Order(2)
 @Slf4j
+@RequiredArgsConstructor
 public class BuiltinSemanticTemplateInitializer implements CommandLineRunner {
 
-    @Autowired
-    private SemanticTemplateService semanticTemplateService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private TemplateConfig templateConfig;
-
-    @Autowired
-    private DatabaseService databaseService;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private DimensionService dimensionService;
-
-    @Autowired
-    private ModelService modelService;
-
-    @Autowired
-    private DictConfService dictConfService;
-
-    @Autowired
-    private DictTaskService dictTaskService;
-
-    @Autowired
-    private DictWordService dictWordService;
+    private final SemanticTemplateService semanticTemplateService;
+    private final UserService userService;
+    private final TemplateConfig templateConfig;
+    private final DatabaseService databaseService;
+    private final AuthService authService;
+    private final DimensionService dimensionService;
+    private final ModelService modelService;
+    private final DictConfService dictConfService;
+    private final DictTaskService dictTaskService;
+    private final DictWordService dictWordService;
 
     @Override
     public void run(String... args) {

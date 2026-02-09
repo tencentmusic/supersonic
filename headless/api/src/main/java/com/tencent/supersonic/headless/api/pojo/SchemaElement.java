@@ -64,32 +64,31 @@ public class SchemaElement implements Serializable {
     }
 
     public boolean isPartitionTime() {
+        DimensionType dimensionType = getDimensionType();
+        return DimensionType.isPartitionTime(dimensionType);
+    }
+
+    public boolean isTimeDimension() {
+        DimensionType dimensionType = getDimensionType();
+        return DimensionType.isTimeDimension(dimensionType);
+    }
+
+    private DimensionType getDimensionType() {
         if (MapUtils.isEmpty(extInfo)) {
-            return false;
+            return null;
         }
         Object o = extInfo.get(DimensionConstants.DIMENSION_TYPE);
-        DimensionType dimensionTYpe = null;
         if (o instanceof DimensionType) {
-            dimensionTYpe = (DimensionType) o;
+            return (DimensionType) o;
         }
         if (o instanceof String) {
-            dimensionTYpe = DimensionType.valueOf((String) o);
+            return DimensionType.valueOf((String) o);
         }
-        return DimensionType.isPartitionTime(dimensionTYpe);
+        return null;
     }
 
     public boolean isPrimaryKey() {
-        if (MapUtils.isEmpty(extInfo)) {
-            return false;
-        }
-        Object o = extInfo.get(DimensionConstants.DIMENSION_TYPE);
-        DimensionType dimensionType = null;
-        if (o instanceof DimensionType) {
-            dimensionType = (DimensionType) o;
-        }
-        if (o instanceof String) {
-            dimensionType = DimensionType.valueOf((String) o);
-        }
+        DimensionType dimensionType = getDimensionType();
         return DimensionType.isPrimaryKey(dimensionType);
     }
 

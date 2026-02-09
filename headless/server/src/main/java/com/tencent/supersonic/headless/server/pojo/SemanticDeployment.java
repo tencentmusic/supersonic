@@ -23,6 +23,8 @@ public class SemanticDeployment {
 
     private String errorMessage;
 
+    private String currentStep;
+
     private Date startTime;
 
     private Date endTime;
@@ -34,6 +36,6 @@ public class SemanticDeployment {
     private String createdBy;
 
     public enum DeploymentStatus {
-        PENDING, RUNNING, SUCCESS, FAILED
+        PENDING, RUNNING, SUCCESS, FAILED, CANCELLED
     }
 }

@@ -28,6 +28,8 @@ public class SemanticDeploymentDO {
 
     private String errorMessage;
 
+    private String currentStep;
+
     private Date startTime;
 
     private Date endTime;
@@ -37,4 +39,9 @@ public class SemanticDeploymentDO {
     private Date createdAt;
 
     private String createdBy;
+
+    /**
+     * Non-null when status is PENDING/RUNNING, value = "{templateId}_{tenantId}". NULL otherwise.
+     */
+    private String activeLock;
 }

@@ -1,0 +1,203 @@
+{
+  "name": "盛京银行日运营报表",
+  "description": "银行日度运营数据分析，包含授信、放款、还款、代偿等核心业务指标",
+  "category": "FINANCE",
+  "domain": {
+    "name": "盛京银行运营分析",
+    "bizName": "shengjing_bank_ops",
+    "description": "盛京银行日度运营数据分析域"
+  },
+  "models": [
+    {
+      "name": "银行日报表",
+      "bizName": "oms_sj_bank_day_report",
+      "tableName": "oms_sj_bank_day_report",
+      "description": "盛京银行日运营报表数据模型",
+      "dimensions": [
+        {
+          "name": "日期",
+          "bizName": "workday",
+          "type": "partition_time",
+          "dateFormat": "yyyy-MM-dd",
+          "alias": "数据日期,报告日期"
+        },
+        {
+          "name": "银行",
+          "bizName": "bank",
+          "type": "categorical"
+        },
+        {
+          "name": "资产",
+          "bizName": "asset",
+          "type": "categorical"
+        }
+      ],
+      "measures": [
+        {
+          "name": "授信申请件数",
+          "bizName": "credit_num",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "授信通过件数",
+          "bizName": "credit_suc_num",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "授信申请金额",
+          "bizName": "apply_amt",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "授信通过金额",
+          "bizName": "credit_suc_amt",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "放款成功件数",
+          "bizName": "loan_num",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "放款成功金额",
+          "bizName": "loan_amt",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "还款件数",
+          "bizName": "repay_num",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "还款本金",
+          "bizName": "r_indeed_prinl",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "还款利息",
+          "bizName": "r_indeed_int",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "还款罚息",
+          "bizName": "r_indeed_penalty",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "代偿件数",
+          "bizName": "comp_num",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "代偿本金",
+          "bizName": "p_indeed_prinl",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "代偿利息",
+          "bizName": "p_indeed_int",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "代偿罚息",
+          "bizName": "p_indeed_penalty",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "在贷余额",
+          "bizName": "ln_bal",
+          "aggOperator": "SUM",
+          "createMetric": true
+        },
+        {
+          "name": "累计放款",
+          "bizName": "t_loan_amt",
+          "aggOperator": "SUM",
+          "createMetric": true
+        }
+      ]
+    }
+  ],
+  "dataSet": {
+    "name": "盛京银行运营数据集",
+    "bizName": "shengjing_bank_ops_dataset",
+    "description": "盛京银行日度运营数据分析数据集"
+  },
+  "agent": {
+    "name": "盛京银行运营助手",
+    "description": "盛京银行日度运营数据分析智能助手，可查询授信、放款、还款、代偿等业务数据",
+    "chatAppOverrides": {
+      "DASHBOARD_MODE": true
+    },
+    "examples": [
+      "昨天的授信通过件数是多少",
+      "最近7天的放款金额趋势",
+      "本月授信申请件数和通过件数",
+      "上周每天的放款成功金额",
+      "最近30天的代偿件数和代偿本金",
+      "本周还款本金、利息、罚息分别是多少",
+      "今天的在贷余额是多少",
+      "最近一个月放款成功件数变化趋势",
+      "上个月累计放款金额",
+      "本周和上周的授信通过件数对比"
+    ]
+  },
+  "exemplars": [
+    {
+      "question": "昨天的授信通过件数是多少",
+      "sql": "SELECT 授信通过件数 FROM 盛京银行运营数据集 WHERE 日期 = '昨天'"
+    },
+    {
+      "question": "最近7天的放款成功金额趋势",
+      "sql": "SELECT 日期, 放款成功金额 FROM 盛京银行运营数据集 WHERE 日期 >= '最近7天' ORDER BY 日期"
+    },
+    {
+      "question": "本月授信申请件数和通过件数分别是多少",
+      "sql": "SELECT 授信申请件数, 授信通过件数 FROM 盛京银行运营数据集 WHERE 日期 >= '本月'"
+    },
+    {
+      "question": "本周和上周的代偿件数对比",
+      "sql": "SELECT 日期, 代偿件数 FROM 盛京银行运营数据集 WHERE 日期 >= '上周'"
+    },
+    {
+      "question": "各资产类型的在贷余额是多少",
+      "sql": "SELECT 资产, 在贷余额 FROM 盛京银行运营数据集 GROUP BY 资产"
+    }
+  ],
+  "terms": [
+    {
+      "name": "授信",
+      "description": "银行对客户进行信用评估并给予一定额度的过程",
+      "alias": ["信用审批", "授信审批"]
+    },
+    {
+      "name": "放款",
+      "description": "授信通过后，银行向客户发放贷款的行为",
+      "alias": ["贷款发放", "出账"]
+    },
+    {
+      "name": "代偿",
+      "description": "借款人无法按时还款时，由担保方代为偿还的行为",
+      "alias": ["担保代偿", "逾期代偿"]
+    },
+    {
+      "name": "在贷余额",
+      "description": "当前尚未偿还的贷款本金总额",
+      "alias": ["贷款余额", "未还本金"]
+    }
+  ]
+}

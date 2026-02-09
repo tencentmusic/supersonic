@@ -43,7 +43,14 @@ public interface SemanticTemplateService {
     SemanticPreviewResult previewDeployment(Long templateId, SemanticDeployParam param, User user);
 
     /**
-     * Execute deployment. All created objects automatically belong to the current tenant.
+     * Submit deployment asynchronously. Returns immediately with PENDING status. Use
+     * getDeploymentById() to poll for completion.
+     */
+    SemanticDeployment submitDeployment(Long templateId, SemanticDeployParam param, User user);
+
+    /**
+     * Execute deployment synchronously. All created objects automatically belong to the current
+     * tenant. Used by BuiltinSemanticTemplateInitializer at startup.
      */
     SemanticDeployment executeDeployment(Long templateId, SemanticDeployParam param, User user);
 
@@ -56,6 +63,11 @@ public interface SemanticTemplateService {
      * Get deployment detail by ID (checks tenant permission).
      */
     SemanticDeployment getDeploymentById(Long id, User user);
+
+    /**
+     * Cancel a PENDING or RUNNING deployment. Triggers rollback of any partially created objects.
+     */
+    SemanticDeployment cancelDeployment(Long deploymentId, User user);
 
     /**
      * Get all builtin templates.

@@ -10,8 +10,8 @@ import com.tencent.supersonic.headless.server.pojo.SemanticTemplateListResp;
 import com.tencent.supersonic.headless.server.service.SemanticTemplateService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,10 +26,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/semantic/v1")
 @Slf4j
+@RequiredArgsConstructor
 public class SemanticTemplateController {
 
-    @Autowired
-    private SemanticTemplateService semanticTemplateService;
+    private final SemanticTemplateService semanticTemplateService;
 
     /**
      * Get template list (builtin + custom)
@@ -95,14 +95,15 @@ public class SemanticTemplateController {
     }
 
     /**
-     * Execute deployment (custom action with colon)
+     * Submit deployment asynchronously (custom action with colon). Returns immediately with PENDING
+     * status. Use GET /deployments/{id} to poll.
      */
     @PostMapping("/templates/{id}:deploy")
-    public SemanticDeployment executeDeployment(@PathVariable Long id,
+    public SemanticDeployment submitDeployment(@PathVariable Long id,
             @RequestBody SemanticDeployParam param, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return semanticTemplateService.executeDeployment(id, param, user);
+        return semanticTemplateService.submitDeployment(id, param, user);
     }
 
     /**
@@ -123,6 +124,16 @@ public class SemanticTemplateController {
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return semanticTemplateService.getDeploymentById(id, user);
+    }
+
+    /**
+     * Cancel a PENDING or RUNNING deployment
+     */
+    @PostMapping("/deployments/{id}:cancel")
+    public SemanticDeployment cancelDeployment(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return semanticTemplateService.cancelDeployment(id, user);
     }
 
     /**

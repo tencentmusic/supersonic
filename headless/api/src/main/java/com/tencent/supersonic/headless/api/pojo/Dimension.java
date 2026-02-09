@@ -29,6 +29,8 @@ public class Dimension {
 
     private String description;
 
+    private String alias;
+
     public Dimension(String name, String bizName, DimensionType type, Integer isCreateDimension) {
         this.name = name;
         this.type = type;

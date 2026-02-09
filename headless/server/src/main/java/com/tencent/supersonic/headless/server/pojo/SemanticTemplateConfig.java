@@ -26,6 +26,8 @@ public class SemanticTemplateConfig {
 
     private List<ConfigParam> configParams = new ArrayList<>();
 
+    private List<ExemplarConfig> exemplars = new ArrayList<>();
+
     @Data
     public static class DomainConfig {
         private String name;
@@ -70,6 +72,7 @@ public class SemanticTemplateConfig {
         private String type; // categorical, time, partition_time
         private String expr;
         private String dateFormat;
+        private String alias;
         private Boolean enableDictValue = false;
     }
 
@@ -145,6 +148,11 @@ public class SemanticTemplateConfig {
         private List<String> admins = new ArrayList<>();
         private List<String> viewers = new ArrayList<>();
         /**
+         * Whether to auto-create the REPORT_SCHEDULE plugin and attach it to the agent. Defaults to
+         * true for backward compatibility.
+         */
+        private Boolean enableReportSchedulePlugin = true;
+        /**
          * Override ChatApp enable/disable per APP_KEY. Key is the ChatApp APP_KEY (e.g.
          * "PLAIN_TEXT", "S2SQL_SC"), value is whether to enable it. Apps not in the map retain
          * their defaults.
@@ -178,5 +186,11 @@ public class SemanticTemplateConfig {
         private String defaultValue;
         private boolean required;
         private String description;
+    }
+
+    @Data
+    public static class ExemplarConfig {
+        private String question;
+        private String sql;
     }
 }

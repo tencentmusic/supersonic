@@ -10,6 +10,8 @@ public class SemanticDeployParam {
 
     private Long databaseId;
 
+    private boolean allowRedeploy = false;
+
     private Map<String, String> params = new HashMap<>();
 
     public String getParam(String key) {

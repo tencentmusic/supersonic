@@ -167,6 +167,7 @@ export interface ConfigParam {
 
 export interface SemanticDeployParam {
   databaseId: number;
+  allowRedeploy?: boolean;
   params: Record<string, string>;
 }
 
@@ -198,9 +199,10 @@ export interface SemanticDeployment {
   templateName?: string;
   databaseId?: number;
   paramConfig?: SemanticDeployParam;
-  status: 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED';
+  status: 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
   resultDetail?: SemanticDeployResult;
   errorMessage?: string;
+  currentStep?: string;
   startTime?: string;
   endTime?: string;
   tenantId: number;
@@ -371,6 +373,15 @@ export function getDeploymentHistory(): Promise<SemanticDeployment[]> {
 export function getDeploymentById(id: number): Promise<SemanticDeployment> {
   return tRequest(`${DEPLOYMENTS_BASE}/${id}`, {
     method: 'GET',
+  });
+}
+
+/**
+ * Cancel a PENDING or RUNNING deployment
+ */
+export function cancelDeployment(id: number): Promise<SemanticDeployment> {
+  return tRequest(`${DEPLOYMENTS_BASE}/${id}:cancel`, {
+    method: 'POST',
   });
 }
 

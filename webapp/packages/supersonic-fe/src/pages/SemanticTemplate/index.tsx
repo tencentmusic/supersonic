@@ -332,6 +332,7 @@ const SemanticTemplatePage: React.FC = () => {
       <DeployModal
         visible={deployModalVisible}
         template={selectedTemplate}
+        hasExistingDeployment={selectedTemplate?.status === TEMPLATE_STATUS.DEPLOYED}
         onCancel={() => setDeployModalVisible(false)}
         onSuccess={handleDeploySuccess}
         onPreviewResult={(data) => {
