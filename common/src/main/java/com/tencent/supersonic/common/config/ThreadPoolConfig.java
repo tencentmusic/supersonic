@@ -41,4 +41,18 @@ public class ThreadPoolConfig {
                 new ThreadFactoryBuilder().setNameFormat("supersonic-chat-pool-").build(),
                 new ThreadPoolExecutor.CallerRunsPolicy());
     }
+
+    @Bean("deployExecutor")
+    public ThreadPoolExecutor getDeployExecutor() {
+        return new ThreadPoolExecutor(2, 4, 60 * 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(16),
+                new ThreadFactoryBuilder().setNameFormat("supersonic-deploy-pool-").build(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
+    }
+
+    @Bean("exportExecutor")
+    public ThreadPoolExecutor getExportExecutor() {
+        return new ThreadPoolExecutor(3, 3, 60 * 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(50),
+                new ThreadFactoryBuilder().setNameFormat("supersonic-export-pool-").build(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
+    }
 }

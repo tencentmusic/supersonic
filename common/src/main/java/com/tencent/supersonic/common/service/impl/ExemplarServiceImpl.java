@@ -13,8 +13,8 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.RetrieveQuery;
 import dev.langchain4j.store.embedding.RetrieveQueryResult;
 import dev.langchain4j.store.embedding.TextSegmentConvert;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
@@ -26,6 +26,7 @@ import java.util.List;
 @Service
 @Slf4j
 @Order(0)
+@RequiredArgsConstructor
 public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private static final String SYS_EXEMPLAR_FILE = "s2-exemplar.json";
@@ -34,11 +35,9 @@ public class ExemplarServiceImpl implements ExemplarService, CommandLineRunner {
 
     private final ObjectMapper objectMapper = JsonUtil.INSTANCE.getObjectMapper();
 
-    @Autowired
-    private EmbeddingConfig embeddingConfig;
+    private final EmbeddingConfig embeddingConfig;
 
-    @Autowired
-    private EmbeddingService embeddingService;
+    private final EmbeddingService embeddingService;
 
     public void storeExemplar(String collection, Text2SQLExemplar exemplar) {
         Metadata metadata = Metadata

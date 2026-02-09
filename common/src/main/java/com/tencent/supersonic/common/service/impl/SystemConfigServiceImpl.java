@@ -11,7 +11,7 @@ import com.tencent.supersonic.common.persistence.mapper.SystemConfigMapper;
 import com.tencent.supersonic.common.pojo.Parameter;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.JsonUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,14 +21,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemConfigDO>
         implements SystemConfigService {
 
-    @Autowired
-    private TenantConfig tenantConfig;
+    private final TenantConfig tenantConfig;
 
-    @Autowired
-    private Environment environment;
+    private final Environment environment;
 
     // Cache field to store the system configuration per tenant
     private Map<Long, SystemConfig> tenantConfigCache = new ConcurrentHashMap<>();
