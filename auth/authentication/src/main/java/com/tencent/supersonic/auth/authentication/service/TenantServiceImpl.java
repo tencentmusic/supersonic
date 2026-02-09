@@ -5,7 +5,10 @@ import com.tencent.supersonic.auth.api.authentication.pojo.Tenant;
 import com.tencent.supersonic.auth.api.authentication.service.TenantService;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.TenantDO;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.TenantDOMapper;
+import com.tencent.supersonic.common.pojo.PlanQuota;
+import com.tencent.supersonic.common.service.SubscriptionInfoProvider;
 import com.tencent.supersonic.common.util.BeanMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TenantServiceImpl implements TenantService {
 
     private static final String STATUS_ACTIVE = "ACTIVE";
@@ -27,10 +31,7 @@ public class TenantServiceImpl implements TenantService {
     private static final String STATUS_DELETED = "DELETED";
 
     private final TenantDOMapper tenantDOMapper;
-
-    public TenantServiceImpl(TenantDOMapper tenantDOMapper) {
-        this.tenantDOMapper = tenantDOMapper;
-    }
+    private final SubscriptionInfoProvider subscriptionInfoProvider;
 
     @Override
     @Transactional
@@ -126,32 +127,57 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean isUserLimitReached(Long tenantId) {
-        // TODO: Implement by counting users with tenant_id and comparing with max_users
-        return false;
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return false;
+        }
+        Integer maxUsers = quota.get().getMaxUsers();
+        return !quota.get().isUnlimited(maxUsers);
+        // TODO: count actual users with tenant_id and compare with maxUsers
     }
 
     @Override
     public boolean isDatasetLimitReached(Long tenantId) {
-        // TODO: Implement by counting datasets with tenant_id and comparing with max_datasets
-        return false;
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return false;
+        }
+        Integer maxDatasets = quota.get().getMaxDatasets();
+        return !quota.get().isUnlimited(maxDatasets);
+        // TODO: count actual datasets with tenant_id and compare with maxDatasets
     }
 
     @Override
     public boolean isModelLimitReached(Long tenantId) {
-        // TODO: Implement by counting models with tenant_id and comparing with max_models
-        return false;
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return false;
+        }
+        Integer maxModels = quota.get().getMaxModels();
+        return !quota.get().isUnlimited(maxModels);
+        // TODO: count actual models with tenant_id and compare with maxModels
     }
 
     @Override
     public boolean isAgentLimitReached(Long tenantId) {
-        // TODO: Implement by counting agents with tenant_id and comparing with max_agents
-        return false;
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return false;
+        }
+        Integer maxAgents = quota.get().getMaxAgents();
+        return !quota.get().isUnlimited(maxAgents);
+        // TODO: count actual agents with tenant_id and compare with maxAgents
     }
 
     @Override
     public boolean isApiCallLimitReached(Long tenantId) {
-        // TODO: Implement by checking today's API call count from usage table
-        return false;
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return false;
+        }
+        Integer maxApiCalls = quota.get().getMaxApiCallsPerDay();
+        return !quota.get().isUnlimited(maxApiCalls);
+        // TODO: check today's API call count from usage table and compare with maxApiCalls
     }
 
     @Override

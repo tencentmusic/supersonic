@@ -5,7 +5,6 @@ import {
   Modal,
   Form,
   Input,
-  InputNumber,
   Space,
   Tag,
   Popconfirm,
@@ -14,7 +13,6 @@ import {
   Tabs,
   Row,
   Col,
-  Statistic,
   Select,
   Radio,
 } from 'antd';
@@ -25,14 +23,9 @@ import {
   StopOutlined,
   CheckCircleOutlined,
   EyeOutlined,
-  TeamOutlined,
-  DatabaseOutlined,
-  RobotOutlined,
-  ApiOutlined,
-  CloudOutlined,
   GiftOutlined,
 } from '@ant-design/icons';
-import { ProTable, ProCard } from '@ant-design/pro-components';
+import { ProTable } from '@ant-design/pro-components';
 import type { ProColumns, ActionType } from '@ant-design/pro-components';
 import {
   getAllTenants,
@@ -66,8 +59,8 @@ const AdminTenant: React.FC = () => {
   const [subscriptionForm] = Form.useForm();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [assigningTenant, setAssigningTenant] = useState<Tenant | null>(null);
-  const [tenantSubscriptions, setTenantSubscriptions] = useState<Record<number, TenantSubscription | null>>({});
   const [assigningSubscription, setAssigningSubscription] = useState(false);
+  const [viewingSubscription, setViewingSubscription] = useState<TenantSubscription | null>(null);
 
   useEffect(() => {
     loadPlans();
@@ -97,14 +90,6 @@ const AdminTenant: React.FC = () => {
   const handleCreate = () => {
     setEditingTenant(null);
     form.resetFields();
-    form.setFieldsValue({
-      maxUsers: 10,
-      maxDatasets: 10,
-      maxModels: 5,
-      maxAgents: 5,
-      maxApiCallsPerDay: 10000,
-      maxTokensPerMonth: 1000000,
-    });
     setModalVisible(true);
   };
 
@@ -114,9 +99,20 @@ const AdminTenant: React.FC = () => {
     setModalVisible(true);
   };
 
-  const handleView = (record: Tenant) => {
+  const handleView = async (record: Tenant) => {
     setViewingTenant(record);
+    setViewingSubscription(null);
     setDrawerVisible(true);
+
+    // Load subscription details for the viewed tenant
+    try {
+      const res = await getTenantSubscription(record.id);
+      if (res.code === 200 && res.data) {
+        setViewingSubscription(res.data);
+      }
+    } catch {
+      // No subscription
+    }
   };
 
   const handleSubmit = async () => {
@@ -171,16 +167,6 @@ const AdminTenant: React.FC = () => {
     }
   };
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  };
-
   const handleAssignSubscription = async (record: Tenant) => {
     setAssigningTenant(record);
     subscriptionForm.resetFields();
@@ -228,10 +214,17 @@ const AdminTenant: React.FC = () => {
     }
   };
 
-  const getPlanNameById = (planId?: number): string => {
-    if (!planId) return '未订阅';
-    const plan = plans.find((p) => p.id === planId);
-    return plan ? plan.name : '未知计划';
+  const getPlanById = (planId?: number): SubscriptionPlan | undefined => {
+    if (!planId) return undefined;
+    return plans.find((p) => p.id === planId);
+  };
+
+  const formatLimit = (val?: number) => {
+    if (val === undefined || val === null) return '-';
+    if (val === -1) return '不限';
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+    return val.toString();
   };
 
   const columns: ProColumns<Tenant>[] = [
@@ -283,18 +276,12 @@ const AdminTenant: React.FC = () => {
       dataIndex: 'subscriptionPlanName',
       width: 100,
       render: (_: any, record: Tenant) => {
-        const planName = (record as any).subscriptionPlanName;
-        return planName ? (
-          <Tag color="blue">{planName}</Tag>
+        return record.subscriptionPlanName ? (
+          <Tag color="blue">{record.subscriptionPlanName}</Tag>
         ) : (
           <Tag color="default">未订阅</Tag>
         );
       },
-    },
-    {
-      title: '最大用户数',
-      dataIndex: 'maxUsers',
-      width: 100,
     },
     {
       title: '创建时间',
@@ -383,7 +370,7 @@ const AdminTenant: React.FC = () => {
         ]}
         request={loadTenants}
         columns={columns}
-        scroll={{ x: 1400 }}
+        scroll={{ x: 1200 }}
         pagination={{
           pageSize: 10,
         }}
@@ -444,42 +431,6 @@ const AdminTenant: React.FC = () => {
               </Form.Item>
             </Col>
           </Row>
-          <ProCard title="资源配额" bordered style={{ marginBottom: 16 }}>
-            <Row gutter={16}>
-              <Col span={8}>
-                <Form.Item name="maxUsers" label="最大用户数">
-                  <InputNumber min={1} style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item name="maxDatasets" label="最大数据集数">
-                  <InputNumber min={1} style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item name="maxModels" label="最大模型数">
-                  <InputNumber min={1} style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={8}>
-                <Form.Item name="maxAgents" label="最大Agent数">
-                  <InputNumber min={1} style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item name="maxApiCallsPerDay" label="每日API调用上限">
-                  <InputNumber min={1} style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item name="maxTokensPerMonth" label="每月Token上限">
-                  <InputNumber min={1} style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-            </Row>
-          </ProCard>
         </Form>
       </Modal>
 
@@ -528,83 +479,55 @@ const AdminTenant: React.FC = () => {
                 <Descriptions.Item label="更新时间">{viewingTenant.updatedAt ? dayjs(viewingTenant.updatedAt).format('YYYY-MM-DD HH:mm:ss') : '-'}</Descriptions.Item>
               </Descriptions>
             </TabPane>
-            <TabPane tab="资源配额" key="quota">
-              <Row gutter={[16, 16]}>
-                <Col span={12}>
-                  <ProCard bordered>
-                    <Statistic
-                      title="最大用户数"
-                      value={viewingTenant.maxUsers}
-                      prefix={<TeamOutlined />}
-                    />
-                  </ProCard>
-                </Col>
-                <Col span={12}>
-                  <ProCard bordered>
-                    <Statistic
-                      title="最大数据集数"
-                      value={viewingTenant.maxDatasets}
-                      prefix={<DatabaseOutlined />}
-                    />
-                  </ProCard>
-                </Col>
-                <Col span={12}>
-                  <ProCard bordered>
-                    <Statistic
-                      title="最大模型数"
-                      value={viewingTenant.maxModels}
-                      prefix={<RobotOutlined />}
-                    />
-                  </ProCard>
-                </Col>
-                <Col span={12}>
-                  <ProCard bordered>
-                    <Statistic
-                      title="最大Agent数"
-                      value={viewingTenant.maxAgents}
-                      prefix={<RobotOutlined />}
-                    />
-                  </ProCard>
-                </Col>
-                <Col span={12}>
-                  <ProCard bordered>
-                    <Statistic
-                      title="每日API调用上限"
-                      value={formatNumber(viewingTenant.maxApiCallsPerDay)}
-                      prefix={<ApiOutlined />}
-                    />
-                  </ProCard>
-                </Col>
-                <Col span={12}>
-                  <ProCard bordered>
-                    <Statistic
-                      title="每月Token上限"
-                      value={formatNumber(viewingTenant.maxTokensPerMonth)}
-                      prefix={<CloudOutlined />}
-                    />
-                  </ProCard>
-                </Col>
-              </Row>
-            </TabPane>
-            <TabPane tab="订阅信息" key="subscription">
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <p style={{ color: '#666', marginBottom: 16 }}>
-                  订阅计划:{' '}
-                  <Tag color="blue">
-                    {(viewingTenant as any).subscriptionPlanName || '未订阅'}
-                  </Tag>
-                </p>
-                <Button
-                  type="primary"
-                  icon={<GiftOutlined />}
-                  onClick={() => {
-                    setDrawerVisible(false);
-                    handleAssignSubscription(viewingTenant);
-                  }}
-                >
-                  分配订阅
-                </Button>
-              </div>
+            <TabPane tab="订阅与配额" key="subscription">
+              {viewingSubscription ? (
+                <>
+                  <Descriptions column={2} bordered size="small" title="订阅信息">
+                    <Descriptions.Item label="订阅计划">
+                      <Tag color="blue">{viewingSubscription.planName || '未知计划'}</Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="计费周期">
+                      {viewingSubscription.billingCycle === 'MONTHLY' ? '月付' : '年付'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="状态">
+                      <Tag color={viewingSubscription.status === 'ACTIVE' ? 'green' : 'orange'}>
+                        {viewingSubscription.status === 'ACTIVE' ? '生效中' : viewingSubscription.status}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="开始日期">
+                      {viewingSubscription.startDate ? dayjs(viewingSubscription.startDate).format('YYYY-MM-DD') : '-'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                  {(() => {
+                    const plan = getPlanById(viewingSubscription.planId);
+                    if (!plan) return null;
+                    return (
+                      <Descriptions column={2} bordered size="small" title="资源配额" style={{ marginTop: 16 }}>
+                        <Descriptions.Item label="最大用户数">{formatLimit(plan.maxUsers)}</Descriptions.Item>
+                        <Descriptions.Item label="最大数据集数">{formatLimit(plan.maxDatasets)}</Descriptions.Item>
+                        <Descriptions.Item label="最大模型数">{formatLimit(plan.maxModels)}</Descriptions.Item>
+                        <Descriptions.Item label="最大Agent数">{formatLimit(plan.maxAgents)}</Descriptions.Item>
+                        <Descriptions.Item label="每日API调用上限">{formatLimit(plan.maxApiCallsPerDay)}</Descriptions.Item>
+                        <Descriptions.Item label="每月Token上限">{formatLimit(plan.maxTokensPerMonth)}</Descriptions.Item>
+                      </Descriptions>
+                    );
+                  })()}
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <p style={{ color: '#999', marginBottom: 16 }}>该租户尚未分配订阅计划，无资源配额限制。</p>
+                  <Button
+                    type="primary"
+                    icon={<GiftOutlined />}
+                    onClick={() => {
+                      setDrawerVisible(false);
+                      handleAssignSubscription(viewingTenant);
+                    }}
+                  >
+                    分配订阅
+                  </Button>
+                </div>
+              )}
             </TabPane>
           </Tabs>
         )}

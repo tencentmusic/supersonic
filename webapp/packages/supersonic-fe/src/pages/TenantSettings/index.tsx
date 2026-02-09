@@ -209,6 +209,10 @@ const TenantSettings: React.FC = () => {
     return `¥${price.toFixed(2)}`;
   };
 
+  const currentPlan = subscription
+    ? plans.find((p) => p.id === subscription.planId) || null
+    : null;
+
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -358,18 +362,20 @@ const TenantSettings: React.FC = () => {
                       title="API 调用次数"
                       value={usage?.apiCalls || 0}
                       prefix={<ApiOutlined />}
-                      suffix={`/ ${formatNumber(tenant?.maxApiCallsPerDay || 0)}`}
+                      suffix={currentPlan ? `/ ${formatNumber(currentPlan.maxApiCallsPerDay)}` : ''}
                     />
-                    <Progress
-                      percent={getUsagePercent(
-                        usage?.apiCalls || 0,
-                        tenant?.maxApiCallsPerDay || 0,
-                      )}
-                      strokeColor={getStatusColor(
-                        getUsagePercent(usage?.apiCalls || 0, tenant?.maxApiCallsPerDay || 0),
-                      )}
-                      size="small"
-                    />
+                    {currentPlan && currentPlan.maxApiCallsPerDay > 0 && (
+                      <Progress
+                        percent={getUsagePercent(
+                          usage?.apiCalls || 0,
+                          currentPlan.maxApiCallsPerDay,
+                        )}
+                        strokeColor={getStatusColor(
+                          getUsagePercent(usage?.apiCalls || 0, currentPlan.maxApiCallsPerDay),
+                        )}
+                        size="small"
+                      />
+                    )}
                   </Col>
                   <Col span={6}>
                     <Statistic
@@ -390,7 +396,7 @@ const TenantSettings: React.FC = () => {
                       title="活跃用户"
                       value={usage?.activeUsers || 0}
                       prefix={<TeamOutlined />}
-                      suffix={`/ ${tenant?.maxUsers || 0}`}
+                      suffix={currentPlan ? `/ ${currentPlan.maxUsers === -1 ? '不限' : currentPlan.maxUsers}` : ''}
                     />
                   </Col>
                 </Row>
@@ -407,18 +413,20 @@ const TenantSettings: React.FC = () => {
                       title="Token 消耗"
                       value={formatNumber(monthlyUsage?.tokensUsed || 0)}
                       prefix={<CloudOutlined />}
-                      suffix={`/ ${formatNumber(tenant?.maxTokensPerMonth || 0)}`}
+                      suffix={currentPlan ? `/ ${formatNumber(currentPlan.maxTokensPerMonth || 0)}` : ''}
                     />
-                    <Progress
-                      percent={getUsagePercent(
-                        monthlyUsage?.tokensUsed || 0,
-                        tenant?.maxTokensPerMonth || 0,
-                      )}
-                      strokeColor={getStatusColor(
-                        getUsagePercent(monthlyUsage?.tokensUsed || 0, tenant?.maxTokensPerMonth || 0),
-                      )}
-                      size="small"
-                    />
+                    {currentPlan && currentPlan.maxTokensPerMonth && currentPlan.maxTokensPerMonth > 0 && (
+                      <Progress
+                        percent={getUsagePercent(
+                          monthlyUsage?.tokensUsed || 0,
+                          currentPlan.maxTokensPerMonth,
+                        )}
+                        strokeColor={getStatusColor(
+                          getUsagePercent(monthlyUsage?.tokensUsed || 0, currentPlan.maxTokensPerMonth),
+                        )}
+                        size="small"
+                      />
+                    )}
                   </Col>
                   <Col span={6}>
                     <Statistic
@@ -448,64 +456,72 @@ const TenantSettings: React.FC = () => {
         </TabPane>
 
         <TabPane tab="资源配额" key="quota">
-          <ProCard title="资源限额" className={styles.card}>
-            <Row gutter={[24, 24]}>
-              <Col span={8}>
-                <Card size="small">
-                  <Statistic
-                    title="最大用户数"
-                    value={tenant?.maxUsers || 0}
-                    prefix={<TeamOutlined />}
-                  />
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small">
-                  <Statistic
-                    title="最大数据集数"
-                    value={tenant?.maxDatasets || 0}
-                    prefix={<DatabaseOutlined />}
-                  />
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small">
-                  <Statistic
-                    title="最大模型数"
-                    value={tenant?.maxModels || 0}
-                    prefix={<RobotOutlined />}
-                  />
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small">
-                  <Statistic
-                    title="最大Agent数"
-                    value={tenant?.maxAgents || 0}
-                    prefix={<RobotOutlined />}
-                  />
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small">
-                  <Statistic
-                    title="每日API调用上限"
-                    value={formatNumber(tenant?.maxApiCallsPerDay || 0)}
-                    prefix={<ApiOutlined />}
-                  />
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card size="small">
-                  <Statistic
-                    title="每月Token上限"
-                    value={formatNumber(tenant?.maxTokensPerMonth || 0)}
-                    prefix={<CloudOutlined />}
-                  />
-                </Card>
-              </Col>
-            </Row>
-          </ProCard>
+          {currentPlan ? (
+            <ProCard title={`资源限额（来自订阅计划: ${currentPlan.name}）`} className={styles.card}>
+              <Row gutter={[24, 24]}>
+                <Col span={8}>
+                  <Card size="small">
+                    <Statistic
+                      title="最大用户数"
+                      value={currentPlan.maxUsers === -1 ? '不限' : currentPlan.maxUsers}
+                      prefix={<TeamOutlined />}
+                    />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small">
+                    <Statistic
+                      title="最大数据集数"
+                      value={currentPlan.maxDatasets === -1 ? '不限' : currentPlan.maxDatasets}
+                      prefix={<DatabaseOutlined />}
+                    />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small">
+                    <Statistic
+                      title="最大模型数"
+                      value={currentPlan.maxModels === -1 ? '不限' : currentPlan.maxModels}
+                      prefix={<RobotOutlined />}
+                    />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small">
+                    <Statistic
+                      title="最大Agent数"
+                      value={currentPlan.maxAgents === -1 ? '不限' : currentPlan.maxAgents}
+                      prefix={<RobotOutlined />}
+                    />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small">
+                    <Statistic
+                      title="每日API调用上限"
+                      value={currentPlan.maxApiCallsPerDay === -1 ? '不限' : formatNumber(currentPlan.maxApiCallsPerDay)}
+                      prefix={<ApiOutlined />}
+                    />
+                  </Card>
+                </Col>
+                <Col span={8}>
+                  <Card size="small">
+                    <Statistic
+                      title="每月Token上限"
+                      value={currentPlan.maxTokensPerMonth === -1 ? '不限' : formatNumber(currentPlan.maxTokensPerMonth || 0)}
+                      prefix={<CloudOutlined />}
+                    />
+                  </Card>
+                </Col>
+              </Row>
+            </ProCard>
+          ) : (
+            <ProCard title="资源限额" className={styles.card}>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                暂无订阅计划，请先选择订阅计划以查看资源配额。
+              </div>
+            </ProCard>
+          )}
         </TabPane>
       </Tabs>
 

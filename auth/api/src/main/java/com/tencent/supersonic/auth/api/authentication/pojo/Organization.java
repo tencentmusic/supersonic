@@ -23,4 +23,8 @@ public class Organization {
     private List<Organization> subOrganizations = Lists.newArrayList();
 
     private boolean isRoot;
+
+    private Integer sortOrder;
+
+    private Integer status;
 }

@@ -1,7 +1,6 @@
 package com.tencent.supersonic.auth.authentication.oauth.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * Configuration for Redis-based OAuth exchange code storage. This configuration is only loaded when
- * Redis is on the classpath and properly configured.
+ * Redis is on the classpath and the storage type is explicitly set to "redis".
  */
 @Slf4j
 @Configuration
@@ -25,7 +24,6 @@ public class RedisCodeExchangeStorageConfig {
      */
     @Bean
     @Primary
-    @ConditionalOnBean(StringRedisTemplate.class)
     public CodeExchangeStorage redisCodeExchangeStorage(StringRedisTemplate redisTemplate) {
         log.info("Using Redis-based CodeExchangeStorage for OAuth exchange codes");
         return new RedisCodeExchangeStorage(redisTemplate);

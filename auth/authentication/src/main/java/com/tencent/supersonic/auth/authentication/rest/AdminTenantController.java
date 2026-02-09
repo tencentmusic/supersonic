@@ -2,6 +2,8 @@ package com.tencent.supersonic.auth.authentication.rest;
 
 import com.tencent.supersonic.auth.api.authentication.pojo.Tenant;
 import com.tencent.supersonic.auth.api.authentication.service.TenantService;
+import com.tencent.supersonic.common.service.SubscriptionInfoProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +16,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/auth/admin/tenant")
 @Slf4j
+@RequiredArgsConstructor
 public class AdminTenantController {
 
     private final TenantService tenantService;
-
-    public AdminTenantController(TenantService tenantService) {
-        this.tenantService = tenantService;
-    }
+    private final SubscriptionInfoProvider subscriptionInfoProvider;
 
     /**
      * Create a new tenant.
@@ -32,11 +32,12 @@ public class AdminTenantController {
     }
 
     /**
-     * Get all tenants.
+     * Get all tenants, enriched with subscription plan names.
      */
     @GetMapping
     public ResponseEntity<List<Tenant>> getAllTenants() {
         List<Tenant> tenants = tenantService.getAllTenants();
+        enrichWithSubscriptionPlanNames(tenants);
         return ResponseEntity.ok(tenants);
     }
 
@@ -46,6 +47,7 @@ public class AdminTenantController {
     @GetMapping("/active")
     public ResponseEntity<List<Tenant>> getActiveTenants() {
         List<Tenant> tenants = tenantService.getActiveTenants();
+        enrichWithSubscriptionPlanNames(tenants);
         return ResponseEntity.ok(tenants);
     }
 
@@ -54,8 +56,10 @@ public class AdminTenantController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Tenant> getTenant(@PathVariable Long id) {
-        return tenantService.getTenantById(id).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return tenantService.getTenantById(id).map(tenant -> {
+            enrichWithSubscriptionPlanName(tenant);
+            return ResponseEntity.ok(tenant);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -63,8 +67,10 @@ public class AdminTenantController {
      */
     @GetMapping("/code/{code}")
     public ResponseEntity<Tenant> getTenantByCode(@PathVariable String code) {
-        return tenantService.getTenantByCode(code).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return tenantService.getTenantByCode(code).map(tenant -> {
+            enrichWithSubscriptionPlanName(tenant);
+            return ResponseEntity.ok(tenant);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -102,5 +108,21 @@ public class AdminTenantController {
     public ResponseEntity<Void> activateTenant(@PathVariable Long id) {
         tenantService.activateTenant(id);
         return ResponseEntity.ok().build();
+    }
+
+    private void enrichWithSubscriptionPlanNames(List<Tenant> tenants) {
+        for (Tenant tenant : tenants) {
+            enrichWithSubscriptionPlanName(tenant);
+        }
+    }
+
+    private void enrichWithSubscriptionPlanName(Tenant tenant) {
+        try {
+            subscriptionInfoProvider.getActivePlanName(tenant.getId())
+                    .ifPresent(tenant::setSubscriptionPlanName);
+        } catch (Exception e) {
+            log.warn("Failed to load subscription for tenant {}: {}", tenant.getId(),
+                    e.getMessage());
+        }
     }
 }

@@ -113,10 +113,15 @@ public class DefaultUserAdaptor implements UserAdaptor {
      * 将 OrganizationDO 转换为 Organization
      */
     private Organization convertToOrganization(OrganizationDO orgDO) {
-        return new Organization(String.valueOf(orgDO.getId()),
-                orgDO.getParentId() != null ? String.valueOf(orgDO.getParentId()) : "0",
-                orgDO.getName(), orgDO.getFullName(), Lists.newArrayList(),
-                orgDO.getIsRoot() != null && orgDO.getIsRoot() == 1);
+        Organization org = new Organization();
+        org.setId(String.valueOf(orgDO.getId()));
+        org.setParentId(orgDO.getParentId() != null ? String.valueOf(orgDO.getParentId()) : "0");
+        org.setName(orgDO.getName());
+        org.setFullName(orgDO.getFullName());
+        org.setRoot(orgDO.getIsRoot() != null && orgDO.getIsRoot() == 1);
+        org.setSortOrder(orgDO.getSortOrder());
+        org.setStatus(orgDO.getStatus());
+        return org;
     }
 
     @Override
