@@ -1,0 +1,65 @@
+package com.tencent.supersonic.chat.server.plugin.support.reportschedule;
+
+/**
+ * Message templates for schedule plugin responses. Supports future i18n by centralizing all
+ * user-facing messages.
+ */
+public final class ScheduleMessages {
+
+    private ScheduleMessages() {}
+
+    // Error messages
+    public static final String ERROR_OPERATION_FAILED = "操作失败: %s";
+    public static final String ERROR_SESSION_MISSING = "无法确认：会话信息缺失";
+    public static final String ERROR_NO_PENDING = "没有待确认的操作，或确认已超时（5分钟）";
+    public static final String ERROR_UNSUPPORTED_CONFIRM = "不支持的确认操作";
+    public static final String ERROR_SCHEDULE_NOT_FOUND = "未找到编号为 #%d 的报表任务";
+    public static final String ERROR_SPECIFY_FREQUENCY = "请告诉我发送频率，比如「每天早上9点」或「每周一」";
+    public static final String ERROR_SPECIFY_CANCEL_ID = "请指定要取消的报表编号，例如「取消报表 #123」";
+    public static final String ERROR_SPECIFY_PAUSE_ID = "请指定要暂停的报表编号，例如「暂停报表 #123」";
+    public static final String ERROR_SPECIFY_RESUME_ID = "请指定要恢复的报表编号，例如「恢复报表 #123」";
+    public static final String ERROR_SPECIFY_TRIGGER_ID = "请指定要执行的报表编号，例如「立即执行报表 #123」";
+    public static final String ERROR_SPECIFY_STATUS_ID = "请指定要查看的报表编号，例如「报表 #123 的执行情况」";
+
+    // Success messages
+    public static final String SUCCESS_CREATED = "已创建定时报表（#%d）\n频率：%s\n\n您可以说「取消报表 #%d」来停止";
+    public static final String SUCCESS_CANCELLED = "已取消定时报表 #%d";
+    public static final String SUCCESS_PAUSED = "已暂停定时报表 #%d\n\n您可以说「恢复报表 #%d」来重新启用";
+    public static final String SUCCESS_RESUMED = "已恢复定时报表 #%d";
+    public static final String SUCCESS_TRIGGERED = "已触发报表 #%d 的执行，请稍后查看结果";
+
+    // Confirmation messages
+    public static final String CONFIRM_CREATE = "我将为您创建定时报表：\n数据集：#%d\n频率：%s\n\n确认创建吗？（回复「确认」）";
+    public static final String CONFIRM_CANCEL = "确认要取消「%s」(#%d) 的定时推送吗？（回复「确认」）";
+
+    // List messages
+    public static final String LIST_EMPTY = "您当前没有定时报表任务。\n\n您可以说「每天9点给我发送报表」来创建一个。";
+    public static final String LIST_HEADER = "您当前有 %d 个定时报表：\n";
+    public static final String LIST_ITEM = "\n#%d %s\n├ 频率：%s\n└ 状态：%s";
+    public static final String STATUS_RUNNING = "运行中";
+    public static final String STATUS_PAUSED = "已暂停";
+
+    // Status/execution messages
+    public static final String EXECUTION_EMPTY = "报表 #%d 暂无执行记录";
+    public static final String EXECUTION_HEADER = "报表 #%d 最近执行记录：\n";
+    public static final String EXECUTION_ERROR = "\n   错误：%s";
+
+    // Unknown intent help
+    public static final String UNKNOWN_INTENT = """
+            我不太理解您的意图。您可以说：
+            • 每天9点给我发送报表
+            • 我的定时报表有哪些
+            • 取消报表 #123
+            • 暂停/恢复报表 #123
+            • 立即执行报表 #123""";
+
+    // Cron description
+    public static final String CRON_UNKNOWN = "未知";
+    public static final String CRON_HOURLY = "每小时";
+    public static final String CRON_DAILY = "每天 ";
+    public static final String CRON_WEEKLY = "每周%s ";
+    public static final String CRON_MONTHLY = "每月%s号 ";
+
+    // Schedule name template
+    public static final String SCHEDULE_NAME_TEMPLATE = "定时报表 - %s";
+}

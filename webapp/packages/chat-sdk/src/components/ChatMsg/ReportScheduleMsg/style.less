@@ -1,0 +1,29 @@
+@import '../../../styles/index.less';
+
+@report-schedule-prefix-cls: ~'@{supersonic-chat-prefix}-report-schedule';
+
+.@{report-schedule-prefix-cls} {
+  padding: 12px 16px;
+  border: 1px solid var(--border-color-base);
+  border-radius: 4px;
+  background: #f5f8fb;
+
+  &-message {
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  &-list {
+    margin-top: 12px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  &-actions {
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color-base);
+  }
+}
