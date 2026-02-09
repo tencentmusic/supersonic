@@ -10,6 +10,7 @@ import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.ChatQueryExecutor;
+import com.tencent.supersonic.chat.server.executor.DashboardExecutor;
 import com.tencent.supersonic.chat.server.parser.ChatQueryParser;
 import com.tencent.supersonic.chat.server.persistence.dataobject.ChatQueryDO;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
@@ -27,17 +28,24 @@ import com.tencent.supersonic.common.jsqlparser.SqlAddHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlRemoveHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlReplaceHelper;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
+import com.tencent.supersonic.common.pojo.Aggregator;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
+import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
 import com.tencent.supersonic.common.pojo.enums.FilterOperatorEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.request.DimensionValueReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryFilter;
 import com.tencent.supersonic.headless.api.pojo.request.QueryNLReq;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SearchResult;
@@ -48,6 +56,8 @@ import com.tencent.supersonic.headless.chat.query.SemanticQuery;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
@@ -66,6 +76,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,19 +88,16 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ChatQueryServiceImpl implements ChatQueryService {
 
-    @Autowired
-    private ChatManageService chatManageService;
-    @Autowired
-    private ChatLayerService chatLayerService;
-    @Autowired
-    private SemanticLayerService semanticLayerService;
+    private final ChatManageService chatManageService;
+    private final ChatLayerService chatLayerService;
+    private final SemanticLayerService semanticLayerService;
     @Autowired
     @Lazy
     private AgentService agentService;
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     private final List<ChatQueryParser> chatQueryParsers = ComponentFactory.getChatParsers();
     private final List<ChatQueryExecutor> chatQueryExecutors = ComponentFactory.getChatExecutors();
@@ -227,16 +235,128 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         DataSetSchema dataSetSchema =
                 semanticLayerService.getDataSetSchema(parseInfo.getDataSetId());
 
-        SemanticQuery semanticQuery = QueryManager.createQuery(parseInfo.getQueryMode());
+        String queryMode = parseInfo.getQueryMode();
+
+        // For DASHBOARD re-queries, use struct query with all metrics (same approach
+        // as DashboardExecutor) so the result includes metric columns for dashboard rendering.
+        // Also check the saved QueryResult's queryMode, because the parse-phase parseInfo
+        // may still have LLM_S2SQL while the execution used DASHBOARD.
+        if (DashboardExecutor.QUERY_MODE.equals(queryMode)
+                || isDashboardExecution(chatQueryDataReq.getQueryId())) {
+            return handleDashboardReQuery(parseInfo, user);
+        }
+
+        // For non-DASHBOARD modes not registered in QueryManager, fall back to LLM_S2SQL.
+        if (QueryManager.createQuery(queryMode) == null) {
+            queryMode = LLMSqlQuery.QUERY_MODE;
+        }
+
+        SemanticQuery semanticQuery = QueryManager.createQuery(queryMode);
         semanticQuery.setParseInfo(parseInfo);
 
-        if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())) {
+        if (LLMSqlQuery.QUERY_MODE.equalsIgnoreCase(queryMode)) {
             handleLLMQueryMode(chatQueryDataReq, semanticQuery, dataSetSchema, user);
         } else {
             handleRuleQueryMode(semanticQuery, dataSetSchema, user);
         }
 
         return executeQuery(semanticQuery, user);
+    }
+
+    /**
+     * Handle re-query for DASHBOARD mode by building a struct query with all metrics from the
+     * dataset and the user's date filter. This mirrors DashboardExecutor.buildDefaultStructQuery to
+     * ensure metric columns are present for dashboard rendering.
+     */
+    private QueryResult handleDashboardReQuery(SemanticParseInfo parseInfo, User user)
+            throws Exception {
+        Long dataSetId = parseInfo.getDataSetId();
+        SchemaService schemaService = ContextUtils.getBean(SchemaService.class);
+        SemanticSchema schema = schemaService.getSemanticSchema(Set.of(dataSetId));
+
+        List<SchemaElement> dimensions = schema.getDimensions(dataSetId);
+        SchemaElement dateColumn = dimensions.stream().filter(SchemaElement::isPartitionTime)
+                .findFirst().orElseGet(() -> dimensions.stream()
+                        .filter(SchemaElement::isTimeDimension).findFirst().orElse(null));
+
+        List<SchemaElement> allMetrics = schema.getMetrics(dataSetId);
+
+        if (dateColumn == null || allMetrics.isEmpty()) {
+            log.warn("Dashboard re-query: no date column or metrics for dataSet {}", dataSetId);
+            QueryResult empty = new QueryResult();
+            empty.setQueryMode(DashboardExecutor.QUERY_MODE);
+            empty.setQueryState(QueryState.EMPTY);
+            empty.setQueryResults(new ArrayList<>());
+            empty.setQueryColumns(new ArrayList<>());
+            empty.setChatContext(parseInfo);
+            return empty;
+        }
+
+        // Limit to 4 metrics (same as DashboardExecutor.MAX_KPI_METRICS)
+        List<SchemaElement> selectedMetrics = allMetrics.stream().limit(4).toList();
+
+        QueryStructReq structReq = new QueryStructReq();
+        structReq.setDataSetId(dataSetId);
+        structReq.setGroups(Collections.singletonList(dateColumn.getBizName()));
+
+        List<Aggregator> aggregators = selectedMetrics.stream().map(metric -> {
+            Aggregator agg = new Aggregator();
+            agg.setColumn(metric.getBizName());
+            agg.setFunc(AggOperatorEnum.SUM);
+            return agg;
+        }).collect(Collectors.toList());
+        structReq.setAggregators(aggregators);
+
+        // Use user's date filter if available
+        // CRITICAL: dateField must be set for WHERE clause generation
+        DateConf dateConf;
+        if (parseInfo.getDateInfo() != null && parseInfo.getDateInfo().getStartDate() != null) {
+            dateConf = parseInfo.getDateInfo();
+        } else {
+            dateConf = new DateConf();
+            dateConf.setDateMode(DateConf.DateMode.RECENT);
+            dateConf.setUnit(30);
+            dateConf.setPeriod(DatePeriodEnum.DAY);
+        }
+        dateConf.setDateField(dateColumn.getBizName());
+        structReq.setDateInfo(dateConf);
+        structReq.setLimit(30L);
+
+        SemanticQueryResp queryResp = semanticLayerService.queryByReq(structReq, user);
+
+        QueryResult queryResult = new QueryResult();
+        if (queryResp != null) {
+            queryResult.setQueryAuthorization(queryResp.getQueryAuthorization());
+            queryResult.setQuerySql(queryResp.getSql());
+            queryResult.setQueryResults(queryResp.getResultList());
+            queryResult.setQueryColumns(queryResp.getColumns());
+        } else {
+            queryResult.setQueryResults(new ArrayList<>());
+            queryResult.setQueryColumns(new ArrayList<>());
+        }
+        queryResult.setQueryMode(DashboardExecutor.QUERY_MODE);
+        queryResult.setQueryState(QueryState.SUCCESS);
+        queryResult.setChatContext(parseInfo);
+
+        return queryResult;
+    }
+
+    /**
+     * Check if a previous execution of this query used DASHBOARD mode. The parse-phase parseInfo
+     * may have LLM_S2SQL, but the executor may have overridden it.
+     */
+    private boolean isDashboardExecution(Long queryId) {
+        try {
+            ChatQueryDO chatQueryDO = chatManageService.getChatQueryDO(queryId);
+            if (chatQueryDO != null && chatQueryDO.getQueryResult() != null) {
+                QueryResult savedResult =
+                        JSON.parseObject(chatQueryDO.getQueryResult(), QueryResult.class);
+                return DashboardExecutor.QUERY_MODE.equals(savedResult.getQueryMode());
+            }
+        } catch (Exception e) {
+            log.debug("Failed to check saved query mode for queryId {}", queryId, e);
+        }
+        return false;
     }
 
     private List<String> getFieldsFromSql(SemanticParseInfo parseInfo) {

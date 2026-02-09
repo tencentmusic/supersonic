@@ -1,0 +1,349 @@
+@import '../../../styles/index.less';
+
+@dashboard-prefix-cls: ~'@{supersonic-chat-prefix}-dashboard';
+
+.@{dashboard-prefix-cls} {
+  width: 100%;
+  min-width: 600px;
+  max-width: 900px;
+
+  &-empty {
+    padding: 40px;
+    text-align: center;
+    color: #999;
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  &-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #262626;
+  }
+
+  &-date {
+    font-size: 13px;
+    color: #8c8c8c;
+  }
+
+  &-kpi-section {
+    margin-bottom: 16px;
+  }
+
+  &-kpi-card {
+    height: 100%;
+    border-radius: 8px;
+    transition: box-shadow 0.2s;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .ant-card-body {
+      padding: 12px 16px;
+    }
+  }
+
+  &-kpi-title {
+    font-size: 13px;
+    color: #8c8c8c;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  &-kpi-trend {
+    font-size: 12px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  &-trend-section {
+    margin-bottom: 16px;
+    border-radius: 8px;
+
+    .ant-card-head {
+      min-height: 40px;
+      padding: 0 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      padding: 10px 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ant-card-body {
+      padding: 12px 16px;
+    }
+  }
+
+  &-table-section {
+    border-radius: 8px;
+
+    .ant-card-head {
+      min-height: 40px;
+      padding: 0 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      padding: 10px 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ant-card-body {
+      padding: 12px 16px;
+    }
+
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .ant-table-tbody > tr > td {
+      font-size: 13px;
+    }
+
+    .ant-table-tbody > tr:nth-child(even) {
+      background: #fafafa;
+    }
+  }
+
+  // Analysis section styles
+  &-analysis-section {
+    border-radius: 8px;
+
+    .ant-card-body {
+      padding: 12px 16px;
+    }
+  }
+
+  &-analysis-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  &-analysis-summary {
+    flex: 1;
+    font-size: 13px;
+    line-height: 22px;
+    color: #262626;
+  }
+
+  // LLM insight section
+  &-llm-insight {
+    margin-top: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, #f0f5ff 0%, #e6f7ff 100%);
+    border-radius: 6px;
+    border-left: 3px solid #1890ff;
+  }
+
+  &-llm-insight-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1890ff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  &-llm-insight-content {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #262626;
+    white-space: pre-wrap;
+  }
+
+  &-insights {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #d9d9d9;
+  }
+
+  &-insights-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #595959;
+    margin-bottom: 8px;
+  }
+
+  &-insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &-insight-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #262626;
+    padding: 4px 0;
+  }
+
+  &-anomalies-collapse {
+    margin-top: 8px;
+
+    .ant-collapse-header {
+      padding: 8px 0 !important;
+    }
+
+    .ant-collapse-content-box {
+      padding: 8px 0 !important;
+    }
+  }
+
+  &-anomalies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &-anomaly-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #595959;
+    padding: 4px 0;
+  }
+
+  // Attribution analysis section
+  &-attribution-section {
+    margin-bottom: 16px;
+    border-radius: 8px;
+
+    .ant-card-head {
+      min-height: 40px;
+      padding: 0 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ant-card-head-title {
+      padding: 10px 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ant-card-body {
+      padding: 12px 16px;
+    }
+  }
+
+  &-attribution-metric {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &-attribution-metric-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #262626;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed #e8e8e8;
+  }
+
+  &-attribution-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &-attribution-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    background: #fafafa;
+    border-radius: 4px;
+  }
+
+  &-attribution-label {
+    display: flex;
+    align-items: center;
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+
+  &-attribution-value {
+    font-size: 13px;
+    color: #262626;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-attribution-bar-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    min-width: 120px;
+  }
+
+  &-attribution-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  &-attribution-percent {
+    position: absolute;
+    right: 8px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  &-attribution-change {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #8c8c8c;
+    min-width: 80px;
+    justify-content: flex-end;
+  }
+}
+
+// Responsive adjustments for mobile
+@media (max-width: 768px) {
+  .@{dashboard-prefix-cls} {
+    min-width: auto;
+
+    &-kpi-card {
+      .ant-statistic-content-value {
+        font-size: 18px !important;
+      }
+    }
+
+    &-trend-section {
+      .ant-card-body {
+        padding: 8px;
+      }
+    }
+  }
+}

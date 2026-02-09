@@ -4,6 +4,8 @@ import { PREFIX_CLS, MsgContentTypeEnum } from '../../common/constants';
 import { MsgDataType } from '../../common/type';
 import ChatMsg from '../ChatMsg';
 import WebPage from '../ChatMsg/WebPage';
+import ReportScheduleMsg from '../ChatMsg/ReportScheduleMsg/index';
+import DashboardMsg from '../ChatMsg/DashboardMsg';
 import Loading from './Loading';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -25,6 +27,7 @@ type Props = {
   triggerResize?: boolean;
   isDeveloper?: boolean;
   isSimpleMode?: boolean;
+  onSendMsg?: (msg: string) => void;
 };
 
 const ExecuteItem: React.FC<Props> = ({
@@ -42,6 +45,7 @@ const ExecuteItem: React.FC<Props> = ({
   triggerResize,
   isDeveloper,
   isSimpleMode,
+  onSendMsg,
 }) => {
   const prefixCls = `${PREFIX_CLS}-item`;
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
@@ -164,6 +168,10 @@ const ExecuteItem: React.FC<Props> = ({
             data?.textResult
           ) : data?.queryMode === 'WEB_PAGE' ? (
             <WebPage id={queryId!} data={data} />
+          ) : data?.queryMode === 'REPORT_SCHEDULE' ? (
+            <ReportScheduleMsg data={data} onSendMsg={onSendMsg} />
+          ) : data?.queryMode === 'DASHBOARD' || data?.queryMode === 'REPORT_DASHBOARD' ? (
+            <DashboardMsg data={data} onSendMsg={onSendMsg} />
           ) : (
             <ChatMsg
               isSimpleMode={isSimpleMode}
