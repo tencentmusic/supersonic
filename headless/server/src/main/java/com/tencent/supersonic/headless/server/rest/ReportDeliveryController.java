@@ -1,0 +1,120 @@
+package com.tencent.supersonic.headless.server.rest;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
+import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * REST controller for report delivery configuration management.
+ */
+@RestController
+@RequestMapping("${spring.servlet.api-path:/api}/semantic/delivery")
+@Slf4j
+public class ReportDeliveryController {
+
+    private final ReportDeliveryService deliveryService;
+
+    public ReportDeliveryController(ReportDeliveryService deliveryService) {
+        this.deliveryService = deliveryService;
+    }
+
+    // ========== Delivery Config CRUD ==========
+
+    @GetMapping("/configs")
+    public Page<ReportDeliveryConfigDO> listConfigs(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "20") Integer pageSize, HttpServletRequest request,
+            HttpServletResponse response) {
+        Page<ReportDeliveryConfigDO> page = new Page<>(pageNum, pageSize);
+        return deliveryService.getConfigList(page);
+    }
+
+    @GetMapping("/configs/{id}")
+    public ReportDeliveryConfigDO getConfig(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        return deliveryService.getConfigById(id);
+    }
+
+    @PostMapping("/configs")
+    public ReportDeliveryConfigDO createConfig(@RequestBody ReportDeliveryConfigDO config,
+            HttpServletRequest request, HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        config.setCreatedBy(user != null ? user.getName() : "system");
+        config.setTenantId(user != null ? user.getTenantId() : 0L);
+        return deliveryService.createConfig(config);
+    }
+
+    @PutMapping("/configs/{id}")
+    public ReportDeliveryConfigDO updateConfig(@PathVariable Long id,
+            @RequestBody ReportDeliveryConfigDO config, HttpServletRequest request,
+            HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        config.setId(id);
+        config.setUpdatedBy(user != null ? user.getName() : "system");
+        return deliveryService.updateConfig(config);
+    }
+
+    @DeleteMapping("/configs/{id}")
+    public void deleteConfig(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        deliveryService.deleteConfig(id);
+    }
+
+    // ========== Test Delivery ==========
+
+    @PostMapping("/configs/{id}:test")
+    public void testConfig(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        deliveryService.testDelivery(id);
+    }
+
+    // ========== Delivery Records ==========
+
+    @GetMapping("/records")
+    public Page<ReportDeliveryRecordDO> listRecords(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false) Long scheduleId,
+            @RequestParam(required = false) Long executionId, HttpServletRequest request,
+            HttpServletResponse response) {
+        Page<ReportDeliveryRecordDO> page = new Page<>(pageNum, pageSize);
+        return deliveryService.getDeliveryRecords(page, scheduleId, executionId);
+    }
+
+    @PostMapping("/records/{id}:retry")
+    public void retryDelivery(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        deliveryService.retryDelivery(id);
+    }
+
+    // ========== Statistics ==========
+
+    @GetMapping("/statistics")
+    public ReportDeliveryService.DeliveryStatistics getStatistics(
+            @RequestParam(defaultValue = "7") Integer days, HttpServletRequest request,
+            HttpServletResponse response) {
+        return deliveryService.getStatistics(days);
+    }
+
+    @GetMapping("/statistics/daily")
+    public java.util.List<ReportDeliveryService.DailyDeliveryStats> getDailyStats(
+            @RequestParam(defaultValue = "7") Integer days, HttpServletRequest request,
+            HttpServletResponse response) {
+        return deliveryService.getDailyStats(days);
+    }
+}
