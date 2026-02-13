@@ -58,6 +58,11 @@ public interface UserService {
     List<Long> getUserRoleIds(Long userId);
 
     /**
+     * Get a user by ID.
+     */
+    User getUserById(Long userId);
+
+    /**
      * Get the system admin user (queried from database).
      */
     User getDefaultUser();

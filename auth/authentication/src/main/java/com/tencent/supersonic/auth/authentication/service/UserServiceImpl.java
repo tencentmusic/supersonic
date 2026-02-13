@@ -166,6 +166,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserById(Long userId) {
+        return ComponentFactory.getUserAdaptor().getUserById(userId);
+    }
+
+    @Override
     public User getDefaultUser() {
         try {
             User user = ComponentFactory.getUserAdaptor().getUserByName("admin");

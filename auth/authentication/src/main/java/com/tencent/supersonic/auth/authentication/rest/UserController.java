@@ -32,6 +32,11 @@ public class UserController {
         return userService.getCurrentUser(httpServletRequest, httpServletResponse);
     }
 
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable("userId") Long userId) {
+        return userService.getUserById(userId);
+    }
+
     @GetMapping("/getUserNames")
     public List<String> getUserNames() {
         return userService.getUserNames();

@@ -133,6 +133,16 @@ public class DefaultUserAdaptor implements UserAdaptor {
         return convert(userDO);
     }
 
+    @Override
+    public User getUserById(Long userId) {
+        UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
+        UserDO userDO = userRepository.getUser(userId);
+        if (userDO == null) {
+            return null;
+        }
+        return convert(userDO);
+    }
+
     private User convert(UserDO userDO) {
         User user = new User();
         BeanUtils.copyProperties(userDO, user);

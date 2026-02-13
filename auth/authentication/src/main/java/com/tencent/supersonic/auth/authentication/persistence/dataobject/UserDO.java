@@ -48,6 +48,9 @@ public class UserDO {
     /** 最后登录时间 */
     private Date lastLogin;
 
+    /** 工号 */
+    private String employeeId;
+
     /** 租户ID */
     private Long tenantId;
 

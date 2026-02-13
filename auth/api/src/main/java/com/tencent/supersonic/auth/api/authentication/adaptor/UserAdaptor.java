@@ -44,4 +44,6 @@ public interface UserAdaptor {
     List<UserToken> getUserTokens(String userName);
 
     User getUserByName(String name);
+
+    User getUserById(Long userId);
 }
