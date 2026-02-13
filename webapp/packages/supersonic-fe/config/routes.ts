@@ -276,6 +276,12 @@ const ROUTES = [
     component: './DeliveryConfig',
     envEnableList: [ENV_KEY.SEMANTIC],
   },
+  {
+    path: '/feishu-bot',
+    name: 'feishuBot',
+    component: './FeishuBot',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
   // Connection 功能已整合到数据库管理页面 (SemanticModel/Database)
   // 后端 API /api/v1/connections 保留，前端入口改为数据库详情中的"同步配置"Tab
   // ========== 平台管理 (Platform Admin) ==========

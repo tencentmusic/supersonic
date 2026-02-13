@@ -95,18 +95,42 @@ const SemanticTemplatePage: React.FC = () => {
 
   const handlePreview = (template: SemanticTemplate) => {
     setSelectedTemplate(template);
-    // Preview with empty params for now
+    const config = template.templateConfig;
+
+    // 从 models 的 measures/dimensions 提取指标和维度预览
+    const metrics: any[] = [];
+    const dimensions: any[] = [];
+    config?.models?.forEach((model: any) => {
+      model.measures?.forEach((m: any) => {
+        if (m.createMetric !== false) {
+          metrics.push({ name: m.name, bizName: m.bizName });
+        }
+      });
+      model.dimensions?.forEach((d: any) => {
+        dimensions.push({ name: d.name, bizName: d.bizName, type: d.type });
+      });
+    });
+
     const previewResult: SemanticPreviewResult = {
-      domain: template.templateConfig?.domain,
-      models: template.templateConfig?.models,
-      agent: template.templateConfig?.agent
+      domain: config?.domain,
+      models: config?.models,
+      metrics,
+      dimensions,
+      dataSet: config?.dataSet
         ? {
-            name: template.templateConfig.agent.name || '',
-            description: template.templateConfig.agent.description,
-            examples: template.templateConfig.agent.examples,
+            name: config.dataSet.name || '',
+            bizName: config.dataSet.bizName || '',
+            description: config.dataSet.description,
           }
         : undefined,
-      terms: template.templateConfig?.terms?.map((t) => ({
+      agent: config?.agent
+        ? {
+            name: config.agent.name || '',
+            description: config.agent.description,
+            examples: config.agent.examples,
+          }
+        : undefined,
+      terms: config?.terms?.map((t: any) => ({
         name: t.name,
         description: t.description,
         alias: t.alias,
@@ -233,9 +257,13 @@ const SemanticTemplatePage: React.FC = () => {
             ) : (
               <span key="deploy" />
             ),
-            <Button type="link" key="preview" onClick={() => handlePreview(template)}>
-              <EyeOutlined /> 预览
-            </Button>,
+            !isDeployed ? (
+              <Button type="link" key="preview" onClick={() => handlePreview(template)}>
+                <EyeOutlined /> 预览
+              </Button>
+            ) : (
+              <span key="preview" />
+            ),
             moreMenuItems.length > 0 ? (
               <Dropdown
                 key="more"

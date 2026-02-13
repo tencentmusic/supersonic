@@ -91,6 +91,30 @@ const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ visible, data, onClose })
         ),
     },
     {
+      key: 'dimensions',
+      label: (
+        <span>
+          <TableOutlined /> 维度 ({data.dimensions?.length || 0})
+        </span>
+      ),
+      children:
+        data.dimensions && data.dimensions.length > 0 ? (
+          <Table
+            dataSource={data.dimensions}
+            columns={[
+              { title: '维度名称', dataIndex: 'name', key: 'name' },
+              { title: '代码', dataIndex: 'bizName', key: 'bizName' },
+              { title: '类型', dataIndex: 'type', key: 'type' },
+            ]}
+            rowKey="bizName"
+            size="small"
+            pagination={false}
+          />
+        ) : (
+          <Empty description="暂无维度" />
+        ),
+    },
+    {
       key: 'dataset',
       label: (
         <span>

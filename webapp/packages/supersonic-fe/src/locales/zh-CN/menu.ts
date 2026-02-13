@@ -41,4 +41,5 @@ export default {
   'menu.reportSchedule': '报表调度',
   'menu.deliveryConfig': '推送配置',
   'menu.datasetPermission': '数据集权限',
+  'menu.feishuBot': '飞书机器人',
 };

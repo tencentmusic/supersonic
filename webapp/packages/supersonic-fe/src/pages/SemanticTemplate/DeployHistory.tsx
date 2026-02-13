@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Drawer, Table, Tag, Button, Space, message, Modal, Descriptions } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Drawer, Table, Tag, Button, Space, message, Modal, Descriptions, Select } from 'antd';
+import { SwapOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import moment from 'moment';
 import { useModel } from '@umijs/max';
 import { getDeploymentHistory, getAllDeploymentHistory, cancelDeployment, SemanticDeployment } from '@/services/semanticTemplate';
+import ConfigDiff from './ConfigDiff';
 
 interface DeployHistoryProps {
   visible: boolean;
@@ -21,13 +23,16 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
   const { initialState } = useModel('@@initialState');
   const currentUser = initialState?.currentUser;
-  // 管理员可以查看所有租户的部署历史
   const isSaasAdmin = currentUser?.superAdmin || currentUser?.isAdmin === 1;
 
   const [deployments, setDeployments] = useState<SemanticDeployment[]>([]);
   const [loading, setLoading] = useState(false);
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedDeployment, setSelectedDeployment] = useState<SemanticDeployment | null>(null);
+  // Compare modal state
+  const [compareVisible, setCompareVisible] = useState(false);
+  const [compareTarget, setCompareTarget] = useState<SemanticDeployment | null>(null);
+  const [compareBaseId, setCompareBaseId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (visible) {
@@ -38,12 +43,9 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
   const loadHistory = async () => {
     setLoading(true);
     try {
-      // 管理员使用 getAllDeploymentHistory 查看所有租户的部署历史
-      // 普通用户使用 getDeploymentHistory 只看本租户的部署历史
       const res: any = isSaasAdmin
         ? await getAllDeploymentHistory()
         : await getDeploymentHistory();
-      // API response is wrapped in { code, data, msg } format
       if (res?.code === 200 && res?.data) {
         setDeployments(res.data);
       } else {
@@ -82,6 +84,56 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
     });
   };
 
+  /**
+   * Find the previous deployment of the same template for default comparison baseline.
+   */
+  const findPreviousDeployment = (record: SemanticDeployment): SemanticDeployment | undefined => {
+    const sameTemplate = deployments
+      .filter((d) => d.templateId === record.templateId && d.id !== record.id)
+      .sort((a, b) => (b.templateVersion || 0) - (a.templateVersion || 0));
+    // Find the most recent deployment with a lower version
+    return sameTemplate.find(
+      (d) => (d.templateVersion || 0) < (record.templateVersion || 0),
+    );
+  };
+
+  /**
+   * Get all deployments of the same template that can serve as comparison baseline.
+   */
+  const getBaselineOptions = (record: SemanticDeployment) => {
+    return deployments
+      .filter(
+        (d) =>
+          d.templateId === record.templateId &&
+          d.id !== record.id &&
+          d.templateConfigSnapshot != null,
+      )
+      .sort((a, b) => (b.templateVersion || 0) - (a.templateVersion || 0));
+  };
+
+  const handleCompare = (record: SemanticDeployment) => {
+    const prev = findPreviousDeployment(record);
+    setCompareTarget(record);
+    setCompareBaseId(prev?.id);
+    setCompareVisible(true);
+  };
+
+  const compareBase = useMemo(() => {
+    if (!compareBaseId) return undefined;
+    return deployments.find((d) => d.id === compareBaseId);
+  }, [compareBaseId, deployments]);
+
+  const canCompare = (record: SemanticDeployment): boolean => {
+    if (!record.templateConfigSnapshot) return false;
+    // Must have at least one other deployment with a snapshot for the same template
+    return deployments.some(
+      (d) =>
+        d.templateId === record.templateId &&
+        d.id !== record.id &&
+        d.templateConfigSnapshot != null,
+    );
+  };
+
   const columns: ColumnsType<SemanticDeployment> = [
     {
       title: '模板',
@@ -89,7 +141,13 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
       key: 'templateName',
       width: 150,
     },
-    // 管理员可以看到租户ID列
+    {
+      title: '版本',
+      dataIndex: 'templateVersion',
+      key: 'templateVersion',
+      width: 70,
+      render: (v: number | undefined) => (v != null ? <Tag>V{v}</Tag> : '-'),
+    },
     ...(isSaasAdmin
       ? [
           {
@@ -134,12 +192,22 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
     {
       title: '操作',
       key: 'actions',
-      width: 120,
+      width: 160,
       render: (_, record) => (
         <Space size="small">
           <Button type="link" size="small" onClick={() => showDetail(record)}>
             详情
           </Button>
+          {canCompare(record) && (
+            <Button
+              type="link"
+              size="small"
+              icon={<SwapOutlined />}
+              onClick={() => handleCompare(record)}
+            >
+              对比
+            </Button>
+          )}
           {(record.status === 'PENDING' || record.status === 'RUNNING') && (
             <Button type="link" size="small" danger onClick={() => handleCancel(record)}>
               取消
@@ -154,7 +222,7 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
     <>
       <Drawer
         title="部署历史"
-        width={900}
+        width={1000}
         open={visible}
         onClose={onClose}
       >
@@ -168,6 +236,7 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
         />
       </Drawer>
 
+      {/* Detail Modal */}
       <Modal
         title="部署详情"
         open={detailVisible}
@@ -178,6 +247,11 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
         {selectedDeployment && (
           <Descriptions bordered column={1} size="small">
             <Descriptions.Item label="模板">{selectedDeployment.templateName}</Descriptions.Item>
+            {selectedDeployment.templateVersion != null && (
+              <Descriptions.Item label="模板版本">
+                <Tag>V{selectedDeployment.templateVersion}</Tag>
+              </Descriptions.Item>
+            )}
             <Descriptions.Item label="状态">
               <Tag color={statusConfig[selectedDeployment.status]?.color}>
                 {statusConfig[selectedDeployment.status]?.text}
@@ -194,6 +268,36 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
                 : '-'}
             </Descriptions.Item>
             <Descriptions.Item label="创建人">{selectedDeployment.createdBy}</Descriptions.Item>
+            {selectedDeployment.templateConfigSnapshot && (
+              <Descriptions.Item label="配置快照">
+                <Button
+                  type="link"
+                  size="small"
+                  onClick={() => {
+                    Modal.info({
+                      title: `配置快照 — V${selectedDeployment.templateVersion || '?'}`,
+                      width: 720,
+                      content: (
+                        <pre
+                          style={{
+                            maxHeight: 480,
+                            overflow: 'auto',
+                            fontSize: 12,
+                            background: '#f5f5f5',
+                            padding: 12,
+                            borderRadius: 4,
+                          }}
+                        >
+                          {JSON.stringify(selectedDeployment.templateConfigSnapshot, null, 2)}
+                        </pre>
+                      ),
+                    });
+                  }}
+                >
+                  查看 JSON
+                </Button>
+              </Descriptions.Item>
+            )}
             {selectedDeployment.status === 'SUCCESS' && selectedDeployment.resultDetail && (
               <>
                 <Descriptions.Item label="主题域">
@@ -239,6 +343,67 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
               </Descriptions.Item>
             )}
           </Descriptions>
+        )}
+      </Modal>
+
+      {/* Compare Modal */}
+      <Modal
+        title={
+          compareTarget
+            ? `配置变更对比 — ${compareTarget.templateName}`
+            : '配置变更对比'
+        }
+        open={compareVisible}
+        onCancel={() => setCompareVisible(false)}
+        footer={<Button onClick={() => setCompareVisible(false)}>关闭</Button>}
+        width={960}
+      >
+        {compareTarget && (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <Space>
+                <span>对比基线：</span>
+                <Select
+                  value={compareBaseId}
+                  onChange={setCompareBaseId}
+                  style={{ width: 320 }}
+                  placeholder="选择基线版本"
+                >
+                  {getBaselineOptions(compareTarget).map((d) => (
+                    <Select.Option key={d.id} value={d.id}>
+                      V{d.templateVersion || '?'} — {d.startTime ? moment(d.startTime).format('YYYY-MM-DD HH:mm') : '未知时间'} ({statusConfig[d.status]?.text || d.status})
+                    </Select.Option>
+                  ))}
+                </Select>
+                <SwapOutlined />
+                <Tag>
+                  V{compareTarget.templateVersion || '?'} (当前)
+                </Tag>
+              </Space>
+            </div>
+            {compareBase ? (
+              <ConfigDiff
+                oldConfig={compareBase.templateConfigSnapshot}
+                newConfig={compareTarget.templateConfigSnapshot}
+                oldVersion={compareBase.templateVersion}
+                newVersion={compareTarget.templateVersion}
+                oldTime={
+                  compareBase.startTime
+                    ? moment(compareBase.startTime).format('YYYY-MM-DD HH:mm')
+                    : undefined
+                }
+                newTime={
+                  compareTarget.startTime
+                    ? moment(compareTarget.startTime).format('YYYY-MM-DD HH:mm')
+                    : undefined
+                }
+              />
+            ) : (
+              <div style={{ color: '#999', textAlign: 'center', padding: 24 }}>
+                请选择基线版本进行对比
+              </div>
+            )}
+          </>
         )}
       </Modal>
     </>

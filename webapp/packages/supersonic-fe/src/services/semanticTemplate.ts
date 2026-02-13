@@ -14,8 +14,10 @@ export interface SemanticTemplate {
    * Template status:
    * - 0: Draft (can edit/delete)
    * - 1: Deployed (cannot edit/delete)
+   * - 2: Offline
    */
   status: number;
+  currentVersion?: number;
   isBuiltin: boolean;
   tenantId: number;
   createdAt?: string;
@@ -30,6 +32,7 @@ export interface SemanticTemplate {
 export const TEMPLATE_STATUS = {
   DRAFT: 0,
   DEPLOYED: 1,
+  OFFLINE: 2,
 } as const;
 
 /**
@@ -197,6 +200,8 @@ export interface SemanticDeployment {
   id: number;
   templateId: number;
   templateName?: string;
+  templateVersion?: number;
+  templateConfigSnapshot?: SemanticTemplateConfig;
   databaseId?: number;
   paramConfig?: SemanticDeployParam;
   status: 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
