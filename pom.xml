@@ -16,6 +16,7 @@
         <module>chat</module>
         <module>launchers</module>
         <module>headless</module>
+        <module>feishu</module>
     </modules>
 
     <name>supersonic</name>
@@ -23,7 +24,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.9</version>
+        <version>3.4.11</version>
     </parent>
 
     <properties>
@@ -38,12 +39,11 @@
         <pagehelper.version>6.1.0</pagehelper.version>
         <pagehelper.spring.version>2.1.0</pagehelper.spring.version>
         <mybatis.version>3.5.19</mybatis.version>
-        <guava.version>32.0.0-jre</guava.version>
+        <guava.version>33.4.0-jre</guava.version>
         <hanlp.version>portable-1.8.4</hanlp.version>
         <hadoop.version>3.3.6</hadoop.version>
-        <commons.lang3.version>3.7</commons.lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <org.testng.version>7.10.2</org.testng.version>
-        <yaml.utils.version>2.14.1</yaml.utils.version>
         <jjwt.version>0.12.6</jjwt.version>
         <alibaba.druid.version>1.2.24</alibaba.druid.version>
         <mysql.connector.java.version>9.2.0</mysql.connector.java.version>
@@ -51,7 +51,7 @@
         <presto.version>0.291</presto.version>
         <trino.version>471</trino.version>
         <mybatis.plus.version>3.5.10.1</mybatis.plus.version>
-        <httpclient5.version>5.4.2</httpclient5.version>
+        <httpclient5.version>5.4.3</httpclient5.version>
 <!--        <httpcore.version>4.4.16</httpcore.version>-->
         <httpcore5.version>5.3.3</httpcore5.version>
         <clickhouse.jdbc.version>0.4.6</clickhouse.jdbc.version>
@@ -67,7 +67,7 @@
         <xk.time.version>3.2.4</xk.time.version>
         <mockito-inline.version>4.5.1</mockito-inline.version>
         <easyexcel.version>4.0.3</easyexcel.version>
-        <poi.version>5.2.5</poi.version>
+        <poi.version>5.4.0</poi.version>
         <langchain4j.version>0.36.2</langchain4j.version>
         <langchain4j.embedding.version>0.36.2</langchain4j.embedding.version>
 <!--        <postgresql.version>42.7.1</postgresql.version>-->
@@ -80,9 +80,15 @@
         <spotless.version>2.27.1</spotless.version>
         <spotless.skip>false</spotless.skip>
         <stax2.version>4.2.2</stax2.version>
-        <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
         <jgrapht.version>1.5.2</jgrapht.version>
         <redisson.version>3.40.2</redisson.version>
+        <!-- Managed dependency overrides — CVE fixes -->
+        <snappy-java.version>1.1.10.7</snappy-java.version>
+        <protobuf-java.version>3.25.5</protobuf-java.version>
+        <commons-configuration2.version>2.11.0</commons-configuration2.version>
+        <avro.version>1.11.4</avro.version>
+        <bouncycastle.version>1.79</bouncycastle.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
     </properties>
 
     <dependencyManagement>
@@ -156,6 +162,22 @@
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-milvus</artifactId>
                 <version>${langchain4j.version}</version>
+                <exclusions>
+                    <!-- Jetty 9.4.x EoL (multiple CVEs) via hadoop-client — app uses Tomcat -->
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.websocket</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <!-- Jersey 1.x EoL via hadoop-client -->
+                    <exclusion>
+                        <groupId>com.sun.jersey</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
@@ -213,14 +235,41 @@
                 <version>${mockito-inline.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk</artifactId>
-                <version>${aws-java-sdk.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jgrapht</groupId>
                 <artifactId>jgrapht-core</artifactId>
                 <version>${jgrapht.version}</version>
+            </dependency>
+
+            <!-- CVE fixes: override vulnerable transitive dependency versions -->
+            <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <version>${snappy-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-configuration2</artifactId>
+                <version>${commons-configuration2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>${avro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

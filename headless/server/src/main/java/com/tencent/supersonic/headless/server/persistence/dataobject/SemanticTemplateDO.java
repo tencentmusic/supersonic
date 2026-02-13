@@ -26,6 +26,8 @@ public class SemanticTemplateDO {
 
     private String previewImage;
 
+    private Long currentVersion;
+
     private Integer status;
 
     private Integer isBuiltin;

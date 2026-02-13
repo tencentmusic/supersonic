@@ -84,6 +84,16 @@ public class SemanticTemplateController {
     }
 
     /**
+     * Take template offline (custom action with colon)
+     */
+    @PostMapping("/templates/{id}:offline")
+    public void offlineTemplate(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        semanticTemplateService.offlineTemplate(id, user);
+    }
+
+    /**
      * Preview deployment (custom action with colon)
      */
     @PostMapping("/templates/{id}:preview")

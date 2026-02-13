@@ -18,6 +18,10 @@ public class SemanticDeploymentDO {
 
     private String templateName;
 
+    private Long templateVersion;
+
+    private String templateConfigSnapshot;
+
     private Long databaseId;
 
     private String paramConfig;

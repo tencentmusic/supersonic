@@ -13,6 +13,10 @@ public class SemanticDeployment {
 
     private String templateName;
 
+    private Long templateVersion;
+
+    private SemanticTemplateConfig templateConfigSnapshot;
+
     private Long databaseId;
 
     private SemanticDeployParam paramConfig;

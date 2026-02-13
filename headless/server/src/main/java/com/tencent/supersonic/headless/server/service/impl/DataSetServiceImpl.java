@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
@@ -22,6 +23,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
 import com.tencent.supersonic.headless.server.service.*;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,10 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     private MetricService metricService;
 
     private final UserService userService;
+
+    @Lazy
+    @Autowired
+    private ReportScheduleService reportScheduleService;
 
     @Override
     public DataSetResp save(DataSetReq dataSetReq, User user) {
@@ -122,6 +128,16 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
 
     @Override
     public void delete(Long id, User user) {
+        // Check for active report schedules referencing this dataset
+        if (reportScheduleService != null) {
+            Page<ReportScheduleDO> activePage =
+                    reportScheduleService.getScheduleList(new Page<>(1, 1), id, true);
+            if (activePage.getTotal() > 0) {
+                throw new InvalidArgumentException(
+                        "无法删除数据集：关联 " + activePage.getTotal() + " 个活跃调度任务，请先暂停或删除相关调度");
+            }
+        }
+
         DataSetDO dataSetDO = getById(id);
         dataSetDO.setStatus(StatusEnum.DELETED.getCode());
         dataSetDO.setUpdatedBy(user.getName());

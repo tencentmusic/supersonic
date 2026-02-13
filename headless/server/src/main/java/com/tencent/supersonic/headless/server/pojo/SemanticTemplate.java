@@ -21,6 +21,8 @@ public class SemanticTemplate {
 
     private String previewImage;
 
+    private Long currentVersion;
+
     private Integer status;
 
     private Boolean isBuiltin;

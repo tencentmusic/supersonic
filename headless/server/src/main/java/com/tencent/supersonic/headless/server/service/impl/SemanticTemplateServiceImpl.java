@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.common.context.TenantContext;
@@ -10,6 +11,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.server.event.TemplateDeployedEvent;
 import com.tencent.supersonic.headless.server.executor.SemanticDeployExecutor;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.SemanticDeploymentDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.SemanticTemplateDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.SemanticDeploymentMapper;
@@ -22,6 +24,7 @@ import com.tencent.supersonic.headless.server.pojo.SemanticTemplate;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateListResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
+import com.tencent.supersonic.headless.server.service.ReportScheduleService;
 import com.tencent.supersonic.headless.server.service.SemanticTemplateService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +51,7 @@ public class SemanticTemplateServiceImpl extends
 
     private static final Integer STATUS_DRAFT = 0;
     private static final Integer STATUS_DEPLOYED = 1;
+    private static final Integer STATUS_OFFLINE = 2;
 
     private final Map<Long, Future<?>> runningDeployments = new ConcurrentHashMap<>();
 
@@ -57,18 +61,20 @@ public class SemanticTemplateServiceImpl extends
     private final TenantConfig tenantConfig;
     private final ThreadPoolExecutor deployPool;
     private final DomainService domainService;
+    private final ReportScheduleService reportScheduleService;
 
     public SemanticTemplateServiceImpl(SemanticDeploymentMapper deploymentMapper,
             @Lazy SemanticDeployExecutor deployExecutor,
             ApplicationEventPublisher applicationEventPublisher, TenantConfig tenantConfig,
-            @Qualifier("deployExecutor") ThreadPoolExecutor deployPool,
-            DomainService domainService) {
+            @Qualifier("deployExecutor") ThreadPoolExecutor deployPool, DomainService domainService,
+            @Lazy ReportScheduleService reportScheduleService) {
         this.deploymentMapper = deploymentMapper;
         this.deployExecutor = deployExecutor;
         this.applicationEventPublisher = applicationEventPublisher;
         this.tenantConfig = tenantConfig;
         this.deployPool = deployPool;
         this.domainService = domainService;
+        this.reportScheduleService = reportScheduleService;
     }
 
     @Override
@@ -115,6 +121,7 @@ public class SemanticTemplateServiceImpl extends
         template.setCreatedBy(user.getName());
         template.setCreatedAt(new Date());
         template.setStatus(STATUS_DRAFT);
+        template.setCurrentVersion(1L);
 
         SemanticTemplateDO templateDO = convertToDO(template);
         baseMapper.insert(templateDO);
@@ -146,6 +153,11 @@ public class SemanticTemplateServiceImpl extends
 
         template.setUpdatedBy(user.getName());
         template.setUpdatedAt(new Date());
+        // Increment version on every edit
+        Long nextVersion =
+                (existingDO.getCurrentVersion() != null ? existingDO.getCurrentVersion() : 0L) + 1;
+        template.setCurrentVersion(nextVersion);
+
         SemanticTemplateDO templateDO = convertToDO(template);
         templateDO.setId(existingDO.getId());
         templateDO.setTenantId(existingDO.getTenantId());
@@ -200,6 +212,8 @@ public class SemanticTemplateServiceImpl extends
         SemanticDeployment deployment = new SemanticDeployment();
         deployment.setTemplateId(templateId);
         deployment.setTemplateName(template.getName());
+        deployment.setTemplateVersion(template.getCurrentVersion());
+        deployment.setTemplateConfigSnapshot(template.getTemplateConfig());
         deployment.setDatabaseId(param.getDatabaseId());
         deployment.setParamConfig(param);
         deployment.setStatus(SemanticDeployment.DeploymentStatus.PENDING);
@@ -301,6 +315,8 @@ public class SemanticTemplateServiceImpl extends
         SemanticDeployment deployment = new SemanticDeployment();
         deployment.setTemplateId(templateId);
         deployment.setTemplateName(template.getName());
+        deployment.setTemplateVersion(template.getCurrentVersion());
+        deployment.setTemplateConfigSnapshot(template.getTemplateConfig());
         deployment.setDatabaseId(param.getDatabaseId());
         deployment.setParamConfig(param);
         deployment.setStatus(SemanticDeployment.DeploymentStatus.PENDING);
@@ -464,17 +480,70 @@ public class SemanticTemplateServiceImpl extends
             template.setId(existingDO.getId());
             template.setUpdatedBy(user.getName());
             template.setUpdatedAt(new Date());
+            Long nextVersion =
+                    (existingDO.getCurrentVersion() != null ? existingDO.getCurrentVersion() : 0L)
+                            + 1;
+            template.setCurrentVersion(nextVersion);
             SemanticTemplateDO templateDO = convertToDO(template);
             baseMapper.updateById(templateDO);
         } else {
             template.setCreatedBy(user.getName());
             template.setCreatedAt(new Date());
+            template.setCurrentVersion(1L);
             SemanticTemplateDO templateDO = convertToDO(template);
             baseMapper.insert(templateDO);
             template.setId(templateDO.getId());
         }
 
         return template;
+    }
+
+    @Override
+    @Transactional
+    public void offlineTemplate(Long id, User user) {
+        SemanticTemplateDO templateDO = baseMapper.selectById(id);
+        if (templateDO == null) {
+            throw new InvalidArgumentException("Template not found: " + id);
+        }
+
+        Long tenantId = getTenantId(user);
+        if (templateDO.getIsBuiltin() == 1) {
+            throw new InvalidArgumentException("Cannot take builtin templates offline");
+        }
+        if (!templateDO.getTenantId().equals(tenantId)) {
+            throw new InvalidArgumentException("No permission to offline this template");
+        }
+        if (!STATUS_DEPLOYED.equals(templateDO.getStatus())) {
+            throw new InvalidArgumentException("Only deployed templates can be taken offline");
+        }
+
+        // Check for active schedules via the latest successful deployment
+        QueryWrapper<SemanticDeploymentDO> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(SemanticDeploymentDO::getTemplateId, id)
+                .eq(SemanticDeploymentDO::getTenantId, tenantId)
+                .eq(SemanticDeploymentDO::getStatus,
+                        SemanticDeployment.DeploymentStatus.SUCCESS.name())
+                .orderByDesc(SemanticDeploymentDO::getCreatedAt).last("LIMIT 1");
+        SemanticDeploymentDO lastSuccess = deploymentMapper.selectOne(wrapper);
+
+        if (lastSuccess != null) {
+            SemanticDeployment deployment = convertToDeployment(lastSuccess);
+            SemanticDeployResult result = deployment.getResultDetail();
+            if (result != null && result.getDataSetId() != null) {
+                Page<ReportScheduleDO> activePage = reportScheduleService
+                        .getScheduleList(new Page<>(1, 1), result.getDataSetId(), true);
+                if (activePage.getTotal() > 0) {
+                    throw new InvalidArgumentException(
+                            "无法下线：该模板关联 " + activePage.getTotal() + " 个活跃调度任务，请先暂停或删除相关调度");
+                }
+            }
+        }
+
+        templateDO.setStatus(STATUS_OFFLINE);
+        templateDO.setUpdatedBy(user.getName());
+        templateDO.setUpdatedAt(new Date());
+        baseMapper.updateById(templateDO);
+        log.info("Template {} taken offline by user {}", id, user.getName());
     }
 
     // ============ Helper Methods ============
@@ -553,7 +622,8 @@ public class SemanticTemplateServiceImpl extends
             return null;
         }
         SemanticDeployment deployment = new SemanticDeployment();
-        BeanUtils.copyProperties(deploymentDO, deployment, "status", "paramConfig", "resultDetail");
+        BeanUtils.copyProperties(deploymentDO, deployment, "status", "paramConfig", "resultDetail",
+                "templateConfigSnapshot");
         deployment.setStatus(SemanticDeployment.DeploymentStatus.valueOf(deploymentDO.getStatus()));
         if (StringUtils.isNotBlank(deploymentDO.getParamConfig())) {
             deployment.setParamConfig(
@@ -563,19 +633,27 @@ public class SemanticTemplateServiceImpl extends
             deployment.setResultDetail(
                     JsonUtil.toObject(deploymentDO.getResultDetail(), SemanticDeployResult.class));
         }
+        if (StringUtils.isNotBlank(deploymentDO.getTemplateConfigSnapshot())) {
+            deployment.setTemplateConfigSnapshot(JsonUtil.toObject(
+                    deploymentDO.getTemplateConfigSnapshot(), SemanticTemplateConfig.class));
+        }
         return deployment;
     }
 
     private SemanticDeploymentDO convertToDeploymentDO(SemanticDeployment deployment) {
         SemanticDeploymentDO deploymentDO = new SemanticDeploymentDO();
         BeanUtils.copyProperties(deployment, deploymentDO, "status", "paramConfig", "resultDetail",
-                "activeLock");
+                "activeLock", "templateConfigSnapshot");
         deploymentDO.setStatus(deployment.getStatus().name());
         if (deployment.getParamConfig() != null) {
             deploymentDO.setParamConfig(JsonUtil.toString(deployment.getParamConfig()));
         }
         if (deployment.getResultDetail() != null) {
             deploymentDO.setResultDetail(JsonUtil.toString(deployment.getResultDetail()));
+        }
+        if (deployment.getTemplateConfigSnapshot() != null) {
+            deploymentDO.setTemplateConfigSnapshot(
+                    JsonUtil.toString(deployment.getTemplateConfigSnapshot()));
         }
         // activeLock is non-null only for PENDING/RUNNING, enabling DB unique constraint
         SemanticDeployment.DeploymentStatus status = deployment.getStatus();

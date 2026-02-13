@@ -12,19 +12,6 @@
     <artifactId>headless-api</artifactId>
 
     <dependencies>
-        <!--<dependency>
-            <groupId>ru.yandex.clickhouse</groupId>
-            <artifactId>clickhouse-jdbc</artifactId>
-            <version>${clickhouse.jdbc.version}</version>
-        </dependency>-->
-        <dependency>
-            <groupId>com.clickhouse</groupId>
-            <artifactId>clickhouse-jdbc</artifactId>
-            <version>${clickhouse.jdbc.version}</version>
-            <!-- use uber jar with all dependencies included, change classifier to http for smaller jar -->
-            <classifier>all</classifier>
-        </dependency>
-
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
             <artifactId>common</artifactId>
@@ -43,7 +30,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <!--<version>${spring.version}</version>-->
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -54,11 +40,6 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <!--<version>${spring.version}</version>-->
         </dependency>
         <dependency>
             <groupId>com.tencent.supersonic</groupId>

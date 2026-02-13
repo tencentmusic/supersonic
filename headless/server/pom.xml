@@ -144,7 +144,6 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.24.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.arrow</groupId>

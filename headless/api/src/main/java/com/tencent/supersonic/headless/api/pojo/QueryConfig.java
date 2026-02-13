@@ -11,4 +11,10 @@ public class QueryConfig implements Serializable {
 
     private AggregateTypeDefaultConfig aggregateTypeDefaultConfig =
             new AggregateTypeDefaultConfig();
+
+    /**
+     * SQL template config for complex reports (UNION, window functions, etc.). When set, takes
+     * priority over structured query configs above. Uses ST4 syntax for parameter rendering.
+     */
+    private SqlTemplateConfig sqlTemplateConfig;
 }

@@ -83,4 +83,9 @@ public interface SemanticTemplateService {
      * Create/update builtin template (SaaS Admin).
      */
     SemanticTemplate saveBuiltinTemplate(SemanticTemplate template, User user);
+
+    /**
+     * Take a deployed template offline. Checks for active schedules first — rejects if any exist.
+     */
+    void offlineTemplate(Long id, User user);
 }

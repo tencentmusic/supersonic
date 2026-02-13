@@ -106,6 +106,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.clickhouse</groupId>
+            <artifactId>clickhouse-jdbc</artifactId>
+            <version>${clickhouse.jdbc.version}</version>
+            <classifier>all</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.duckdb</groupId>
             <artifactId>duckdb_jdbc</artifactId>
             <version>${duckdb_jdbc.version}</version>

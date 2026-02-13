@@ -6,10 +6,12 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.ParamValidationException;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.SqlTemplateConfig;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.core.utils.SqlTemplateEngine;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
@@ -47,6 +49,9 @@ public class ReportExecutionOrchestrator {
 
     @Autowired(required = false)
     private ReportDeliveryService deliveryService;
+
+    @Autowired(required = false)
+    private SqlTemplateEngine sqlTemplateEngine;
 
     @Value("${supersonic.export.local-dir:${java.io.tmpdir}/supersonic-export}")
     private String exportDir;
@@ -139,7 +144,31 @@ public class ReportExecutionOrchestrator {
             throw new IllegalArgumentException("queryConfig is required");
         }
 
-        // Try to parse as QueryStructReq first, then QuerySqlReq
+        // Path 1: Try SqlTemplateConfig (ST4 template with variable rendering)
+        try {
+            SqlTemplateConfig templateConfig =
+                    JsonUtil.toObject(queryConfig, SqlTemplateConfig.class);
+            if (templateConfig != null && StringUtils.isNotBlank(templateConfig.getTemplateSql())) {
+                if (sqlTemplateEngine == null) {
+                    throw new IllegalStateException(
+                            "SqlTemplateEngine is not available but queryConfig contains a SQL template");
+                }
+                Map<String, Object> params =
+                        ctx.getResolvedParams() != null ? ctx.getResolvedParams() : Map.of();
+                String renderedSql =
+                        sqlTemplateEngine.render(templateConfig.getTemplateSql(), params);
+                QuerySqlReq sqlReq = new QuerySqlReq();
+                sqlReq.setSql(renderedSql);
+                sqlReq.setDataSetId(ctx.getDatasetId());
+                return sqlReq;
+            }
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            log.debug("Failed to parse as SqlTemplateConfig, trying QueryStructReq");
+        }
+
+        // Path 2: Try QueryStructReq (structured query)
         try {
             QueryStructReq structReq = JsonUtil.toObject(queryConfig, QueryStructReq.class);
             if (structReq != null && structReq.getDataSetId() != null) {
@@ -149,6 +178,7 @@ public class ReportExecutionOrchestrator {
             log.debug("Failed to parse as QueryStructReq, trying QuerySqlReq");
         }
 
+        // Path 3: Try QuerySqlReq (raw SQL)
         try {
             QuerySqlReq sqlReq = JsonUtil.toObject(queryConfig, QuerySqlReq.class);
             if (sqlReq != null) {
