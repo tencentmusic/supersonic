@@ -36,17 +36,21 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseContext parseContext) {
+        String queryText = parseContext.getRequest().getQueryText();
         parseContext.getResponse().getSelectedParses().forEach(p -> {
             if (Objects.isNull(p.getDataSet()) || Objects.isNull(p.getSqlInfo().getParsedS2SQL())) {
                 return;
             }
 
             buildParseInfoFromSQL(p);
-            buildTextInfo(p);
+            buildTextInfo(p, queryText);
         });
     }
 
-    private void buildTextInfo(SemanticParseInfo parseInfo) {
+    private static final List<String> TREND_KEYWORDS =
+            List.of("趋势", "变化", "走势", "增长", "下降", "波动", "同比", "环比", "对比");
+
+    private void buildTextInfo(SemanticParseInfo parseInfo, String queryText) {
         StringBuilder textBuilder = new StringBuilder();
         textBuilder.append("**数据集:** ").append(parseInfo.getDataSet().getName()).append(" ");
         List<String> metricNames = parseInfo.getMetrics().stream().map(SchemaElement::getName)
@@ -76,6 +80,13 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
                         .append(queryFilter.getValue()).append(" ");
             }
         }
+
+        // Warn when query text contains trend/aggregation keywords but no metrics matched
+        if (CollectionUtils.isEmpty(metricNames) && queryText != null
+                && TREND_KEYWORDS.stream().anyMatch(queryText::contains)) {
+            textBuilder.append("\n**提示:** 未识别到相关指标，当前结果仅包含维度数据。如需查看趋势，请在查询中明确指标名称。");
+        }
+
         parseInfo.setTextInfo(textBuilder.toString());
     }
 
@@ -187,7 +198,7 @@ public class ParseInfoFormatProcessor implements ParseResultProcessor {
         }
         DateConf dateInfo = new DateConf();
         dateInfo.setDateMode(DateConf.DateMode.BETWEEN);
-        FieldExpression firstExpression = dateExpressions.get(0);
+        FieldExpression firstExpression = dateExpressions.getFirst();
 
         FilterOperatorEnum firstOperator =
                 FilterOperatorEnum.getSqlOperator(firstExpression.getOperator());

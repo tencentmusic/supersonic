@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>feishu</artifactId>
+        <groupId>com.tencent.supersonic</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>feishu-server</artifactId>
+    <description>Feishu Server - Bot webhook, message handling, user mapping</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>feishu-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- chat-api: ChatParseReq, QueryResult POJOs (no business logic) -->
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>chat-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- headless-api: SemanticParseInfo POJOs (no business logic) -->
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>headless-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- auth-api: InternalTokenGenerator, @AuthenticationIgnore, User -->
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>auth-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Caffeine for event dedup + token cache (default) -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <!-- Redis cache (optional, activated by s2.feishu.cache.type=redis) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- AOP for metrics interceptors -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- Feishu SDK for WebSocket long connection mode -->
+        <dependency>
+            <groupId>com.larksuite.oapi</groupId>
+            <artifactId>oapi-sdk</artifactId>
+            <version>2.5.3</version>
+        </dependency>
+    </dependencies>
+
+</project>

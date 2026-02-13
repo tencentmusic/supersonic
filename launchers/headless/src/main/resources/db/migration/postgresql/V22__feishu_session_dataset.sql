@@ -1,0 +1,2 @@
+ALTER TABLE s2_feishu_query_session ADD COLUMN IF NOT EXISTS dataset_id BIGINT DEFAULT NULL;
+ALTER TABLE s2_feishu_query_session ADD COLUMN IF NOT EXISTS agent_id INT DEFAULT NULL;

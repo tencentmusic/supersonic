@@ -19,7 +19,7 @@ import java.util.List;
 public interface ChatManageService {
     Long addChat(User user, String chatName, Integer agentId);
 
-    List<ChatDO> getAll(User user, Integer agentId);
+    List<ChatDO> getAll(User user, Integer agentId, String chatName);
 
     boolean updateChatName(Long chatId, String chatName, User user);
 

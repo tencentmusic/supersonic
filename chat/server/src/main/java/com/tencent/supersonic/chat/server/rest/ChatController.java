@@ -31,8 +31,9 @@ public class ChatController {
     @GetMapping("/getAll")
     public List<ChatDO> getAllChats(
             @RequestParam(value = "agentId", required = false) Integer agentId,
+            @RequestParam(value = "chatName", required = false) String chatName,
             HttpServletRequest request, HttpServletResponse response) {
-        return chatService.getAll(UserHolder.findUser(request, response), agentId);
+        return chatService.getAll(UserHolder.findUser(request, response), agentId, chatName);
     }
 
     @PostMapping("/delete")

@@ -61,8 +61,8 @@ public class ChatManageServiceImpl implements ChatManageService {
     }
 
     @Override
-    public List<ChatDO> getAll(User user, Integer agentId) {
-        return chatRepository.getAll(user.getName(), agentId, getEffectiveTenantId(user));
+    public List<ChatDO> getAll(User user, Integer agentId, String chatName) {
+        return chatRepository.getAll(user.getName(), agentId, getEffectiveTenantId(user), chatName);
     }
 
     @Override

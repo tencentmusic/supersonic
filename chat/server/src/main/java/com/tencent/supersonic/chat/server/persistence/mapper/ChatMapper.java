@@ -23,9 +23,10 @@ public interface ChatMapper extends BaseMapper<ChatDO> {
     @Select("<script>"
             + "SELECT * FROM s2_chat WHERE creator = #{creator} AND tenant_id = #{tenantId} AND is_delete = 0 "
             + "<if test='agentId != null'>AND agent_id = #{agentId}</if> "
+            + "<if test='chatName != null'>AND chat_name = #{chatName}</if> "
             + "ORDER BY is_top DESC, last_time DESC" + "</script>")
     List<ChatDO> getAll(@Param("creator") String creator, @Param("agentId") Integer agentId,
-            @Param("tenantId") Long tenantId);
+            @Param("tenantId") Long tenantId, @Param("chatName") String chatName);
 
     @Update("UPDATE s2_chat SET chat_name = #{chatName}, last_time = #{lastTime} WHERE chat_id = #{chatId} AND creator = #{creator} AND tenant_id = #{tenantId}")
     Boolean updateChatName(@Param("chatId") Long chatId, @Param("chatName") String chatName,

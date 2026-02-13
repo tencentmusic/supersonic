@@ -9,7 +9,7 @@ public interface ChatRepository {
 
     Long createChat(ChatDO chatDO);
 
-    List<ChatDO> getAll(String creator, Integer agentId, Long tenantId);
+    List<ChatDO> getAll(String creator, Integer agentId, Long tenantId, String chatName);
 
     Boolean updateChatName(Long chatId, String chatName, String lastTime, String creator,
             Long tenantId);
