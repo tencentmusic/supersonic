@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS `s2_user` (
     `created_by` varchar(100) DEFAULT NULL,
     `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `updated_by` varchar(100) DEFAULT NULL,
+    `employee_id` varchar(64) DEFAULT NULL COMMENT '工号(飞书自动匹配)',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_user_name_tenant` (`name`, `tenant_id`),
     KEY `idx_user_tenant` (`tenant_id`),
@@ -1099,3 +1100,46 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_deployment` (
     KEY `idx_semantic_deployment_status` (`status`),
     UNIQUE KEY `uk_deployment_active_lock` (`active_lock`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='语义模板部署记录表';
+
+-- ========================================
+-- 飞书机器人
+-- ========================================
+
+-- 飞书用户映射表
+CREATE TABLE IF NOT EXISTS `s2_feishu_user_mapping` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `feishu_open_id` varchar(64) NOT NULL,
+    `feishu_union_id` varchar(64) DEFAULT NULL,
+    `feishu_user_name` varchar(128) DEFAULT NULL,
+    `feishu_email` varchar(128) DEFAULT NULL,
+    `feishu_mobile` varchar(20) DEFAULT NULL,
+    `feishu_employee_id` varchar(64) DEFAULT NULL,
+    `s2_user_id` bigint(20) DEFAULT NULL,
+    `tenant_id` bigint(20) NOT NULL DEFAULT 1,
+    `default_agent_id` int DEFAULT NULL,
+    `match_type` varchar(20) NOT NULL DEFAULT 'MANUAL',
+    `status` tinyint NOT NULL DEFAULT 1,
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_feishu_open_id` (`feishu_open_id`),
+    KEY `idx_s2_user_id` (`s2_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='飞书用户映射表';
+
+-- 飞书查询会话表
+CREATE TABLE IF NOT EXISTS `s2_feishu_query_session` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `feishu_open_id` varchar(64) NOT NULL,
+    `feishu_message_id` varchar(64) NOT NULL,
+    `query_text` text NOT NULL,
+    `query_result_id` bigint(20) DEFAULT NULL,
+    `sql_text` text DEFAULT NULL,
+    `row_count` int DEFAULT NULL,
+    `dataset_id` bigint(20) DEFAULT NULL,
+    `agent_id` int DEFAULT NULL,
+    `status` varchar(20) NOT NULL DEFAULT 'PENDING',
+    `error_message` text DEFAULT NULL,
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_open_id_created` (`feishu_open_id`, `created_at` DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='飞书查询会话表';

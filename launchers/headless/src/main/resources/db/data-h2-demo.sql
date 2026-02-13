@@ -1,109 +1,22 @@
-insert into s2_domain (id, `name`, biz_name, parent_id, status, created_at, created_by, updated_at, updated_by, `admin`, admin_org, viewer, view_org) VALUES(1, '超音数', 'supersonic', 0, 1, '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin', '', 'admin,tom,jack', 'admin' );
-insert into s2_model (id, `name`, biz_name, domain_id, created_at, created_by, updated_at, updated_by, `admin`, admin_org, is_open, viewer, view_org, entity) VALUES(1, '超音数', 'supersonic', 1, '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin', '', 0, 'admin,tom,jack', 'admin','' );
-insert into s2_model (id, `name`, biz_name, domain_id, created_at, created_by, updated_at, updated_by, `admin`, admin_org, is_open, viewer, view_org, entity) VALUES(2, '艺人库', 'singer', 1, '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin', '', 0, 'admin,tom,jack', 'admin','{"entityId": 7, "names": ["歌手", "艺人"]}' );
-insert into s2_database (id, `name`, description, `type` ,config ,created_at ,created_by ,updated_at ,updated_by, `admin`) VALUES(1, 'H2数据实例', '', 'h2', '{"password":"semantic","url":"jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false","userName":"root"}', '2023-05-24 00:00:00', 'admin', '2023-05-24 00:00:00', 'admin', 'admin');
-insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(1, 1, '停留时长统计', 's2_stay_time_statis', '停留时长统计', 1, 	'{"dimensions":[{"bizName":"imp_date","dateFormat":"yyyy-MM-dd","expr":"imp_date","isCreateDimension":0,"type":"time","typeParams":{"isPrimary":"true","timeGranularity":"day"}},{"bizName":"page","dateFormat":"yyyy-MM-dd","expr":"page","isCreateDimension":0,"type":"categorical"}],"identifiers":[{"bizName":"user_name","name":"用户名","type":"primary"}],"measures":[{"agg":"sum","bizName":"s2_stay_time_statis_stay_hours","expr":"stay_hours","isCreateMetric":1,"name":"停留时长"}],"queryType":"sql_query","sqlQuery":"SELECT imp_date, page,user_name,stay_hours FROM s2_stay_time_statis"}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(2, 1, 'PVUV统计', 's2_pv_uv_statis', 'PVUV统计', 1, 	'{"dimensions":[{"bizName":"imp_date","dateFormat":"yyyy-MM-dd","expr":"imp_date","isCreateDimension":0,"type":"time","typeParams":{"isPrimary":"true","timeGranularity":"day"}},{"bizName":"page","dateFormat":"yyyy-MM-dd","expr":"page","isCreateDimension":0,"type":"categorical"}],"identifiers":[{"bizName":"user_name","name":"用户名","type":"primary"}],"measures":[{"agg":"sum","bizName":"s2_pv_uv_statis_pv","expr":"pv","isCreateMetric":1,"name":"访问次数"},{"agg":"count_distinct","bizName":"s2_pv_uv_statis_uv","expr":"uv","isCreateMetric":1,"name":"访问人数"}],"queryType":"sql_query","sqlQuery":"SELECT imp_date, user_name,page,1 as pv, user_name as uv FROM s2_pv_uv_statis"}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(3, 1, '用户部门', 'user_department', '用户部门', 1, 	'{"dimensions":[{"bizName":"department","dateFormat":"yyyy-MM-dd","expr":"department","isCreateDimension":1,"name":"部门","type":"categorical"}],"identifiers":[{"bizName":"user_name","name":"用户名","type":"primary"}],"measures":[],"queryType":"sql_query","sqlQuery":"SELECT user_name,department FROM s2_user_department"}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_datasource (id ,  model_id,  `name`, biz_name,  description,  database_id ,datasource_detail, created_at, created_by, updated_at, updated_by ) VALUES(4, 2, '艺人库', 'singer', '艺人库', 1, 	'{"dimensions":[{"bizName":"imp_date","dateFormat":"yyyy-MM-dd","expr":"imp_date","isCreateDimension":0,"type":"time","typeParams":{"isPrimary":"true","timeGranularity":"day"}},{"bizName":"act_area","dateFormat":"yyyy-MM-dd","expr":"act_area","isCreateDimension":1,"name":"活跃区域","type":"categorical"},{"bizName":"song_name","dateFormat":"yyyy-MM-dd","expr":"song_name","isCreateDimension":1,"name":"代表作","type":"categorical"},{"bizName":"genre","dateFormat":"yyyy-MM-dd","expr":"genre","isCreateDimension":1,"name":"风格","type":"categorical"}],"identifiers":[{"bizName":"singer_name","name":"歌手名","type":"primary"}],"measures":[{"agg":"sum","bizName":"music_down_cnt","expr":"down_cnt","isCreateMetric":1,"name":"下载量"},{"agg":"sum","bizName":"music_js_play_cnt","expr":"js_play_cnt","isCreateMetric":1,"name":"播放量"},{"agg":"sum","bizName":"music_favor_cnt","expr":"favor_cnt","isCreateMetric":1,"name":"收藏量"}],"queryType":"sql_query","sqlQuery":"SELECT imp_date,singer_name,act_area,song_name,genre,js_play_cnt,down_cnt,favor_cnt FROM singer "}', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_datasource_rela (id ,  model_id,  `datasource_from`, datasource_to,  join_key,  created_at, created_by, updated_at, updated_by ) VALUES(1, 1, 1, 2, 'user_name', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_datasource_rela (id ,  model_id,  `datasource_from`, datasource_to,  join_key,  created_at, created_by, updated_at, updated_by ) VALUES(2, 1, 1, 3, 'user_name', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_datasource_rela (id ,  model_id,  `datasource_from`, datasource_to,  join_key,  created_at, created_by, updated_at, updated_by ) VALUES(3, 1, 2, 3, 'user_name', '2023-05-25 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(1, 1, 3, '部门', 'department', '部门', 1, 0, 'categorical', NULL, 'department', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(2, 1, 1, '用户名', 'user_name', '用户名', 1, 0, 'primary', NULL, 'user_name', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(3, 1, 2, '页面', 'page', '页面', 1, 2, 'categorical', NULL, 'page', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(4, 2, 4, '活跃区域', 'act_area', '活跃区域', 1, 2, 'categorical', NULL, 'act_area', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(5, 2, 4, '代表作', 'song_name', '代表作', 1, 2, 'categorical', NULL, 'song_name', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(6, 2, 4, '风格', 'genre', '风格', 1, 2, 'categorical', NULL, 'genre', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_dimension (id , model_id, datasource_id, `name`, biz_name, description, status, sensitive_level, `type`, type_params, expr, created_at, created_by, updated_at, updated_by, semantic_type) VALUES(7, 2, 4, '歌手名', 'singer_name', '歌手名', 1, 2, 'categorical', NULL, 'singer_name', '2023-05-24 00:00:00', 'admin', '2023-05-25 00:00:00', 'admin', 'CATEGORY');
-insert into s2_metric (id,  model_id,  `name`,  biz_name,  description,  status,  sensitive_level,  `type`,  type_params,  created_at,  created_by,  updated_at,  updated_by,  data_format_type,  data_format) VALUES(1, 1, '停留时长', 'stay_hours', '停留时长', 1, 2, 'ATOMIC', '{"expr":"s2_stay_time_statis_stay_hours","measures":[{"agg":"sum","expr":"stay_hours","isCreateMetric":1,"datasourceId":1,"bizName":"s2_stay_time_statis_stay_hours","name":"s2_stay_time_statis_stay_hours"}]}'      , '2023-05-24 17:00:00', 'admin', '2023-05-25 00:00:00', 'admin', NULL, NULL );
-insert into s2_metric (id,  model_id,  `name`,  biz_name,  description,  status,  sensitive_level,  `type`,  type_params,  created_at,  created_by,  updated_at,  updated_by,  data_format_type,  data_format) VALUES(2, 1, '访问次数', 'pv', '访问次数', 1, 0, 'ATOMIC', '	{"expr":"s2_pv_uv_statis_pv","measures":[{"agg":"sum","bizName":"s2_pv_uv_statis_pv","datasourceId":2,"expr":"pv","isCreateMetric":1,"name":"s2_pv_uv_statis_pv"}]}' , '2023-05-24 17:00:00', 'admin', '2023-05-25 00:00:00', 'admin', NULL, NULL );
-insert into s2_metric (id,  model_id,  `name`,  biz_name,  description,  status,  sensitive_level,  `type`,  type_params,  created_at,  created_by,  updated_at,  updated_by,  data_format_type,  data_format) VALUES(3, 1, '访问人数', 'uv', '访问人数', 1, 0, 'ATOMIC', '	{"expr":"s2_pv_uv_statis_uv","measures":[{"agg":"count_distinct","bizName":"s2_pv_uv_statis_uv","datasourceId":2,"expr":"uv","isCreateMetric":1,"name":"s2_pv_uv_statis_uv"}]}'      , '2023-05-24 17:00:00', 'admin', '2023-05-25 00:00:00', 'admin', NULL, NULL );
-insert into s2_metric (id,  model_id,  `name`,  biz_name,  description,  status,  sensitive_level,  `type`,  type_params,  created_at,  created_by,  updated_at,  updated_by,  data_format_type,  data_format) VALUES(4, 2, '播放量', 'js_play_cnt', '播放量', 1, 2, 'ATOMIC', '{"expr":"music_js_play_cnt","measures":[{"agg":"sum","expr":"js_play_cnt","isCreateMetric":1,"datasourceId":4,"bizName":"music_js_play_cnt","name":"music_js_play_cnt"}]}'      , '2023-05-24 17:00:00', 'admin', '2023-05-25 00:00:00', 'admin', NULL, NULL );
-insert into s2_metric (id,  model_id,  `name`,  biz_name,  description,  status,  sensitive_level,  `type`,  type_params,  created_at,  created_by,  updated_at,  updated_by,  data_format_type,  data_format) VALUES(5, 2, '下载量', 'down_cnt', '下载量', 1, 0, 'ATOMIC', '	{"expr":"music_down_cnt","measures":[{"agg":"sum","bizName":"music_down_cnt","datasourceId":4,"expr":"down_cnt","isCreateMetric":1,"name":"music_down_cnt"}]}' , '2023-05-24 17:00:00', 'admin', '2023-05-25 00:00:00', 'admin', NULL, NULL );
-insert into s2_metric (id,  model_id,  `name`,  biz_name,  description,  status,  sensitive_level,  `type`,  type_params,  created_at,  created_by,  updated_at,  updated_by,  data_format_type,  data_format) VALUES(6, 2, '收藏量', 'favor_cnt', '收藏量', 1, 0, 'ATOMIC', '	{"expr":"music_favor_cnt","measures":[{"agg":"sum","bizName":"music_favor_cnt","datasourceId":4,"expr":"favor_cnt","isCreateMetric":1,"name":"music_favor_cnt"}]}'      , '2023-05-24 17:00:00', 'admin', '2023-05-25 00:00:00', 'admin', NULL, NULL );
+-------S2VisitsDemo
+MERGE INTO s2_user_department (user_name, department) values ('jack','HR');
+MERGE INTO s2_user_department (user_name, department) values ('tom','sales');
+MERGE INTO s2_user_department (user_name, department) values ('lucy','marketing');
+MERGE INTO s2_user_department (user_name, department) values ('john','strategy');
+MERGE INTO s2_user_department (user_name, department) values ('alice','sales');
+MERGE INTO s2_user_department (user_name, department) values ('dean','marketing');
 
-insert into s2_available_date_info(`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
-values (1, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
-insert into s2_available_date_info(`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
-values (2, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
-insert into s2_available_date_info(`item_id` ,`type`    ,`date_format` ,`start_date`  ,`end_date` ,`unavailable_date` ,`created_at`  ,`created_by`  ,`updated_at`  ,`updated_by` )
-values (3, 'dimension', 'yyyy-MM-dd', DATEADD('DAY', -28, CURRENT_DATE()), DATEADD('DAY', -1, CURRENT_DATE()), '[]', '2023-06-01', 'admin', '2023-06-01', 'admin');
-
-insert into s2_auth_groups (group_id, config)
-values (1, '{"domainId":"1","name":"admin-permission","groupId":1,"authRules":[{"metrics":["stay_hours"],"dimensions":["page"]}],"dimensionFilters":[""],"dimensionFilterDescription":"授权admin 页面和停留时长权限","authorizedUsers":["admin"],"authorizedDepartmentIds":[]}');
-insert into s2_auth_groups (group_id, config)
-values (2, '{"domainId":"1","name":"tom_sales_permission","groupId":2,"authRules":[{"metrics":["stay_hours"],"dimensions":["page"]}],"dimensionFilters":["department in (''sales'')"],"dimensionFilterDescription":"开通 tom sales部门权限", "authorizedUsers":["tom"],"authorizedDepartmentIds":[]}');
-
-
-insert into s2_user (id, `name`, password, display_name, email, is_admin) values (1, 'admin','admin','admin','admin@xx.com', 1);
-insert into s2_user (id, `name`, password, display_name, email) values (2, 'jack','123456','jack','jack@xx.com');
-insert into s2_user (id, `name`, password, display_name, email) values (3, 'tom','123456','tom','tom@xx.com');
-insert into s2_user (id, `name`, password, display_name, email) values (4, 'lucy','123456','lucy','lucy@xx.com');
-
----demo data for semantic and chat
-insert into s2_user_department (user_name, department) values ('jack','HR');
-insert into s2_user_department (user_name, department) values ('tom','sales');
-insert into s2_user_department (user_name, department) values ('lucy','marketing');
-insert into s2_user_department (user_name, department) values ('john','strategy');
-insert into s2_user_department (user_name, department) values ('alice','sales');
-insert into s2_user_department (user_name, department) values ('dean','marketing');
-
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '周杰伦', '中国','青花瓷','流行',1000000,1000000,1000000);
-
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '陈奕迅', '中国','爱情转移','激情',1000000,1000000,1000000);
-
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '林俊杰', '中国','美人鱼','爱情',1000000,1000000,1000000);
-
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '张碧晨', '中国','光的方向','流行',1000000,1000000,1000000);
-
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), '程响', '中国','人间烟火','国风',1000000,1000000,1000000);
-
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -1, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -2, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -6, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-INSERT INTO singer (imp_date,singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES (DATEADD('DAY', -7, CURRENT_DATE()), 'Taylor Swift
-', '欧美','Love Story','爱情',1000000,1000000,1000000);
-
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'jack', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p4');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'alice', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'dean', 'p2');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'john', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'tom', 'p3');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'lucy', 'p1');
+INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (CURRENT_DATE(), 'dean', 'p4');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -5, CURRENT_DATE()), 'lucy', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 'jack', 'p1');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -3, CURRENT_DATE()), 'lucy', 'p4');
@@ -605,10 +518,6 @@ INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -12, CURRENT_DATE()), 'dean', 'p5');
 INSERT INTO s2_pv_uv_statis (imp_date, user_name, page) VALUES (DATEADD('DAY', -26, CURRENT_DATE()), 'tom', 'p4');
 
-
-
-
-
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATEADD('DAY', -23, CURRENT_DATE()), 'jack', '0.7636857512911863', 'p4');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATEADD('DAY', -23, CURRENT_DATE()), 'dean', '0.17663327393462436', 'p2');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATEADD('DAY', -23, CURRENT_DATE()), 'alice', '0.38943688941552057', 'p3');
@@ -1109,3 +1018,58 @@ INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATEADD('DAY', -19, CURRENT_DATE()), 'alice', '0.8131712486302015', 'p2');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATEADD('DAY', -15, CURRENT_DATE()), 'lucy', '0.8124302447925607', 'p4');
 INSERT INTO s2_stay_time_statis (imp_date, user_name, stay_hours, page) VALUES (DATEADD('DAY', -8, CURRENT_DATE()), 'lucy', '0.039935860913407284', 'p2');
+
+
+-------S2ArtistDemo
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('周杰伦', '港台','青花瓷','国风',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('陈奕迅', '港台','爱情转移','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('林俊杰', '港台','美人鱼','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('张碧晨', '内地','光的方向','流行',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('程响', '内地','人间烟火','国风',1000000,1000000,1000000);
+MERGE INTO singer (singer_name,act_area, song_name,genre,js_play_cnt,down_cnt,favor_cnt) VALUES ('Taylor Swift', '欧美','Love Story','流行',1000000,1000000,1000000);
+
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('tagore',8,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('nazrul',7,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('民间',9,'锡尔赫特、吉大港、库斯蒂亚');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('现代',8,'孟加拉国');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('蓝调',7,'加拿大');
+MERGE INTO genre(g_name,rating,most_popular_in) VALUES ('流行',9,'美国');
+
+-------S2CompanyDemo
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_131','微软','西雅图','1975','盖茨','纳德拉',102300000000,210000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_132','特斯拉','加州','2003','艾伯哈德','马斯克',376800000000,140473);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_133','谷歌','加州','1998','拉里佩奇','劈柴',321600000000,182503);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_134','亚马逊','加州','1994','贝索斯','贝索斯',28800000000,950000);
+MERGE into company(company_id,company_name,headquarter_address,company_established_time,founder,ceo,annual_turnover,employee_count) VALUES ('item_enterprise_13_135','英伟达','杭州','1993','黄仁勋','黄仁勋',67500000000,29000);
+
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_131','Office','1990','item_enterprise_13_131','盖茨',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_132','Windows','1991','item_enterprise_13_131','盖茨',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_133','Model 3','2017','item_enterprise_13_132','马斯克',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_134','Model Y','2020','item_enterprise_13_132','马斯克',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_135','Google','2003','item_enterprise_13_133','拉里佩奇',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_136','Android','2007','item_enterprise_13_133','拉里佩奇',50000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_137','aws','2004','item_enterprise_13_134','贝索斯',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_138','kindle','2007','item_enterprise_13_134','贝索斯',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_139','H100','2022','item_enterprise_13_135','黄仁勋',100000000);
+MERGE into brand(brand_id,brand_name,brand_established_time,company_id,legal_representative,registered_capital) VALUES ('item_brand_13_140','A100','2021','item_enterprise_13_135','黄仁勋',100000000);
+
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_131',12100000000, 2100000000,10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_132',12200000000, 2200000000,20,20);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_133',12300000000, 2300000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_134',12400000000, 2400000000,10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_135',12500000000, 2500000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_136',12600000000, 2600000000,40,40);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_137',12700000000, 2700000000,50,50);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_138',12800000000, 2800000000,20,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_139',12900000000, 2900000000,60,70);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2023','item_brand_13_140',13000000000, 3000000000,80,100);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_131',13100000000,3100000000, 10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_132',13200000000, 3200000000,20,20);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_133',13300000000, 3300000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_134',13400000000, 3400000000,10,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_135',13500000000, 3500000000,30,30);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_136',13600000000, 3600000000,40,40);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_137',13700000000, 3700000000,50,50);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_138',13800000000, 3800000000,20,10);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_139',13900000000, 3900000000,60,70);
+insert into brand_revenue(year_time,brand_id,revenue,profit,revenue_growth_year_on_year,profit_growth_year_on_year) VALUES ('2024','item_brand_13_140',14000000000, 4000000000,80,100);

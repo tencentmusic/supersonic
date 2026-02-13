@@ -37,7 +37,7 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
         // 判断当前请求是否是 Swagger 相关的请求
         String path = serverHttpRequest.getURI().getPath();
         if (path.startsWith("/swagger") || path.startsWith("/v3/api-docs")
-                || path.startsWith("/v2/api-docs")) {
+                || path.startsWith("/v2/api-docs") || path.startsWith("/api/feishu/webhook")) {
             return result;
         }
         objectMapper.registerModule(new JavaTimeModule());

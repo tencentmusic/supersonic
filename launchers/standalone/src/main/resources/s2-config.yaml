@@ -25,7 +25,7 @@ s2:
   authentication:
     enable: true
     exclude:
-      path: /api/auth/user/register,/api/auth/user/login
+      path: /api/auth/user/register,/api/auth/user/login,/api/feishu/webhook
     token:
       http:
         header:

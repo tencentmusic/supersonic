@@ -1,6 +1,11 @@
+server:
+  servlet:
+    context-path:
+  port: 9081
+
 spring:
   profiles:
-    active: local
+    active: ${S2_DB_TYPE:h2}
   application:
     name: headless
   main:
@@ -8,3 +13,12 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+
+authentication:
+  enable: true
+  exclude:
+    path: /api/auth/user/register,/api/auth/user/login
+  token:
+    http:
+      header:
+        key: Authorization

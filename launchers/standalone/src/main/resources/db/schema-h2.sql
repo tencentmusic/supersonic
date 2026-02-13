@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS `s2_user` (
     `created_by` VARCHAR(100) DEFAULT NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_by` VARCHAR(100) DEFAULT NULL,
+    `employee_id` VARCHAR(64) DEFAULT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `uk_user_name_tenant` UNIQUE (`name`, `tenant_id`)
 );
@@ -1076,3 +1077,46 @@ COMMENT ON TABLE s2_semantic_deployment IS '语义模板部署记录表';
 CREATE INDEX idx_semantic_deployment_template ON s2_semantic_deployment(`template_id`);
 CREATE INDEX idx_semantic_deployment_tenant ON s2_semantic_deployment(`tenant_id`);
 CREATE INDEX idx_semantic_deployment_status ON s2_semantic_deployment(`status`);
+
+-- ========================================
+-- 飞书机器人
+-- ========================================
+
+-- 飞书用户映射表
+CREATE TABLE IF NOT EXISTS `s2_feishu_user_mapping` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `feishu_open_id` VARCHAR(64) NOT NULL,
+    `feishu_union_id` VARCHAR(64) DEFAULT NULL,
+    `feishu_user_name` VARCHAR(128) DEFAULT NULL,
+    `feishu_email` VARCHAR(128) DEFAULT NULL,
+    `feishu_mobile` VARCHAR(20) DEFAULT NULL,
+    `feishu_employee_id` VARCHAR(64) DEFAULT NULL,
+    `s2_user_id` BIGINT DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `default_agent_id` INT DEFAULT NULL,
+    `match_type` VARCHAR(20) NOT NULL DEFAULT 'MANUAL',
+    `status` TINYINT DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_feishu_open_id` UNIQUE (`feishu_open_id`)
+);
+CREATE INDEX idx_s2_feishu_user_mapping_s2_user_id ON s2_feishu_user_mapping(`s2_user_id`);
+
+-- 飞书查询会话表
+CREATE TABLE IF NOT EXISTS `s2_feishu_query_session` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `feishu_open_id` VARCHAR(64) NOT NULL,
+    `feishu_message_id` VARCHAR(64) NOT NULL,
+    `query_text` CLOB NOT NULL,
+    `query_result_id` BIGINT DEFAULT NULL,
+    `sql_text` CLOB DEFAULT NULL,
+    `row_count` INT DEFAULT NULL,
+    `dataset_id` BIGINT DEFAULT NULL,
+    `agent_id` INT DEFAULT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `error_message` CLOB DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX idx_feishu_session_open_id_created ON s2_feishu_query_session(`feishu_open_id`, `created_at` DESC);

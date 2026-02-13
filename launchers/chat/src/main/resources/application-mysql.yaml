@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${S2_DB_HOST:localhost}:${S2_DB_PORT:3306}/${S2_DB_DATABASE:mysql}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    username: ${S2_DB_USER:root}
+    password: ${S2_DB_PASSWORD:}
+  sql:
+    init:
+      continue-on-error: true
+      mode: never
+      username: ${S2_DB_USER:root}
+      password: ${S2_DB_PASSWORD:}
+      schema-locations: classpath:db/schema-mysql-common.sql,classpath:db/schema-mysql.sql
+      data-locations: classpath:db/data-mysql-common.sql
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: ${FLYWAY_BASELINE_VERSION:-1}
+    locations: classpath:db/migration/mysql
+    table: flyway_schema_history
+    out-of-order: false
+    validate-on-migrate: false

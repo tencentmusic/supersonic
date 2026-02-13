@@ -1,3 +1,59 @@
+### headless-chat SPIs
+
+com.tencent.supersonic.headless.chat.mapper.SchemaMapper=\
+    com.tencent.supersonic.headless.chat.mapper.EmbeddingMapper, \
+    com.tencent.supersonic.headless.chat.mapper.KeywordMapper, \
+    com.tencent.supersonic.headless.chat.mapper.QueryFilterMapper, \
+    com.tencent.supersonic.headless.chat.mapper.PartitionTimeMapper,\
+    com.tencent.supersonic.headless.chat.mapper.TermDescMapper,\
+    com.tencent.supersonic.headless.chat.mapper.AllFieldMapper
+
+com.tencent.supersonic.headless.chat.parser.SemanticParser=\
+    com.tencent.supersonic.headless.chat.parser.llm.LLMSqlParser,\
+    com.tencent.supersonic.headless.chat.parser.rule.RuleSqlParser,\
+    com.tencent.supersonic.headless.chat.parser.QueryTypeParser
+
+com.tencent.supersonic.headless.chat.corrector.SemanticCorrector=\
+    com.tencent.supersonic.headless.chat.corrector.RuleSqlCorrector,\
+    com.tencent.supersonic.headless.chat.corrector.LLMSqlCorrector,\
+    com.tencent.supersonic.headless.chat.corrector.LLMPhysicalSqlCorrector
+
+com.tencent.supersonic.headless.chat.knowledge.file.FileHandler=\
+    com.tencent.supersonic.headless.chat.knowledge.file.FileHandlerImpl
+
+com.tencent.supersonic.headless.chat.parser.llm.DataSetResolver=\
+  com.tencent.supersonic.headless.chat.parser.llm.HeuristicDataSetResolver
+
+
+### headless-core SPIs
+
+com.tencent.supersonic.headless.core.translator.optimizer.QueryOptimizer=\
+    com.tencent.supersonic.headless.core.translator.optimizer.DbDialectOptimizer,\
+    com.tencent.supersonic.headless.core.translator.optimizer.ResultLimitOptimizer
+
+com.tencent.supersonic.headless.core.translator.parser.QueryParser=\
+    com.tencent.supersonic.headless.core.translator.parser.SqlVariableParser,\
+    com.tencent.supersonic.headless.core.translator.parser.StructQueryParser,\
+    com.tencent.supersonic.headless.core.translator.parser.SqlQueryParser,\
+    com.tencent.supersonic.headless.core.translator.parser.DefaultDimValueParser,\
+    com.tencent.supersonic.headless.core.translator.parser.DimExpressionParser,\
+    com.tencent.supersonic.headless.core.translator.parser.MetricExpressionParser,\
+    com.tencent.supersonic.headless.core.translator.parser.MetricRatioParser,\
+    com.tencent.supersonic.headless.core.translator.parser.OntologyQueryParser
+
+com.tencent.supersonic.headless.core.executor.QueryExecutor=\
+    com.tencent.supersonic.headless.core.executor.JdbcExecutor
+
+com.tencent.supersonic.headless.core.cache.QueryCache=\
+    com.tencent.supersonic.headless.core.cache.DefaultQueryCache
+
+
+### headless-server SPIs
+
+com.tencent.supersonic.headless.server.modeller.SemanticModeller=\
+    com.tencent.supersonic.headless.server.modeller.RuleSemanticModeller, \
+    com.tencent.supersonic.headless.server.modeller.LLMSemanticModeller
+
 ### chat-server SPIs
 
 com.tencent.supersonic.chat.server.parser.ChatQueryParser=\
@@ -6,7 +62,9 @@ com.tencent.supersonic.chat.server.parser.ChatQueryParser=\
     com.tencent.supersonic.chat.server.parser.PlainTextParser
 
 com.tencent.supersonic.chat.server.executor.ChatQueryExecutor=\
+    com.tencent.supersonic.chat.server.executor.ReportScheduleExecutor,\
     com.tencent.supersonic.chat.server.executor.PluginExecutor, \
+    com.tencent.supersonic.chat.server.executor.DashboardExecutor,\
     com.tencent.supersonic.chat.server.executor.SqlExecutor,\
     com.tencent.supersonic.chat.server.executor.PlainTextExecutor
 
