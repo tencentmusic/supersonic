@@ -109,7 +109,7 @@ public class MetricRepositoryImpl implements MetricRepository {
         if (StringUtils.isNotBlank(metricFilter.getCreatedBy())) {
             queryWrapper.lambda().eq(MetricDO::getCreatedBy, metricFilter.getCreatedBy());
         }
-        if (Objects.nonNull(metricFilter.getIsPublish()) && metricFilter.getIsPublish() == 1) {
+        if (Objects.nonNull(metricFilter.getIsPublish())) {
             queryWrapper.lambda().eq(MetricDO::getIsPublish, metricFilter.getIsPublish());
         }
         if (StringUtils.isNotBlank(metricFilter.getKey())) {
