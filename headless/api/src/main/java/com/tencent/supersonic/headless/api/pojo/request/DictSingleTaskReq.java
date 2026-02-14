@@ -12,4 +12,6 @@ public class DictSingleTaskReq {
     private TypeEnums type;
     @NotNull
     private Long itemId;
+    private String startDate;
+    private String endDate;
 }

@@ -452,14 +452,18 @@ public class DictUtils {
         if (DateConf.DateMode.ALL.equals(config.getDateConf().getDateMode())) {
             return "";
         }
+
         // 静态日期
         if (DateConf.DateMode.BETWEEN.equals(config.getDateConf().getDateMode())) {
             return String.format("( %s >= '%s' and %s <= '%s' )",
-                    config.getDateConf().getDateField(), config.getDateConf().getStartDate(),
-                    config.getDateConf().getDateField(), config.getDateConf().getEndDate());
+                    partitionTimeDimension.getBizName(), config.getDateConf().getStartDate(),
+                    partitionTimeDimension.getBizName(), config.getDateConf().getEndDate());
         }
+
         // 动态日期
         if (DateConf.DateMode.RECENT.equals(config.getDateConf().getDateMode())) {
+            dictItemResp.getConfig().getDateConf()
+                    .setDateField(partitionTimeDimension.getBizName());
             return generateDictDateFilterRecent(dictItemResp);
         }
 
