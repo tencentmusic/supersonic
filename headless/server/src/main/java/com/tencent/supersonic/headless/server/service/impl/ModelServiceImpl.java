@@ -42,6 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+import static com.tencent.supersonic.common.pojo.DimensionConstants.DIMENSION_TIME_FORMAT;
+
 @Service
 @Slf4j
 public class ModelServiceImpl implements ModelService {
@@ -534,17 +536,23 @@ public class ModelServiceImpl implements ModelService {
                 Optional<Dimension> dimOptional = modelDetail.getDimensions().stream().filter(
                         dimension -> dimension.getBizName().equals(dimensionReq.getBizName()))
                         .findFirst();
+                String dateFormat = null;
+                if (dimensionReq.getExt().containsKey(DIMENSION_TIME_FORMAT)) {
+                    dateFormat = (String) dimensionReq.getExt().get(DIMENSION_TIME_FORMAT);
+                }
                 if (dimOptional.isPresent()) {
                     Dimension dimension = dimOptional.get();
                     dimension.setExpr(dimensionReq.getExpr());
                     dimension.setName(dimensionReq.getName());
                     dimension.setType(DimensionType.valueOf(dimensionReq.getType()));
                     dimension.setDescription(dimensionReq.getDescription());
+                    dimension.setDateFormat(dateFormat);
                 } else {
                     Dimension dimension = Dimension.builder().name(dimensionReq.getName())
                             .bizName(dimensionReq.getBizName()).expr(dimensionReq.getExpr())
                             .type(DimensionType.valueOf(dimensionReq.getType()))
-                            .description(dimensionReq.getDescription()).build();
+                            .dateFormat(dateFormat).description(dimensionReq.getDescription())
+                            .build();
                     modelDetail.getDimensions().add(dimension);
                 }
             });
