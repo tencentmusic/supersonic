@@ -455,9 +455,20 @@ public class DictUtils {
 
         // 静态日期
         if (DateConf.DateMode.BETWEEN.equals(config.getDateConf().getDateMode())) {
+            String dateFormat = partitionTimeDimension.getDateFormat();
+            if (StringUtils.isEmpty(dateFormat)) {
+                dateFormat = "yyyy-MM-dd"; // 默认格式
+            }
+
+            // 格式化起止日期
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
+            String startDate =
+                    LocalDate.parse(config.getDateConf().getStartDate()).format(formatter);
+            String endDate = LocalDate.parse(config.getDateConf().getEndDate()).format(formatter);
+
             return String.format("( %s >= '%s' and %s <= '%s' )",
-                    partitionTimeDimension.getBizName(), config.getDateConf().getStartDate(),
-                    partitionTimeDimension.getBizName(), config.getDateConf().getEndDate());
+                    partitionTimeDimension.getBizName(), startDate,
+                    partitionTimeDimension.getBizName(), endDate);
         }
 
         // 动态日期
