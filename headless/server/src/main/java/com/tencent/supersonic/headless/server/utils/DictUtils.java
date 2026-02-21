@@ -299,6 +299,8 @@ public class DictUtils {
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
         querySqlReq.setSql(sql);
+        // bypass semantic translation
+        querySqlReq.getSqlInfo().setQuerySQL(sql);
         // SECURITY: Auth bypass is safe here - internal dimension dictionary query
         // for system knowledge base construction, aggregated counts only
         querySqlReq.setNeedAuth(false);
