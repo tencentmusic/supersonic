@@ -379,7 +379,15 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
         MetricFilter metricFilter = new MetricFilter();
         metricFilter.setUserName(user.getName());
         BeanUtils.copyProperties(pageMetricReq, metricFilter);
-        if (!CollectionUtils.isEmpty(pageMetricReq.getDomainIds())) {
+
+        // If dataSetId is provided, get models directly from the dataset
+        if (pageMetricReq.getDataSetId() != null) {
+            DataSetResp dataSetResp = dataSetService.getDataSet(pageMetricReq.getDataSetId());
+            if (dataSetResp != null) {
+                pageMetricReq.getModelIds().addAll(dataSetResp.getAllModels());
+            }
+        } else if (!CollectionUtils.isEmpty(pageMetricReq.getDomainIds())) {
+            // Only check domainIds when dataSetId is not provided
             List<ModelResp> modelResps =
                     modelService.getAllModelByDomainIds(pageMetricReq.getDomainIds());
             List<Long> modelIds =
