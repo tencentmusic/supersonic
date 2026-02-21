@@ -296,6 +296,8 @@ public class DictUtils {
         modelIds.add(dictItemResp.getModelId());
         QuerySqlReq querySqlReq = new QuerySqlReq();
         querySqlReq.setSql(sql);
+        // bypass semantic translation
+        querySqlReq.getSqlInfo().setQuerySQL(sql);
         querySqlReq.setNeedAuth(false);
         querySqlReq.setModelIds(modelIds);
 

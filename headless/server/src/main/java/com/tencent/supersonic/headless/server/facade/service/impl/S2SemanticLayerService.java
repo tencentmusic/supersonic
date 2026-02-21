@@ -123,7 +123,9 @@ public class S2SemanticLayerService implements SemanticLayerService {
 
             // 3 translate query
             QueryStatement queryStatement = buildQueryStatement(queryReq, user);
-            semanticTranslator.translate(queryStatement);
+            if (!queryStatement.isTranslated()) {
+                semanticTranslator.translate(queryStatement);
+            }
 
             // Check whether the dimensions of the metric drill-down are correct temporarily,
             // add the abstraction of a validator later.
