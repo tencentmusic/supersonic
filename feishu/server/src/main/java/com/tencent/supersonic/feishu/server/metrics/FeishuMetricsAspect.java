@@ -14,25 +14,37 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
- * Pure AOP aspect for feishu module metrics: handler timing and message send counting.
- * MeterRegistry is constructor-injected — no null guards needed.
+ * 飞书模块指标切面：对消息处理器耗时与消息发送次数进行埋点。
+ * <p>
+ * 仅在存在 {@link MeterRegistry} 时生效（{@link ConditionalOnBean}），
+ * 用于 Prometheus/Actuator 采集：处理器耗时分布、消息发送成功/失败计数。
+ * MeterRegistry 通过构造器注入，无需空校验。
  */
 @Aspect
 @Component
 @ConditionalOnBean(MeterRegistry.class)
 public class FeishuMetricsAspect {
 
+    /** 所有飞书指标的通用 tag，便于在 Prometheus 中按 module=feishu 过滤。 */
     private static final Tags FEISHU_TAGS = Tags.of("module", "feishu");
 
     private final MeterRegistry registry;
 
+    /**
+     * 注入 Micrometer 注册表，用于创建 Timer/Counter。
+     *
+     * @param registry 由 Spring Boot 自动配置的 MeterRegistry（如 PrometheusMeterRegistry）
+     */
     public FeishuMetricsAspect(MeterRegistry registry) {
         this.registry = registry;
     }
 
     /**
-     * Times {@code MessageHandler.handle()} execution. Tags: handler class name, status
-     * (success/error).
+     * 环绕切面：统计各 {@link com.tencent.supersonic.feishu.server.handler.MessageHandler#handle}
+     * 的执行耗时。指标名：{@code feishu.query.duration}；标签：handler=类名、status=success|error。
+     *
+     * @param pjp 被拦截的 handle 方法
+     * @return 原方法返回值
      */
     @Around("execution(* com.tencent.supersonic.feishu.server.handler.MessageHandler+.handle(..))")
     public Object aroundHandle(ProceedingJoinPoint pjp) throws Throwable {
@@ -48,13 +60,23 @@ public class FeishuMetricsAspect {
         }
     }
 
-    /** Returns (or creates) {@code feishu.query.duration} timer for the given handler + status. */
+    /**
+     * 获取或创建「查询耗时」计时器。同一 handler+status 复用同一 Timer 实例。
+     *
+     * @param handler Handler 类简单名（如 QueryMessageHandler）
+     * @param status  成功为 success，异常为 error
+     * @return feishu.query.duration 对应的 Timer
+     */
     private Timer queryTimer(String handler, String status) {
         return Timer.builder("feishu.query.duration").tags(FEISHU_TAGS).tag("handler", handler)
                 .tag("status", status).register(registry);
     }
 
-    /** Increments {@code feishu.message.sent} on successful send. Tag type: text/card/file. */
+    /**
+     * 消息发送成功后的后置切面：递增 {@code feishu.message.sent} 计数。
+     * 切点：{@link com.tencent.supersonic.feishu.server.service.FeishuMessageSender} 的 reply*、send*、uploadFile。
+     * 标签 type：根据方法名推断，text/card/file。
+     */
     @AfterReturning("execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.reply*(..)) || "
             + "execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.send*(..)) || "
             + "execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.uploadFile(..))")
@@ -63,7 +85,10 @@ public class FeishuMetricsAspect {
                 .register(registry).increment();
     }
 
-    /** Increments {@code feishu.message.send.errors} on send failure. Tag type: text/card/file. */
+    /**
+     * 消息发送异常后的切面：递增 {@code feishu.message.send.errors} 计数。
+     * 切点与 {@link #afterMessageSent} 相同；标签 type 同样为 text/card/file。
+     */
     @AfterThrowing("execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.reply*(..)) || "
             + "execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.send*(..)) || "
             + "execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.uploadFile(..))")
@@ -72,7 +97,13 @@ public class FeishuMetricsAspect {
                 .register(registry).increment();
     }
 
-    /** Infers message type from method name: *Text* -> text, *Card* -> card, else -> file. */
+    /**
+     * 根据 FeishuMessageSender 方法名推断消息类型，用于 metric 的 type 标签。
+     * 规则：方法名含 Text -> text，含 Card -> card，否则 -> file（如 uploadFile、sendFile）。
+     *
+     * @param jp 当前切点（reply/send/upload 方法）
+     * @return "text" | "card" | "file"
+     */
     private String extractType(JoinPoint jp) {
         String method = jp.getSignature().getName();
         if (method.contains("Text")) {

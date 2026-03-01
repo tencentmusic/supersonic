@@ -100,15 +100,24 @@ public class FeishuEventController {
             return;
         }
 
-        // 3. v2.0 HMAC signature verification (only when header field exists)
+        // 3. v2.0 HMAC signature verification
+        // When encryptKey is configured, signature headers are MANDATORY — reject if missing.
+        // This prevents attackers from bypassing verification by omitting the headers.
         Map<String, Object> header = (Map<String, Object>) body.get("header");
         if (header != null && StringUtils.isNotBlank(encryptKey)) {
             String timestamp = request.getHeader("X-Lark-Request-Timestamp");
             String nonce = request.getHeader("X-Lark-Request-Nonce");
             String signature = request.getHeader("X-Lark-Signature");
 
-            if (signature != null
-                    && !verifySignature(timestamp, nonce, encryptKey, rawBody, signature)) {
+            if (StringUtils.isAnyBlank(timestamp, nonce, signature)) {
+                log.warn(
+                        "[Webhook] Missing signature headers: timestamp={}, nonce={}, signature={}",
+                        timestamp != null, nonce != null, signature != null);
+                writeJson(response, "{\"code\":0}");
+                return;
+            }
+
+            if (!verifySignature(timestamp, nonce, encryptKey, rawBody, signature)) {
                 log.warn("[Webhook] Signature verification failed");
                 writeJson(response, "{\"code\":0}");
                 return;
@@ -206,20 +215,23 @@ public class FeishuEventController {
         try {
             String content = timestamp + nonce + encryptKey + body;
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
-            String calculated = bytesToHex(hash);
-            return calculated.equals(expected);
+            byte[] calculated = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+            byte[] expectedBytes = hexToBytes(expected);
+            // Timing-safe comparison to prevent timing attacks
+            return MessageDigest.isEqual(calculated, expectedBytes);
         } catch (Exception e) {
             log.error("[Webhook] Signature verification error", e);
             return false;
         }
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+    private static byte[] hexToBytes(String hex) {
+        int len = hex.length();
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i + 1), 16));
         }
-        return sb.toString();
+        return bytes;
     }
 }
