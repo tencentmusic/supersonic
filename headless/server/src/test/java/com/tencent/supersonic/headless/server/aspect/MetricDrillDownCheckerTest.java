@@ -6,58 +6,75 @@ import com.tencent.supersonic.headless.api.pojo.DrillDownDimension;
 import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
+import com.tencent.supersonic.headless.server.service.MetricService;
 import com.tencent.supersonic.headless.server.utils.DataUtils;
 import com.tencent.supersonic.headless.server.utils.MetricDrillDownChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 public class MetricDrillDownCheckerTest {
 
     @Test
     void test_groupBy_in_drillDownDimension() {
-        MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+        MetricService metricService = Mockito.mock(MetricService.class);
+        when(metricService.getDrillDownDimension(1L)).thenReturn(
+                Lists.newArrayList(new DrillDownDimension(1L), new DrillDownDimension(2L)));
+        MetricDrillDownChecker checker = new MetricDrillDownChecker(metricService);
         String sql = "select user_name, sum(pv) from t_1 group by user_name";
         SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
-        metricDrillDownChecker.checkQuery(semanticSchemaResp, sql);
+        checker.checkQuery(semanticSchemaResp, sql);
     }
 
     // @Test
     // void test_groupBy_not_in_drillDownDimension() {
-    // MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+    // MetricService metricService = Mockito.mock(MetricService.class);
+    // when(metricService.getDrillDownDimension(1L)).thenReturn(
+    // Lists.newArrayList(new DrillDownDimension(1L), new DrillDownDimension(2L)));
+    // MetricDrillDownChecker checker = new MetricDrillDownChecker(metricService);
     // String sql = "select page, sum(pv) from t_1 group by page";
     // SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
     // assertThrows(InvalidArgumentException.class,
-    // () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
+    // () -> checker.checkQuery(semanticSchemaResp, sql));
     // }
 
     // @Test
     // void test_groupBy_not_in_necessary_dimension() {
-    // MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+    // MetricService metricService = Mockito.mock(MetricService.class);
+    // when(metricService.getDrillDownDimension(2L)).thenReturn(
+    // Lists.newArrayList(new DrillDownDimension(2L, true)));
+    // MetricDrillDownChecker checker = new MetricDrillDownChecker(metricService);
     // String sql = "select user_name, count(distinct uv) from t_1 group by user_name";
     // SemanticSchemaResp semanticSchemaResp = mockModelSchemaResp();
     // assertThrows(InvalidArgumentException.class,
-    // () -> metricDrillDownChecker.checkQuery(semanticSchemaResp, sql));
+    // () -> checker.checkQuery(semanticSchemaResp, sql));
     // }
 
     @Test
     void test_groupBy_no_necessary_dimension_setting() {
-        MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+        MetricService metricService = Mockito.mock(MetricService.class);
+        when(metricService.getDrillDownDimension(anyLong())).thenReturn(Lists.newArrayList());
+        MetricDrillDownChecker checker = new MetricDrillDownChecker(metricService);
         String sql = "select user_name, page, count(distinct uv) from t_1 group by user_name,page";
         SemanticSchemaResp semanticSchemaResp = mockModelSchemaNoDimensionSetting();
-        metricDrillDownChecker.checkQuery(semanticSchemaResp, sql);
+        checker.checkQuery(semanticSchemaResp, sql);
     }
 
     @Test
     void test_groupBy_no_necessary_dimension_setting_no_metric() {
-        MetricDrillDownChecker metricDrillDownChecker = new MetricDrillDownChecker();
+        MetricService metricService = Mockito.mock(MetricService.class);
+        when(metricService.getDrillDownDimension(anyLong())).thenReturn(Lists.newArrayList());
+        MetricDrillDownChecker checker = new MetricDrillDownChecker(metricService);
         String sql = "select user_name, page, count(*) from t_1 group by user_name,page";
         SemanticSchemaResp semanticSchemaResp = mockModelSchemaNoDimensionSetting();
-        metricDrillDownChecker.checkQuery(semanticSchemaResp, sql);
+        checker.checkQuery(semanticSchemaResp, sql);
     }
 
     private SemanticSchemaResp mockModelSchemaResp() {
