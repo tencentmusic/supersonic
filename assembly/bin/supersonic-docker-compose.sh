@@ -1,5 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-export SUPERSONIC_VERSION=latest
+# Start SuperSonic via Docker Compose
+# Reads configuration from docker/.env file
 
-docker-compose -f docker-compose.yml -p supersonic up
+sbinDir=$(cd "$(dirname "$0")"; pwd)
+source "$sbinDir/supersonic-common.sh"
+
+cd "$projectDir/docker"
+docker compose up -d

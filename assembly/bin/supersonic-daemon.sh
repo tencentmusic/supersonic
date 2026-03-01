@@ -56,15 +56,21 @@ function runJavaService {
   export LANG="zh_CN.UTF-8"
 
   cd $javaRunDir
-  if [[ "$JAVA_HOME" == "" ]]; then
-    JAVA_HOME=$(ls /usr/jdk64/jdk* -d 2>/dev/null | xargs | awk '{print "'$local_app_name'"}')
+  if [[ -z "$JAVA_HOME" ]]; then
+    # Auto-detect: check common JDK locations
+    for candidate in /usr/jdk64/jdk* /usr/lib/jvm/java-21-* /usr/lib/jvm/temurin-21-*; do
+      if [[ -d "$candidate" ]]; then
+        JAVA_HOME="$candidate"
+        break
+      fi
+    done
   fi
   export PATH=$JAVA_HOME/bin:$PATH
   command="-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08
   -Dapp_name=${local_app_name} -Xms1024m -Xmx2048m -XX:+UseZGC -XX:+ZGenerational $main_class"
 
   mkdir -p $javaRunDir/logs
-  java -Dspring.profiles.active="$profile" $command >/dev/null 2>$javaRunDir/logs/error.log &
+  java -Dspring.profiles.active="$profile" $command >$javaRunDir/logs/stdout.log 2>$javaRunDir/logs/error.log &
 }
 
 function start() {
@@ -87,11 +93,19 @@ function stop() {
     echo "Process $1 is not running!"
     return 1
   else
-    kill -9 $pid
-    echo "Process (PID = $pid) is killed!"
+    kill $pid 2>/dev/null
+    # Wait up to 10s for graceful shutdown, then force kill
+    for i in $(seq 1 10); do
+      if ! kill -0 $pid 2>/dev/null; then
+        echo "Process (PID = $pid) stopped gracefully."
+        return 0
+      fi
+      sleep 1
+    done
+    kill -9 $pid 2>/dev/null
+    echo "Process (PID = $pid) force killed after timeout."
     return 0
   fi
-  echo "Stop success"
 }
 
 setMainClass
