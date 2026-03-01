@@ -1,37 +1,47 @@
-FROM openjdk:21-jdk-bullseye as base
+# syntax=docker/dockerfile:1
+# SuperSonic Multi-Stage Build
+# Usage: docker build -f docker/Dockerfile -t supersonicbi/supersonic:latest .
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+# ── Stage 1: Backend ─────────────────────────────────────────────────────────
+FROM maven:3.9-eclipse-temurin-21 AS backend
+WORKDIR /build
+COPY . .
+COPY docker/settings.xml /root/.m2/settings.xml
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn clean package -DskipTests -Dspotless.skip=true -pl launchers/standalone -am -q \
+    && tar xzf launchers/standalone/target/launchers-standalone-*-bin.tar.gz -C /tmp
 
-# Argument to pass in the supersonic version at build time
-ARG SUPERSONIC_VERSION
+# ── Stage 2: Frontend ────────────────────────────────────────────────────────
+FROM node:18-slim AS frontend
+RUN npm config set registry https://registry.npmmirror.com && npm i -g pnpm
+WORKDIR /build
+COPY webapp/ .
+ENV NODE_OPTIONS=--openssl-legacy-provider
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm config set registry https://registry.npmmirror.com \
+    && cd packages/chat-sdk && pnpm i && pnpm run build \
+    && cd ../supersonic-fe && pnpm link ../chat-sdk && pnpm i && pnpm run build:os-local
 
-# Copy the supersonic standalone zip file into the container
-COPY assembly/build/supersonic-standalone-${SUPERSONIC_VERSION}.zip .
+# ── Stage 3: Custom JRE via jlink (glibc-based for Debian runtime) ──────────
+FROM eclipse-temurin:21-jdk-jammy AS jre-build
+RUN $JAVA_HOME/bin/jlink \
+    --add-modules java.base,java.desktop,java.instrument,java.logging,java.management,\
+java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,\
+java.security.sasl,java.sql,java.xml,jdk.crypto.ec,jdk.httpserver,jdk.management,\
+jdk.naming.dns,jdk.naming.rmi,jdk.net,jdk.unsupported \
+    --strip-debug --no-man-pages --no-header-files \
+    --compress=zip-9 --output /custom-jre
 
-# Unzip the supersonic standalone zip
-RUN unzip supersonic-standalone-${SUPERSONIC_VERSION}.zip && \
-    rm supersonic-standalone-${SUPERSONIC_VERSION}.zip
-
-FROM openjdk:21-slim
-
-# Set the working directory in the container
-WORKDIR /usr/src/app
-
-# Argument to pass in the supersonic version at build time
-ARG SUPERSONIC_VERSION
-
-# Copy the supersonic standalone folder into the container
-COPY --from=base /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION} ./supersonic-standalone-${SUPERSONIC_VERSION}
-
-# Create a symbolic link to the supersonic installation directory
-RUN ln -s /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION} /usr/src/app/supersonic-standalone-latest
-
-# Set the working directory to the supersonic installation directory
-WORKDIR /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION}
-
-# Expose the default port
+# ── Stage 4: Runtime (Debian slim + custom JRE) ───────────────────────────────
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends procps && rm -rf /var/lib/apt/lists/*
+COPY --from=jre-build /custom-jre /opt/java/openjdk
+ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:$PATH"
+WORKDIR /app
+COPY --from=backend /tmp/launchers-standalone-*/lib ./lib
+COPY --from=backend /tmp/launchers-standalone-*/conf ./conf
+COPY --from=backend /tmp/launchers-standalone-*/bin ./bin
+COPY --from=frontend /build/packages/supersonic-fe/supersonic-webapp ./webapp
+RUN echo '{"env":""}' > webapp/supersonic.config.json && chmod +x bin/*.sh
 EXPOSE 9080
-# Command to run the supersonic daemon
-RUN chmod +x bin/supersonic-daemon.sh
-CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone ${S2_DB_TYPE} && tail -f /dev/null"]
+CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone ${S2_DB_TYPE:-mysql} && tail -f /dev/null"]

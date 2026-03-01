@@ -1,0 +1,22 @@
+# Dependencies & build output
+webapp/node_modules
+webapp/packages/*/node_modules
+webapp/packages/supersonic-fe/supersonic-webapp
+webapp/packages/supersonic-fe/.umi
+webapp/packages/supersonic-fe/.umi-production
+**/target
+
+# Docker & IDE
+docker/supersonic_mysql
+docker/supersonic_pg
+.git
+.idea
+*.iml
+.env
+.env.*
+!.env.example
+
+# Assembly output
+assembly/build/*.zip
+assembly/build/*.tar.gz
+assembly/runtime
