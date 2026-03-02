@@ -1,0 +1,20 @@
+# 无 Redis 的轻量编排：仅 Postgres + 应用，缓存与 OAuth 使用 caffeine（单机适用）。
+# 使用：docker-compose -f docker-compose.yml -f docker-compose.no-redis.yml up -d supersonic_postgres supersonic_standalone
+# 注意：应用若强依赖 Spring Data Redis 连接，可能需额外配置（如排除 Redis 自动配置）方可正常启动。
+services:
+  supersonic_standalone:
+    environment:
+      S2_DB_TYPE: postgres
+      S2_DB_HOST: supersonic_postgres
+      S2_DB_PORT: 5432
+      S2_DB_DATABASE: postgres
+      S2_DB_USER: supersonic_user
+      S2_DB_PASSWORD: supersonic_password
+      FEISHU_CACHE_TYPE: caffeine
+      S2_OAUTH_STORAGE_TYPE: caffeine
+      # 不连 Redis 时避免连接失败（若应用支持）；否则需在应用侧禁用 Redis 自动配置
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+    depends_on:
+      supersonic_postgres:
+        condition: service_healthy

@@ -2,11 +2,12 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
 scrape_configs:
-  - job_name: 'supersonic'
-    metrics_path: '/actuator/prometheus'
-    scrape_interval: 10s
+  - job_name: "supersonic-standalone"
+    metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ['supersonic_standalone:9080']
-        labels:
-          application: 'supersonic'
+      - targets: ["supersonic_standalone:9080"]
+

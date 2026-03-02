@@ -1,17 +1,22 @@
-name: supersonic
-
+# 使用方式：
+#  默认（含 Redis）：  docker-compose up -d
+#  无 Redis（单机）：  docker-compose -f docker-compose.yml -f docker-compose.no-redis.yml up -d supersonic_postgres supersonic_standalone
+#                     （仅启动 Postgres + 应用，飞书/OAuth 用 caffeine；应用若强依赖 Redis 需额外配置）
 services:
-  supersonic_mysql:
-    image: mysql:8.0
-    container_name: supersonic_mysql
+  supersonic_postgres:
+    image: pgvector/pgvector:pg17
+    privileged: true
+    container_name: supersonic_postgres
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${S2_DB_DATABASE}
+      LANG: 'C.UTF-8'  # 设置环境变量
+      POSTGRES_ROOT_PASSWORD: root_password
+      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: supersonic_user
+      POSTGRES_PASSWORD: supersonic_password
     ports:
-      - "${MYSQL_PORT:-13306}:3306"
+      - "15432:5432"
     volumes:
-      - ./supersonic_mysql/data:/var/lib/mysql
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --skip-character-set-client-handshake
+       - ./supersonic_pg/data:/var/lib/postgresql/data
     networks:
       - supersonic_network
     dns:
@@ -19,59 +24,72 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U supersonic_user -d postgres'"]
       interval: 10s
       timeout: 10s
       retries: 5
 
+  # Redis：会话/缓存/OAuth 存储、飞书多实例缓存等。单机可选 caffeine，见 docker-compose.no-redis.yml。
   supersonic_redis:
     image: redis:7-alpine
     container_name: supersonic_redis
-    command: >
-      sh -c '
-      if [ -n "$REDIS_PASSWORD" ]; then
-        redis-server --requirepass "$REDIS_PASSWORD" --maxmemory 256mb --maxmemory-policy allkeys-lru
-      else
-        redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
-      fi'
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
+      - "6379:6379"
     networks:
       - supersonic_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+
+  supersonic_prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: supersonic_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+    depends_on:
+      supersonic_standalone:
+        condition: service_started
+    networks:
+      - supersonic_network
+
+  supersonic_grafana:
+    image: grafana/grafana:11.2.0
+    container_name: supersonic_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      supersonic_prometheus:
+        condition: service_started
+    networks:
+      - supersonic_network
 
   supersonic_standalone:
     image: supersonicbi/supersonic:${SUPERSONIC_VERSION:-latest}
     privileged: true
     container_name: supersonic_standalone
     environment:
-      S2_DB_TYPE: ${S2_DB_TYPE:-mysql}
-      S2_DB_HOST: supersonic_mysql
-      S2_DB_PORT: 3306
-      S2_DB_DATABASE: ${S2_DB_DATABASE}
-      S2_DB_USER: ${S2_DB_USER}
-      S2_DB_PASSWORD: ${S2_DB_PASSWORD}
-      S2_OAUTH_STORAGE_TYPE: ${S2_OAUTH_STORAGE_TYPE:-redis}
+      S2_DB_TYPE: postgres
+      S2_DB_HOST: supersonic_postgres
+      S2_DB_PORT: 5432
+      S2_DB_DATABASE: postgres
+      S2_DB_USER: supersonic_user
+      S2_DB_PASSWORD: supersonic_password
       REDIS_HOST: supersonic_redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      REDIS_DATABASE: ${REDIS_DATABASE:-0}
-      FEISHU_ENABLED: ${FEISHU_ENABLED:-false}
-      FEISHU_CONNECTION_MODE: ${FEISHU_CONNECTION_MODE:-ws}
-      FEISHU_APP_ID: ${FEISHU_APP_ID:-}
-      FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
-      FEISHU_VERIFICATION_TOKEN: ${FEISHU_VERIFICATION_TOKEN:-}
-      FEISHU_ENCRYPT_KEY: ${FEISHU_ENCRYPT_KEY:-}
-      FEISHU_DEFAULT_AGENT_ID: ${FEISHU_DEFAULT_AGENT_ID:-1}
-      FEISHU_CACHE_TYPE: ${FEISHU_CACHE_TYPE:-redis}
+      FEISHU_CACHE_TYPE: redis
+      S2_OAUTH_STORAGE_TYPE: redis
     ports:
       - "9080:9080"
     deploy:
@@ -80,7 +98,7 @@ services:
           cpus: "2.0"
           memory: 2048M
     depends_on:
-      supersonic_mysql:
+      supersonic_postgres:
         condition: service_healthy
       supersonic_redis:
         condition: service_healthy
@@ -90,41 +108,20 @@ services:
       - 114.114.114.114
       - 8.8.8.8
       - 8.8.4.4
-
-  prometheus:
-    image: prom/prometheus:v2.53.0
-    container_name: supersonic_prometheus
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
-    depends_on:
-      - supersonic_standalone
-    networks:
-      - supersonic_network
-
-  grafana:
-    image: grafana/grafana:11.1.0
-    container_name: supersonic_grafana
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-    ports:
-      - "3000:3000"
-    depends_on:
-      - prometheus
-    networks:
-      - supersonic_network
-
-volumes:
-  redis_data:
-  prometheus_data:
-  grafana_data:
+    #volumes:
+      #1.Named Volumes are best for persistent data managed by Docker.
+      #- supersonic_data:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}
+      #2.Bind Mounts are suitable for frequent modifications and debugging.
+      #      - ./conf/application-prd.yaml:/usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/conf/application-prd.yaml
+      #3.Detailed Bind Mounts offer more control over the mount behavior.
+      #      - type: bind
+      #        source: ./supersonic-standalone-${SUPERSONIC_VERSION:-latest}/logs
+      #        target: /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION:-latest}/logs
+      #        bind:
+      #          propagation: rprivate
+      #          create_host_path: true
+#volumes:
+#  supersonic_data:
 
 networks:
   supersonic_network:
