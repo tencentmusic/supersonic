@@ -20,6 +20,7 @@ public class FeishuContactService {
             "https://open.feishu.cn/open-apis/contact/v3/users/{open_id}?user_id_type=open_id";
 
     private final FeishuTokenManager feishuTokenManager;
+    private final FeishuApiRateLimiter rateLimiter;
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
@@ -34,6 +35,11 @@ public class FeishuContactService {
             String token = feishuTokenManager.getTenantAccessToken();
             if (token == null) {
                 log.warn("Cannot get contact info: tenant_access_token is null");
+                return null;
+            }
+
+            if (rateLimiter.isRateLimited(FeishuApiRateLimiter.ApiType.CONTACT)) {
+                log.warn("Contact API rate limited for openId={}", openId);
                 return null;
             }
 

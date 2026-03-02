@@ -25,6 +25,7 @@ public class FeishuProperties {
     private CacheConfig cache = new CacheConfig();
     private RateLimitConfig rateLimit = new RateLimitConfig();
     private AsyncConfig async = new AsyncConfig();
+    private OAuthBindingConfig oauth = new OAuthBindingConfig();
 
     @Data
     public static class AsyncConfig {
@@ -56,5 +57,21 @@ public class FeishuProperties {
         private boolean enabled = true;
         /** Max requests per user per window */
         private int maxRequests = 20;
+        /** IM message API QPS limit (platform limit 50, 20% headroom) */
+        private int messageQps = 40;
+        /** Contact API QPS limit (low-frequency, conservative) */
+        private int contactQps = 5;
+    }
+
+    @Data
+    public static class OAuthBindingConfig {
+        /** Whether self-service OAuth binding is enabled */
+        private boolean enabled = false;
+        /** Bind token TTL in minutes */
+        private int bindTokenTtlMinutes = 30;
+        /** Automatically activate mapping after successful binding */
+        private boolean autoActivate = true;
+        /** Allow already-bound users to rebind */
+        private boolean allowRebind = false;
     }
 }

@@ -2,6 +2,8 @@ package com.tencent.supersonic.feishu.server.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tencent.supersonic.feishu.server.service.FeishuApiRateLimiter.ApiType;
+import com.tencent.supersonic.feishu.server.service.FeishuApiRateLimiter.FeishuApiRateLimitedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
@@ -26,6 +28,7 @@ public class FeishuMessageSender {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final FeishuTokenManager feishuTokenManager;
+    private final FeishuApiRateLimiter rateLimiter;
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
@@ -72,6 +75,9 @@ public class FeishuMessageSender {
      */
     @SuppressWarnings("unchecked")
     public String uploadFile(File file, String fileName, String fileType) {
+        if (rateLimiter.isRateLimited(ApiType.MESSAGE)) {
+            throw new FeishuApiRateLimitedException("IM file upload API rate limited");
+        }
         String token = feishuTokenManager.getTenantAccessToken();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -105,6 +111,9 @@ public class FeishuMessageSender {
     }
 
     private void doReply(String messageId, Map<String, String> body) {
+        if (rateLimiter.isRateLimited(ApiType.MESSAGE)) {
+            throw new FeishuApiRateLimitedException("IM message API rate limited");
+        }
         try {
             String url = BASE_URL + "/" + messageId + "/reply";
             HttpEntity<Map<String, String>> request = buildRequest(body);
@@ -117,6 +126,9 @@ public class FeishuMessageSender {
     }
 
     private void doSend(Map<String, String> body) {
+        if (rateLimiter.isRateLimited(ApiType.MESSAGE)) {
+            throw new FeishuApiRateLimitedException("IM message API rate limited");
+        }
         try {
             String url = BASE_URL + "?receive_id_type=open_id";
             HttpEntity<Map<String, String>> request = buildRequest(body);
