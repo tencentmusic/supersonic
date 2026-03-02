@@ -50,4 +50,14 @@ public interface SuperSonicApiClient {
      * Get the list of agents visible to the given user.
      */
     List<Map<String, Object>> getAgentList(User user);
+
+    /**
+     * Verify SuperSonic credentials and return the matched User if valid.
+     *
+     * @param username SuperSonic username
+     * @param password plaintext password
+     * @param tenantId tenant to scope the lookup
+     * @return the User if credentials are valid, null otherwise
+     */
+    User login(String username, String password, Long tenantId);
 }

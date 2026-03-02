@@ -275,6 +275,44 @@ public class FeishuUserMappingService {
     }
 
     /**
+     * Find a PENDING mapping record for a given openId.
+     */
+    public FeishuUserMappingDO findPendingByOpenId(String openId) {
+        LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FeishuUserMappingDO::getFeishuOpenId, openId).eq(FeishuUserMappingDO::getStatus,
+                0);
+        return userMappingMapper.selectOne(wrapper);
+    }
+
+    /**
+     * Find an active mapping by SuperSonic user ID.
+     */
+    public FeishuUserMappingDO findByS2UserId(Long s2UserId) {
+        LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FeishuUserMappingDO::getS2UserId, s2UserId).eq(FeishuUserMappingDO::getStatus,
+                1);
+        return userMappingMapper.selectOne(wrapper);
+    }
+
+    /**
+     * Complete a self-service binding: update the PENDING mapping to active with the given
+     * s2UserId.
+     */
+    public void completeBinding(Long mappingId, Long s2UserId) {
+        FeishuUserMappingDO mapping = userMappingMapper.selectById(mappingId);
+        if (mapping == null) {
+            throw new IllegalStateException("Mapping record not found: id=" + mappingId);
+        }
+        mapping.setS2UserId(s2UserId);
+        mapping.setMatchType("OAUTH_BIND");
+        mapping.setStatus(1);
+        mapping.setUpdatedAt(new Date());
+        userMappingMapper.updateById(mapping);
+        log.info("Completed OAuth binding: mappingId={}, s2UserId={}, openId={}", mappingId,
+                s2UserId, mapping.getFeishuOpenId());
+    }
+
+    /**
      * Get a User object via the auth API (supports independent deployment).
      */
     private User buildUser(Long s2UserId, Long tenantId) {

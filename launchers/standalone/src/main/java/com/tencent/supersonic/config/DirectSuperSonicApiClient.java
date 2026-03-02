@@ -168,6 +168,32 @@ public class DirectSuperSonicApiClient implements SuperSonicApiClient {
     }
 
     @Override
+    public User login(String username, String password, Long tenantId) {
+        Long previousTenantId = TenantContext.getTenantId();
+        try {
+            TenantContext.setTenantId(tenantId);
+            com.tencent.supersonic.auth.api.authentication.request.UserReq req =
+                    new com.tencent.supersonic.auth.api.authentication.request.UserReq();
+            req.setName(username);
+            req.setPassword(password);
+            // login() returns a JWT token on success, throws on failure
+            userService.login(req, "feishu-bind");
+            // Credentials valid — look up the User object by name
+            return userService.getUserList().stream().filter(u -> username.equals(u.getName()))
+                    .findFirst().orElse(null);
+        } catch (Exception e) {
+            log.debug("Login failed for user={}: {}", username, e.getMessage());
+            return null;
+        } finally {
+            if (previousTenantId != null) {
+                TenantContext.setTenantId(previousTenantId);
+            } else {
+                TenantContext.clear();
+            }
+        }
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> getAgentList(User user) {
         try {

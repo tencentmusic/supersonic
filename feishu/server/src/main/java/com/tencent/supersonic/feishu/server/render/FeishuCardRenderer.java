@@ -331,6 +331,23 @@ public class FeishuCardRenderer {
     }
 
     /**
+     * Bind guide card: shown when auto-match fails and OAuth binding is enabled.
+     */
+    public Map<String, Object> renderBindGuideCard(String feishuUserName, String bindUrl) {
+        List<Object> elements = new ArrayList<>();
+        elements.add(FeishuCardTemplate.buildMarkdown("您好，**" + feishuUserName + "**！\n\n"
+                + "系统未能自动识别您的数据平台账号。" + "请点击下方按钮，输入您的平台账号密码完成绑定（仅需一次）。"));
+        elements.add(FeishuCardTemplate.buildDivider());
+        elements.add(FeishuCardTemplate.buildUrlButton("绑定账号", bindUrl, "primary"));
+        elements.add(FeishuCardTemplate.buildNote("绑定链接 30 分钟内有效。如无平台账号，请联系管理员开通。"));
+
+        Map<String, Object> card = new HashMap<>();
+        card.put("header", FeishuCardTemplate.buildHeader("账号绑定", "orange"));
+        card.put("elements", elements);
+        return card;
+    }
+
+    /**
      * History card showing recent query sessions.
      */
     public Map<String, Object> renderHistoryCard(List<Map<String, String>> items) {

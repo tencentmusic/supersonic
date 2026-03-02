@@ -224,6 +224,28 @@ public class HttpSuperSonicApiClient implements SuperSonicApiClient {
     }
 
     @Override
+    public User login(String username, String password, Long tenantId) {
+        String loginUrl = properties.getApiBaseUrl() + "/api/auth/user/login";
+        Map<String, String> loginReq = Map.of("name", username, "password", password);
+        HttpEntity<Map<String, String>> entity =
+                new HttpEntity<>(loginReq, buildInternalHeaders(tenantId));
+
+        try {
+            ResponseEntity<String> response =
+                    restTemplate.exchange(loginUrl, HttpMethod.POST, entity, String.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                // Login succeeded — find user by name
+                List<User> users = getUserList(tenantId);
+                return users.stream().filter(u -> username.equals(u.getName())).findFirst()
+                        .orElse(null);
+            }
+        } catch (Exception e) {
+            log.debug("Login failed for user={}: {}", username, e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
     public List<Map<String, Object>> getAgentList(User user) {
         String url = properties.getApiBaseUrl() + "/api/chat/agent/getAgentList";
 

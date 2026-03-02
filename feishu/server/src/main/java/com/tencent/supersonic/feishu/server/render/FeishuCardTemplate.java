@@ -63,6 +63,35 @@ public final class FeishuCardTemplate {
         return sb.toString();
     }
 
+    public static Map<String, Object> buildUrlButton(String text, String url, String type) {
+        Map<String, Object> action = new HashMap<>();
+        action.put("tag", "action");
+        List<Object> actions = new ArrayList<>();
+        Map<String, Object> button = new HashMap<>();
+        button.put("tag", "button");
+        Map<String, Object> buttonText = new HashMap<>();
+        buttonText.put("tag", "plain_text");
+        buttonText.put("content", text);
+        button.put("text", buttonText);
+        button.put("type", type);
+        button.put("url", url);
+        actions.add(button);
+        action.put("actions", actions);
+        return action;
+    }
+
+    public static Map<String, Object> buildNote(String text) {
+        Map<String, Object> note = new HashMap<>();
+        note.put("tag", "note");
+        List<Object> elements = new ArrayList<>();
+        Map<String, Object> textObj = new HashMap<>();
+        textObj.put("tag", "plain_text");
+        textObj.put("content", text);
+        elements.add(textObj);
+        note.put("elements", elements);
+        return note;
+    }
+
     public static Map<String, Object> buildActionButton(String text, String value, String type) {
         // type: "primary", "default", "danger"
         Map<String, Object> action = new HashMap<>();

@@ -33,12 +33,13 @@ public class FeishuBotService {
     private final FeishuCacheService cacheService;
     private final ThreadPoolTaskExecutor feishuExecutor;
     private final FeishuMeterBinder meterBinder;
+    private final FeishuBindTokenService bindTokenService;
 
     public FeishuBotService(FeishuMessageRouter router, FeishuUserMappingService userMappingService,
             FeishuMessageSender messageSender, FeishuCardRenderer cardRenderer,
             FeishuProperties properties, FeishuCacheService cacheService,
             @Qualifier("feishuExecutor") ThreadPoolTaskExecutor feishuExecutor,
-            FeishuMeterBinder meterBinder) {
+            FeishuMeterBinder meterBinder, FeishuBindTokenService bindTokenService) {
         this.router = router;
         this.userMappingService = userMappingService;
         this.messageSender = messageSender;
@@ -47,6 +48,7 @@ public class FeishuBotService {
         this.cacheService = cacheService;
         this.feishuExecutor = feishuExecutor;
         this.meterBinder = meterBinder;
+        this.bindTokenService = bindTokenService;
     }
 
     public void handleEventAsync(String eventType, Map<String, Object> event) {
@@ -109,8 +111,7 @@ public class FeishuBotService {
             FeishuUserMappingService.ResolvedMapping resolved =
                     userMappingService.resolveMapping(msg.getOpenId());
             if (resolved == null) {
-                messageSender.replyText(msg.getMessageId(),
-                        "未找到您的账号映射，已自动提交映射申请，请联系管理员在用户映射页面审核并关联您的平台账号。");
+                replyUnmappedUser(msg);
                 return;
             }
             User user = resolved.user();
@@ -146,6 +147,25 @@ public class FeishuBotService {
         } finally {
             TenantContext.clear();
         }
+    }
+
+    private void replyUnmappedUser(FeishuMessage msg) {
+        if (properties.getOauth().isEnabled()) {
+            var pending = userMappingService.findPendingByOpenId(msg.getOpenId());
+            if (pending != null) {
+                String bindToken = bindTokenService.generateToken(msg.getOpenId(), pending.getId(),
+                        pending.getFeishuUserName(), TenantContext.getTenantIdOrDefault(1L));
+                String bindUrl =
+                        properties.getApiBaseUrl() + "/api/feishu/bindPage?token=" + bindToken;
+                Map<String, Object> card = cardRenderer.renderBindGuideCard(
+                        pending.getFeishuUserName() != null ? pending.getFeishuUserName() : "用户",
+                        bindUrl);
+                messageSender.replyCard(msg.getMessageId(), card);
+                return;
+            }
+        }
+        messageSender.replyText(msg.getMessageId(),
+                "未找到您的账号映射，已自动提交映射申请，请联系管理员在用户映射页面审核并关联您的平台账号。");
     }
 
     private boolean isRateLimited(String openId) {

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title id="pageTitle"></title>
+  <link rel="stylesheet" href="bind.css">
+</head>
+<body>
+  <div class="card">
+    <div class="title" id="cardTitle"></div>
+
+    <div class="info">
+      <div class="label" id="feishuUserLabel"></div>
+      <div class="value" id="feishuUser">-</div>
+    </div>
+
+    <form id="bindForm">
+      <div class="form-group">
+        <label for="username" id="usernameLabel"></label>
+        <input type="text" id="username" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password" id="passwordLabel"></label>
+        <input type="password" id="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn" id="submitBtn"></button>
+    </form>
+
+    <div class="loading" id="loading"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script src="bind-messages.js"></script>
+  <script src="bind.js"></script>
+</body>
+</html>
