@@ -16,9 +16,8 @@ import org.springframework.stereotype.Component;
 /**
  * 飞书模块指标切面：对消息处理器耗时与消息发送次数进行埋点。
  * <p>
- * 仅在存在 {@link MeterRegistry} 时生效（{@link ConditionalOnBean}），
- * 用于 Prometheus/Actuator 采集：处理器耗时分布、消息发送成功/失败计数。
- * MeterRegistry 通过构造器注入，无需空校验。
+ * 仅在存在 {@link MeterRegistry} 时生效（{@link ConditionalOnBean}）， 用于 Prometheus/Actuator
+ * 采集：处理器耗时分布、消息发送成功/失败计数。 MeterRegistry 通过构造器注入，无需空校验。
  */
 @Aspect
 @Component
@@ -64,7 +63,7 @@ public class FeishuMetricsAspect {
      * 获取或创建「查询耗时」计时器。同一 handler+status 复用同一 Timer 实例。
      *
      * @param handler Handler 类简单名（如 QueryMessageHandler）
-     * @param status  成功为 success，异常为 error
+     * @param status 成功为 success，异常为 error
      * @return feishu.query.duration 对应的 Timer
      */
     private Timer queryTimer(String handler, String status) {
@@ -74,8 +73,8 @@ public class FeishuMetricsAspect {
 
     /**
      * 消息发送成功后的后置切面：递增 {@code feishu.message.sent} 计数。
-     * 切点：{@link com.tencent.supersonic.feishu.server.service.FeishuMessageSender} 的 reply*、send*、uploadFile。
-     * 标签 type：根据方法名推断，text/card/file。
+     * 切点：{@link com.tencent.supersonic.feishu.server.service.FeishuMessageSender} 的
+     * reply*、send*、uploadFile。 标签 type：根据方法名推断，text/card/file。
      */
     @AfterReturning("execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.reply*(..)) || "
             + "execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.send*(..)) || "
@@ -86,8 +85,8 @@ public class FeishuMetricsAspect {
     }
 
     /**
-     * 消息发送异常后的切面：递增 {@code feishu.message.send.errors} 计数。
-     * 切点与 {@link #afterMessageSent} 相同；标签 type 同样为 text/card/file。
+     * 消息发送异常后的切面：递增 {@code feishu.message.send.errors} 计数。 切点与 {@link #afterMessageSent} 相同；标签 type
+     * 同样为 text/card/file。
      */
     @AfterThrowing("execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.reply*(..)) || "
             + "execution(* com.tencent.supersonic.feishu.server.service.FeishuMessageSender.send*(..)) || "
@@ -98,8 +97,8 @@ public class FeishuMetricsAspect {
     }
 
     /**
-     * 根据 FeishuMessageSender 方法名推断消息类型，用于 metric 的 type 标签。
-     * 规则：方法名含 Text -> text，含 Card -> card，否则 -> file（如 uploadFile、sendFile）。
+     * 根据 FeishuMessageSender 方法名推断消息类型，用于 metric 的 type 标签。 规则：方法名含 Text -> text，含 Card -> card，否则
+     * -> file（如 uploadFile、sendFile）。
      *
      * @param jp 当前切点（reply/send/upload 方法）
      * @return "text" | "card" | "file"
