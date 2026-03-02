@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryConfigMapper;
@@ -11,6 +12,7 @@ import com.tencent.supersonic.headless.server.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryException;
 import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +38,8 @@ public class DeliveryRetryTask {
     private final ReportDeliveryRecordMapper recordMapper;
     private final ReportDeliveryConfigMapper configMapper;
     private final Map<DeliveryType, ReportDeliveryChannel> channelMap;
+    @Autowired(required = false)
+    private TemplateReportMetrics reportMetrics;
 
     public DeliveryRetryTask(ReportDeliveryRecordMapper recordMapper,
             ReportDeliveryConfigMapper configMapper, List<ReportDeliveryChannel> channels) {
@@ -140,6 +144,10 @@ public class DeliveryRetryTask {
 
             log.info("Delivery retry successful: recordId={}, attempt={}", record.getId(),
                     retryCount);
+            if (reportMetrics != null) {
+                reportMetrics.recordDeliveryRetry("success",
+                        normalizeType(config.getDeliveryType()), deliveryTimeMs);
+            }
 
         } catch (DeliveryException e) {
             long deliveryTimeMs = System.currentTimeMillis() - startTime;
@@ -162,6 +170,10 @@ public class DeliveryRetryTask {
             }
 
             recordMapper.updateById(record);
+            if (reportMetrics != null) {
+                reportMetrics.recordDeliveryRetry("error", normalizeType(config.getDeliveryType()),
+                        deliveryTimeMs);
+            }
         }
     }
 
@@ -206,5 +218,9 @@ public class DeliveryRetryTask {
             return null;
         }
         return s.length() <= maxLen ? s : s.substring(0, maxLen);
+    }
+
+    private String normalizeType(String type) {
+        return type == null ? "unknown" : type.toLowerCase();
     }
 }

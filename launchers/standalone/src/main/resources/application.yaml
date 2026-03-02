@@ -219,6 +219,14 @@ s2:
   # Report execution configuration
   report:
     max-concurrent-per-tenant: 3
+  # SLO thresholds for template-report observability and alerts
+  slo:
+    report:
+      success-rate-threshold: ${S2_SLO_REPORT_SUCCESS_RATE_THRESHOLD:0.95}
+      execution-p95-threshold-ms: ${S2_SLO_REPORT_EXECUTION_P95_THRESHOLD_MS:10000}
+      export-pending-threshold: ${S2_SLO_REPORT_EXPORT_PENDING_THRESHOLD:100}
+      delivery-failure-rate-threshold: ${S2_SLO_REPORT_DELIVERY_FAILURE_RATE_THRESHOLD:0.05}
+      delivery-retry-exhausted-threshold: ${S2_SLO_REPORT_DELIVERY_RETRY_EXHAUSTED_THRESHOLD:5}
   # Data sync configuration
   data-sync:
     max-concurrent-per-tenant: 2

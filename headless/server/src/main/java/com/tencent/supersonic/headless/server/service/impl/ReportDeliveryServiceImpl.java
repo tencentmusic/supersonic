@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryConfigMapper;
@@ -15,6 +16,7 @@ import com.tencent.supersonic.headless.server.service.delivery.DeliveryException
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryRateLimiter;
 import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -43,6 +45,8 @@ public class ReportDeliveryServiceImpl
     private final ReportDeliveryRecordMapper recordMapper;
     private final Map<DeliveryType, ReportDeliveryChannel> channelMap;
     private final DeliveryRateLimiter rateLimiter;
+    @Autowired(required = false)
+    private TemplateReportMetrics reportMetrics;
 
     public ReportDeliveryServiceImpl(ReportDeliveryRecordMapper recordMapper,
             List<ReportDeliveryChannel> channels, DeliveryRateLimiter rateLimiter) {
@@ -175,6 +179,10 @@ public class ReportDeliveryServiceImpl
 
                 // Reset consecutive failures on success
                 resetConsecutiveFailures(config);
+                if (reportMetrics != null) {
+                    reportMetrics.recordDelivery("success",
+                            normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
+                }
 
                 log.info("Delivery successful: configId={}, type={}, scheduleId={}, timeMs={}",
                         config.getId(), config.getDeliveryType(), context.getScheduleId(),
@@ -199,6 +207,10 @@ public class ReportDeliveryServiceImpl
 
                 // Track consecutive failures
                 handleDeliveryFailure(config);
+                if (reportMetrics != null) {
+                    reportMetrics.recordDelivery("error",
+                            normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
+                }
             }
 
             records.add(record);
@@ -334,6 +346,10 @@ public class ReportDeliveryServiceImpl
 
             // Reset failures on manual retry success
             resetConsecutiveFailures(config);
+            if (reportMetrics != null) {
+                reportMetrics.recordDeliveryRetry("success",
+                        normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
+            }
 
         } catch (DeliveryException e) {
             long deliveryTimeMs = System.currentTimeMillis() - startTime;
@@ -342,6 +358,10 @@ public class ReportDeliveryServiceImpl
             record.setCompletedAt(new Date());
             record.setDeliveryTimeMs(deliveryTimeMs);
             recordMapper.updateById(record);
+            if (reportMetrics != null) {
+                reportMetrics.recordDeliveryRetry("error",
+                        normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
+            }
             throw e;
         }
     }
@@ -481,5 +501,9 @@ public class ReportDeliveryServiceImpl
             return null;
         }
         return s.length() <= maxLen ? s : s.substring(0, maxLen);
+    }
+
+    private String normalizeDeliveryType(String type) {
+        return type == null ? "unknown" : type.toLowerCase();
     }
 }

@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.core.utils.SqlTemplateEngine;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
 import com.tencent.supersonic.headless.server.pojo.OutputFormat;
@@ -22,6 +23,7 @@ import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig;
 import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.server.service.SemanticTemplateService;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryContext;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,8 @@ public class ReportExecutionOrchestrator {
 
     @Autowired(required = false)
     private SqlTemplateEngine sqlTemplateEngine;
+    @Autowired(required = false)
+    private TemplateReportMetrics reportMetrics;
 
     @Value("${supersonic.export.local-dir:${java.io.tmpdir}/supersonic-export}")
     private String exportDir;
@@ -64,6 +68,8 @@ public class ReportExecutionOrchestrator {
     }
 
     public void execute(ReportExecutionContext ctx) {
+        Timer.Sample executionSample = reportMetrics != null ? reportMetrics.startTimer() : null;
+        String source = ctx.getSource() != null ? ctx.getSource().name().toLowerCase() : "unknown";
         Date startTime = new Date();
         ReportExecutionDO execution = new ReportExecutionDO();
         execution.setScheduleId(ctx.getScheduleId());
@@ -117,6 +123,9 @@ public class ReportExecutionOrchestrator {
 
             // Step 8: Deliver output to configured channels
             deliverOutput(ctx, execution.getId(), resultLocation, rowCount);
+            if (reportMetrics != null && executionSample != null) {
+                reportMetrics.recordExecution("success", source, executionSample);
+            }
 
         } catch (Exception e) {
             log.error("Report execution failed for schedule={}", ctx.getScheduleId(), e);
@@ -124,6 +133,9 @@ public class ReportExecutionOrchestrator {
             execution.setEndTime(new Date());
             execution.setErrorMessage(truncate(e.getMessage(), 2000));
             executionMapper.updateById(execution);
+            if (reportMetrics != null && executionSample != null) {
+                reportMetrics.recordExecution("error", source, executionSample);
+            }
             throw new RuntimeException("Report execution failed: " + e.getMessage(), e);
         }
     }

@@ -13,6 +13,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ExportTaskDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ExportTaskMapper;
 import com.tencent.supersonic.headless.server.pojo.ExportTaskStatus;
@@ -20,6 +21,7 @@ import com.tencent.supersonic.headless.server.service.ExportTaskService;
 import com.tencent.supersonic.headless.server.service.RowCountEstimator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,8 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
     private final ThreadPoolExecutor exportExecutor;
     private final SemanticLayerService semanticLayerService;
     private final RowCountEstimator rowCountEstimator;
+    @Autowired(required = false)
+    private TemplateReportMetrics reportMetrics;
 
     @Value("${supersonic.export.local-dir:${java.io.tmpdir}/supersonic-export}")
     private String exportDir;
@@ -138,6 +142,7 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
     }
 
     private void executeExport(Long taskId) {
+        long startTimeMs = System.currentTimeMillis();
         ExportTaskDO task = baseMapper.selectById(taskId);
         if (task == null) {
             return;
@@ -168,6 +173,10 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
             task.setFileSize(outputFile.length());
             task.setFileLocation(outputFile.getAbsolutePath());
             baseMapper.updateById(task);
+            if (reportMetrics != null) {
+                reportMetrics.recordExport("success", normalizeFormat(task.getOutputFormat()),
+                        System.currentTimeMillis() - startTimeMs);
+            }
 
             log.info("Export task completed: taskId={}, rows={}, size={}", taskId,
                     task.getRowCount(), task.getFileSize());
@@ -176,7 +185,15 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
             task.setStatus(ExportTaskStatus.FAILED.name());
             task.setErrorMessage(truncate(e.getMessage(), 2000));
             baseMapper.updateById(task);
+            if (reportMetrics != null) {
+                reportMetrics.recordExport("error", normalizeFormat(task.getOutputFormat()),
+                        System.currentTimeMillis() - startTimeMs);
+            }
         }
+    }
+
+    private String normalizeFormat(String format) {
+        return StringUtils.isBlank(format) ? "unknown" : format.toLowerCase();
     }
 
     private User buildUserContext(ExportTaskDO task) {
