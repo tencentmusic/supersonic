@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 public class SearchService {
 
     public static final int SEARCH_SIZE = 200;
-    private static BinTrie<List<String>> trie;
-    private static BinTrie<List<String>> suffixTrie;
+    private static volatile BinTrie<List<String>> trie;
+    private static volatile BinTrie<List<String>> suffixTrie;
 
     static {
         trie = new BinTrie<>();

@@ -100,8 +100,6 @@ public class HanlpHelper {
             FileHelper.deleteCacheFile(HanLP.Config.CustomDictionaryPath);
             FileHelper.resetCustomPath(getDynamicCustomDictionary());
         }
-        // 3.clear trie
-        SearchService.clear();
 
         boolean reload = getDynamicCustomDictionary().reload();
         if (reload) {
