@@ -13,7 +13,8 @@ import { deleteConversation, getAllConversations, saveConversation } from '../se
 import styles from './style.module.less';
 import { AgentType, ConversationDetailType } from '../type';
 import { DEFAULT_CONVERSATION_NAME } from '../constants';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 import { CloseOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 
 type Props = {
@@ -100,9 +101,9 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
   });
 
   const convertTime = (date: string) => {
-    moment.locale('zh-cn');
-    const now = moment();
-    const inputDate = moment(date);
+    dayjs.locale('zh-cn');
+    const now = dayjs();
+    const inputDate = dayjs(date);
     const diffMinutes = now.diff(inputDate, 'minutes');
     if (diffMinutes < 1) {
       return '刚刚';

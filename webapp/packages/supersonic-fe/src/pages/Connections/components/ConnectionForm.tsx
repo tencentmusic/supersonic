@@ -22,6 +22,7 @@ import {
   DiscoveredSchema,
 } from '@/services/connection';
 import StreamConfigStep from '@/pages/SemanticModel/components/Database/StreamConfigStep';
+import { MSG } from '@/common/messages';
 
 interface ConnectionFormProps {
   visible: boolean;
@@ -175,10 +176,10 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
 
       if (isEdit && record?.id) {
         await updateConnection(record.id, connectionData);
-        message.success('更新成功');
+        message.success(MSG.UPDATE_SUCCESS);
       } else {
         await createConnection(connectionData);
-        message.success('创建成功');
+        message.success(MSG.CREATE_SUCCESS);
       }
 
       onSuccess();
@@ -186,7 +187,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
       if (e.errorFields) {
         message.error('请检查表单填写是否正确');
       } else {
-        message.error(e.message || '操作失败');
+        message.error(e.message || MSG.OPERATION_FAILED);
       }
     } finally {
       setLoading(false);

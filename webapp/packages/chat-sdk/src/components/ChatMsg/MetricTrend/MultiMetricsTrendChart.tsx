@@ -3,7 +3,7 @@ import { getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ColumnType } from '../../../common/type';
 import { isArray } from 'lodash';
 import { ChartItemContext } from '../../ChatItem';
@@ -42,7 +42,7 @@ const MultiMetricsTrendChart: React.FC<Props> = ({
       const date = isArray(item[dateColumnName])
         ? item[dateColumnName].join('-')
         : `${item[dateColumnName]}`;
-      return date.length === 10 ? moment(date).format('MM-DD') : date;
+      return date.length === 10 ? dayjs(date).format('MM-DD') : date;
     });
 
     instanceObj.setOption({

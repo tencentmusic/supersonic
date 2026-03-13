@@ -1,5 +1,5 @@
 import G6 from '@antv/g6';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const initTooltips = () => {
   const tooltip = new G6.Tooltip({
@@ -42,7 +42,7 @@ const initTooltips = () => {
         },
         {
           label: '更新时间:',
-          value: updatedAt ? moment(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
+          value: updatedAt ? dayjs(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
         },
         {
           label: '描述:',

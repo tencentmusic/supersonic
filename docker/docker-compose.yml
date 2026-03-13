@@ -92,6 +92,12 @@ services:
       S2_OAUTH_STORAGE_TYPE: redis
     ports:
       - "9080:9080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
     deploy:
       resources:
         limits:

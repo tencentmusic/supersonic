@@ -9,6 +9,7 @@ import {
 } from '@/services/user';
 import { encryptPassword, encryptKey, copyText } from '@/utils/utils';
 import { API } from '@/services/API';
+import { MSG } from '@/common/messages';
 import { EditableProTable, ProColumns } from '@ant-design/pro-components';
 import { CopyOutlined } from '@ant-design/icons';
 
@@ -131,7 +132,7 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
                 }
 
                 setDataSource(dataSource.filter((item) => item.id !== record.id));
-                message.success('删除成功');
+                message.success(MSG.DELETE_SUCCESS);
               },
             });
           }}

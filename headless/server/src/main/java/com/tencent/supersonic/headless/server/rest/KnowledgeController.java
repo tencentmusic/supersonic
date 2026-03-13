@@ -89,8 +89,8 @@ public class KnowledgeController {
      * @param taskReq
      */
     @PostMapping("/task")
-    public Long addDictTask(@RequestBody DictSingleTaskReq taskReq, HttpServletRequest request,
-            HttpServletResponse response) {
+    public Long addDictTask(@Valid @RequestBody DictSingleTaskReq taskReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.addDictTask(taskReq, user);
     }
@@ -101,8 +101,8 @@ public class KnowledgeController {
      * @param taskReq
      */
     @PutMapping("/task/delete")
-    public Long deleteDictTask(@RequestBody DictSingleTaskReq taskReq, HttpServletRequest request,
-            HttpServletResponse response) {
+    public Long deleteDictTask(@Valid @RequestBody DictSingleTaskReq taskReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.deleteDictTask(taskReq, user);
     }
@@ -121,7 +121,7 @@ public class KnowledgeController {
      * @param taskReq
      */
     @PostMapping("/task/search")
-    public DictTaskResp queryLatestDictTask(@RequestBody DictSingleTaskReq taskReq,
+    public DictTaskResp queryLatestDictTask(@Valid @RequestBody DictSingleTaskReq taskReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryLatestDictTask(taskReq, user);
@@ -133,7 +133,7 @@ public class KnowledgeController {
      * @param taskQueryReq
      */
     @PostMapping("/task/search/page")
-    public PageInfo<DictTaskResp> queryDictTask(@RequestBody ValueTaskQueryReq taskQueryReq,
+    public PageInfo<DictTaskResp> queryDictTask(@Valid @RequestBody ValueTaskQueryReq taskQueryReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return taskService.queryDictTask(taskQueryReq, user);

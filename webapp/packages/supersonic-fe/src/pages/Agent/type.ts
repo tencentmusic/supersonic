@@ -91,7 +91,7 @@ export type AgentType = {
   createdAt?: string;
   updatedAt?: string;
   examples?: string[];
-  status?: 0 | 1;
+  status?: number;
   enableSearch?: 0 | 1;
   enableFeedback?: 0 | 1;
   toolConfig?: string;

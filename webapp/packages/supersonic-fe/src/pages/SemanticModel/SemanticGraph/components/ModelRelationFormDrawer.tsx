@@ -3,6 +3,7 @@ import { Form, Button, Drawer, Space, Input, Select, message, Popconfirm } from 
 import { formLayout } from '@/components/FormHelper/utils';
 import { TYPE_OPTIONS_LABEL } from '@/pages/SemanticModel/Datasource/constants';
 import { createOrUpdateModelRela, deleteModelRela, getModelDetail } from '../../service';
+import { MSG } from '@/common/messages';
 
 export type ModelRelationFormDrawerProps = {
   domainId: number;
@@ -174,7 +175,7 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
     });
     setSaveLoading(false);
     if (code === 200) {
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
       onSave?.();
       return;
     }
@@ -186,7 +187,7 @@ const ModelRelationFormDrawer: React.FC<ModelRelationFormDrawerProps> = ({
     const { code, msg } = await deleteModelRela(relationData?.id);
     setDeleteLoading(false);
     if (code === 200) {
-      message.success('删除成功');
+      message.success(MSG.DELETE_SUCCESS);
       onDelete?.();
       return;
     }

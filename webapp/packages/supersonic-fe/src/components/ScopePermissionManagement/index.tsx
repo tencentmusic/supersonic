@@ -13,6 +13,7 @@ import {
   Tag,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { MSG } from '@/common/messages';
 import styles from './style.less';
 
 interface Permission {
@@ -95,11 +96,11 @@ const ScopePermissionManagement: React.FC<ScopeConfig> = ({
     try {
       const { code } = await api.delete(id);
       if (code === 200) {
-        message.success('删除成功');
+        message.success(MSG.DELETE_SUCCESS);
         loadPermissions();
       }
     } catch (error) {
-      message.error('删除失败');
+      message.error(MSG.DELETE_FAILED);
     }
   };
 
@@ -117,11 +118,11 @@ const ScopePermissionManagement: React.FC<ScopeConfig> = ({
       }
 
       if (result.code === 200) {
-        message.success(editingPerm ? '更新成功' : '创建成功');
+        message.success(editingPerm ? MSG.UPDATE_SUCCESS : MSG.CREATE_SUCCESS);
         setModalVisible(false);
         loadPermissions();
       } else {
-        message.error(result.msg || '操作失败');
+        message.error(result.msg || MSG.OPERATION_FAILED);
       }
     } catch (error) {
       console.error(error);

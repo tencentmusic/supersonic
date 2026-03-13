@@ -1,0 +1,13 @@
+# Dev profile — local development & integration testing defaults
+# Activate via: spring.profiles.active=h2,dev
+# WARNING: Do NOT use these credentials in production environments.
+
+s2:
+  encryption:
+    aes-key: ${S2_ENCRYPTION_KEY:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08}
+    aes-iv: ${S2_ENCRYPTION_IV:supersonic@bicom}
+  feishu:
+    app-id: ${FEISHU_APP_ID:cli_a9016ca343785bde}
+    app-secret: ${FEISHU_APP_SECRET:Ipbce7MMYlpbtRdvG9lzkbnby6jg83Zo}
+    verification-token: ${FEISHU_VERIFICATION_TOKEN:2157XpI00t0Srvxi0LGWFcBeFLggJo1t}
+    encrypt-key: ${FEISHU_ENCRYPT_KEY:SageData}

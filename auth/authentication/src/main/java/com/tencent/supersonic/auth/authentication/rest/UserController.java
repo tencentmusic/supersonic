@@ -8,6 +8,7 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -63,7 +64,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public void register(@RequestBody UserReq userCmd) {
+    public void register(@Valid @RequestBody UserReq userCmd) {
         userService.register(userCmd);
     }
 
@@ -78,19 +79,19 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserReq userCmd, HttpServletRequest request) {
+    public String login(@Valid @RequestBody UserReq userCmd, HttpServletRequest request) {
         return userService.login(userCmd, request);
     }
 
     @PostMapping("/resetPassword")
-    public void resetPassword(@RequestBody UserReq userCmd, HttpServletRequest request,
+    public void resetPassword(@Valid @RequestBody UserReq userCmd, HttpServletRequest request,
             HttpServletResponse response) {
         User user = userService.getCurrentUser(request, response);
         userService.resetPassword(user.getName(), userCmd.getPassword(), userCmd.getNewPassword());
     }
 
     @PostMapping("/generateToken")
-    public UserToken generateToken(@RequestBody UserTokenReq userTokenReq,
+    public UserToken generateToken(@Valid @RequestBody UserTokenReq userTokenReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = userService.getCurrentUser(request, response);
         return userService.generateToken(userTokenReq.getName(), user.getName(),

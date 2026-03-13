@@ -6,7 +6,7 @@ import { StatusEnum } from '../../enum';
 import { useModel } from '@umijs/max';
 import { deleteView, updateView, getDataSetList, getAllModelByDomainId } from '../../service';
 import ViewCreateFormModal from './ViewCreateFormModal';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from '../../components/style.less';
 import { ISemantic } from '../../data';
 import { ColumnsConfig } from '../../components/TableColumnRender';
@@ -128,7 +128,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
       title: '更新时间',
       search: false,
       render: (value: any) => {
-        return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       },
     },
   ];

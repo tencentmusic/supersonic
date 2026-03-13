@@ -31,28 +31,28 @@ public class ChatQueryController {
     private final ChatQueryService chatQueryService;
 
     @PostMapping("search")
-    public Object search(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
+    public Object search(@Valid @RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) {
         chatParseReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.search(chatParseReq);
     }
 
     @PostMapping("parse")
-    public Object parse(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
+    public Object parse(@Valid @RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         chatParseReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.parse(chatParseReq);
     }
 
     @PostMapping("execute")
-    public Object execute(@RequestBody ChatExecuteReq chatExecuteReq, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public Object execute(@Valid @RequestBody ChatExecuteReq chatExecuteReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.execute(chatExecuteReq);
     }
 
     @PostMapping("getExecuteSummary")
-    public Object getExecuteSummary(@RequestBody ChatExecuteReq chatExecuteReq,
+    public Object getExecuteSummary(@Valid @RequestBody ChatExecuteReq chatExecuteReq,
             HttpServletRequest request, HttpServletResponse response) {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         QueryResult res = chatQueryService.getTextSummary(chatExecuteReq);
@@ -60,7 +60,7 @@ public class ChatQueryController {
     }
 
     @PostMapping("/")
-    public Object query(@RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
+    public Object query(@Valid @RequestBody ChatParseReq chatParseReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         chatParseReq.setUser(user);
@@ -78,7 +78,7 @@ public class ChatQueryController {
     }
 
     @PostMapping("queryData")
-    public Object queryData(@RequestBody ChatQueryDataReq chatQueryDataReq,
+    public Object queryData(@Valid @RequestBody ChatQueryDataReq chatQueryDataReq,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         chatQueryDataReq.setUser(UserHolder.findUser(request, response));
         return chatQueryService.queryData(chatQueryDataReq, UserHolder.findUser(request, response));

@@ -1,5 +1,5 @@
-import tRequest from '@/services/request';
-import moment from 'moment';
+import request from '@/services/request';
+import dayjs from 'dayjs';
 import { DateRangeType } from '@/components/MDatePicker/type';
 import { IDataSource } from './data';
 
@@ -8,33 +8,33 @@ const getRunningEnv = () => {
 };
 
 export function getDomainList(): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}domain/getDomainList`);
+  return request.get(`${process.env.API_BASE_URL}domain/getDomainList`);
 }
 
 export function getDomainDetail(data: any): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}domain/getDomain/${data.modelId}`);
+  return request.get(`${process.env.API_BASE_URL}domain/getDomain/${data.modelId}`);
 }
 
 export function createDomain(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}domain/createDomain`, {
+  return request.post(`${process.env.API_BASE_URL}domain/createDomain`, {
     data,
   });
 }
 
 export function updateDomain(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}domain/updateDomain`, {
+  return request.post(`${process.env.API_BASE_URL}domain/updateDomain`, {
     data,
   });
 }
 
 export function createDatasource(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}datasource/createDatasource`, {
+  return request.post(`${process.env.API_BASE_URL}datasource/createDatasource`, {
     data,
   });
 }
 
 export function updateDatasource(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}datasource/updateDatasource`, {
+  return request.post(`${process.env.API_BASE_URL}datasource/updateDatasource`, {
     data,
   });
 }
@@ -50,63 +50,63 @@ export function getDimensionList(data: any): Promise<any> {
       ...(modelId ? { modelIds: [modelId] } : {}),
     },
   };
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
+  return request.post(`${process.env.API_BASE_URL}dimension/queryDimension`, queryParams);
 }
 
 export function saveCommonDimension(data: any): Promise<any> {
   if (data.id) {
-    return tRequest(`${process.env.API_BASE_URL}commonDimension`, {
+    return request(`${process.env.API_BASE_URL}commonDimension`, {
       method: 'PUT',
       data,
     });
   }
-  return tRequest.post(`${process.env.API_BASE_URL}commonDimension`, {
+  return request.post(`${process.env.API_BASE_URL}commonDimension`, {
     data,
   });
 }
 
 export function deleteCommonDimension(id: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}commonDimension/${id}`, {
+  return request(`${process.env.API_BASE_URL}commonDimension/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function getDimensionInModelCluster(modelId: number): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}dimension/getDimensionInModelCluster/${modelId}`);
+  return request.get(`${process.env.API_BASE_URL}dimension/getDimensionInModelCluster/${modelId}`);
 }
 
 export function createDimension(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/createDimension`, {
+  return request.post(`${process.env.API_BASE_URL}dimension/createDimension`, {
     data,
   });
 }
 
 export function updateDimension(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/updateDimension`, {
+  return request.post(`${process.env.API_BASE_URL}dimension/updateDimension`, {
     data,
   });
 }
 
 export function updateDimensionAliasValue(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/updateDimension/alias/value`, {
+  return request.post(`${process.env.API_BASE_URL}dimension/updateDimension/alias/value`, {
     data,
   });
 }
 
 export function mockDimensionAlias(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/mockDimensionAlias`, {
+  return request.post(`${process.env.API_BASE_URL}dimension/mockDimensionAlias`, {
     data,
   });
 }
 
 export function mockDimensionValuesAlias(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/mockDimensionValuesAlias`, {
+  return request.post(`${process.env.API_BASE_URL}dimension/mockDimensionValuesAlias`, {
     data,
   });
 }
 
 export function getDictData(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}knowledge/dict/data`, {
+  return request.post(`${process.env.API_BASE_URL}knowledge/dict/data`, {
     data,
   });
 }
@@ -122,35 +122,35 @@ export function queryMetric(data: any): Promise<any> {
       ...(modelId ? { modelIds: [modelId] } : {}),
     },
   };
-  return tRequest.post(`${process.env.API_BASE_URL}metric/queryMetric`, queryParams);
+  return request.post(`${process.env.API_BASE_URL}metric/queryMetric`, queryParams);
 }
 
 export function createMetric(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}metric/createMetric`, {
+  return request.post(`${process.env.API_BASE_URL}metric/createMetric`, {
     data,
   });
 }
 
 export function updateMetric(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}metric/updateMetric`, {
+  return request.post(`${process.env.API_BASE_URL}metric/updateMetric`, {
     data,
   });
 }
 
 export function batchUpdateMetricStatus(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}metric/batchUpdateStatus`, {
+  return request.post(`${process.env.API_BASE_URL}metric/batchUpdateStatus`, {
     data,
   });
 }
 
 export function batchUpdateDimensionStatus(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}dimension/batchUpdateStatus`, {
+  return request.post(`${process.env.API_BASE_URL}dimension/batchUpdateStatus`, {
     data,
   });
 }
 
 export async function batchDownloadMetric(data: any): Promise<any> {
-  const response = await tRequest.post(`${process.env.API_BASE_URL}query/downloadBatch/metric`, {
+  const response = await request.post(`${process.env.API_BASE_URL}query/downloadBatch/metric`, {
     responseType: 'blob',
     getResponse: true,
     data,
@@ -160,117 +160,117 @@ export async function batchDownloadMetric(data: any): Promise<any> {
 }
 
 export function mockMetricAlias(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}metric/mockMetricAlias`, {
+  return request.post(`${process.env.API_BASE_URL}metric/mockMetricAlias`, {
     data,
   });
 }
 
 export function getMetricTags(): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}metric/getMetricTags`);
+  return request.get(`${process.env.API_BASE_URL}metric/getMetricTags`);
 }
 
 export function getMetricData(metricId: string | number): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}metric/getMetric/${metricId}`);
+  return request.get(`${process.env.API_BASE_URL}metric/getMetric/${metricId}`);
 }
 
 export function getDrillDownDimension(metricId: number): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}metric/getDrillDownDimension`, {
+  return request.get(`${process.env.API_BASE_URL}metric/getDrillDownDimension`, {
     params: { metricId },
   });
 }
 
 export function getMeasureListByModelId(modelId: number): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}datasource/getMeasureListOfModel/${modelId}`);
+  return request.get(`${process.env.API_BASE_URL}datasource/getMeasureListOfModel/${modelId}`);
 }
 
 export function deleteDatasource(id: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}datasource/deleteDatasource/${id}`, {
+  return request(`${process.env.API_BASE_URL}datasource/deleteDatasource/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function deleteDimension(id: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dimension/deleteDimension/${id}`, {
+  return request(`${process.env.API_BASE_URL}dimension/deleteDimension/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function deleteMetric(id: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}metric/deleteMetric/${id}`, {
+  return request(`${process.env.API_BASE_URL}metric/deleteMetric/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function deleteDomain(id: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}domain/deleteDomain/${id}`, {
+  return request(`${process.env.API_BASE_URL}domain/deleteDomain/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function getGroupAuthInfo(modelId: number): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}queryGroup`, {
+  return request(`${process.env.AUTH_API_BASE_URL}queryGroup`, {
     method: 'GET',
     params: { modelId },
   });
 }
 
 export function createGroupAuth(data: any): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}createGroup`, {
+  return request(`${process.env.AUTH_API_BASE_URL}createGroup`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateGroupAuth(data: any): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}updateGroup`, {
+  return request(`${process.env.AUTH_API_BASE_URL}updateGroup`, {
     method: 'POST',
     data,
   });
 }
 
 export function removeGroupAuth(data: any): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}removeGroup`, {
+  return request(`${process.env.AUTH_API_BASE_URL}removeGroup`, {
     method: 'POST',
     data,
   });
 }
 
 export function addDomainExtend(data: any): Promise<any> {
-  return tRequest(`${process.env.CHAT_API_BASE_URL}conf`, {
+  return request(`${process.env.CHAT_API_BASE_URL}conf`, {
     method: 'POST',
     data,
   });
 }
 
 export function editDomainExtend(data: any): Promise<any> {
-  return tRequest(`${process.env.CHAT_API_BASE_URL}conf`, {
+  return request(`${process.env.CHAT_API_BASE_URL}conf`, {
     method: 'PUT',
     data,
   });
 }
 
 export function getDomainExtendConfig(data: any): Promise<any> {
-  return tRequest(`${process.env.CHAT_API_BASE_URL}conf/search`, {
+  return request(`${process.env.CHAT_API_BASE_URL}conf/search`, {
     method: 'POST',
     data,
   });
 }
 
 export function getDatasourceRelaList(id?: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}datasource/getDatasourceRelaList/${id}`, {
+  return request(`${process.env.API_BASE_URL}datasource/getDatasourceRelaList/${id}`, {
     method: 'GET',
   });
 }
 
 export function createOrUpdateDatasourceRela(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}viewInfo/createOrUpdateDatasourceRela`, {
+  return request(`${process.env.API_BASE_URL}viewInfo/createOrUpdateDatasourceRela`, {
     method: 'POST',
     data,
   });
 }
 
 export function createOrUpdateModelRela(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}modelRela`, {
+  return request(`${process.env.API_BASE_URL}modelRela`, {
     method: data?.id ? 'PUT' : 'POST',
     data,
   });
@@ -280,45 +280,45 @@ export function deleteModelRela(id: any): Promise<any> {
   if (!id) {
     return;
   }
-  return tRequest(`${process.env.API_BASE_URL}modelRela/${id}`, {
+  return request(`${process.env.API_BASE_URL}modelRela/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function getModelRelaList(domainId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}modelRela/list`, {
+  return request(`${process.env.API_BASE_URL}modelRela/list`, {
     method: 'GET',
     params: { domainId },
   });
 }
 
 export function createOrUpdateViewInfo(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}viewInfo/createOrUpdateViewInfo`, {
+  return request(`${process.env.API_BASE_URL}viewInfo/createOrUpdateViewInfo`, {
     method: 'POST',
     data,
   });
 }
 
 export function getViewInfoList(domainId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}viewInfo/getViewInfoList/${domainId}`, {
+  return request(`${process.env.API_BASE_URL}viewInfo/getViewInfoList/${domainId}`, {
     method: 'GET',
   });
 }
 
 export function deleteViewInfo(recordId: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}viewInfo/deleteViewInfo/${recordId}`, {
+  return request(`${process.env.API_BASE_URL}viewInfo/deleteViewInfo/${recordId}`, {
     method: 'DELETE',
   });
 }
 
 export function deleteDatasourceRela(domainId: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}viewInfo/deleteDatasourceRela/${domainId}`, {
+  return request(`${process.env.API_BASE_URL}viewInfo/deleteDatasourceRela/${domainId}`, {
     method: 'DELETE',
   });
 }
 
 export function getDomainSchemaRela(domainId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}viewInfo/getDomainSchemaRela/${domainId}`, {
+  return request(`${process.env.API_BASE_URL}viewInfo/getDomainSchemaRela/${domainId}`, {
     method: 'GET',
   });
 }
@@ -336,26 +336,26 @@ export type SaveDatabaseParams = {
 };
 
 export function getDatabaseList(): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/getDatabaseList`, {
+  return request(`${process.env.API_BASE_URL}database/getDatabaseList`, {
     method: 'GET',
   });
 }
 
 export function deleteDatabase(domainId: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/${domainId}`, {
+  return request(`${process.env.API_BASE_URL}database/${domainId}`, {
     method: 'DELETE',
   });
 }
 
 export function saveDatabase(data: SaveDatabaseParams): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/createOrUpdateDatabase`, {
+  return request(`${process.env.API_BASE_URL}database/createOrUpdateDatabase`, {
     method: 'POST',
     data,
   });
 }
 
 export function testDatabaseConnect(data: SaveDatabaseParams): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/testConnect`, {
+  return request(`${process.env.API_BASE_URL}database/testConnect`, {
     method: 'POST',
     data,
   });
@@ -370,11 +370,11 @@ type ExcuteSqlParams = {
 // 执行脚本
 export async function executeSql(params: ExcuteSqlParams) {
   const data = { ...params };
-  return tRequest.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
+  return request.post(`${process.env.API_BASE_URL}database/executeSql`, { data });
 }
 
 export function getCatalogs(dbId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/getCatalogs`, {
+  return request(`${process.env.API_BASE_URL}database/getCatalogs`, {
     method: 'GET',
     params: {
       id: dbId,
@@ -383,7 +383,7 @@ export function getCatalogs(dbId: number): Promise<any> {
 }
 
 export function getDbNames(dbId: number, catalog: string): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/getDbNames`, {
+  return request(`${process.env.API_BASE_URL}database/getDbNames`, {
     method: 'GET',
     params: {
       id: dbId,
@@ -393,7 +393,7 @@ export function getDbNames(dbId: number, catalog: string): Promise<any> {
 }
 
 export function getTables(databaseId: number, catalog: string, dbName: string): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/getTables`, {
+  return request(`${process.env.API_BASE_URL}database/getTables`, {
     method: 'GET',
     params: {
       databaseId,
@@ -409,7 +409,7 @@ export function getColumns(
   dbName: string,
   tableName: string,
 ): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}database/getColumnsByName`, {
+  return request(`${process.env.API_BASE_URL}database/getColumnsByName`, {
     method: 'GET',
     params: {
       databaseId,
@@ -421,39 +421,39 @@ export function getColumns(
 }
 
 export function getModelList(domainId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/getModelList/${domainId}`, {
+  return request(`${process.env.API_BASE_URL}model/getModelList/${domainId}`, {
     method: 'GET',
   });
 }
 
 export function createModel(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/createModel`, {
+  return request(`${process.env.API_BASE_URL}model/createModel`, {
     method: 'POST',
     data,
   });
 }
 export function updateModel(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/updateModel`, {
+  return request(`${process.env.API_BASE_URL}model/updateModel`, {
     method: 'POST',
     data,
   });
 }
 
 export function batchUpdateModelStatus(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/batchUpdateStatus`, {
+  return request(`${process.env.API_BASE_URL}model/batchUpdateStatus`, {
     method: 'POST',
     data,
   });
 }
 
 export function deleteModel(modelId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/deleteModel/${modelId}`, {
+  return request(`${process.env.API_BASE_URL}model/deleteModel/${modelId}`, {
     method: 'DELETE',
   });
 }
 
 export function getUnAvailableItem(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/getUnAvailableItem`, {
+  return request(`${process.env.API_BASE_URL}model/getUnAvailableItem`, {
     method: 'POST',
     data,
   });
@@ -463,17 +463,17 @@ export function getModelDetail(data: any): Promise<any> {
   if (!data.modelId) {
     return {};
   }
-  return tRequest.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
+  return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }
 
 export function getMetricsToCreateNewMetric(data: any): Promise<any> {
-  return tRequest.get(
+  return request.get(
     `${process.env.API_BASE_URL}metric/getMetricsToCreateNewMetric/${data.modelId}`,
   );
 }
 
 export function getAllModelByDomainId(domainId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}model/getAllModelByDomainId`, {
+  return request(`${process.env.API_BASE_URL}model/getAllModelByDomainId`, {
     method: 'GET',
     params: {
       domainId,
@@ -482,49 +482,49 @@ export function getAllModelByDomainId(domainId: number): Promise<any> {
 }
 
 export function createDictTask(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}knowledge/task`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task`, {
     method: 'POST',
     data,
   });
 }
 
 export function createDictConfig(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}knowledge/conf`, {
+  return request(`${process.env.API_BASE_URL}knowledge/conf`, {
     method: 'POST',
     data,
   });
 }
 
 export function editDictConfig(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}knowledge/conf`, {
+  return request(`${process.env.API_BASE_URL}knowledge/conf`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteDictTask(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}knowledge/task/delete`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task/delete`, {
     method: 'PUT',
     data,
   });
 }
 
 export function searchDictLatestTaskList(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}knowledge/task/search`, {
+  return request(`${process.env.API_BASE_URL}knowledge/task/search`, {
     method: 'POST',
     data,
   });
 }
 
 export function searchKnowledgeConfigQuery(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}knowledge/conf/query`, {
+  return request(`${process.env.API_BASE_URL}knowledge/conf/query`, {
     method: 'POST',
     data,
   });
 }
 
 const downloadStruct = (blob: Blob) => {
-  const fieldName = `supersonic_${moment().format('YYYYMMDDhhmmss')}.xlsx`;
+  const fieldName = `supersonic_${dayjs().format('YYYYMMDDhhmmss')}.xlsx`;
   const link = document.createElement('a');
   link.href = URL.createObjectURL(new Blob([blob]));
   link.download = fieldName;
@@ -535,7 +535,7 @@ const downloadStruct = (blob: Blob) => {
 };
 
 export function queryDimValue(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dimension/queryDimValue`, {
+  return request(`${process.env.API_BASE_URL}dimension/queryDimValue`, {
     method: 'POST',
     data,
   });
@@ -564,7 +564,7 @@ export async function queryStruct({
   filters?: string[];
   isTransform: boolean;
 }): Promise<any> {
-  const response = await tRequest(
+  const response = await request(
     `${process.env.API_BASE_URL}query/${download ? 'download/' : ''}metric`,
     {
       method: 'POST',
@@ -606,15 +606,15 @@ export function indicatorStarState(data: {
 }): Promise<any> {
   const { id, state, type } = data;
   if (state) {
-    return tRequest(`${process.env.API_BASE_URL}collect/createCollectionIndicators`, {
+    return request(`${process.env.API_BASE_URL}collect/createCollectionIndicators`, {
       method: 'POST',
       data: { collectId: id, type },
     });
   } else {
-    // return tRequest(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators/${id}`, {
+    // return request(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators/${id}`, {
     //   method: 'DELETE',
     // });
-    return tRequest(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators`, {
+    return request(`${process.env.API_BASE_URL}collect/deleteCollectionIndicators`, {
       method: 'POST',
       data: { collectId: id, type },
     });
@@ -622,196 +622,196 @@ export function indicatorStarState(data: {
 }
 
 export function getDatabaseParameters(): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}database/getDatabaseParameters`);
+  return request.get(`${process.env.API_BASE_URL}database/getDatabaseParameters`);
 }
 
 export function getDatabaseDetail(id: number): Promise<any> {
-  return tRequest.get(`${process.env.API_BASE_URL}database/${id}`);
+  return request.get(`${process.env.API_BASE_URL}database/${id}`);
 }
 
 export function getDataSetList(domainId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dataSet/getDataSetList`, {
+  return request(`${process.env.API_BASE_URL}dataSet/getDataSetList`, {
     method: 'GET',
     params: { domainId },
   });
 }
 
 export function getDataSetDetail(id: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dataSet/${id}`, {
+  return request(`${process.env.API_BASE_URL}dataSet/${id}`, {
     method: 'GET',
   });
 }
 
 export function createView(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dataSet`, {
+  return request(`${process.env.API_BASE_URL}dataSet`, {
     method: 'POST',
     data,
   });
 }
 export function updateView(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dataSet`, {
+  return request(`${process.env.API_BASE_URL}dataSet`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteView(viewId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dataSet/${viewId}`, {
+  return request(`${process.env.API_BASE_URL}dataSet/${viewId}`, {
     method: 'DELETE',
   });
 }
 
 export function getTagList(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/queryTag/market`, {
+  return request(`${process.env.API_BASE_URL}tag/queryTag/market`, {
     method: 'POST',
     data: { pageSize: 9999, ...data },
   });
 }
 
 export function deleteTag(tagId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/delete/${tagId}`, {
+  return request(`${process.env.API_BASE_URL}tag/delete/${tagId}`, {
     method: 'DELETE',
   });
 }
 
 export function batchUpdateTagStatus(data: any): Promise<any> {
-  return tRequest.post(`${process.env.API_BASE_URL}tag/batchUpdateStatus`, {
+  return request.post(`${process.env.API_BASE_URL}tag/batchUpdateStatus`, {
     data,
   });
 }
 
 export function createTag(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/create`, {
+  return request(`${process.env.API_BASE_URL}tag/create`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateTag(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/update`, {
+  return request(`${process.env.API_BASE_URL}tag/update`, {
     method: 'POST',
     data,
   });
 }
 
 export function getTagData(tagId: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/getTag/${tagId}`, {
+  return request(`${process.env.API_BASE_URL}tag/getTag/${tagId}`, {
     method: 'GET',
   });
 }
 
 export function getTagValueDistribution(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/value/distribution`, {
+  return request(`${process.env.API_BASE_URL}tag/value/distribution`, {
     method: 'POST',
     data,
   });
 }
 
 export function batchCreateTag(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/create/batch`, {
+  return request(`${process.env.API_BASE_URL}tag/create/batch`, {
     method: 'POST',
     data,
   });
 }
 
 export function batchDeleteTag(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tag/delete/batch`, {
+  return request(`${process.env.API_BASE_URL}tag/delete/batch`, {
     method: 'POST',
     data,
   });
 }
 
 export function batchMetricPublish(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}metric/batchPublish`, {
+  return request(`${process.env.API_BASE_URL}metric/batchPublish`, {
     method: 'POST',
     data,
   });
 }
 
 export function batchMetricUnPublish(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}metric/batchUnPublish`, {
+  return request(`${process.env.API_BASE_URL}metric/batchUnPublish`, {
     method: 'POST',
     data,
   });
 }
 
 export function createTagObject(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tagObject/create`, {
+  return request(`${process.env.API_BASE_URL}tagObject/create`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateTagObject(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tagObject/update`, {
+  return request(`${process.env.API_BASE_URL}tagObject/update`, {
     method: 'POST',
     data,
   });
 }
 
 export function deleteTagObject(id: number): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tagObject/delete/${id}`, {
+  return request(`${process.env.API_BASE_URL}tagObject/delete/${id}`, {
     method: 'DELETE',
   });
 }
 
 export function getTagObjectList(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}tagObject/query`, {
+  return request(`${process.env.API_BASE_URL}tagObject/query`, {
     method: 'POST',
     data: { pageSize: 9999, status: 1, ...data },
   });
 }
 
 export function getMetricClassifications(): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}metric/getMetricClassifications`, {
+  return request(`${process.env.API_BASE_URL}metric/getMetricClassifications`, {
     method: 'GET',
   });
 }
 
 export function batchUpdateClassifications(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}metric/batchUpdateClassifications`, {
+  return request(`${process.env.API_BASE_URL}metric/batchUpdateClassifications`, {
     method: 'POST',
     data: { ...data },
   });
 }
 
 export function batchUpdateDimensionSensitiveLevel(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}dimension/batchUpdateSensitiveLevel`, {
+  return request(`${process.env.API_BASE_URL}dimension/batchUpdateSensitiveLevel`, {
     method: 'POST',
     data: { ...data },
   });
 }
 
 export function batchUpdateMetricSensitiveLevel(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}metric/batchUpdateSensitiveLevel`, {
+  return request(`${process.env.API_BASE_URL}metric/batchUpdateSensitiveLevel`, {
     method: 'POST',
     data: { ...data },
   });
 }
 
 export function getTermList(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}term`, {
+  return request(`${process.env.API_BASE_URL}term`, {
     method: 'GET',
     params: data,
   });
 }
 
 export function saveOrUpdate(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}term/saveOrUpdate`, {
+  return request(`${process.env.API_BASE_URL}term/saveOrUpdate`, {
     method: 'POST',
     data: { ...data },
   });
 }
 
 export function deleteTerm(data: any): Promise<any> {
-  return tRequest(`${process.env.API_BASE_URL}term/deleteBatch`, {
+  return request(`${process.env.API_BASE_URL}term/deleteBatch`, {
     method: 'POST',
     data: { ...data },
   });
 }
 
 export function createLlmConfig(data: any): Promise<any> {
-  return tRequest(`${process.env.CHAT_API_BASE_URL}chat/model`, {
+  return request(`${process.env.CHAT_API_BASE_URL}chat/model`, {
     method: 'POST',
     data: { ...data },
   });
@@ -819,19 +819,19 @@ export function createLlmConfig(data: any): Promise<any> {
 
 export function saveLlmConfig(data: any): Promise<any> {
   if (data.id) {
-    return tRequest(`${process.env.CHAT_API_BASE_URL}model`, {
+    return request(`${process.env.CHAT_API_BASE_URL}model`, {
       method: 'PUT',
       data,
     });
   }
-  return tRequest(`${process.env.CHAT_API_BASE_URL}model`, {
+  return request(`${process.env.CHAT_API_BASE_URL}model`, {
     method: 'POST',
     data,
   });
 }
 
 export function deleteLlmConfig(id: number): Promise<any> {
-  return tRequest(`${process.env.CHAT_API_BASE_URL}model/${id}`, {
+  return request(`${process.env.CHAT_API_BASE_URL}model/${id}`, {
     method: 'DELETE',
   });
 }

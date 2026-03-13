@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.server.memory.MemoryReviewTask;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.User;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.util.CollectionUtils;
@@ -28,6 +29,7 @@ public class Agent extends RecordInfo {
     private static final int DISABLED = 0;
 
     private Integer id;
+    @NotBlank(message = "name must not be blank")
     private String name;
     private String description;
     /** 0 offline, 1 online */

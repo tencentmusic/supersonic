@@ -17,6 +17,7 @@ import com.tencent.supersonic.headless.server.pojo.MetricFilter;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,15 +40,15 @@ public class MetricController {
     }
 
     @PostMapping("/createMetric")
-    public MetricResp createMetric(@RequestBody MetricReq metricReq, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public MetricResp createMetric(@RequestBody @Valid MetricReq metricReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return metricService.createMetric(metricReq, user);
     }
 
     @PostMapping("/updateMetric")
-    public MetricResp updateMetric(@RequestBody MetricReq metricReq, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public MetricResp updateMetric(@RequestBody @Valid MetricReq metricReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return metricService.updateMetric(metricReq, user);
     }

@@ -81,7 +81,7 @@
     "eslint-config-tencent": "^1.0.4",
     "jsencrypt": "^3.0.1",
     "lodash": "^4.17.11",
-    "moment": "^2.29.1",
+
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
     "omit.js": "^2.0.2",

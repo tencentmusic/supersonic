@@ -1,4 +1,4 @@
-import { request } from 'umi';
+import request from '@/services/request';
 
 export interface ConnectionDO {
   id?: number;
@@ -123,29 +123,23 @@ export interface PageResult<T> {
 const API_PREFIX = '/api/v1/connections';
 
 export async function createConnection(connection: ConnectionDO) {
-  return request<ConnectionDO>(API_PREFIX, {
-    method: 'POST',
+  return request.post<ConnectionDO>(API_PREFIX, {
     data: connection,
   });
 }
 
 export async function updateConnection(id: number, connection: Partial<ConnectionDO>) {
-  return request<ConnectionDO>(`${API_PREFIX}/${id}`, {
-    method: 'PATCH',
+  return request.patch<ConnectionDO>(`${API_PREFIX}/${id}`, {
     data: connection,
   });
 }
 
 export async function deleteConnection(id: number) {
-  return request<void>(`${API_PREFIX}/${id}`, {
-    method: 'DELETE',
-  });
+  return request.delete<void>(`${API_PREFIX}/${id}`);
 }
 
 export async function getConnectionById(id: number) {
-  return request<ConnectionDO>(`${API_PREFIX}/${id}`, {
-    method: 'GET',
-  });
+  return request.get<ConnectionDO>(`${API_PREFIX}/${id}`);
 }
 
 export async function listConnections(params: {
@@ -155,8 +149,7 @@ export async function listConnections(params: {
   destDbId?: number;
   status?: string;
 }) {
-  return request<PageResult<ConnectionDO>>(API_PREFIX, {
-    method: 'GET',
+  return request.get<PageResult<ConnectionDO>>(API_PREFIX, {
     params: {
       current: params.current || 1,
       pageSize: params.pageSize || 20,
@@ -168,52 +161,39 @@ export async function listConnections(params: {
 }
 
 export async function pauseConnection(id: number) {
-  return request<void>(`${API_PREFIX}/${id}:pause`, {
-    method: 'POST',
-  });
+  return request.post<void>(`${API_PREFIX}/${id}:pause`);
 }
 
 export async function resumeConnection(id: number) {
-  return request<void>(`${API_PREFIX}/${id}:resume`, {
-    method: 'POST',
-  });
+  return request.post<void>(`${API_PREFIX}/${id}:resume`);
 }
 
 export async function deprecateConnection(id: number, reason?: string) {
-  return request<void>(`${API_PREFIX}/${id}:deprecate`, {
-    method: 'POST',
+  return request.post<void>(`${API_PREFIX}/${id}:deprecate`, {
     data: reason ? { reason } : {},
   });
 }
 
 export async function triggerSync(id: number) {
-  return request<void>(`${API_PREFIX}/${id}:sync`, {
-    method: 'POST',
-  });
+  return request.post<void>(`${API_PREFIX}/${id}:sync`);
 }
 
 export async function resetState(id: number, streams?: string[]) {
-  return request<void>(`${API_PREFIX}/${id}:resetState`, {
-    method: 'POST',
+  return request.post<void>(`${API_PREFIX}/${id}:resetState`, {
     data: streams ? { streams } : {},
   });
 }
 
 export async function discoverSchema(id: number) {
-  return request<DiscoveredSchema>(`${API_PREFIX}/${id}:discoverSchema`, {
-    method: 'POST',
-  });
+  return request.post<DiscoveredSchema>(`${API_PREFIX}/${id}:discoverSchema`);
 }
 
 export async function getSchemaChanges(id: number) {
-  return request<SchemaChange>(`${API_PREFIX}/${id}/schemaChanges`, {
-    method: 'GET',
-  });
+  return request.get<SchemaChange>(`${API_PREFIX}/${id}/schemaChanges`);
 }
 
 export async function applySchemaChanges(id: number, catalog: ConfiguredCatalog) {
-  return request<void>(`${API_PREFIX}/${id}:applySchemaChanges`, {
-    method: 'POST',
+  return request.post<void>(`${API_PREFIX}/${id}:applySchemaChanges`, {
     data: catalog,
   });
 }
@@ -222,8 +202,7 @@ export async function getTimeline(
   id: number,
   params: { current?: number; pageSize?: number; eventType?: string },
 ) {
-  return request<PageResult<ConnectionEventDO>>(`${API_PREFIX}/${id}/timeline`, {
-    method: 'GET',
+  return request.get<PageResult<ConnectionEventDO>>(`${API_PREFIX}/${id}/timeline`, {
     params: {
       current: params.current || 1,
       pageSize: params.pageSize || 20,
@@ -233,8 +212,7 @@ export async function getTimeline(
 }
 
 export async function getJobHistory(id: number, params: { current?: number; pageSize?: number }) {
-  return request<PageResult<DataSyncExecutionDO>>(`${API_PREFIX}/${id}/jobs`, {
-    method: 'GET',
+  return request.get<PageResult<DataSyncExecutionDO>>(`${API_PREFIX}/${id}/jobs`, {
     params: {
       current: params.current || 1,
       pageSize: params.pageSize || 20,

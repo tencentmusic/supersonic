@@ -2,7 +2,7 @@ import { Button, Drawer, message, Row, Col, Divider, Tag, Space, Popconfirm } fr
 import React, { useState, useEffect, ReactNode } from 'react';
 import { SemanticNodeType } from '../../enum';
 import { deleteDimension, deleteMetric, deleteDatasource } from '../../service';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from '../style.less';
 import TransTypeTag from '../../components/TransTypeTag';
 import { SENSITIVE_LEVEL_ENUM } from '../../constant';
@@ -109,11 +109,11 @@ const NodeInfoDrawer: React.FC<Props> = ({
           },
           {
             label: '创建时间',
-            value: createdAt ? moment(createdAt).format('YYYY-MM-DD HH:mm:ss') : '',
+            value: createdAt ? dayjs(createdAt).format('YYYY-MM-DD HH:mm:ss') : '',
           },
           {
             label: '更新时间',
-            value: updatedAt ? moment(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
+            value: updatedAt ? dayjs(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
           },
         ],
       },
@@ -142,11 +142,11 @@ const NodeInfoDrawer: React.FC<Props> = ({
           },
           {
             label: '创建时间',
-            value: createdAt ? moment(createdAt).format('YYYY-MM-DD HH:mm:ss') : '',
+            value: createdAt ? dayjs(createdAt).format('YYYY-MM-DD HH:mm:ss') : '',
           },
           {
             label: '更新时间',
-            value: updatedAt ? moment(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
+            value: updatedAt ? dayjs(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '',
           },
         ],
       },

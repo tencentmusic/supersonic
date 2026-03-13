@@ -22,6 +22,7 @@ import {
   updateSyncConfig,
 } from '@/services/dataSync';
 import type { DataSyncConfig } from '@/services/dataSync';
+import { MSG } from '@/common/messages';
 import styles from '../style.less';
 
 type Props = {
@@ -176,7 +177,7 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
           message.warning('数据库保存成功，但同步配置保存失败');
         }
       } else {
-        message.success('保存成功');
+        message.success(MSG.SAVE_SUCCESS);
       }
       onSubmit?.();
       return;

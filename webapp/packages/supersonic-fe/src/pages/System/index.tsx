@@ -1,5 +1,6 @@
 import styles from './style.less';
 import { Button, Form, message, Space, Divider, Anchor, Row, Col } from 'antd';
+import { MSG } from '@/common/messages';
 import React, { useState, useEffect, useRef } from 'react';
 import { getSystemConfig, saveSystemConfig } from '@/services/user';
 import { ProCard } from '@ant-design/pro-components';
@@ -138,7 +139,7 @@ const System: React.FC = () => {
       }),
     });
     if (code === 200) {
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
     } else {
       message.error(msg);
     }

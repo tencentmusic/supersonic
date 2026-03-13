@@ -1,4 +1,4 @@
-import tRequest from './request';
+import request from './request';
 
 // ============ Types ============
 
@@ -289,7 +289,7 @@ const ADMIN_BASE = `${API_V1}/admin`;
  * Get template list (builtin + custom)
  */
 export function getTemplateList(): Promise<SemanticTemplateListResp> {
-  return tRequest(TEMPLATES_BASE, {
+  return request(TEMPLATES_BASE, {
     method: 'GET',
   });
 }
@@ -298,7 +298,7 @@ export function getTemplateList(): Promise<SemanticTemplateListResp> {
  * Get template by ID
  */
 export function getTemplateById(id: number): Promise<SemanticTemplate> {
-  return tRequest(`${TEMPLATES_BASE}/${id}`, {
+  return request(`${TEMPLATES_BASE}/${id}`, {
     method: 'GET',
   });
 }
@@ -307,7 +307,7 @@ export function getTemplateById(id: number): Promise<SemanticTemplate> {
  * Create template
  */
 export function createTemplate(template: Partial<SemanticTemplate>): Promise<SemanticTemplate> {
-  return tRequest(TEMPLATES_BASE, {
+  return request(TEMPLATES_BASE, {
     method: 'POST',
     data: template,
   });
@@ -320,7 +320,7 @@ export function updateTemplate(
   id: number,
   template: Partial<SemanticTemplate>,
 ): Promise<SemanticTemplate> {
-  return tRequest(`${TEMPLATES_BASE}/${id}`, {
+  return request(`${TEMPLATES_BASE}/${id}`, {
     method: 'PATCH',
     data: template,
   });
@@ -330,7 +330,7 @@ export function updateTemplate(
  * Delete template
  */
 export function deleteTemplate(id: number): Promise<void> {
-  return tRequest(`${TEMPLATES_BASE}/${id}`, {
+  return request(`${TEMPLATES_BASE}/${id}`, {
     method: 'DELETE',
   });
 }
@@ -342,7 +342,7 @@ export function previewDeployment(
   templateId: number,
   param: SemanticDeployParam,
 ): Promise<SemanticPreviewResult> {
-  return tRequest(`${TEMPLATES_BASE}/${templateId}:preview`, {
+  return request(`${TEMPLATES_BASE}/${templateId}:preview`, {
     method: 'POST',
     data: param,
   });
@@ -355,7 +355,7 @@ export function executeDeployment(
   templateId: number,
   param: SemanticDeployParam,
 ): Promise<SemanticDeployment> {
-  return tRequest(`${TEMPLATES_BASE}/${templateId}:deploy`, {
+  return request(`${TEMPLATES_BASE}/${templateId}:deploy`, {
     method: 'POST',
     data: param,
   });
@@ -367,7 +367,7 @@ export function executeDeployment(
  * Get deployment list (current tenant)
  */
 export function getDeploymentHistory(): Promise<SemanticDeployment[]> {
-  return tRequest(DEPLOYMENTS_BASE, {
+  return request(DEPLOYMENTS_BASE, {
     method: 'GET',
   });
 }
@@ -376,7 +376,7 @@ export function getDeploymentHistory(): Promise<SemanticDeployment[]> {
  * Get deployment by ID
  */
 export function getDeploymentById(id: number): Promise<SemanticDeployment> {
-  return tRequest(`${DEPLOYMENTS_BASE}/${id}`, {
+  return request(`${DEPLOYMENTS_BASE}/${id}`, {
     method: 'GET',
   });
 }
@@ -385,7 +385,7 @@ export function getDeploymentById(id: number): Promise<SemanticDeployment> {
  * Cancel a PENDING or RUNNING deployment
  */
 export function cancelDeployment(id: number): Promise<SemanticDeployment> {
-  return tRequest(`${DEPLOYMENTS_BASE}/${id}:cancel`, {
+  return request(`${DEPLOYMENTS_BASE}/${id}:cancel`, {
     method: 'POST',
   });
 }
@@ -396,7 +396,7 @@ export function cancelDeployment(id: number): Promise<SemanticDeployment> {
  * Create/update builtin template (custom action with colon)
  */
 export function saveBuiltinTemplate(template: Partial<SemanticTemplate>): Promise<SemanticTemplate> {
-  return tRequest(`${ADMIN_BASE}/templates:builtin`, {
+  return request(`${ADMIN_BASE}/templates:builtin`, {
     method: 'POST',
     data: template,
   });
@@ -406,7 +406,7 @@ export function saveBuiltinTemplate(template: Partial<SemanticTemplate>): Promis
  * Get all tenants' deployments (SuperAdmin only)
  */
 export function getAllDeploymentHistory(): Promise<SemanticDeployment[]> {
-  return tRequest(`${ADMIN_BASE}/deployments`, {
+  return request(`${ADMIN_BASE}/deployments`, {
     method: 'GET',
   });
 }

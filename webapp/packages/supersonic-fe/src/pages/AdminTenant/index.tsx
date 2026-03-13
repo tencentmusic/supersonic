@@ -43,6 +43,7 @@ import {
 } from '@/services/subscription';
 import type { SubscriptionPlan, TenantSubscription } from '@/services/tenant';
 import dayjs from 'dayjs';
+import { MSG } from '@/common/messages';
 import styles from './style.less';
 
 const { TextArea } = Input;
@@ -126,24 +127,24 @@ const AdminTenant: React.FC = () => {
       }
 
       if (res.code === 200) {
-        message.success(editingTenant ? '更新成功' : '创建成功');
+        message.success(editingTenant ? MSG.UPDATE_SUCCESS : MSG.CREATE_SUCCESS);
         setModalVisible(false);
         actionRef.current?.reload();
       } else {
-        message.error(res.msg || '操作失败');
+        message.error(res.msg || MSG.OPERATION_FAILED);
       }
     } catch (error) {
-      message.error('操作失败');
+      message.error(MSG.OPERATION_FAILED);
     }
   };
 
   const handleDelete = async (id: number) => {
     const res = await deleteTenant(id);
     if (res.code === 200) {
-      message.success('删除成功');
+      message.success(MSG.DELETE_SUCCESS);
       actionRef.current?.reload();
     } else {
-      message.error(res.msg || '删除失败');
+      message.error(res.msg || MSG.DELETE_FAILED);
     }
   };
 
@@ -153,7 +154,7 @@ const AdminTenant: React.FC = () => {
       message.success('已暂停租户');
       actionRef.current?.reload();
     } else {
-      message.error(res.msg || '操作失败');
+      message.error(res.msg || MSG.OPERATION_FAILED);
     }
   };
 
@@ -163,7 +164,7 @@ const AdminTenant: React.FC = () => {
       message.success('已激活租户');
       actionRef.current?.reload();
     } else {
-      message.error(res.msg || '操作失败');
+      message.error(res.msg || MSG.OPERATION_FAILED);
     }
   };
 

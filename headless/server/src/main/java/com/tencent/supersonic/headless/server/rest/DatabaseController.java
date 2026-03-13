@@ -12,6 +12,7 @@ import com.tencent.supersonic.headless.server.pojo.DatabaseParameter;
 import com.tencent.supersonic.headless.server.service.DatabaseService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,14 +37,14 @@ public class DatabaseController {
     }
 
     @PostMapping("/testConnect")
-    public boolean testConnect(@RequestBody DatabaseReq databaseReq, HttpServletRequest request,
-            HttpServletResponse response) {
+    public boolean testConnect(@Valid @RequestBody DatabaseReq databaseReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return databaseService.testConnect(databaseReq, user);
     }
 
     @PostMapping("/createOrUpdateDatabase")
-    public DatabaseResp createOrUpdateDatabase(@RequestBody DatabaseReq databaseReq,
+    public DatabaseResp createOrUpdateDatabase(@Valid @RequestBody DatabaseReq databaseReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return databaseService.createOrUpdateDatabase(databaseReq, user);
@@ -72,7 +73,7 @@ public class DatabaseController {
     }
 
     @PostMapping("/executeSql")
-    public SemanticQueryResp executeSql(@RequestBody SqlExecuteReq sqlExecuteReq,
+    public SemanticQueryResp executeSql(@Valid @RequestBody SqlExecuteReq sqlExecuteReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return databaseService.executeSql(sqlExecuteReq, user);

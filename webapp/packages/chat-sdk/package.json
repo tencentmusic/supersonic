@@ -17,7 +17,7 @@
     "github-markdown-css": "^5.5.1",
     "highlight.js": "^11.9.0",
     "lodash": "^4.17.11",
-    "moment": "^2.29.4",
+
     "react-copy-to-clipboard": "^5.1.0",
     "react-grid-layout": "^1.4.4",
     "react-markdown": "^9.0.1",

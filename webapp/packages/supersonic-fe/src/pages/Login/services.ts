@@ -1,4 +1,4 @@
-import tRequest from '@/services/request';
+import request from '@/services/request';
 
 export interface PostUserLoginRes {
   code: string; // 返回编码
@@ -31,14 +31,14 @@ export interface OAuthTokenResponse {
 }
 
 export function userRegister(data: any): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}user/register`, {
+  return request(`${process.env.AUTH_API_BASE_URL}user/register`, {
     method: 'POST',
     data,
   });
 }
 
 export function postUserLogin(data: any): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}user/login`, {
+  return request(`${process.env.AUTH_API_BASE_URL}user/login`, {
     method: 'POST',
     data,
   });
@@ -48,7 +48,7 @@ export function postUserLogin(data: any): Promise<any> {
  * Get available OAuth providers.
  */
 export function getOAuthProviders(): Promise<OAuthProvidersResponse> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}oauth/providers`, {
+  return request(`${process.env.AUTH_API_BASE_URL}oauth/providers`, {
     method: 'GET',
   });
 }
@@ -58,7 +58,7 @@ export function getOAuthProviders(): Promise<OAuthProvidersResponse> {
  * The exchange code is automatically sent via HTTP-only cookie.
  */
 export function exchangeOAuthCode(): Promise<OAuthTokenResponse> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}oauth/token/exchange`, {
+  return request(`${process.env.AUTH_API_BASE_URL}oauth/token/exchange`, {
     method: 'POST',
     credentials: 'include', // Important: include cookies
   });
@@ -68,7 +68,7 @@ export function exchangeOAuthCode(): Promise<OAuthTokenResponse> {
  * Refresh access token using refresh token.
  */
 export function refreshAccessToken(refreshToken: string): Promise<OAuthTokenResponse> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}token/refresh`, {
+  return request(`${process.env.AUTH_API_BASE_URL}token/refresh`, {
     method: 'POST',
     data: { refresh_token: refreshToken },
   });
@@ -78,7 +78,7 @@ export function refreshAccessToken(refreshToken: string): Promise<OAuthTokenResp
  * Revoke refresh token.
  */
 export function revokeRefreshToken(refreshToken: string): Promise<{ success: boolean }> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}token/revoke`, {
+  return request(`${process.env.AUTH_API_BASE_URL}token/revoke`, {
     method: 'POST',
     data: { refresh_token: refreshToken },
   });
@@ -95,7 +95,7 @@ export function getOAuthAuthorizeUrl(provider: string): string {
  * Get current user info including tenant ID.
  */
 export function getCurrentUserInfo(): Promise<any> {
-  return tRequest(`${process.env.AUTH_API_BASE_URL}user/info`, {
+  return request(`${process.env.AUTH_API_BASE_URL}user/info`, {
     method: 'GET',
   });
 }

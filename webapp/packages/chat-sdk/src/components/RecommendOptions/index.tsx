@@ -1,6 +1,6 @@
 import { getFormattedValue, isMobile } from '../../utils/utils';
 import { Table, Avatar } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { queryEntities } from '../../service';
 import { CLS_PREFIX } from '../../common/constants';
@@ -80,7 +80,7 @@ const RecommendOptions: React.FC<Props> = ({ entityId, modelId, modelName, onSel
                 title: '发布时间',
                 align: 'center',
                 render: (publishTime: string) => {
-                  return publishTime ? moment(publishTime).format('YYYY-MM-DD') : '-';
+                  return publishTime ? dayjs(publishTime).format('YYYY-MM-DD') : '-';
                 },
               },
           {

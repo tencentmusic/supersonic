@@ -1,5 +1,6 @@
 server:
   port: 9080
+  shutdown: graceful
   compression:
     enabled: true
     min-response-size: 1024
@@ -8,8 +9,14 @@ server:
 spring:
   profiles:
     active: ${S2_DB_TYPE:h2}
+    include: ${S2_ENV:dev}
   application:
     name: chat
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  task:
+    execution:
+      thread-name-prefix: supersonic-task-
   config:
     import:
       - classpath:s2-config.yaml
@@ -185,18 +192,12 @@ s2:
       - /actuator/**
   # Feishu bot configuration
   feishu:
-    enabled: ${FEISHU_ENABLED:true}
+    enabled: ${FEISHU_ENABLED:false}
     # Connection mode: "webhook" (HTTP callback, requires public URL) or "ws" (WebSocket long connection, recommended)
     connection-mode: ${FEISHU_CONNECTION_MODE:ws}
     # SuperSonic API base URL for internal HTTP calls (standalone mode uses localhost)
     api-base-url: ${FEISHU_API_BASE_URL:http://localhost:${server.port:9080}}
-    # Feishu app credentials (from Feishu Open Platform -> App -> Credentials)
-    app-id: ${FEISHU_APP_ID:cli_a9016ca343785bde}
-    app-secret: ${FEISHU_APP_SECRET:Ipbce7MMYlpbtRdvG9lzkbnby6jg83Zo}
-    # Security: event verification (from Feishu Open Platform -> Events & Callbacks -> Encryption Strategy)
-    # Both are optional; leave empty to skip that verification layer
-    verification-token: ${FEISHU_VERIFICATION_TOKEN:2157XpI00t0Srvxi0LGWFcBeFLggJo1t}
-    encrypt-key: ${FEISHU_ENCRYPT_KEY:SageData}
+    # Feishu app credentials — defined in profile-specific yaml (application-dev.yaml, application-prd.yaml)
     # Default agent ID used for NL2SQL queries from Feishu
     default-agent-id: ${FEISHU_DEFAULT_AGENT_ID:7}
     query-timeout-ms: ${FEISHU_QUERY_TIMEOUT_MS:30000}

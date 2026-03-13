@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.server.pojo.TagObjectFilter;
 import com.tencent.supersonic.headless.server.service.TagObjectService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,8 +38,8 @@ public class TagObjectController {
      * @throws Exception
      */
     @PostMapping("/create")
-    public TagObjectResp create(@RequestBody TagObjectReq tagObjectReq, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public TagObjectResp create(@Valid @RequestBody TagObjectReq tagObjectReq,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return tagObjectService.create(tagObjectReq, user);
     }
@@ -52,8 +53,8 @@ public class TagObjectController {
      * @return
      */
     @PostMapping("/update")
-    public TagObjectResp update(@RequestBody TagObjectReq tagObjectReq, HttpServletRequest request,
-            HttpServletResponse response) {
+    public TagObjectResp update(@Valid @RequestBody TagObjectReq tagObjectReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return tagObjectService.update(tagObjectReq, user);
     }

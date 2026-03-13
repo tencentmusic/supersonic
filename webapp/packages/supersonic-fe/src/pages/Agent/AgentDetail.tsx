@@ -1,5 +1,6 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Switch } from 'antd';
+import { StatusEnum } from '@/common/constants';
 import styles from './style.less';
 import { AgentType } from './type';
 import AgentForm from './AgentForm';
@@ -23,7 +24,7 @@ const ToolsSection: React.FC<Props> = ({
         <ArrowLeftOutlined className={styles.backIcon} onClick={goBack} />
         <div className={styles.agentTitle}>{currentAgent?.name}</div>
         <div className={styles.toggleStatus}>
-          {currentAgent?.status === 0 ? '已禁用' : <span className={styles.online}>已启用</span>}
+          {currentAgent?.status === StatusEnum.DISABLED ? '已禁用' : <span className={styles.online}>已启用</span>}
           <span
             onClick={(e) => {
               e.stopPropagation();
@@ -31,9 +32,9 @@ const ToolsSection: React.FC<Props> = ({
           >
             <Switch
               size="small"
-              defaultChecked={currentAgent?.status === 1}
+              defaultChecked={currentAgent?.status === StatusEnum.ENABLED}
               onChange={(value) => {
-                onSaveAgent({ ...currentAgent, status: value ? 1 : 0 }, true);
+                onSaveAgent({ ...currentAgent, status: value ? StatusEnum.ENABLED : StatusEnum.DISABLED }, true);
               }}
             />
           </span>

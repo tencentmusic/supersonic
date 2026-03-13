@@ -111,10 +111,10 @@ export default defineConfig({
    * @description 将项目中的 Dayjs 替换为 Dayjs
    * @doc https://umijs.org/docs/max/moment2dayjs
    */
-  // moment2dayjs: {
-  //   preset: 'antd',
-  //   plugins: ['duration'],
-  // },
+  moment2dayjs: {
+    preset: 'antd',
+    plugins: ['duration', 'isSameOrBefore', 'isSameOrAfter', 'minMax', 'quarterOfYear', 'localeData', 'weekOfYear'],
+  },
   /**
    * @name 国际化插件
    * @doc https://umijs.org/docs/max/i18n

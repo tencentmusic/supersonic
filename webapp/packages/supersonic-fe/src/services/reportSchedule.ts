@@ -1,6 +1,17 @@
-import tRequest from './request';
+import request from './request';
 
 const BASE = '/api/v1/reportSchedules';
+
+/** 有效数据集（供调度关联选择），仅包含系统已配置且状态为 ONLINE/OFFLINE 的数据集 */
+export interface ValidDataSetItem {
+  id: number;
+  name: string;
+  domainId?: number;
+}
+
+export function getValidDataSetList(): Promise<ValidDataSetItem[]> {
+  return request(`${process.env.API_BASE_URL || ''}dataSet/getValidDataSetList`, { method: 'GET' });
+}
 
 export interface ReportSchedule {
   id: number;
@@ -44,46 +55,46 @@ export function getScheduleList(params: {
   datasetId?: number;
   enabled?: boolean;
 }) {
-  return tRequest(BASE, { method: 'GET', params });
+  return request(BASE, { method: 'GET', params });
 }
 
 export function getScheduleById(id: number) {
-  return tRequest(`${BASE}/${id}`, { method: 'GET' });
+  return request(`${BASE}/${id}`, { method: 'GET' });
 }
 
 export function createSchedule(data: Partial<ReportSchedule>) {
-  return tRequest(BASE, { method: 'POST', data });
+  return request(BASE, { method: 'POST', data });
 }
 
 export function updateSchedule(id: number, data: Partial<ReportSchedule>) {
-  return tRequest(`${BASE}/${id}`, { method: 'PATCH', data });
+  return request(`${BASE}/${id}`, { method: 'PATCH', data });
 }
 
 export function deleteSchedule(id: number) {
-  return tRequest(`${BASE}/${id}`, { method: 'DELETE' });
+  return request(`${BASE}/${id}`, { method: 'DELETE' });
 }
 
 export function pauseSchedule(id: number) {
-  return tRequest(`${BASE}/${id}:pause`, { method: 'POST' });
+  return request(`${BASE}/${id}:pause`, { method: 'POST' });
 }
 
 export function resumeSchedule(id: number) {
-  return tRequest(`${BASE}/${id}:resume`, { method: 'POST' });
+  return request(`${BASE}/${id}:resume`, { method: 'POST' });
 }
 
 export function triggerSchedule(id: number) {
-  return tRequest(`${BASE}/${id}:trigger`, { method: 'POST' });
+  return request(`${BASE}/${id}:trigger`, { method: 'POST' });
 }
 
 export function getExecutionList(
   scheduleId: number,
   params?: { current?: number; pageSize?: number; status?: string },
 ) {
-  return tRequest(`${BASE}/${scheduleId}/executions`, { method: 'GET', params });
+  return request(`${BASE}/${scheduleId}/executions`, { method: 'GET', params });
 }
 
 export function getExecutionById(scheduleId: number, executionId: number) {
-  return tRequest(`${BASE}/${scheduleId}/executions/${executionId}`, { method: 'GET' });
+  return request(`${BASE}/${scheduleId}/executions/${executionId}`, { method: 'GET' });
 }
 
 export function downloadExecutionResult(scheduleId: number, executionId: number) {

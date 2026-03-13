@@ -11,7 +11,7 @@ import { publicPath } from '../config/defaultSettings';
 import type { DefaultSetting } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
-export { request } from './services/request';
+export { requestConfig as request } from './services/request';
 import { BASE_TITLE } from '@/common/constants';
 import { ROUTE_AUTH_CODES } from '../config/routes';
 import AppPage from './pages/index';

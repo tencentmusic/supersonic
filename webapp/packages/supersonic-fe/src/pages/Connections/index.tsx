@@ -22,7 +22,7 @@ import {
   ReloadOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import StatusBadge from './components/StatusBadge';
 import ConnectionForm from './components/ConnectionForm';
 import TimelineDrawer from './components/TimelineDrawer';
@@ -38,6 +38,7 @@ import {
   ConnectionDO,
 } from '@/services/connection';
 import { getDatabaseList } from '@/pages/SemanticModel/service';
+import { MSG } from '@/common/messages';
 
 const SCHEMA_CHANGE_STATUS: Record<string, { color: string; text: string }> = {
   NO_CHANGE: { color: 'default', text: '无变更' },
@@ -122,7 +123,7 @@ const ConnectionsPage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     await deleteConnection(id);
-    message.success('删除成功');
+    message.success(MSG.DELETE_SUCCESS);
     fetchData(pagination.current, pagination.pageSize);
   };
 
@@ -221,7 +222,7 @@ const ConnectionsPage: React.FC = () => {
       title: '更新时间',
       dataIndex: 'updatedAt',
       width: 160,
-      render: (val: string) => (val ? moment(val).format('YYYY-MM-DD HH:mm') : '-'),
+      render: (val: string) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '-'),
     },
     {
       title: '操作',

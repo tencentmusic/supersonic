@@ -21,3 +21,13 @@ export enum NumericUnit {
   Million = 'M',
   Giga = 'G',
 }
+
+export enum StatusEnum {
+  DISABLED = 0,
+  ENABLED = 1,
+}
+
+export const StatusLabel: Record<StatusEnum, string> = {
+  [StatusEnum.DISABLED]: '已禁用',
+  [StatusEnum.ENABLED]: '已启用',
+};

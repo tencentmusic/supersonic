@@ -9,6 +9,7 @@ import SqlEditor from '@/components/SqlEditor';
 import { TransType } from '../../enum';
 import DimensionMetricVisibleTransfer from '../Entity/DimensionMetricVisibleTransfer';
 import { wrapperTransTypeAndId } from '../../utils';
+import { MSG } from '@/common/messages';
 import styles from '../style.less';
 
 const { Text } = Typography;
@@ -74,7 +75,7 @@ const PermissionCreateDrawer: React.FC<Props> = ({
 
     if (code === 200) {
       onSubmit?.();
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
       return;
     }
     message.error(msg);

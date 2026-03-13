@@ -2,7 +2,7 @@ import type { NsGraph } from '@antv/xflow';
 import { uuidv4 } from '@antv/xflow';
 import { GraphApi } from './service';
 import { NODE_WIDTH, NODE_HEIGHT } from './constant';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { jsonParse } from '@/utils/utils';
 import type { GraphConfigListItem, RelationListItem } from './data';
 
@@ -111,7 +111,7 @@ export const addDataSourceInfoAsDimensionParents = (
 };
 
 export const getGraphConfigFromList = (configList: GraphConfigListItem[]) => {
-  configList.sort((a, b) => moment(b.updatedAt).valueOf() - moment(a.updatedAt).valueOf());
+  configList.sort((a, b) => dayjs(b.updatedAt).valueOf() - dayjs(a.updatedAt).valueOf());
   const targetConfig = configList[0];
   if (targetConfig) {
     const { config, id } = targetConfig;

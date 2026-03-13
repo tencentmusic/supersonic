@@ -34,7 +34,7 @@ jdk.naming.dns,jdk.naming.rmi,jdk.net,jdk.unsupported \
 
 # ── Stage 4: Runtime (Debian slim + custom JRE) ───────────────────────────────
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends procps && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends procps curl && rm -rf /var/lib/apt/lists/*
 COPY --from=jre-build /custom-jre /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:$PATH"
 WORKDIR /app
@@ -44,4 +44,6 @@ COPY --from=backend /tmp/launchers-standalone-*/bin ./bin
 COPY --from=frontend /build/packages/supersonic-fe/supersonic-webapp ./webapp
 RUN echo '{"env":""}' > webapp/supersonic.config.json && chmod +x bin/*.sh
 EXPOSE 9080
-CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone ${S2_DB_TYPE:-mysql} && tail -f /dev/null"]
+# Use "run" so Java runs in foreground (PID 1) and receives SIGTERM for graceful shutdown.
+# Profile (h2/mysql/postgres) is taken from S2_DB_TYPE when not passed.
+CMD ["bin/supersonic-daemon.sh", "run", "standalone"]

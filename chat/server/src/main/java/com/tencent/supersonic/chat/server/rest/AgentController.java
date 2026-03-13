@@ -8,6 +8,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,14 +30,14 @@ public class AgentController {
     private final AgentService agentService;
 
     @PostMapping
-    public Agent createAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,
+    public Agent createAgent(@Valid @RequestBody Agent agent, HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.createAgent(agent, user);
     }
 
     @PutMapping
-    public Agent updateAgent(@RequestBody Agent agent, HttpServletRequest httpServletRequest,
+    public Agent updateAgent(@Valid @RequestBody Agent agent, HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
         User user = UserHolder.findUser(httpServletRequest, httpServletResponse);
         return agentService.updateAgent(agent, user);

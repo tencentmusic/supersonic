@@ -10,7 +10,7 @@ import {
 import type { NsGraph } from '@antv/xflow';
 import { NsGraphStatusCommand } from '@antv/xflow';
 import { Tooltip } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import './algoNode.less';
 
 const fontStyle = { fontSize: '16px', color: '#3057e3' };
@@ -65,7 +65,7 @@ export const AlgoNode: NsGraph.INodeRender = (props) => {
       },
       {
         label: '更新时间',
-        value: updatedAt ? moment(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '-',
+        value: updatedAt ? dayjs(updatedAt).format('YYYY-MM-DD HH:mm:ss') : '-',
       },
       {
         label: '描述',

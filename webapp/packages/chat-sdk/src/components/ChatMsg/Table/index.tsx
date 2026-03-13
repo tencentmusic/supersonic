@@ -4,7 +4,7 @@ import { MsgDataType } from '../../../common/type';
 import { CLS_PREFIX } from '../../../common/constants';
 import ApplyAuth from '../ApplyAuth';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type Props = {
   data: MsgDataType;
@@ -74,7 +74,7 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
 
   const dateColumn = queryColumns.find(column => column.type === 'DATE' || column.showType === 'DATE');
   const dataSource = dateColumn
-    ? queryResults.sort((a, b) => moment(a[dateColumn.bizName]).diff(moment(b[dateColumn.bizName])))
+    ? queryResults.sort((a, b) => dayjs(a[dateColumn.bizName]).diff(dayjs(b[dateColumn.bizName])))
     : queryResults;
 
   return (

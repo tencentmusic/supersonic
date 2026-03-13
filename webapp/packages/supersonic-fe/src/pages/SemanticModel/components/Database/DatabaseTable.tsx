@@ -10,7 +10,7 @@ import { getDatabaseList, deleteDatabase } from '../../service';
 import { listConnections, triggerSync, pauseConnection, resumeConnection } from '@/services/connection';
 import type { ConnectionDO } from '@/services/connection';
 
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type Props = {};
 
@@ -160,7 +160,7 @@ const DatabaseTable: React.FC<Props> = ({}) => {
       title: '更新时间',
       search: false,
       render: (value: any) => {
-        return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       },
     },
 

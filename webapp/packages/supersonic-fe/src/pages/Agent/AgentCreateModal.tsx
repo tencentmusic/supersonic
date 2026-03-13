@@ -6,6 +6,7 @@ import { getLlmModelAppList, getLlmList } from '@/services/system';
 import { getPluginList } from '@/pages/ChatPlugin/service';
 import { PluginType } from '@/pages/ChatPlugin/type';
 import { traverseTree } from '@/utils/utils';
+import { StatusEnum } from '@/common/constants';
 
 const { TextArea } = Input;
 
@@ -137,7 +138,7 @@ const AgentCreateModal: React.FC<AgentCreateModalProps> = ({
         name: values.name,
         description: values.description,
         enableSearch: values.enableSearch ? 1 : 0,
-        status: 1,
+        status: StatusEnum.ENABLED,
         toolConfig: JSON.stringify(toolConfig),
         chatAppConfig,
         isOpen: 0,

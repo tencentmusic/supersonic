@@ -2,6 +2,7 @@ import { message } from 'antd';
 import { useEffect, useState } from 'react';
 import AgentsSection from './AgentsSection';
 import { uuid, jsonParse } from '@/utils/utils';
+import { MSG } from '@/common/messages';
 import { deleteAgent, getAgentList, saveAgent } from './service';
 import styles from './style.less';
 import ToolModal from './ToolModal';
@@ -68,13 +69,13 @@ const Agent = () => {
       updateData();
     }
     if (!noTip) {
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
     }
   };
 
   const onDeleteAgent = async (id: number) => {
     await deleteAgent(id);
-    message.success('删除成功');
+    message.success(MSG.DELETE_SUCCESS);
     updateData();
   };
 

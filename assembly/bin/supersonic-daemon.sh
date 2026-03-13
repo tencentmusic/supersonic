@@ -73,6 +73,36 @@ function runJavaService {
   java -Dspring.profiles.active="$profile" $command >$javaRunDir/logs/stdout.log 2>$javaRunDir/logs/error.log &
 }
 
+# Run Java in foreground (for Docker: Java becomes PID 1 and receives SIGTERM for graceful shutdown)
+function runForeground {
+  local_app_name=$1
+  libDir=$baseDir/lib
+  confDir=$baseDir/conf
+
+  CLASSPATH=""
+  CLASSPATH=$CLASSPATH:$confDir
+  for jarPath in $libDir/*.jar; do
+    CLASSPATH=$CLASSPATH:$jarPath
+  done
+  export CLASSPATH
+  export LANG="zh_CN.UTF-8"
+
+  cd $baseDir
+  if [[ -z "$JAVA_HOME" ]]; then
+    for candidate in /usr/jdk64/jdk* /usr/lib/jvm/java-21-* /usr/lib/jvm/temurin-21-*; do
+      if [[ -d "$candidate" ]]; then
+        JAVA_HOME="$candidate"
+        break
+      fi
+    done
+  fi
+  export PATH=$JAVA_HOME/bin:$PATH
+  java_cmd="-Dfile.encoding=UTF-8 -Duser.language=Zh -Duser.region=CN -Duser.timezone=GMT+08"
+  java_cmd="$java_cmd -Dapp_name=${local_app_name} -Xms1024m -Xmx2048m -XX:+UseZGC -XX:+ZGenerational $main_class"
+  mkdir -p $baseDir/logs
+  exec java -Dspring.profiles.active="$profile" $java_cmd
+}
+
 function start() {
   local_app_name=$1
   echo "Starting ${local_app_name}"
@@ -121,7 +151,11 @@ case "$command" in
     stop ${app_name}
     start ${app_name}
     ;;
+  run)
+    # Foreground run for Docker: Java is PID 1 and receives SIGTERM for graceful shutdown
+    runForeground ${app_name}
+    ;;
   *)
-    echo "Use command {start|stop|restart} to run."
+    echo "Use command {start|stop|restart|run} to run."
     exit 1
 esac

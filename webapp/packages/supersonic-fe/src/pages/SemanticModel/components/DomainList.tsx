@@ -8,6 +8,7 @@ import { createDomain, updateDomain, deleteDomain } from '../service';
 import DomainInfoForm from './DomainInfoForm';
 import styles from './style.less';
 import { ISemantic } from '../data';
+import { MSG } from '@/common/messages';
 
 const { Search } = Input;
 
@@ -96,7 +97,7 @@ const DomainListTree: FC<DomainListProps> = ({
   const confirmDelete = async (domainId: string) => {
     const res = await deleteDomain(domainId);
     if (res.code === 200) {
-      message.success('删除成功');
+      message.success(MSG.DELETE_SUCCESS);
       setProjectInfoModalVisible(false);
       onTreeDataUpdate?.();
       window.location.reload();

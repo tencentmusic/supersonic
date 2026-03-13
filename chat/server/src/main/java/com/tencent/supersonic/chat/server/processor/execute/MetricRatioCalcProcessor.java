@@ -13,6 +13,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.RatioOverType;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.common.util.ThreadMdcUtil;
 import com.tencent.supersonic.headless.api.pojo.AggregateInfo;
 import com.tencent.supersonic.headless.api.pojo.MetricInfo;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -24,6 +25,7 @@ import com.tencent.supersonic.headless.core.config.AggregatorConfig;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
 
 import java.text.DecimalFormat;
@@ -43,6 +45,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.tencent.supersonic.common.pojo.Constants.DAY_FORMAT;
@@ -113,11 +116,15 @@ public class MetricRatioCalcProcessor implements ExecuteResultProcessor {
             });
 
             CompletableFuture<MetricInfo> metricInfoRoll =
-                    CompletableFuture.supplyAsync(() -> queryRatio(user, semanticParseInfo,
-                            ratioMetric.get(), AggOperatorEnum.RATIO_ROLL, queryResult));
+                    CompletableFuture.supplyAsync(ThreadMdcUtil.wrapSupplier(
+                            () -> queryRatio(user, semanticParseInfo, ratioMetric.get(),
+                                    AggOperatorEnum.RATIO_ROLL, queryResult),
+                            MDC.getCopyOfContextMap()));
             CompletableFuture<MetricInfo> metricInfoOver =
-                    CompletableFuture.supplyAsync(() -> queryRatio(user, semanticParseInfo,
-                            ratioMetric.get(), AggOperatorEnum.RATIO_OVER, queryResult));
+                    CompletableFuture.supplyAsync(ThreadMdcUtil.wrapSupplier(
+                            () -> queryRatio(user, semanticParseInfo, ratioMetric.get(),
+                                    AggOperatorEnum.RATIO_OVER, queryResult),
+                            MDC.getCopyOfContextMap()));
 
             CompletableFuture.allOf(metricInfoRoll, metricInfoOver).join();
 

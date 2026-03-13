@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -11,8 +12,10 @@ public class DatabaseReq extends RecordInfo {
 
     private Long id;
 
+    @NotBlank(message = "name must not be blank")
     private String name;
 
+    @NotBlank(message = "type must not be blank")
     private String type;
 
     private String host;

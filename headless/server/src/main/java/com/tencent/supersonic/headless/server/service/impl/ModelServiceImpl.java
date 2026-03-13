@@ -28,6 +28,7 @@ import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,14 +66,14 @@ public class ModelServiceImpl implements ModelService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    ExecutorService executor =
-            new ThreadPoolExecutor(0, 5, 5L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+    private final ThreadPoolExecutor commonExecutor;
 
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
             DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            @Qualifier("commonExecutor") ThreadPoolExecutor commonExecutor) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -81,6 +84,7 @@ public class ModelServiceImpl implements ModelService {
         this.dateInfoRepository = dateInfoRepository;
         this.modelRelaService = modelRelaService;
         this.eventPublisher = eventPublisher;
+        this.commonExecutor = commonExecutor;
     }
 
     @Override
@@ -210,7 +214,7 @@ public class ModelServiceImpl implements ModelService {
         CompletableFuture.allOf(dbSchemas.stream()
                 .map(dbSchema -> CompletableFuture.runAsync(
                         () -> doBuild(modelBuildReq, dbSchema, dbSchemas, modelSchemaMap),
-                        executor))
+                        commonExecutor))
                 .toArray(CompletableFuture[]::new)).join();
         return modelSchemaMap;
     }

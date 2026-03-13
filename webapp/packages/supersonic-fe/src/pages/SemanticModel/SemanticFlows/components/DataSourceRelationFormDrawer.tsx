@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Form, Button, Drawer, Space, Input, Select, message } from 'antd';
 import { formLayout } from '@/components/FormHelper/utils';
 import { createOrUpdateDatasourceRela } from '../../service';
+import { MSG } from '@/common/messages';
 import { getRelationConfigInfo } from '../utils';
 import { useXFlowApp } from '@antv/xflow';
 import { CustomCommands } from '../CmdExtensions/constants';
@@ -112,7 +113,7 @@ const DataSourceRelationFormDrawer: React.FC<DataSourceRelationFormDrawerProps> 
     });
     setSaveLoading(false);
     if (code === 200) {
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
       getRelationListInfo();
       onClose?.();
       return;

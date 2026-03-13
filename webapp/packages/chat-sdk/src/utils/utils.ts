@@ -1,4 +1,7 @@
-import moment, { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import minMax from 'dayjs/plugin/minMax';
+dayjs.extend(minMax);
 import { NumericUnit } from '../common/constants';
 import { isString } from 'lodash';
 import { ColumnType } from '../common/type';
@@ -121,13 +124,15 @@ export const groupByColumn = (data: any[], column: string) => {
 };
 
 // 获取任意两个日期中的所有日期
-export function enumerateDaysBetweenDates(startDate: Moment, endDate: Moment, dateType?: any) {
+export function enumerateDaysBetweenDates(startDate: Dayjs, endDate: Dayjs, dateType?: any) {
   let daysList: any[] = [];
   const day = endDate.diff(startDate, dateType || 'days');
   const format = dateType === 'months' ? 'YYYY-MM' : 'YYYY-MM-DD';
   daysList.push(startDate.format(format));
+  let current = startDate;
   for (let i = 1; i <= day; i++) {
-    daysList.push(startDate.add(1, dateType || 'days').format(format));
+    current = current.add(1, dateType || 'days');
+    daysList.push(current.format(format));
   }
   return daysList;
 }
@@ -140,11 +145,11 @@ export const normalizeTrendData = (
   endDate: string,
   dateType?: string
 ) => {
-  const dateList = enumerateDaysBetweenDates(moment(startDate), moment(endDate), dateType);
+  const dateList = enumerateDaysBetweenDates(dayjs(startDate), dayjs(endDate), dateType);
   const result = dateList.map(date => {
     const item = resultList.find(
       result =>
-        moment(result[dateColumnName]).format(dateType === 'months' ? 'YYYY-MM' : 'YYYY-MM-DD') ===
+        dayjs(result[dateColumnName]).format(dateType === 'months' ? 'YYYY-MM' : 'YYYY-MM-DD') ===
         date
     );
     return {
@@ -157,8 +162,8 @@ export const normalizeTrendData = (
 };
 
 export const getMinMaxDate = (resultList: any[], dateColumnName: string) => {
-  const dateList = resultList.map(item => moment(item[dateColumnName]));
-  return [moment.min(dateList).format('YYYY-MM-DD'), moment.max(dateList).format('YYYY-MM-DD')];
+  const dateList = resultList.map(item => dayjs(item[dateColumnName]));
+  return [dayjs.min(dateList)?.format('YYYY-MM-DD') ?? '', dayjs.max(dateList)?.format('YYYY-MM-DD') ?? ''];
 };
 
 export function hexToRgbObj(hex) {

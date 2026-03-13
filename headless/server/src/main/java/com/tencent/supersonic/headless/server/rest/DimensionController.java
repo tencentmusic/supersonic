@@ -19,6 +19,7 @@ import com.tencent.supersonic.headless.server.pojo.DimensionFilter;
 import com.tencent.supersonic.headless.server.service.DimensionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,14 +46,14 @@ public class DimensionController {
      * @param dimensionReq
      */
     @PostMapping("/createDimension")
-    public DimensionResp createDimension(@RequestBody DimensionReq dimensionReq,
+    public DimensionResp createDimension(@Valid @RequestBody DimensionReq dimensionReq,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return dimensionService.createDimension(dimensionReq, user);
     }
 
     @PostMapping("/updateDimension")
-    public Boolean updateDimension(@RequestBody DimensionReq dimensionReq,
+    public Boolean updateDimension(@Valid @RequestBody DimensionReq dimensionReq,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         dimensionService.updateDimension(dimensionReq, user);
@@ -60,7 +61,7 @@ public class DimensionController {
     }
 
     @PostMapping("/updateDimension/alias/value")
-    public Boolean updateDimValueAlias(@RequestBody DimValueAliasReq req,
+    public Boolean updateDimValueAlias(@Valid @RequestBody DimValueAliasReq req,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         dimensionService.updateDimValueAlias(req, user);
@@ -84,14 +85,14 @@ public class DimensionController {
     }
 
     @PostMapping("/mockDimensionAlias")
-    public List<String> mockMetricAlias(@RequestBody DimensionReq dimensionReq,
+    public List<String> mockMetricAlias(@Valid @RequestBody DimensionReq dimensionReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dimensionService.mockAlias(dimensionReq, "dimension", user);
     }
 
     @PostMapping("/mockDimensionValuesAlias")
-    public List<DimValueMap> mockDimensionValuesAlias(@RequestBody DimensionReq dimensionReq,
+    public List<DimValueMap> mockDimensionValuesAlias(@Valid @RequestBody DimensionReq dimensionReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dimensionService.mockDimensionValueAlias(dimensionReq, user);
@@ -121,7 +122,7 @@ public class DimensionController {
     }
 
     @PostMapping("/queryDimValue")
-    public SemanticQueryResp queryDimValue(@RequestBody DimensionValueReq dimensionValueReq,
+    public SemanticQueryResp queryDimValue(@Valid @RequestBody DimensionValueReq dimensionValueReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return queryService.queryDimensionValue(dimensionValueReq, user);

@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, InputNumber, Switch, Divider, Tag, Space } 
 import { SendOutlined } from '@ant-design/icons';
 import CronInput from './CronInput';
 import type { ReportSchedule } from '@/services/reportSchedule';
+import { getValidDataSetList, type ValidDataSetItem } from '@/services/reportSchedule';
 import {
   getConfigList,
   DeliveryConfig,
@@ -21,13 +22,29 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, onCancel, 
   const isEdit = !!record?.id;
   const [deliveryConfigs, setDeliveryConfigs] = useState<DeliveryConfig[]>([]);
   const [loadingConfigs, setLoadingConfigs] = useState(false);
+  const [dataSets, setDataSets] = useState<ValidDataSetItem[]>([]);
+  const [loadingDataSets, setLoadingDataSets] = useState(false);
 
-  // Fetch delivery configs when modal opens
+  // Fetch delivery configs and valid datasets when modal opens
   useEffect(() => {
     if (visible) {
       fetchDeliveryConfigs();
+      fetchValidDataSets();
     }
   }, [visible]);
+
+  const fetchValidDataSets = async () => {
+    setLoadingDataSets(true);
+    try {
+      const list = await getValidDataSetList();
+      setDataSets(Array.isArray(list) ? list : []);
+    } catch (error) {
+      console.error('Failed to load datasets', error);
+      setDataSets([]);
+    } finally {
+      setLoadingDataSets(false);
+    }
+  };
 
   const fetchDeliveryConfigs = async () => {
     setLoadingConfigs(true);
@@ -105,7 +122,14 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, onCancel, 
           <Input placeholder="如: GMV 日报" />
         </Form.Item>
         <Form.Item name="datasetId" label="关联数据集" rules={[{ required: true, message: '请选择数据集' }]}>
-          <InputNumber style={{ width: '100%' }} placeholder="DataSet ID" />
+          <Select
+            placeholder="请选择已配置的数据集"
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            loading={loadingDataSets}
+            options={dataSets.map((d) => ({ label: `${d.name} (ID: ${d.id})`, value: d.id }))}
+          />
         </Form.Item>
         <Form.Item name="queryConfig" label="查询参数 (JSON)">
           <Input.TextArea rows={4} placeholder='{"metrics": [...], "dimensions": [...]}' />

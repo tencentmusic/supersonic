@@ -6,7 +6,12 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.tencent.supersonic.common.config.EncryptionProperties;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.MessageDigest;
 import java.security.spec.KeySpec;
@@ -14,6 +19,8 @@ import java.util.Arrays;
 import java.util.Base64;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class AESEncryptionUtil {
 
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
@@ -21,16 +28,36 @@ public class AESEncryptionUtil {
     private static final String SECRET_KEY_ALGORITHM = "PBKDF2WithHmacSHA256";
     private static final int ITERATIONS = 65536;
     private static final int KEY_LENGTH = 256;
-    private static final String KEY =
+
+    private static final String DEFAULT_KEY =
             "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
-    // TODO 固定IV，确保每次加密时使用相同的IV,该值应该安全保管
-    private static final String IV = "supersonic@bicom";
+    private static final String DEFAULT_IV = "supersonic@bicom";
+
+    private static String KEY = DEFAULT_KEY;
+    private static String IV = DEFAULT_IV;
+
+    private final EncryptionProperties encryptionProperties;
+
+    @PostConstruct
+    void init() {
+        if (StringUtils.hasText(encryptionProperties.getAesKey())) {
+            KEY = encryptionProperties.getAesKey();
+        } else {
+            log.warn("[SECURITY] s2.encryption.aes-key is not configured, "
+                    + "using default key. Set S2_ENCRYPTION_KEY in production.");
+        }
+        if (StringUtils.hasText(encryptionProperties.getAesIv())) {
+            IV = encryptionProperties.getAesIv();
+        } else {
+            log.warn("[SECURITY] s2.encryption.aes-iv is not configured, "
+                    + "using default IV. Set S2_ENCRYPTION_IV in production.");
+        }
+    }
 
     public static byte[] generateSalt(String username) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(username.getBytes(ENCODE));
         byte[] hash = md.digest();
-        // 通常只需要使用盐的一部分作为盐值，例如16字节
         byte[] salt = new byte[16];
         System.arraycopy(hash, 0, salt, 0, salt.length);
         return salt;

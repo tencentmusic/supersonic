@@ -101,25 +101,25 @@ interface RequestMethodInUmi<R = false> {
 }
 
 // @ts-ignore
-const tRequest: RequestMethodInUmi = (url: any, options: any) => {
+const request: RequestMethodInUmi = (url: any, options: any) => {
   return requestMethod(url, options);
 };
 const METHODS = ['get', 'post', 'delete', 'put', 'patch', 'head', 'options', 'rpc'];
 METHODS.forEach((method) => {
-  tRequest[method] = (url: any, options: any) => {
+  request[method] = (url: any, options: any) => {
     return requestMethod(url, {
       ...options,
       method,
     });
   };
 });
-tRequest.Cancel = requestMethod.Cancel;
-tRequest.CancelToken = requestMethod.CancelToken;
-tRequest.isCancel = requestMethod.isCancel;
+request.Cancel = requestMethod.Cancel;
+request.CancelToken = requestMethod.CancelToken;
+request.isCancel = requestMethod.isCancel;
 
-export default tRequest;
+export default request;
 
-export const request = {
+export const requestConfig = {
   requestInterceptors: [authHeaderInterceptor],
   responseInterceptors: [responseInterceptor],
 };

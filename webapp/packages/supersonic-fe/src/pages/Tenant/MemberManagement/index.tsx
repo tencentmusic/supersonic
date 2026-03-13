@@ -17,6 +17,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, UserAddOutlined } from '@an
 import { getUserList } from '@/services/user';
 import { getOrganizationTree, assignUserToOrganization } from '@/services/organization';
 import { getTenantRoles, assignRoleToUser } from '@/services/tenant';
+import { StatusEnum } from '@/common/constants';
 import styles from './style.less';
 
 interface Member {
@@ -199,8 +200,8 @@ const MemberManagement: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: number) => (
-        <Tag color={status === 1 ? 'green' : 'red'}>
-          {status === 1 ? '启用' : '禁用'}
+        <Tag color={status === StatusEnum.ENABLED ? 'green' : 'red'}>
+          {status === StatusEnum.ENABLED ? '启用' : '禁用'}
         </Tag>
       ),
     },

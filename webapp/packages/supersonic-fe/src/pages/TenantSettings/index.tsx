@@ -49,6 +49,7 @@ import {
   cancelSubscription,
 } from '@/services/subscription';
 import type { TenantSubscription, SubscriptionPlan } from '@/services/tenant';
+import { MSG } from '@/common/messages';
 import styles from './style.less';
 
 const { TabPane } = Tabs;
@@ -117,13 +118,13 @@ const TenantSettings: React.FC = () => {
       setSaving(true);
       const res = await updateCurrentTenant(values);
       if (res.code === 200) {
-        message.success('保存成功');
+        message.success(MSG.SAVE_SUCCESS);
         setTenant(res.data);
       } else {
-        message.error(res.msg || '保存失败');
+        message.error(res.msg || MSG.SAVE_FAILED);
       }
     } catch (error) {
-      message.error('保存失败');
+      message.error(MSG.SAVE_FAILED);
     } finally {
       setSaving(false);
     }

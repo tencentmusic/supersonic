@@ -48,7 +48,7 @@ public class TagController {
      * @throws Exception
      */
     @PostMapping("/create")
-    public TagResp create(@RequestBody TagReq tagReq, HttpServletRequest request,
+    public TagResp create(@Valid @RequestBody TagReq tagReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return tagMetaService.create(tagReq, user);
@@ -139,7 +139,7 @@ public class TagController {
      * @throws Exception
      */
     @PostMapping("/value/distribution")
-    public ItemValueResp queryTagValue(@RequestBody ItemValueReq itemValueReq,
+    public ItemValueResp queryTagValue(@Valid @RequestBody ItemValueReq itemValueReq,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         return tagQueryService.queryTagValue(itemValueReq, user);

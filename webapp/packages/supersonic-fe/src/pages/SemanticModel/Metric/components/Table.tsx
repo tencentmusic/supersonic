@@ -1,7 +1,7 @@
 import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ColumnConfig } from '../data';
 
 type Props = {
@@ -32,7 +32,7 @@ const MetricTable: React.FC<Props> = ({
             width: 120,
             fixed: 'left',
             defaultSortOrder: 'descend',
-            sorter: (a, b) => moment(a[nameEn]).valueOf() - moment(b[nameEn]).valueOf(),
+            sorter: (a, b) => dayjs(a[nameEn]).valueOf() - dayjs(b[nameEn]).valueOf(),
           };
         }
         if (nameEn === metricFieldName) {

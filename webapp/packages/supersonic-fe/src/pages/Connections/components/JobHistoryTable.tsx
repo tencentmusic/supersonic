@@ -6,7 +6,7 @@ import {
   SyncOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { getJobHistory, DataSyncExecutionDO } from '@/services/connection';
 
 interface JobHistoryTableProps {
@@ -25,8 +25,8 @@ const STATUS_CONFIG: Record<string, { color: string; icon: React.ReactNode; text
 
 const formatDuration = (start?: string, end?: string): string => {
   if (!start || !end) return '-';
-  const startTime = moment(start);
-  const endTime = moment(end);
+  const startTime = dayjs(start);
+  const endTime = dayjs(end);
   const durationMs = endTime.diff(startTime);
   if (durationMs < 1000) return `${durationMs}ms`;
   if (durationMs < 60000) return `${(durationMs / 1000).toFixed(1)}s`;
@@ -89,7 +89,7 @@ const JobHistoryTable: React.FC<JobHistoryTableProps> = ({
       title: '开始时间',
       dataIndex: 'startTime',
       width: 160,
-      render: (val: string) => (val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : '-'),
+      render: (val: string) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-'),
     },
     {
       title: '耗时',

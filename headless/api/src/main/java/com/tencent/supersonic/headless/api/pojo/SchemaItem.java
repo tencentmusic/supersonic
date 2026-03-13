@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,6 +20,7 @@ public class SchemaItem extends RecordInfo {
 
     protected Long id;
 
+    @NotBlank(message = "name must not be blank")
     protected String name;
 
     protected String bizName;

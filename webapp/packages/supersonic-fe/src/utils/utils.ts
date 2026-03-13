@@ -1,4 +1,5 @@
 import { AUTH_TOKEN_KEY, NumericUnit } from '@/common/constants';
+import { MSG } from '@/common/messages';
 import { message } from 'antd';
 import numeral from 'numeral';
 import copy from 'copy-to-clipboard';
@@ -13,7 +14,7 @@ export const isUrl = (path: string): boolean => reg.test(path);
 
 export function copyText(str: string) {
   copy(str);
-  return message.success('复制成功');
+  return message.success(MSG.COPY_SUCCESS);
 }
 
 export function mapToOptions(map: Map<string | number, string>) {

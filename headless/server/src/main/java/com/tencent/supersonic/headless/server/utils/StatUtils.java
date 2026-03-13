@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
+import com.tencent.supersonic.common.util.ThreadMdcUtil;
 import com.tencent.supersonic.headless.api.pojo.QueryStat;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryMethod;
@@ -23,6 +24,7 @@ import com.tencent.supersonic.headless.server.persistence.repository.StatReposit
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -65,9 +67,9 @@ public class StatUtils {
         QueryStat queryStatInfo = get();
         queryStatInfo.setElapsedMs(System.currentTimeMillis() - queryStatInfo.getStartTime());
         queryStatInfo.setQueryState(state.getStatus());
-        CompletableFuture.runAsync(() -> {
+        CompletableFuture.runAsync(ThreadMdcUtil.wrap(() -> {
             statRepository.createRecord(queryStatInfo);
-        }).exceptionally(exception -> {
+        }, MDC.getCopyOfContextMap())).exceptionally(exception -> {
             log.warn("queryStatInfo, exception:", exception);
             return null;
         });

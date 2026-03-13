@@ -3,6 +3,7 @@ import { Form, Input, Select, Spin, Space } from 'antd';
 import type { Ref } from 'react';
 import styles from '../../components/style.less';
 import { message } from 'antd';
+import { MSG } from '@/common/messages';
 import { formLayout } from '@/components/FormHelper/utils';
 import { createView, updateView, getDimensionList, queryMetric } from '../../service';
 import { ISemantic } from '../../data';
@@ -99,7 +100,7 @@ const DatasetCreateForm: React.FC<ModelCreateFormModalProps> = forwardRef(
       setSaveLoading(false);
       if (code === 200) {
         onSubmit?.(queryData);
-        message.success('保存成功');
+        message.success(MSG.SAVE_SUCCESS);
       } else {
         message.error(msg);
       }

@@ -1,6 +1,9 @@
-spring:
-  datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.jdbc.Driver
+s2:
+  encryption:
+    aes-key: ${S2_ENCRYPTION_KEY}
+    aes-iv: ${S2_ENCRYPTION_IV}
+  feishu:
+    app-id: ${FEISHU_APP_ID}
+    app-secret: ${FEISHU_APP_SECRET}
+    verification-token: ${FEISHU_VERIFICATION_TOKEN}
+    encrypt-key: ${FEISHU_ENCRYPT_KEY}

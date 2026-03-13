@@ -20,6 +20,7 @@ import {
   updateSubscriptionPlan,
   deleteSubscriptionPlan,
 } from '@/services/platform';
+import { MSG } from '@/common/messages';
 import styles from './style.less';
 
 interface SubscriptionPlan {
@@ -89,11 +90,11 @@ const SubscriptionManagement: React.FC = () => {
     try {
       const { code } = await deleteSubscriptionPlan(id);
       if (code === 200) {
-        message.success('删除成功');
+        message.success(MSG.DELETE_SUCCESS);
         loadPlans();
       }
     } catch (error) {
-      message.error('删除失败');
+      message.error(MSG.DELETE_FAILED);
     }
   };
 
@@ -110,11 +111,11 @@ const SubscriptionManagement: React.FC = () => {
       }
 
       if (result.code === 200) {
-        message.success(editingPlan ? '更新成功' : '创建成功');
+        message.success(editingPlan ? MSG.UPDATE_SUCCESS : MSG.CREATE_SUCCESS);
         setModalVisible(false);
         loadPlans();
       } else {
-        message.error(result.msg || '操作失败');
+        message.error(result.msg || MSG.OPERATION_FAILED);
       }
     } catch (error) {
       console.error(error);

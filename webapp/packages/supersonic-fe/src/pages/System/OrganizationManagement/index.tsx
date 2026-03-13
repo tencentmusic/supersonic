@@ -36,6 +36,8 @@ import {
   OrganizationReq,
 } from '@/services/organization';
 import { getUserList } from '@/services/user';
+import { StatusEnum } from '@/common/constants';
+import { MSG } from '@/common/messages';
 import styles from './style.less';
 
 interface UserInfo {
@@ -147,7 +149,7 @@ const OrganizationManagement: React.FC = () => {
       parentId: Number(org.parentId),
       name: org.name,
       sortOrder: 0,
-      status: 1,
+      status: StatusEnum.ENABLED,
     });
     setModalVisible(true);
   };
@@ -156,17 +158,17 @@ const OrganizationManagement: React.FC = () => {
     try {
       const { code, msg } = await deleteOrganization(Number(orgId));
       if (code === 200) {
-        message.success('删除成功');
+        message.success(MSG.DELETE_SUCCESS);
         loadOrganizations();
         if (selectedOrg?.id === orgId) {
           setSelectedOrg(null);
           setOrgUsers([]);
         }
       } else {
-        message.error(msg || '删除失败');
+        message.error(msg || MSG.DELETE_FAILED);
       }
     } catch (error: any) {
-      message.error(error?.message || '删除失败');
+      message.error(error?.message || MSG.DELETE_FAILED);
     }
   };
 
@@ -179,7 +181,7 @@ const OrganizationManagement: React.FC = () => {
         parentId: values.parentId || 0,
         name: values.name,
         sortOrder: values.sortOrder || 0,
-        status: values.status ?? 1,
+        status: values.status ?? StatusEnum.ENABLED,
       };
 
       let result;
@@ -190,11 +192,11 @@ const OrganizationManagement: React.FC = () => {
       }
 
       if (result.code === 200) {
-        message.success(editingOrg ? '更新成功' : '创建成功');
+        message.success(editingOrg ? MSG.UPDATE_SUCCESS : MSG.CREATE_SUCCESS);
         setModalVisible(false);
         loadOrganizations();
       } else {
-        message.error(result.msg || '操作失败');
+        message.error(result.msg || MSG.OPERATION_FAILED);
       }
     } catch (error) {
       console.error(error);
@@ -412,10 +414,10 @@ const OrganizationManagement: React.FC = () => {
           <Form.Item name="sortOrder" label="排序">
             <InputNumber min={0} placeholder="请输入排序序号" style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="status" label="状态" initialValue={1}>
+          <Form.Item name="status" label="状态" initialValue={StatusEnum.ENABLED}>
             <Select>
-              <Select.Option value={1}>启用</Select.Option>
-              <Select.Option value={0}>禁用</Select.Option>
+              <Select.Option value={StatusEnum.ENABLED}>启用</Select.Option>
+              <Select.Option value={StatusEnum.DISABLED}>禁用</Select.Option>
             </Select>
           </Form.Item>
         </Form>

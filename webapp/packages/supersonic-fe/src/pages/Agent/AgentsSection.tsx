@@ -1,7 +1,8 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Popconfirm, Switch, Table } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { StatusEnum } from '@/common/constants';
 import styles from './style.less';
 import { AgentType } from './type';
 
@@ -57,7 +58,7 @@ const AgentsSection: React.FC<Props> = ({
       render: (status: number, agent: AgentType) => {
         return (
           <div className={styles.toggleStatus}>
-            {status === 0 ? '已禁用' : <span className={styles.online}>已启用</span>}
+            {status === StatusEnum.DISABLED ? '已禁用' : <span className={styles.online}>已启用</span>}
             <span
               onClick={(e) => {
                 e.stopPropagation();
@@ -66,9 +67,9 @@ const AgentsSection: React.FC<Props> = ({
               <Switch
                 key={agent.id}
                 size="small"
-                defaultChecked={status === 1}
+                defaultChecked={status === StatusEnum.ENABLED}
                 onChange={(value) => {
-                  onSaveAgent({ ...agent, status: value ? 1 : 0 }, true);
+                  onSaveAgent({ ...agent, status: value ? StatusEnum.ENABLED : StatusEnum.DISABLED }, true);
                 }}
               />
             </span>
@@ -86,7 +87,7 @@ const AgentsSection: React.FC<Props> = ({
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       render: (value: string) => {
-        return moment(value).format('YYYY-MM-DD HH:mm:ss');
+        return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
       },
     },
     {

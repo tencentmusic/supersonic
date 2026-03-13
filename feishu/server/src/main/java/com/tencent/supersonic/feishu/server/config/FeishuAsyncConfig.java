@@ -1,5 +1,6 @@
 package com.tencent.supersonic.feishu.server.config;
 
+import com.tencent.supersonic.common.pojo.ThreadPoolExecutorMdcWrapper;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +16,7 @@ public class FeishuAsyncConfig {
     @Bean("feishuExecutor")
     public ThreadPoolTaskExecutor feishuExecutor(FeishuProperties properties) {
         FeishuProperties.AsyncConfig config = properties.getAsync();
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        ThreadPoolExecutorMdcWrapper executor = new ThreadPoolExecutorMdcWrapper();
         executor.setCorePoolSize(config.getCorePoolSize());
         executor.setMaxPoolSize(config.getMaxPoolSize());
         executor.setQueueCapacity(config.getQueueCapacity());

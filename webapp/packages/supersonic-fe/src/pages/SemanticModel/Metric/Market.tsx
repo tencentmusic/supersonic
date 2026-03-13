@@ -17,7 +17,7 @@ import MetricFilter from './components/MetricFilter';
 import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import MetricCardList from './components/MetricCardList';
 import { StatusEnum } from '../enum';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
@@ -217,7 +217,7 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
       title: '更新时间',
       search: false,
       render: (value: any) => {
-        return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       },
     },
     {

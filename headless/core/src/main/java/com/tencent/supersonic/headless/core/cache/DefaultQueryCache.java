@@ -1,9 +1,11 @@
 package com.tencent.supersonic.headless.core.cache;
 
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.ThreadMdcUtil;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +34,9 @@ public class DefaultQueryCache implements QueryCache {
         CacheManager cacheManager = ContextUtils.getBean(CacheManager.class);
         CacheCommonConfig cacheCommonConfig = ContextUtils.getBean(CacheCommonConfig.class);
         if (cacheCommonConfig.getCacheEnable() && Objects.nonNull(value)) {
-            CompletableFuture.supplyAsync(() -> cacheManager.put(cacheKey, value))
+            CompletableFuture
+                    .supplyAsync(ThreadMdcUtil.wrapSupplier(() -> cacheManager.put(cacheKey, value),
+                            MDC.getCopyOfContextMap()))
                     .exceptionally(exception -> {
                         log.warn("exception:", exception);
                         return null;

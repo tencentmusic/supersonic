@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Form, Button, Modal, Input } from 'antd';
 import styles from '../style.less';
 import { message } from 'antd';
+import { MSG } from '@/common/messages';
 import { formLayout } from '@/components/FormHelper/utils';
 import { createView, updateView, getDimensionList, queryMetric } from '../../service';
 import { ISemantic } from '../../data';
@@ -87,7 +88,7 @@ const ViewSearchFormModal: React.FC<ModelCreateFormModalProps> = ({
     setSaveLoading(false);
     if (code === 200) {
       onSubmit?.(queryData);
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
     } else {
       message.error(msg);
     }

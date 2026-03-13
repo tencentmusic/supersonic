@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Drawer, Table, Tag, Button, Space, message, Modal, Descriptions, Select } from 'antd';
 import { SwapOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useModel } from '@umijs/max';
 import { getDeploymentHistory, getAllDeploymentHistory, cancelDeployment, SemanticDeployment } from '@/services/semanticTemplate';
 import ConfigDiff from './ConfigDiff';
@@ -174,14 +174,14 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
       dataIndex: 'startTime',
       key: 'startTime',
       width: 160,
-      render: (value: string) => (value ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-'),
+      render: (value: string) => (value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'),
     },
     {
       title: '结束时间',
       dataIndex: 'endTime',
       key: 'endTime',
       width: 160,
-      render: (value: string) => (value ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-'),
+      render: (value: string) => (value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'),
     },
     {
       title: '创建人',
@@ -259,12 +259,12 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
             </Descriptions.Item>
             <Descriptions.Item label="开始时间">
               {selectedDeployment.startTime
-                ? moment(selectedDeployment.startTime).format('YYYY-MM-DD HH:mm:ss')
+                ? dayjs(selectedDeployment.startTime).format('YYYY-MM-DD HH:mm:ss')
                 : '-'}
             </Descriptions.Item>
             <Descriptions.Item label="结束时间">
               {selectedDeployment.endTime
-                ? moment(selectedDeployment.endTime).format('YYYY-MM-DD HH:mm:ss')
+                ? dayjs(selectedDeployment.endTime).format('YYYY-MM-DD HH:mm:ss')
                 : '-'}
             </Descriptions.Item>
             <Descriptions.Item label="创建人">{selectedDeployment.createdBy}</Descriptions.Item>
@@ -371,7 +371,7 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
                 >
                   {getBaselineOptions(compareTarget).map((d) => (
                     <Select.Option key={d.id} value={d.id}>
-                      V{d.templateVersion || '?'} — {d.startTime ? moment(d.startTime).format('YYYY-MM-DD HH:mm') : '未知时间'} ({statusConfig[d.status]?.text || d.status})
+                      V{d.templateVersion || '?'} — {d.startTime ? dayjs(d.startTime).format('YYYY-MM-DD HH:mm') : '未知时间'} ({statusConfig[d.status]?.text || d.status})
                     </Select.Option>
                   ))}
                 </Select>
@@ -389,12 +389,12 @@ const DeployHistory: React.FC<DeployHistoryProps> = ({ visible, onClose }) => {
                 newVersion={compareTarget.templateVersion}
                 oldTime={
                   compareBase.startTime
-                    ? moment(compareBase.startTime).format('YYYY-MM-DD HH:mm')
+                    ? dayjs(compareBase.startTime).format('YYYY-MM-DD HH:mm')
                     : undefined
                 }
                 newTime={
                   compareTarget.startTime
-                    ? moment(compareTarget.startTime).format('YYYY-MM-DD HH:mm')
+                    ? dayjs(compareTarget.startTime).format('YYYY-MM-DD HH:mm')
                     : undefined
                 }
               />

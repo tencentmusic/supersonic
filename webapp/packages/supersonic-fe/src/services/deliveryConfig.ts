@@ -1,4 +1,4 @@
-import tRequest from './request';
+import request from './request';
 
 const BASE = '/api/semantic/delivery';
 
@@ -89,7 +89,7 @@ export interface WeChatWorkConfig {
 // ========== Config CRUD APIs ==========
 
 export function getConfigList(params?: { pageNum?: number; pageSize?: number }) {
-  return tRequest(`${BASE}/configs`, {
+  return request(`${BASE}/configs`, {
     method: 'GET',
     params: {
       pageNum: params?.pageNum || 1,
@@ -99,27 +99,27 @@ export function getConfigList(params?: { pageNum?: number; pageSize?: number }) 
 }
 
 export function getConfigById(id: number) {
-  return tRequest(`${BASE}/configs/${id}`, {
+  return request(`${BASE}/configs/${id}`, {
     method: 'GET',
   });
 }
 
 export function createConfig(data: Partial<DeliveryConfig>) {
-  return tRequest(`${BASE}/configs`, {
+  return request(`${BASE}/configs`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateConfig(id: number, data: Partial<DeliveryConfig>) {
-  return tRequest(`${BASE}/configs/${id}`, {
+  return request(`${BASE}/configs/${id}`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteConfig(id: number) {
-  return tRequest(`${BASE}/configs/${id}`, {
+  return request(`${BASE}/configs/${id}`, {
     method: 'DELETE',
   });
 }
@@ -127,7 +127,7 @@ export function deleteConfig(id: number) {
 // ========== Test Delivery ==========
 
 export function testConfig(id: number) {
-  return tRequest(`${BASE}/configs/${id}:test`, {
+  return request(`${BASE}/configs/${id}:test`, {
     method: 'POST',
   });
 }
@@ -141,7 +141,7 @@ export function getRecordList(params?: {
   executionId?: number;
   configId?: number;
 }) {
-  return tRequest(`${BASE}/records`, {
+  return request(`${BASE}/records`, {
     method: 'GET',
     params: {
       pageNum: params?.pageNum || 1,
@@ -153,7 +153,7 @@ export function getRecordList(params?: {
 }
 
 export function retryRecord(id: number) {
-  return tRequest(`${BASE}/records/${id}:retry`, {
+  return request(`${BASE}/records/${id}:retry`, {
     method: 'POST',
   });
 }
@@ -207,14 +207,14 @@ export interface DailyDeliveryStats {
 // ========== Statistics APIs ==========
 
 export function getStatistics(days = 7) {
-  return tRequest(`${BASE}/statistics`, {
+  return request(`${BASE}/statistics`, {
     method: 'GET',
     params: { days },
   });
 }
 
 export function getDailyStats(days = 7) {
-  return tRequest(`${BASE}/statistics/daily`, {
+  return request(`${BASE}/statistics/daily`, {
     method: 'GET',
     params: { days },
   });

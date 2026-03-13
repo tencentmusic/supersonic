@@ -17,6 +17,7 @@ import {
 import { discoverSchemaByDatabase } from '@/services/dataSync';
 import CronInput from '../../../ReportSchedule/components/CronInput';
 import StreamConfigStep from './StreamConfigStep';
+import { MSG } from '@/common/messages';
 
 // Map old TableSyncConfig to ConfiguredStream
 type TableSyncConfig = {
@@ -233,7 +234,7 @@ const SyncConfigWizard: React.FC<SyncConfigWizardProps> = ({
       onSuccess();
       onClose();
     } catch (e: any) {
-      message.error(e?.message || '保存失败');
+      message.error(e?.message || MSG.SAVE_FAILED);
     } finally {
       setLoading(false);
     }

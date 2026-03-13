@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, message } from 'antd';
 import { createFeishuMapping, updateFeishuMapping } from '@/services/feishu';
 import { getUserList, queryCurrentUser } from '@/services/user';
 import { getAgentList } from '@/pages/Agent/service';
+import { StatusEnum } from '@/common/constants';
 
 interface Props {
   visible: boolean;
@@ -59,7 +60,7 @@ const MappingFormModal: React.FC<Props> = ({ visible, record, onCancel, onSucces
     if (isEdit) {
       await updateFeishuMapping(record.id, values);
     } else {
-      await createFeishuMapping({ ...values, matchType: 'MANUAL', status: 1 });
+      await createFeishuMapping({ ...values, matchType: 'MANUAL', status: StatusEnum.ENABLED });
     }
     onSuccess();
   };

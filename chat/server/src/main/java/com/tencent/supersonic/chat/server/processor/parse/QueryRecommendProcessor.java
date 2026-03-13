@@ -10,8 +10,10 @@ import com.tencent.supersonic.common.config.EmbeddingConfig;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.ThreadMdcUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +32,8 @@ public class QueryRecommendProcessor implements ParseResultProcessor {
 
     @Override
     public void process(ParseContext parseContext) {
-        CompletableFuture.runAsync(() -> doProcess(parseContext));
+        CompletableFuture.runAsync(
+                ThreadMdcUtil.wrap(() -> doProcess(parseContext), MDC.getCopyOfContextMap()));
     }
 
     @SneakyThrows

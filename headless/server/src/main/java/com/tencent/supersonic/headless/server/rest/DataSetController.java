@@ -9,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,14 +32,14 @@ public class DataSetController {
     private final DataSetService dataSetService;
 
     @PostMapping
-    public DataSetResp save(@RequestBody DataSetReq dataSetReq, HttpServletRequest request,
+    public DataSetResp save(@RequestBody @Valid DataSetReq dataSetReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dataSetService.save(dataSetReq, user);
     }
 
     @PutMapping
-    public DataSetResp update(@RequestBody DataSetReq dataSetReq, HttpServletRequest request,
+    public DataSetResp update(@RequestBody @Valid DataSetReq dataSetReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return dataSetService.update(dataSetReq, user);
@@ -54,6 +55,14 @@ public class DataSetController {
         List<Integer> statuCodeList =
                 Arrays.asList(StatusEnum.ONLINE.getCode(), StatusEnum.OFFLINE.getCode());
         return dataSetService.getDataSetList(domainId, statuCodeList);
+    }
+
+    /**
+     * 获取当前租户下有效（ONLINE/OFFLINE）的数据集列表，供报表调度等场景选择关联数据集。
+     */
+    @GetMapping("/getValidDataSetList")
+    public List<DataSetResp> getValidDataSetList() {
+        return dataSetService.getValidDataSetList();
     }
 
     @DeleteMapping("/{id}")

@@ -22,6 +22,11 @@ public interface DataSetService {
 
     List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList);
 
+    /**
+     * 获取当前租户下已配置且有效（ONLINE/OFFLINE）的数据集列表，供报表调度等场景选择关联数据集使用。
+     */
+    List<DataSetResp> getValidDataSetList();
+
     void delete(Long id, User user);
 
     Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user);

@@ -1,32 +1,28 @@
-import { request } from '@umijs/max';
+import request from '@/services/request';
+import { StatusEnum } from '@/common/constants';
 import { AgentType, MemoryType, MetricType, ModelType } from './type';
 
 export function getAgentList() {
-  return request<Result<AgentType[]>>('/api/chat/agent/getAgentList');
+  return request.get<Result<AgentType[]>>('/api/chat/agent/getAgentList');
 }
 
 export function saveAgent(agent: AgentType) {
-  return request<Result<any>>('/api/chat/agent', {
-    method: agent?.id ? 'PUT' : 'POST',
-    data: { ...agent, status: agent.status !== undefined ? agent.status : 1 },
+  const method = agent?.id ? 'put' : 'post';
+  return request[method]<Result<any>>('/api/chat/agent', {
+    data: { ...agent, status: agent.status !== undefined ? agent.status : StatusEnum.ENABLED },
   });
 }
 
 export function deleteAgent(id: number) {
-  return request<Result<any>>(`/api/chat/agent/${id}`, {
-    method: 'DELETE',
-  });
+  return request.delete<Result<any>>(`/api/chat/agent/${id}`);
 }
 
 export function getModelList() {
-  return request<Result<ModelType[]>>('/api/chat/conf/getDomainDataSetTree', {
-    method: 'GET',
-  });
+  return request.get<Result<ModelType[]>>('/api/chat/conf/getDomainDataSetTree');
 }
 
 export function getMetricList(modelId: number) {
-  return request<Result<{ list: MetricType[] }>>('/api/semantic/metric/queryMetric', {
-    method: 'POST',
+  return request.post<Result<{ list: MetricType[] }>>('/api/semantic/metric/queryMetric', {
     data: {
       modelIds: [modelId],
       current: 1,
@@ -42,42 +38,35 @@ export function getMemeoryList(data: {
   pageSize: number;
 }) {
   const { agentId, chatMemoryFilter, current, pageSize } = data;
-  return request<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
-    method: 'POST',
+  return request.post<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
     data: {
       ...data,
       chatMemoryFilter: { agentId, ...chatMemoryFilter },
       current,
       pageSize: pageSize || 10,
       sort: 'desc',
-      // orderCondition: 'updatedAt',
     },
   });
 }
 
 export function saveMemory(data: MemoryType) {
-  return request<Result<string>>('/api/chat/memory/updateMemory', {
-    method: 'POST',
+  return request.post<Result<string>>('/api/chat/memory/updateMemory', {
     data,
   });
 }
 
 export function batchDeleteMemory(ids: number[]) {
-  return request<Result<string>>('/api/chat/memory/batchDelete', {
-    method: 'POST',
+  return request.post<Result<string>>('/api/chat/memory/batchDelete', {
     data: { ids },
   });
 }
 
 export function getToolTypes(): Promise<any> {
-  return request(`${process.env.CHAT_API_BASE_URL}agent/getToolTypes`, {
-    method: 'GET',
-  });
+  return request.get(`${process.env.CHAT_API_BASE_URL}agent/getToolTypes`);
 }
 
 export function createMemory(data: any) {
-  return request<Result<string>>('/api/chat/memory/createMemory', {
-    method: 'POST',
+  return request.post<Result<string>>('/api/chat/memory/createMemory', {
     data,
   });
 }

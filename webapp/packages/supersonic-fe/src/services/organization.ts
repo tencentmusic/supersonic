@@ -1,4 +1,4 @@
-import { request } from '@umijs/max';
+import request from '@/services/request';
 
 const API_BASE = process.env.AUTH_API_BASE_URL || '/api/auth/';
 
@@ -27,91 +27,74 @@ export interface UserOrganizationReq {
 
 // Get organization tree
 export async function getOrganizationTree() {
-  return request<any>(`${API_BASE}organization/tree`, {
-    method: 'GET',
-  });
+  return request.get<any>(`${API_BASE}organization/tree`);
 }
 
 // Get organization by id
 export async function getOrganization(id: number) {
-  return request<any>(`${API_BASE}organization/${id}`, {
-    method: 'GET',
-  });
+  return request.get<any>(`${API_BASE}organization/${id}`);
 }
 
 // Create organization
 export async function createOrganization(data: OrganizationReq) {
-  return request<any>(`${API_BASE}organization`, {
-    method: 'POST',
+  return request.post<any>(`${API_BASE}organization`, {
     data,
   });
 }
 
 // Update organization
 export async function updateOrganization(id: number, data: OrganizationReq) {
-  return request<any>(`${API_BASE}organization/${id}`, {
-    method: 'PUT',
+  return request.put<any>(`${API_BASE}organization/${id}`, {
     data,
   });
 }
 
 // Delete organization
 export async function deleteOrganization(id: number) {
-  return request<any>(`${API_BASE}organization/${id}`, {
-    method: 'DELETE',
-  });
+  return request.delete<any>(`${API_BASE}organization/${id}`);
 }
 
 // Get users by organization
 export async function getUsersByOrganization(id: number) {
-  return request<any>(`${API_BASE}organization/${id}/users`, {
-    method: 'GET',
-  });
+  return request.get<any>(`${API_BASE}organization/${id}/users`);
 }
 
 // Get user's organizations
 export async function getUserOrganizations(userId: number) {
-  return request<any>(`${API_BASE}organization/user/${userId}`, {
-    method: 'GET',
-  });
+  return request.get<any>(`${API_BASE}organization/user/${userId}`);
 }
 
 // Assign user to organization
 export async function assignUserToOrganization(data: UserOrganizationReq) {
-  return request<any>(`${API_BASE}organization/assign`, {
-    method: 'POST',
+  return request.post<any>(`${API_BASE}organization/assign`, {
     data,
   });
 }
 
 // Remove user from organization
 export async function removeUserFromOrganization(data: UserOrganizationReq) {
-  return request<any>(`${API_BASE}organization/remove`, {
-    method: 'POST',
+  return request.post<any>(`${API_BASE}organization/remove`, {
     data,
   });
 }
 
 // Set user's primary organization
 export async function setUserPrimaryOrganization(data: UserOrganizationReq) {
-  return request<any>(`${API_BASE}organization/setPrimary`, {
-    method: 'POST',
+  return request.post<any>(`${API_BASE}organization/setPrimary`, {
     data,
   });
 }
 
 // Batch assign users to organization
 export async function batchAssignUsersToOrganization(data: UserOrganizationReq) {
-  return request<any>(`${API_BASE}organization/batchAssign`, {
-    method: 'POST',
+  return request.post<any>(`${API_BASE}organization/batchAssign`, {
     data,
   });
 }
 
 // Batch remove users from organization
 export async function batchRemoveUsersFromOrganization(data: UserOrganizationReq) {
-  return request<any>(`${API_BASE}organization/batchRemove`, {
-    method: 'POST',
+  return request.post<any>(`${API_BASE}organization/batchRemove`, {
     data,
   });
 }

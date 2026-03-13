@@ -1,5 +1,5 @@
-import moment from 'moment';
-import type { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import { DateMode, DateRangeType, DateRangePicker, DateRangeTypeToPickerMap } from './type';
 import {
   DatePeriodType,
@@ -208,8 +208,8 @@ const getLastTypeDateRange = ({
         subtractData = computedSubtractDateRange(number, true);
       }
       return [
-        moment(periodTypeMoment).subtract(subtractData.startDateNumber, 'days').startOf('days'),
-        moment(periodTypeMoment).subtract(subtractData.endDateNumber, 'days').endOf('days'),
+        dayjs(periodTypeMoment).subtract(subtractData.startDateNumber, 'days').startOf('days'),
+        dayjs(periodTypeMoment).subtract(subtractData.endDateNumber, 'days').endOf('days'),
       ];
     }
     case DatePeriodType.WEEK: {
@@ -226,8 +226,8 @@ const getLastTypeDateRange = ({
         subtractData = computedSubtractDateRange(number, true);
       }
       return [
-        moment(periodTypeMoment).subtract(subtractData.startDateNumber, 'week').startOf('week'),
-        moment(periodTypeMoment).subtract(subtractData.endDateNumber, 'week').endOf('week'),
+        dayjs(periodTypeMoment).subtract(subtractData.startDateNumber, 'week').startOf('week'),
+        dayjs(periodTypeMoment).subtract(subtractData.endDateNumber, 'week').endOf('week'),
       ];
     }
     case DatePeriodType.MONTH: {
@@ -244,14 +244,14 @@ const getLastTypeDateRange = ({
         subtractData = computedSubtractDateRange(number, true);
       }
       return [
-        moment(periodTypeMoment).subtract(subtractData.startDateNumber, 'month').startOf('month'),
-        moment(periodTypeMoment).subtract(subtractData.endDateNumber, 'month').endOf('month'),
+        dayjs(periodTypeMoment).subtract(subtractData.startDateNumber, 'month').startOf('month'),
+        dayjs(periodTypeMoment).subtract(subtractData.endDateNumber, 'month').endOf('month'),
       ];
     }
     case DatePeriodType.YEAR:
       return [
-        moment().subtract(startDateNumber, 'year').startOf('year'),
-        moment().subtract(endDateNumber, 'year').endOf('year'),
+        dayjs().subtract(startDateNumber, 'year').startOf('year'),
+        dayjs().subtract(endDateNumber, 'year').endOf('year'),
       ];
     default:
       return [];
@@ -269,23 +269,23 @@ const getHistoryTypeDateRange = ({
   switch (periodType) {
     case DatePeriodType.DAY:
       return [
-        moment().subtract(dateNumber, 'days').startOf('days'),
-        moment().subtract(dateNumber, 'days').endOf('days'),
+        dayjs().subtract(dateNumber, 'days').startOf('days'),
+        dayjs().subtract(dateNumber, 'days').endOf('days'),
       ];
     case DatePeriodType.WEEK:
       return [
-        moment().subtract(dateNumber, 'week').startOf('week'),
-        moment().subtract(dateNumber, 'week').endOf('week'),
+        dayjs().subtract(dateNumber, 'week').startOf('week'),
+        dayjs().subtract(dateNumber, 'week').endOf('week'),
       ];
     case DatePeriodType.MONTH:
       return [
-        moment().subtract(dateNumber, 'month').startOf('month'),
-        moment().subtract(dateNumber, 'month').endOf('month'),
+        dayjs().subtract(dateNumber, 'month').startOf('month'),
+        dayjs().subtract(dateNumber, 'month').endOf('month'),
       ];
     case DatePeriodType.YEAR:
       return [
-        moment().subtract(dateNumber, 'year').startOf('year'),
-        moment().subtract(dateNumber, 'year').endOf('year'),
+        dayjs().subtract(dateNumber, 'year').startOf('year'),
+        dayjs().subtract(dateNumber, 'year').endOf('year'),
       ];
     default:
       return [];
@@ -298,59 +298,59 @@ const getFromDatePeriodTypeDateRange = ({
 }) => {
   switch (perPeriodType) {
     case PerDatePeriodType.PERDAY:
-      return [moment().startOf('days'), moment()];
+      return [dayjs().startOf('days'), dayjs()];
     case PerDatePeriodType.PERWEEK:
-      return [moment().startOf('week'), moment()];
+      return [dayjs().startOf('week'), dayjs()];
     case PerDatePeriodType.PERMONTH:
-      return [moment().startOf('month'), moment()];
+      return [dayjs().startOf('month'), dayjs()];
     case PerDatePeriodType.PERYEAR:
-      return [moment().startOf('year'), moment()];
+      return [dayjs().startOf('year'), dayjs()];
     default:
       return [];
   }
 };
 const getFromDateTypeDateRange = ({ date }: { date: string }) => {
-  return [moment(date), moment()];
+  return [dayjs(date), dayjs()];
 };
 
 export const getLastestTypeDateRange = (latestDate: string) => {
   if (latestDate) {
-    return [moment(latestDate), moment(latestDate)];
+    return [dayjs(latestDate), dayjs(latestDate)];
   }
   console.warn('最新标签更新日期不存在');
-  return [moment().subtract(1, 'week'), moment().subtract(1, 'week')];
+  return [dayjs().subtract(1, 'week'), dayjs().subtract(1, 'week')];
 };
 
 export const shortCutDateRangeMap = {
   // latest: (latestDate?: string) => {
   //   if (latestDate) {
-  //     return [moment(latestDate), moment(latestDate)];
+  //     return [dayjs(latestDate), dayjs(latestDate)];
   //   }
-  //   return [moment(), moment()];
+  //   return [dayjs(), dayjs()];
   // },
   // yesterday: () => {
-  //   return [moment().subtract(1, 'days'), moment().subtract(1, 'days')];
+  //   return [dayjs().subtract(1, 'days'), dayjs().subtract(1, 'days')];
   // },
   // last3Days: () => {
-  //   return [moment().subtract(3, 'days'), moment()];
+  //   return [dayjs().subtract(3, 'days'), dayjs()];
   // },
   // last7Days: () => {
-  //   return [moment().subtract(7, 'days'), moment()];
+  //   return [dayjs().subtract(7, 'days'), dayjs()];
   // },
   // last30Days: () => {
-  //   return [moment().subtract(30, 'days'), moment()];
+  //   return [dayjs().subtract(30, 'days'), dayjs()];
   // },
   // today: () => {
-  //   return [moment(), moment()];
+  //   return [dayjs(), dayjs()];
   // },
   // thisWeek: () => {
-  //   return [moment().startOf('week'), moment().endOf('week')];
+  //   return [dayjs().startOf('week'), dayjs().endOf('week')];
   // },
   // thisMonth: () => {
-  //   return [moment().startOf('month'), moment().endOf('month')];
+  //   return [dayjs().startOf('month'), dayjs().endOf('month')];
   // },
   // thisYear: () => {
-  //   return [moment().startOf('year'), moment().endOf('year')];
+  //   return [dayjs().startOf('year'), dayjs().endOf('year')];
   // },
   [DynamicAdvancedConfigType.LATEST]: getLastestTypeDateRange,
   [DynamicAdvancedConfigType.LAST]: getLastTypeDateRange,
@@ -359,7 +359,7 @@ export const shortCutDateRangeMap = {
   [DynamicAdvancedConfigType.FROM_DATE]: getFromDateTypeDateRange,
 };
 
-export const formatDateRangeString = (dateRange: Moment[]) => {
+export const formatDateRangeString = (dateRange: Dayjs[]) => {
   if (dateRange && Array.isArray(dateRange)) {
     return dateRange.map((item) => {
       return item?.format?.('YYYY-MM-DD') || '';
@@ -386,7 +386,7 @@ export const parseDynamicDateParamsToStaticDateParams = (
     dateMode: DateMode.RANGE,
     dateRangeType: dateRangeType || DateRangeType.DAY,
   };
-  let dateMomentRange: Moment[] = [];
+  let dateMomentRange: Dayjs[] = [];
   switch (dynamicAdvancedConfigType) {
     case DynamicAdvancedConfigType.LATEST: {
       const latestDate = latestDateMap?.maxPartition;
@@ -506,7 +506,7 @@ export function getDateStrings({
     dateRange = [dateRange];
   }
   const picker = DateRangeTypeToPickerMap[dateRangeType];
-  const dateStrings = dateRange.map((date: Moment, index: number) => {
+  const dateStrings = dateRange.map((date: Dayjs, index: number) => {
     switch (picker) {
       case DateRangePicker.DATE:
         if (latestDateMap?.maxPartition && !isDateRangeChange) {
@@ -547,13 +547,13 @@ export function getDateStrings({
 }
 
 export const getWeekDateRangeString = (startTime: string, endTime: string) => {
-  const startTimeWeekNumber = moment(startTime).format('w');
-  const endTimeWeekNumber = moment(endTime).format('w');
+  const startTimeWeekNumber = dayjs(startTime).format('w');
+  const endTimeWeekNumber = dayjs(endTime).format('w');
   return `${startTime}(${startTimeWeekNumber}周)至${endTime}(${endTimeWeekNumber}周)`;
 };
 
 export const getMonthDateRangeString = (startTime: string, endTime: string) => {
-  const startTimeMonth = moment(startTime).format('YYYY-MM');
-  const endTimeMonth = moment(endTime).format('YYYY-MM');
+  const startTimeMonth = dayjs(startTime).format('YYYY-MM');
+  const endTimeMonth = dayjs(endTime).format('YYYY-MM');
   return `${startTimeMonth}至${endTimeMonth}`;
 };

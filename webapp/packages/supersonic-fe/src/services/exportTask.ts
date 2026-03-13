@@ -1,4 +1,4 @@
-import tRequest from './request';
+import request from './request';
 
 const BASE = '/api/v1/exportTasks';
 
@@ -19,15 +19,15 @@ export interface ExportTask {
 }
 
 export function submitExportTask(data: Partial<ExportTask>) {
-  return tRequest(BASE, { method: 'POST', data });
+  return request(BASE, { method: 'POST', data });
 }
 
 export function getExportTaskList(params?: { current?: number; pageSize?: number }) {
-  return tRequest(BASE, { method: 'GET', params });
+  return request(BASE, { method: 'GET', params });
 }
 
 export function getExportTaskById(id: number) {
-  return tRequest(`${BASE}/${id}`, { method: 'GET' });
+  return request(`${BASE}/${id}`, { method: 'GET' });
 }
 
 export function downloadExportFile(id: number) {
@@ -35,5 +35,5 @@ export function downloadExportFile(id: number) {
 }
 
 export function cancelExportTask(id: number) {
-  return tRequest(`${BASE}/${id}`, { method: 'DELETE' });
+  return request(`${BASE}/${id}`, { method: 'DELETE' });
 }

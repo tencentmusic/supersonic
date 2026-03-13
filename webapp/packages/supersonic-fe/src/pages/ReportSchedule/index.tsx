@@ -12,9 +12,11 @@ import {
   pauseSchedule,
   resumeSchedule,
   triggerSchedule,
+  getValidDataSetList,
 } from '@/services/reportSchedule';
 import type { ReportSchedule } from '@/services/reportSchedule';
 import { getConfigList, DeliveryConfig, DELIVERY_TYPE_MAP } from '@/services/deliveryConfig';
+import { MSG } from '@/common/messages';
 
 const ReportSchedulePage: React.FC = () => {
   const [data, setData] = useState<ReportSchedule[]>([]);
@@ -24,6 +26,7 @@ const ReportSchedulePage: React.FC = () => {
   const [editRecord, setEditRecord] = useState<ReportSchedule | undefined>();
   const [executionDrawer, setExecutionDrawer] = useState<{ visible: boolean; scheduleId?: number; name?: string }>({ visible: false });
   const [deliveryConfigMap, setDeliveryConfigMap] = useState<Record<number, DeliveryConfig>>({});
+  const [datasetNameMap, setDatasetNameMap] = useState<Record<number, string>>({});
 
   const fetchData = async (current = 1, pageSize = 20) => {
     setLoading(true);
@@ -49,9 +52,23 @@ const ReportSchedulePage: React.FC = () => {
     }
   };
 
+  const fetchDatasetNames = async () => {
+    try {
+      const list = await getValidDataSetList();
+      const map: Record<number, string> = {};
+      (Array.isArray(list) ? list : []).forEach((d: { id: number; name: string }) => {
+        map[d.id] = d.name;
+      });
+      setDatasetNameMap(map);
+    } catch (error) {
+      console.error('Failed to load dataset names', error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     fetchDeliveryConfigs();
+    fetchDatasetNames();
   }, []);
 
   const handleCreate = () => {
@@ -67,10 +84,10 @@ const ReportSchedulePage: React.FC = () => {
   const handleFormSubmit = async (values: Partial<ReportSchedule>) => {
     if (editRecord?.id) {
       await updateSchedule(editRecord.id, values);
-      message.success('更新成功');
+      message.success(MSG.UPDATE_SUCCESS);
     } else {
       await createSchedule(values);
-      message.success('创建成功');
+      message.success(MSG.CREATE_SUCCESS);
     }
     setFormVisible(false);
     fetchData(pagination.current, pagination.pageSize);
@@ -80,7 +97,7 @@ const ReportSchedulePage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     await deleteSchedule(id);
-    message.success('删除成功');
+    message.success(MSG.DELETE_SUCCESS);
     fetchData(pagination.current, pagination.pageSize);
   };
 
@@ -105,9 +122,10 @@ const ReportSchedulePage: React.FC = () => {
       width: 200,
     },
     {
-      title: '数据集 ID',
+      title: '关联数据集',
       dataIndex: 'datasetId',
-      width: 100,
+      width: 180,
+      render: (id: number) => (datasetNameMap[id] != null ? `${datasetNameMap[id]} (${id})` : id ?? '-'),
     },
     {
       title: 'Cron 表达式',

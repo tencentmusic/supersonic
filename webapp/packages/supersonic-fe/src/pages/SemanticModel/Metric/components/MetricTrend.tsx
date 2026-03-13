@@ -11,7 +11,7 @@ import * as echarts from 'echarts';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { groupBy, sum } from 'lodash';
 import styles from '../style.less';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 type Props = {
   title?: string;
@@ -66,10 +66,10 @@ const TrendChart: React.FC<Props> = ({
       new Set(
         data
           .map((item) =>
-            moment(`${dateFieldName && item[dateFieldName]}`).format(dateFormat ?? 'YYYY-MM-DD'),
+            dayjs(`${dateFieldName && item[dateFieldName]}`).format(dateFormat ?? 'YYYY-MM-DD'),
           )
           .sort((a, b) => {
-            return moment(a).valueOf() - moment(b).valueOf();
+            return dayjs(a).valueOf() - dayjs(b).valueOf();
           }),
       ),
     );

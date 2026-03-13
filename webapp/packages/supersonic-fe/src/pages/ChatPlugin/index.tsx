@@ -1,7 +1,7 @@
 import { getLeafNodes } from '@/utils/utils';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Input, message, Popconfirm, Select, Table, Tag } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { PLUGIN_TYPE_MAP } from './constants';
 import DetailModal from './DetailModal';
@@ -108,7 +108,7 @@ const PluginManage = () => {
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       render: (value: string) => {
-        return value ? moment(value).format('YYYY-MM-DD HH:mm') : '-';
+        return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-';
       },
     },
     {

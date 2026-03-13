@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.facade.rest;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.StringUtil;
+import com.tencent.supersonic.common.util.ThreadMdcUtil;
 import com.tencent.supersonic.headless.api.pojo.SqlEvaluation;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlsReq;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,15 +59,15 @@ public class SqlQueryApiController {
             return querySqlReq;
         }).collect(Collectors.toList());
 
-        List<CompletableFuture<SemanticQueryResp>> futures =
-                semanticQueryReqs.stream().map(querySqlReq -> CompletableFuture.supplyAsync(() -> {
+        List<CompletableFuture<SemanticQueryResp>> futures = semanticQueryReqs.stream()
+                .map(querySqlReq -> CompletableFuture.supplyAsync(ThreadMdcUtil.wrapSupplier(() -> {
                     try {
                         return semanticLayerService.queryByReq(querySqlReq, user);
                     } catch (Exception e) {
                         log.error("querySqlReq:{},queryByReq error:", querySqlReq, e);
                         return new SemanticQueryResp();
                     }
-                })).toList();
+                }, MDC.getCopyOfContextMap()))).toList();
         return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
 

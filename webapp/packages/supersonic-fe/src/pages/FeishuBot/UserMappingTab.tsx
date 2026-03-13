@@ -5,6 +5,8 @@ import { getFeishuMappings, deleteFeishuMapping, enableFeishuMapping, disableFei
 import { getUserList } from '@/services/user';
 import { getAgentList } from '@/pages/Agent/service';
 import MappingFormModal from './components/MappingFormModal';
+import { StatusEnum } from '@/common/constants';
+import { MSG } from '@/common/messages';
 
 const MATCH_TYPE_LABELS: Record<string, string> = {
   PENDING: '待审核',
@@ -81,7 +83,7 @@ const UserMappingTab: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     await deleteFeishuMapping(id);
-    message.success('删除成功');
+    message.success(MSG.DELETE_SUCCESS);
     fetchData(pagination.current, pagination.pageSize);
   };
 
@@ -125,7 +127,7 @@ const UserMappingTab: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: number, record: any) => (
-        <Switch checked={status === 1} onChange={(checked) => handleToggleStatus(record.id, checked)} />
+        <Switch checked={status === StatusEnum.ENABLED} onChange={(checked) => handleToggleStatus(record.id, checked)} />
       ),
     },
     {

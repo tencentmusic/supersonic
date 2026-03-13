@@ -16,6 +16,7 @@ import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.ModelService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +43,7 @@ public class ModelController {
     }
 
     @PostMapping("/createModel")
-    public Boolean createModel(@RequestBody ModelReq modelReq, HttpServletRequest request,
+    public Boolean createModel(@Valid @RequestBody ModelReq modelReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         modelService.createModel(modelReq, user);
@@ -50,7 +51,7 @@ public class ModelController {
     }
 
     @PostMapping("/createModelBatch")
-    public Boolean createModelBatch(@RequestBody ModelBuildReq modelBuildReq,
+    public Boolean createModelBatch(@Valid @RequestBody ModelBuildReq modelBuildReq,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         modelService.createModel(modelBuildReq, user);
@@ -58,7 +59,7 @@ public class ModelController {
     }
 
     @PostMapping("/updateModel")
-    public Boolean updateModel(@RequestBody ModelReq modelReq, HttpServletRequest request,
+    public Boolean updateModel(@Valid @RequestBody ModelReq modelReq, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         User user = UserHolder.findUser(request, response);
         modelService.updateModel(modelReq, user);

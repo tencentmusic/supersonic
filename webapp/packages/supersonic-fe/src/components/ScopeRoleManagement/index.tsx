@@ -15,6 +15,7 @@ import {
   Transfer,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
+import { MSG } from '@/common/messages';
 import styles from './style.less';
 
 interface Role {
@@ -116,11 +117,11 @@ const ScopeRoleManagement: React.FC<ScopeConfig> = ({
     try {
       const { code } = await api.deleteRole(id);
       if (code === 200) {
-        message.success('删除成功');
+        message.success(MSG.DELETE_SUCCESS);
         loadRoles();
       }
     } catch (error) {
-      message.error('删除失败');
+      message.error(MSG.DELETE_FAILED);
     }
   };
 
@@ -138,11 +139,11 @@ const ScopeRoleManagement: React.FC<ScopeConfig> = ({
       }
 
       if (result.code === 200) {
-        message.success(editingRole ? '更新成功' : '创建成功');
+        message.success(editingRole ? MSG.UPDATE_SUCCESS : MSG.CREATE_SUCCESS);
         setModalVisible(false);
         loadRoles();
       } else {
-        message.error(result.msg || '操作失败');
+        message.error(result.msg || MSG.OPERATION_FAILED);
       }
     } catch (error) {
       console.error(error);

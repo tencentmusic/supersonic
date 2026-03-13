@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.response.TermResp;
 import com.tencent.supersonic.headless.server.service.TermService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,7 @@ public class TermController {
     private final TermService termService;
 
     @PostMapping("/saveOrUpdate")
-    public boolean saveOrUpdate(@RequestBody TermReq termReq, HttpServletRequest request,
+    public boolean saveOrUpdate(@Valid @RequestBody TermReq termReq, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         termService.saveOrUpdate(termReq, user);

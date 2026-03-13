@@ -127,6 +127,14 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     }
 
     @Override
+    public List<DataSetResp> getValidDataSetList() {
+        QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();
+        wrapper.lambda().in(DataSetDO::getStatus,
+                Arrays.asList(StatusEnum.ONLINE.getCode(), StatusEnum.OFFLINE.getCode()));
+        return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(Long id, User user) {
         // Check for active report schedules referencing this dataset
         if (reportScheduleService != null) {

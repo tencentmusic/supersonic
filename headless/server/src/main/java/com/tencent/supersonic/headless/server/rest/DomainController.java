@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.server.service.DomainService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,14 +32,14 @@ public class DomainController {
     }
 
     @PostMapping("/createDomain")
-    public DomainResp createDomain(@RequestBody DomainReq domainReq, HttpServletRequest request,
-            HttpServletResponse response) {
+    public DomainResp createDomain(@Valid @RequestBody DomainReq domainReq,
+            HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return domainService.createDomain(domainReq, user);
     }
 
     @PostMapping("/updateDomain")
-    public DomainResp updateDomain(@RequestBody DomainUpdateReq domainUpdateReq,
+    public DomainResp updateDomain(@Valid @RequestBody DomainUpdateReq domainUpdateReq,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return domainService.updateDomain(domainUpdateReq, user);

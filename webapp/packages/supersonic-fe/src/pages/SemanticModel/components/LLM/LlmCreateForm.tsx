@@ -7,6 +7,7 @@ import { testLLMConn, getLlmConfig } from '@/services/system';
 import { formLayout } from '@/components/FormHelper/utils';
 
 import { genneratorFormItemList } from '../../utils';
+import { MSG } from '@/common/messages';
 import styles from '../style.less';
 type Props = {
   llmItem?: any;
@@ -55,7 +56,7 @@ const LlmCreateForm: ForwardRefRenderFunction<any, Props> = ({ llmItem, onSubmit
     });
 
     if (code === 200) {
-      message.success('保存成功');
+      message.success(MSG.SAVE_SUCCESS);
       onSubmit?.();
       return;
     }

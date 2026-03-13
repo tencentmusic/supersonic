@@ -8,7 +8,7 @@ import { deleteModel, batchUpdateModelStatus } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
 import TableHeaderFilter from '@/components/TableHeaderFilter';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from './style.less';
 import { ISemantic } from '../data';
 import { toModelList } from '@/pages/SemanticModel/utils';
@@ -146,7 +146,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       title: '更新时间',
       search: false,
       render: (value: any) => {
-        return value && value !== '-' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+        return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       },
     },
   ];

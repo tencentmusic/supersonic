@@ -1,4 +1,4 @@
-import tRequest from './request';
+import request from './request';
 
 const BASE = '/api/v1/dataSyncConfigs';
 
@@ -30,53 +30,53 @@ export interface DataSyncExecution {
 }
 
 export function getSyncConfigList(params?: { current?: number; pageSize?: number }) {
-  return tRequest(BASE, { method: 'GET', params });
+  return request(BASE, { method: 'GET', params });
 }
 
 export function getSyncConfigById(id: number) {
-  return tRequest(`${BASE}/${id}`, { method: 'GET' });
+  return request(`${BASE}/${id}`, { method: 'GET' });
 }
 
 export function createSyncConfig(data: Partial<DataSyncConfig>) {
-  return tRequest(BASE, { method: 'POST', data });
+  return request(BASE, { method: 'POST', data });
 }
 
 export function updateSyncConfig(id: number, data: Partial<DataSyncConfig>) {
-  return tRequest(`${BASE}/${id}`, { method: 'PATCH', data });
+  return request(`${BASE}/${id}`, { method: 'PATCH', data });
 }
 
 export function deleteSyncConfig(id: number) {
-  return tRequest(`${BASE}/${id}`, { method: 'DELETE' });
+  return request(`${BASE}/${id}`, { method: 'DELETE' });
 }
 
 export function triggerSync(id: number) {
-  return tRequest(`${BASE}/${id}:trigger`, { method: 'POST' });
+  return request(`${BASE}/${id}:trigger`, { method: 'POST' });
 }
 
 export function pauseSync(id: number) {
-  return tRequest(`${BASE}/${id}:pause`, { method: 'POST' });
+  return request(`${BASE}/${id}:pause`, { method: 'POST' });
 }
 
 export function resumeSync(id: number) {
-  return tRequest(`${BASE}/${id}:resume`, { method: 'POST' });
+  return request(`${BASE}/${id}:resume`, { method: 'POST' });
 }
 
 export function getSyncExecutionList(
   configId: number,
   params?: { current?: number; pageSize?: number },
 ) {
-  return tRequest(`${BASE}/${configId}/executions`, { method: 'GET', params });
+  return request(`${BASE}/${configId}/executions`, { method: 'GET', params });
 }
 
 export function discoverSchema(configId: number) {
-  return tRequest(`${BASE}/${configId}:discoverSchema`, { method: 'POST' });
+  return request(`${BASE}/${configId}:discoverSchema`, { method: 'POST' });
 }
 
 /**
  * Discover schema for a database (used in wizard before config is created).
  */
 export function discoverSchemaByDatabase(databaseId: number) {
-  return tRequest(`${BASE}:discoverSchemaByDatabase`, {
+  return request(`${BASE}:discoverSchemaByDatabase`, {
     method: 'POST',
     params: { databaseId },
   });

@@ -1,7 +1,9 @@
 package com.tencent.supersonic.feishu.api.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -26,6 +28,18 @@ public class FeishuProperties {
     private RateLimitConfig rateLimit = new RateLimitConfig();
     private AsyncConfig async = new AsyncConfig();
     private OAuthBindingConfig oauth = new OAuthBindingConfig();
+
+    @PostConstruct
+    void validate() {
+        if (!enabled) {
+            return;
+        }
+        if (!StringUtils.hasText(appId) || !StringUtils.hasText(appSecret)) {
+            throw new IllegalStateException(
+                    "[Feishu] s2.feishu.enabled=true but app-id or app-secret is not configured. "
+                            + "Set FEISHU_APP_ID and FEISHU_APP_SECRET environment variables.");
+        }
+    }
 
     @Data
     public static class AsyncConfig {

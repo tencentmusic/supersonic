@@ -1,37 +1,29 @@
-import { request } from '@umijs/max';
+import request from '@/services/request';
 import { DimensionType, ModelType, PluginType } from './type';
 
 export function savePlugin(params: Partial<PluginType>) {
-  return request<Result<any>>('/api/chat/plugin', {
-    method: params.id ? 'PUT' : 'POST',
+  const method = params.id ? 'put' : 'post';
+  return request[method]<Result<any>>('/api/chat/plugin', {
     data: params,
   });
 }
 
 export function getPluginList(filters?: any) {
-  return request<Result<any[]>>('/api/chat/plugin/query', {
-    method: 'POST',
+  return request.post<Result<any[]>>('/api/chat/plugin/query', {
     data: filters,
   });
 }
 
 export function deletePlugin(id: number) {
-  return request<Result<any>>(`/api/chat/plugin/${id}`, {
-    method: 'DELETE',
-  });
+  return request.delete<Result<any>>(`/api/chat/plugin/${id}`);
 }
 
 export function getModelList() {
-  return request<Result<ModelType[]>>('/api/chat/conf/getDomainDataSetTree', {
-    method: 'GET',
-  });
+  return request.get<Result<ModelType[]>>('/api/chat/conf/getDomainDataSetTree');
 }
 
 export function getDataSetSchema(dataSetId: number) {
-  return request<Result<{ list: DimensionType[] }>>(
+  return request.get<Result<{ list: DimensionType[] }>>(
     `/api/chat/conf/getDataSetSchema/${dataSetId}`,
-    {
-      method: 'GET',
-    },
   );
 }

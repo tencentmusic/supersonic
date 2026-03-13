@@ -9,7 +9,7 @@ import {
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
 import classNames from 'classnames';
@@ -56,7 +56,7 @@ const MetricTrendChart: React.FC<Props> = ({
       return {
         ...item,
         [dateColumnName]: Array.isArray(item[dateColumnName])
-          ? moment(item[dateColumnName].join('')).format('MM-DD')
+          ? dayjs(item[dateColumnName].join('')).format('MM-DD')
           : item[dateColumnName],
       };
     });
@@ -91,7 +91,7 @@ const MetricTrendChart: React.FC<Props> = ({
       const date = isArray(item[dateColumnName])
         ? item[dateColumnName].join('-')
         : `${item[dateColumnName]}`;
-      return date.length === 10 ? moment(date).format('MM-DD') : date;
+      return date.length === 10 ? dayjs(date).format('MM-DD') : date;
     });
 
     instanceObj.setOption({

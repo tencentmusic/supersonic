@@ -8,7 +8,7 @@ import {
   ReloadOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { getTimeline, ConnectionEventDO } from '@/services/connection';
 
 interface TimelineDrawerProps {
@@ -98,7 +98,7 @@ const TimelineDrawer: React.FC<TimelineDrawerProps> = ({
                       <div>
                         <Tag color={config.color}>{config.text}</Tag>
                         <span style={{ fontSize: 12, color: '#999' }}>
-                          {moment(event.eventTime).format('YYYY-MM-DD HH:mm:ss')}
+                          {dayjs(event.eventTime).format('YYYY-MM-DD HH:mm:ss')}
                         </span>
                       </div>
                       {event.userName && (
