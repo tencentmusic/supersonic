@@ -37,6 +37,21 @@ depends-on:
 | 告警归因分析 | ❌ | 二期考虑 |
 | 自动修复/补数据 | ❌ | 超出范围 |
 
+### SPEC Discovery 约束（Phase 1-3 确认）
+
+| 约束 | 结论 | 来源 |
+|------|------|------|
+| 创建权限 | 管理员不受限 + 分析师限本人可访问 DataSet | Phase 1 Q1 |
+| 规则数量 | 每租户软限制 50 条（AG-10） | Phase 1 Q2 |
+| 查询超时 | 共用线程池，告警查询 30 秒超时 | Phase 1 Q3 |
+| 失败处理 | 连续失败 5 次自动禁用 + 飞书通知 owner | Phase 1 Q4 |
+| 事件保留 | 90 天自动清理 | Phase 1 Q5 |
+| queryConfig 限制 | 禁止 QuerySqlReq，只允许 QueryStructReq / SqlTemplateConfig（AG-06） | Phase 2 |
+| Cron 最小间隔 | ≥ 5 分钟（AG-07） | Phase 2 |
+| 结果行数上限 | LIMIT ≤ 1000（AG-08） | Phase 2 |
+| 消息模板转义 | 变量插值需转义 Markdown 特殊字符（AG-09） | Phase 2 |
+| 自动禁用审计 | s2_alert_rule 新增 `disabled_reason` 字段 | Phase 3 |
+
 ### 与报表调度的关系
 
 | 维度 | 报表调度 | 告警订阅 |

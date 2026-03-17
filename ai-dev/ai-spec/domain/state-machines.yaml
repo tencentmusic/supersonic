@@ -1,0 +1,120 @@
+# state-machines.yaml — SuperSonic 核心状态流转定义
+
+# Model 状态机
+model:
+  states: [DRAFT, ONLINE, OFFLINE, DELETED]
+  transitions:
+    - from: DRAFT
+      to: ONLINE
+      trigger: publish
+    - from: ONLINE
+      to: OFFLINE
+      trigger: unpublish
+    - from: OFFLINE
+      to: ONLINE
+      trigger: republish
+    - from: DRAFT
+      to: DELETED
+      trigger: delete
+    - from: OFFLINE
+      to: DELETED
+      trigger: delete
+  illegal_transitions:
+    - from: DRAFT
+      to: OFFLINE
+      reason: "未发布的模型不能下线"
+    - from: ONLINE
+      to: DRAFT
+      reason: "已上线的模型不能回退到草稿"
+    - from: DELETED
+      to: [DRAFT, ONLINE, OFFLINE]
+      reason: "已删除的模型不可恢复"
+
+# Agent 状态机
+agent:
+  states: [ENABLED, DISABLED, DELETED]
+  transitions:
+    - from: ENABLED
+      to: DISABLED
+      trigger: disable
+    - from: DISABLED
+      to: ENABLED
+      trigger: enable
+    - from: [ENABLED, DISABLED]
+      to: DELETED
+      trigger: delete
+
+# SemanticTemplate 状态机
+semantic_template:
+  states: [DRAFT, PUBLISHED, DEPRECATED]
+  transitions:
+    - from: DRAFT
+      to: PUBLISHED
+      trigger: publish
+    - from: PUBLISHED
+      to: DEPRECATED
+      trigger: deprecate
+    - from: DRAFT
+      to: DRAFT
+      trigger: update
+  illegal_transitions:
+    - from: DEPRECATED
+      to: [DRAFT, PUBLISHED]
+      reason: "已废弃的模板不可恢复"
+
+# AlertRule 状态机
+alert_rule:
+  states: [ENABLED, PAUSED, DISABLED, DELETED]
+  transitions:
+    - from: ENABLED
+      to: PAUSED
+      trigger: pause (用户手动暂停)
+    - from: PAUSED
+      to: ENABLED
+      trigger: resume (用户手动恢复)
+    - from: ENABLED
+      to: DISABLED
+      trigger: auto_disable (连续失败 5 次系统自动禁用)
+    - from: DISABLED
+      to: ENABLED
+      trigger: resume (用户确认问题修复后手动恢复)
+    - from: [ENABLED, PAUSED, DISABLED]
+      to: DELETED
+      trigger: delete
+  illegal_transitions:
+    - from: DELETED
+      to: [ENABLED, PAUSED, DISABLED]
+      reason: "已删除的规则不可恢复"
+  notes:
+    - "PAUSED 是用户主动行为，DISABLED 是系统自动行为（记录 disabled_reason）"
+    - "DISABLED → ENABLED 需用户主动 resume，系统不自动恢复"
+
+# AlertExecution 状态机
+alert_execution:
+  states: [PENDING, RUNNING, SUCCESS, FAILED]
+  transitions:
+    - from: PENDING
+      to: RUNNING
+      trigger: start
+    - from: RUNNING
+      to: SUCCESS
+      trigger: complete (评估完成，无论是否有告警事件)
+    - from: RUNNING
+      to: FAILED
+      trigger: error (查询超时、数仓不可用等)
+  notes:
+    - "SUCCESS 不代表无告警，只代表检查流程正常完成"
+
+# AlertEvent 推送状态机
+alert_event_delivery:
+  states: [PENDING, SUCCESS, FAILED, SILENCED]
+  transitions:
+    - from: PENDING
+      to: SUCCESS
+      trigger: deliver_ok
+    - from: PENDING
+      to: FAILED
+      trigger: deliver_fail
+    - from: PENDING
+      to: SILENCED
+      trigger: silence_hit (同 alert_key 在静默期内)
