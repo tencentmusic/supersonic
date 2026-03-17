@@ -1,21 +1,22 @@
 -- MySQL does not support ALTER TABLE ... ADD COLUMN IF NOT EXISTS
--- Use a stored procedure to conditionally add columns
-DROP PROCEDURE IF EXISTS add_column_if_not_exists;
+-- Use PREPARE/EXECUTE pattern (Flyway-compatible, no DELIMITER needed)
 
-DELIMITER //
-CREATE PROCEDURE add_column_if_not_exists()
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-                   WHERE table_schema = DATABASE() AND table_name = 's2_feishu_query_session' AND column_name = 'dataset_id') THEN
-        ALTER TABLE s2_feishu_query_session ADD COLUMN dataset_id BIGINT DEFAULT NULL;
-    END IF;
+-- Add dataset_id column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 's2_feishu_query_session' AND COLUMN_NAME = 'dataset_id');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE s2_feishu_query_session ADD COLUMN dataset_id BIGINT DEFAULT NULL',
+    'SELECT ''Column dataset_id already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-                   WHERE table_schema = DATABASE() AND table_name = 's2_feishu_query_session' AND column_name = 'agent_id') THEN
-        ALTER TABLE s2_feishu_query_session ADD COLUMN agent_id INT DEFAULT NULL;
-    END IF;
-END //
-DELIMITER ;
-
-CALL add_column_if_not_exists();
-DROP PROCEDURE IF EXISTS add_column_if_not_exists;
+-- Add agent_id column if not exists
+SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 's2_feishu_query_session' AND COLUMN_NAME = 'agent_id');
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE s2_feishu_query_session ADD COLUMN agent_id INT DEFAULT NULL',
+    'SELECT ''Column agent_id already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

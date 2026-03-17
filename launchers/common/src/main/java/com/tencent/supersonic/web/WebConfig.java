@@ -1,12 +1,15 @@
 package com.tencent.supersonic.web;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    private static final boolean INDEX_EXISTS = new ClassPathResource("webapp/index.html").exists();
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -17,9 +20,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("redirect:/webapp/");
-        registry.addViewController("/webapp/").setViewName("forward:/webapp/index.html");
-        registry.addViewController("/webapp/**/{path:[^\\.]*}")
-                .setViewName("forward:/webapp/index.html");
+        if (INDEX_EXISTS) {
+            registry.addViewController("/").setViewName("redirect:/webapp/");
+            registry.addViewController("/webapp/").setViewName("forward:/webapp/index.html");
+            registry.addViewController("/webapp/**/{path:[^\\.]*}")
+                    .setViewName("forward:/webapp/index.html");
+        }
     }
 }

@@ -17,9 +17,9 @@ KEY(id) VALUES
 -- ========================================
 -- 2. 默认租户初始化
 -- ========================================
-MERGE INTO s2_tenant (id, name, code, description, status, plan_id, created_by)
+MERGE INTO s2_tenant (id, name, code, description, status, created_by)
 KEY(id) VALUES
-(1, '默认租户', 'default', '系统默认租户', 'ACTIVE', 1, 'system');
+(1, '默认租户', 'default', '系统默认租户', 'ACTIVE', 'system');
 
 -- ========================================
 -- 2.1 默认租户订阅初始化

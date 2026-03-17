@@ -348,10 +348,10 @@ CREATE TABLE IF NOT EXISTS `s2_organization` (
     `created_by` VARCHAR(100) DEFAULT NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_by` VARCHAR(100) DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    INDEX `idx_org_parent_id` (`parent_id`),
-    INDEX `idx_org_tenant_id` (`tenant_id`)
+    PRIMARY KEY (`id`)
 );
+CREATE INDEX IF NOT EXISTS idx_org_parent_id ON s2_organization(`parent_id`);
+CREATE INDEX IF NOT EXISTS idx_org_tenant_id ON s2_organization(`tenant_id`);
 COMMENT ON TABLE s2_organization IS '组织架构表';
 
 -- 用户-组织关联表
@@ -364,11 +364,11 @@ CREATE TABLE IF NOT EXISTS `s2_user_organization` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `created_by` VARCHAR(100) DEFAULT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `uk_user_org` UNIQUE (`user_id`, `organization_id`),
-    INDEX `idx_user_org_user` (`user_id`),
-    INDEX `idx_user_org_org` (`organization_id`),
-    INDEX `idx_user_org_tenant` (`tenant_id`)
+    CONSTRAINT `uk_user_org` UNIQUE (`user_id`, `organization_id`)
 );
+CREATE INDEX IF NOT EXISTS idx_user_org_user ON s2_user_organization(`user_id`);
+CREATE INDEX IF NOT EXISTS idx_user_org_org ON s2_user_organization(`organization_id`);
+CREATE INDEX IF NOT EXISTS idx_user_org_tenant ON s2_user_organization(`tenant_id`);
 COMMENT ON TABLE s2_user_organization IS '用户-组织关联表';
 COMMENT ON COLUMN s2_user_organization.tenant_id IS '租户ID';
 

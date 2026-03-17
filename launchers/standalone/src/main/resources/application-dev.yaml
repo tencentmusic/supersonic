@@ -1,6 +1,6 @@
 # Dev profile — local development & integration testing defaults
 # Activate via: spring.profiles.active=h2,dev
-# WARNING: Do NOT use these credentials in production environments.
+# WARNING: These are dev/test credentials only. Do NOT use in production.
 
 s2:
   encryption:

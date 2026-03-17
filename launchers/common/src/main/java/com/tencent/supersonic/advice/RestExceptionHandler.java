@@ -6,12 +6,20 @@ import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -28,6 +36,56 @@ public class RestExceptionHandler {
         if (log.isDebugEnabled()) {
             log.debug("Client disconnected: {}", e.getMessage());
         }
+    }
+
+    /** @Valid on @RequestBody — field-level validation failures */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResultData<String> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        log.warn("request validation failed: {}", message);
+        return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(), message);
+    }
+
+    /** @Validated on path/query params — constraint violations */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResultData<String> constraintViolationException(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining("; "));
+        log.warn("constraint violation: {}", message);
+        return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(), message);
+    }
+
+    /** Malformed or missing request body */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResultData<String> httpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.warn("request body not readable: {}", e.getMessage());
+        return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(),
+                "request body is missing or malformed");
+    }
+
+    /** Missing required query/path parameter */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResultData<String> missingServletRequestParameterException(
+            MissingServletRequestParameterException e) {
+        log.warn("missing request parameter: {}", e.getMessage());
+        return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(), e.getMessage());
+    }
+
+    /** Wrong type for query/path parameter */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResultData<String> methodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e) {
+        String message = "parameter '" + e.getName() + "' must be of type "
+                + (e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown");
+        log.warn("argument type mismatch: {}", message);
+        return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(), message);
     }
 
     /** default global exception handler */
