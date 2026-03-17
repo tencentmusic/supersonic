@@ -31,7 +31,7 @@ public class ThreadPoolConfig {
     @Bean("mapExecutor")
     public ThreadPoolExecutor getMapExecutor() {
         return new ContextAwareThreadPoolExecutor(8, 16, 60 * 3, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
+                new LinkedBlockingQueue<>(1024),
                 new ThreadFactoryBuilder().setNameFormat("supersonic-map-pool-").build(),
                 new ThreadPoolExecutor.CallerRunsPolicy());
     }

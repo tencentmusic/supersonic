@@ -23,9 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * DataInterpretProcessor interprets query result to make it more readable to the users.
@@ -34,7 +34,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
     public static String tip = "AI 回答中...\r\n";
     private static final Logger keyPipelineLog = LoggerFactory.getLogger("keyPipeline");
 
-    private static Map<Long, StringBuffer> resultCache = new HashMap<>();
+    private static Map<Long, StringBuffer> resultCache = new ConcurrentHashMap<>();
 
     public static final String APP_KEY = "DATA_INTERPRETER";
     private static final String INSTRUCTION = ""
@@ -76,7 +76,7 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         Agent agent = executeContext.getAgent();
         ChatApp chatApp = agent.getChatAppConfig().get(APP_KEY);
 
-        Map<String, Object> variable = new HashMap<>();
+        Map<String, Object> variable = new java.util.HashMap<>();
         String question = executeContext.getResponse().getTextResult();// 结果解析应该用改写的问题，因为改写的内容信息量更大
         if (executeContext.getParseInfo().getProperties() != null
                 && executeContext.getParseInfo().getProperties().containsKey("CONTEXT")) {
@@ -99,7 +99,10 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
                     new StreamingResponseHandler<AiMessage>() {
                         @Override
                         public void onNext(String token) {
-                            resultCache.get(queryId).append(token);
+                            StringBuffer buf = resultCache.get(queryId);
+                            if (buf != null) {
+                                buf.append(token);
+                            }
                         }
 
                         @Override
@@ -108,8 +111,11 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
                                     ContextUtils.getBean(ChatQueryRepository.class);
                             ChatQueryDO chatQueryDO = chatQueryRepository.getChatQueryDO(queryId);
                             JSONObject queryResult = JSON.parseObject(chatQueryDO.getQueryResult());
-                            queryResult.put("textSummary",
-                                    resultCache.get(queryId).toString().substring(tip.length()));
+                            StringBuffer buf = resultCache.get(queryId);
+                            if (buf != null) {
+                                queryResult.put("textSummary",
+                                        buf.toString().substring(tip.length()));
+                            }
                             chatQueryDO.setQueryResult(queryResult.toJSONString());
                             chatQueryRepository.updateChatQuery(chatQueryDO);
                             resultCache.remove(queryId);
@@ -117,7 +123,9 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
 
                         @Override
                         public void onError(Throwable error) {
-                            error.printStackTrace();
+                            keyPipelineLog.error(
+                                    "DataInterpretProcessor streaming error for queryId: {}",
+                                    queryId, error);
                             resultCache.remove(queryId);
                         }
                     });
