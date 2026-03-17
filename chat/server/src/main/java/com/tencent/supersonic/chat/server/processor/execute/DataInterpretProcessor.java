@@ -80,10 +80,13 @@ public class DataInterpretProcessor implements ExecuteResultProcessor {
         String question = executeContext.getResponse().getTextResult();// 结果解析应该用改写的问题，因为改写的内容信息量更大
         if (executeContext.getParseInfo().getProperties() != null
                 && executeContext.getParseInfo().getProperties().containsKey("CONTEXT")) {
-            Map<String, Object> context = (Map<String, Object>) executeContext.getParseInfo()
-                    .getProperties().get("CONTEXT");
-            if (context.get("queryText") != null && "".equals(context.get("queryText"))) {
-                question = context.get("queryText").toString();
+            Object rawContext = executeContext.getParseInfo().getProperties().get("CONTEXT");
+            if (rawContext instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> context = (Map<String, Object>) rawContext;
+                if (context.get("queryText") != null && "".equals(context.get("queryText"))) {
+                    question = context.get("queryText").toString();
+                }
             }
         }
         variable.put("question", question);
