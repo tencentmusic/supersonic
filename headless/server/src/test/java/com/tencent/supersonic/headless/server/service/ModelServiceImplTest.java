@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.mockito.Mockito.when;
 
@@ -78,9 +79,10 @@ class ModelServiceImplTest {
         DataSetService viewService = Mockito.mock(DataSetService.class);
         ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+        ThreadPoolExecutor commonExecutor = Mockito.mock(ThreadPoolExecutor.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelRelaService, eventPublisher);
+                modelRelaService, eventPublisher, commonExecutor);
     }
 
     private ModelReq mockModelReq() {
