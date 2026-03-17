@@ -384,6 +384,7 @@ CREATE TABLE IF NOT EXISTS `s2_database` (
     `version` VARCHAR(64) DEFAULT NULL,
     `type` VARCHAR(20) NOT NULL,
     `config` TEXT NOT NULL,
+    `pool_config` TEXT DEFAULT NULL,
     `tenant_id` BIGINT NOT NULL DEFAULT 1,
     `admin` VARCHAR(500) DEFAULT NULL,
     `viewer` VARCHAR(500) DEFAULT NULL,
@@ -395,6 +396,7 @@ CREATE TABLE IF NOT EXISTS `s2_database` (
     PRIMARY KEY (`id`)
 );
 COMMENT ON TABLE s2_database IS '数据库实例表';
+COMMENT ON COLUMN s2_database.pool_config IS 'JSON configuration for connection pool settings per pool type';
 
 -- ========================================
 -- 5. 核心业务表 - 主题域与模型
@@ -574,8 +576,8 @@ CREATE TABLE IF NOT EXISTS `s2_dataset_auth_groups` (
     PRIMARY KEY (`group_id`)
 );
 COMMENT ON TABLE s2_dataset_auth_groups IS '数据集权限组表';
-CREATE INDEX idx_dataset_auth_dataset ON s2_dataset_auth_groups (`dataset_id`);
-CREATE INDEX idx_dataset_auth_tenant ON s2_dataset_auth_groups (`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_dataset_auth_dataset ON s2_dataset_auth_groups (`dataset_id`);
+CREATE INDEX IF NOT EXISTS idx_dataset_auth_tenant ON s2_dataset_auth_groups (`tenant_id`);
 
 -- ========================================
 -- 8. 智能体与对话表
@@ -1043,6 +1045,7 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_template` (
     `preview_image` VARCHAR(500) DEFAULT NULL,
     `status` TINYINT DEFAULT 0,
     `is_builtin` TINYINT DEFAULT 0,
+    `current_version` BIGINT DEFAULT 1,
     `tenant_id` BIGINT NOT NULL DEFAULT 1,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `created_by` VARCHAR(100) DEFAULT NULL,
@@ -1066,6 +1069,8 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_deployment` (
     `current_step` VARCHAR(50) DEFAULT NULL,
     `start_time` TIMESTAMP DEFAULT NULL,
     `end_time` TIMESTAMP DEFAULT NULL,
+    `template_version` BIGINT DEFAULT NULL,
+    `template_config_snapshot` CLOB DEFAULT NULL,
     `tenant_id` BIGINT NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `created_by` VARCHAR(100) DEFAULT NULL,
@@ -1074,9 +1079,9 @@ CREATE TABLE IF NOT EXISTS `s2_semantic_deployment` (
     CONSTRAINT uk_deployment_active_lock UNIQUE (`active_lock`)
 );
 COMMENT ON TABLE s2_semantic_deployment IS '语义模板部署记录表';
-CREATE INDEX idx_semantic_deployment_template ON s2_semantic_deployment(`template_id`);
-CREATE INDEX idx_semantic_deployment_tenant ON s2_semantic_deployment(`tenant_id`);
-CREATE INDEX idx_semantic_deployment_status ON s2_semantic_deployment(`status`);
+CREATE INDEX IF NOT EXISTS idx_semantic_deployment_template ON s2_semantic_deployment(`template_id`);
+CREATE INDEX IF NOT EXISTS idx_semantic_deployment_tenant ON s2_semantic_deployment(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_semantic_deployment_status ON s2_semantic_deployment(`status`);
 
 -- ========================================
 -- 飞书机器人
@@ -1101,7 +1106,7 @@ CREATE TABLE IF NOT EXISTS `s2_feishu_user_mapping` (
     PRIMARY KEY (`id`),
     CONSTRAINT `uk_feishu_open_id` UNIQUE (`feishu_open_id`)
 );
-CREATE INDEX idx_s2_feishu_user_mapping_s2_user_id ON s2_feishu_user_mapping(`s2_user_id`);
+CREATE INDEX IF NOT EXISTS idx_s2_feishu_user_mapping_s2_user_id ON s2_feishu_user_mapping(`s2_user_id`);
 
 -- 飞书查询会话表
 CREATE TABLE IF NOT EXISTS `s2_feishu_query_session` (
@@ -1119,4 +1124,268 @@ CREATE TABLE IF NOT EXISTS `s2_feishu_query_session` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 );
-CREATE INDEX idx_feishu_session_open_id_created ON s2_feishu_query_session(`feishu_open_id`, `created_at` DESC);
+CREATE INDEX IF NOT EXISTS idx_feishu_session_open_id_created ON s2_feishu_query_session(`feishu_open_id`, `created_at`);
+
+-- ========================================
+-- 16. 分类表
+-- ========================================
+
+-- 分类表 (指标/维度/标签分类)
+CREATE TABLE IF NOT EXISTS `s2_class` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `domain_id` BIGINT DEFAULT NULL,
+    `data_set_id` BIGINT DEFAULT NULL,
+    `name` VARCHAR(255) DEFAULT NULL,
+    `biz_name` VARCHAR(255) DEFAULT NULL,
+    `description` VARCHAR(500) DEFAULT NULL,
+    `parent_id` BIGINT DEFAULT NULL,
+    `status` INT DEFAULT NULL,
+    `type` VARCHAR(50) DEFAULT NULL,
+    `item_ids` TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT NULL,
+    `created_by` VARCHAR(100) DEFAULT NULL,
+    `updated_at` TIMESTAMP DEFAULT NULL,
+    `updated_by` VARCHAR(100) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
+COMMENT ON TABLE s2_class IS '分类表';
+
+-- ========================================
+-- 17. 报表调度与导出表 (V13)
+-- ========================================
+
+-- 报表调度配置表
+CREATE TABLE IF NOT EXISTS `s2_report_schedule` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(200) NOT NULL,
+    `dataset_id` BIGINT NOT NULL,
+    `query_config` TEXT DEFAULT NULL,
+    `output_format` VARCHAR(20) DEFAULT 'EXCEL',
+    `cron_expression` VARCHAR(100) NOT NULL,
+    `enabled` TINYINT DEFAULT 1,
+    `owner_id` BIGINT DEFAULT NULL,
+    `retry_count` INT DEFAULT 3,
+    `retry_interval` INT DEFAULT 30,
+    `template_version` BIGINT DEFAULT NULL,
+    `delivery_config_ids` VARCHAR(500) DEFAULT NULL,
+    `quartz_job_key` VARCHAR(200) DEFAULT NULL,
+    `last_execution_time` TIMESTAMP DEFAULT NULL,
+    `next_execution_time` TIMESTAMP DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `created_by` VARCHAR(100) DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_report_schedule_tenant ON s2_report_schedule(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_report_schedule_dataset ON s2_report_schedule(`dataset_id`);
+COMMENT ON TABLE s2_report_schedule IS '报表调度配置';
+
+-- 报表执行记录表
+CREATE TABLE IF NOT EXISTS `s2_report_execution` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `schedule_id` BIGINT DEFAULT NULL,
+    `attempt` INT DEFAULT 1,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `start_time` TIMESTAMP DEFAULT NULL,
+    `end_time` TIMESTAMP DEFAULT NULL,
+    `result_location` VARCHAR(500) DEFAULT NULL,
+    `error_message` VARCHAR(2000) DEFAULT NULL,
+    `row_count` BIGINT DEFAULT NULL,
+    `sql_hash` VARCHAR(64) DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `execution_snapshot` TEXT DEFAULT NULL,
+    `template_version` BIGINT DEFAULT NULL,
+    `engine_version` VARCHAR(50) DEFAULT NULL,
+    `scan_rows` BIGINT DEFAULT NULL,
+    `execution_time_ms` BIGINT DEFAULT NULL,
+    `io_bytes` BIGINT DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_report_execution_schedule ON s2_report_execution(`schedule_id`);
+CREATE INDEX IF NOT EXISTS idx_report_execution_tenant ON s2_report_execution(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_report_execution_status ON s2_report_execution(`status`);
+COMMENT ON TABLE s2_report_execution IS '报表执行记录';
+
+-- 导出任务表
+CREATE TABLE IF NOT EXISTS `s2_export_task` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `task_name` VARCHAR(200) DEFAULT NULL,
+    `user_id` BIGINT NOT NULL,
+    `dataset_id` BIGINT DEFAULT NULL,
+    `query_config` TEXT DEFAULT NULL,
+    `output_format` VARCHAR(20) DEFAULT 'EXCEL',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `file_location` VARCHAR(500) DEFAULT NULL,
+    `file_size` BIGINT DEFAULT NULL,
+    `row_count` BIGINT DEFAULT NULL,
+    `error_message` VARCHAR(2000) DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `expire_time` TIMESTAMP DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_export_task_user ON s2_export_task(`user_id`);
+CREATE INDEX IF NOT EXISTS idx_export_task_tenant ON s2_export_task(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_export_task_status ON s2_export_task(`status`);
+COMMENT ON TABLE s2_export_task IS '导出任务';
+
+-- 数据同步配置表
+CREATE TABLE IF NOT EXISTS `s2_data_sync_config` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(200) NOT NULL,
+    `source_database_id` BIGINT NOT NULL,
+    `target_database_id` BIGINT NOT NULL,
+    `sync_config` TEXT DEFAULT NULL,
+    `cron_expression` VARCHAR(100) NOT NULL,
+    `retry_count` INT DEFAULT 3,
+    `enabled` TINYINT DEFAULT 1,
+    `quartz_job_key` VARCHAR(200) DEFAULT NULL,
+    `created_by` VARCHAR(100) DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_data_sync_config_tenant ON s2_data_sync_config(`tenant_id`);
+COMMENT ON TABLE s2_data_sync_config IS '数据同步配置';
+
+-- 数据同步执行记录表 (includes V18 columns: connection_id, job_type, attempt_number, bytes_synced)
+CREATE TABLE IF NOT EXISTS `s2_data_sync_execution` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `sync_config_id` BIGINT NOT NULL,
+    `connection_id` BIGINT DEFAULT NULL,
+    `job_type` VARCHAR(20) DEFAULT 'SYNC',
+    `attempt_number` INT DEFAULT 1,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `start_time` TIMESTAMP DEFAULT NULL,
+    `end_time` TIMESTAMP DEFAULT NULL,
+    `rows_read` BIGINT DEFAULT NULL,
+    `rows_written` BIGINT DEFAULT NULL,
+    `bytes_synced` BIGINT DEFAULT NULL,
+    `watermark_value` VARCHAR(200) DEFAULT NULL,
+    `error_message` VARCHAR(2000) DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_data_sync_execution_config ON s2_data_sync_execution(`sync_config_id`);
+CREATE INDEX IF NOT EXISTS idx_data_sync_execution_tenant ON s2_data_sync_execution(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_execution_connection ON s2_data_sync_execution(`connection_id`);
+COMMENT ON TABLE s2_data_sync_execution IS '数据同步执行记录';
+
+-- ========================================
+-- 17. 报表推送渠道表 (V15 + V16 + V17)
+-- ========================================
+
+-- 报表推送渠道配置表
+CREATE TABLE IF NOT EXISTS `s2_report_delivery_config` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(200) NOT NULL,
+    `delivery_type` VARCHAR(50) NOT NULL,
+    `delivery_config` TEXT DEFAULT NULL,
+    `enabled` TINYINT DEFAULT 1,
+    `description` VARCHAR(500) DEFAULT NULL,
+    `consecutive_failures` INT DEFAULT 0,
+    `max_consecutive_failures` INT DEFAULT 5,
+    `tenant_id` BIGINT NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `created_by` VARCHAR(100) DEFAULT NULL,
+    `updated_by` VARCHAR(100) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_config_tenant_id ON s2_report_delivery_config(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_delivery_config_type ON s2_report_delivery_config(`delivery_type`);
+COMMENT ON TABLE s2_report_delivery_config IS '报表推送渠道配置';
+
+-- 报表推送记录表
+CREATE TABLE IF NOT EXISTS `s2_report_delivery_record` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `delivery_key` VARCHAR(200) NOT NULL,
+    `schedule_id` BIGINT NOT NULL,
+    `execution_id` BIGINT DEFAULT NULL,
+    `config_id` BIGINT NOT NULL,
+    `delivery_type` VARCHAR(50) NOT NULL,
+    `status` VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    `file_location` VARCHAR(500) DEFAULT NULL,
+    `error_message` TEXT DEFAULT NULL,
+    `retry_count` INT DEFAULT 0,
+    `max_retries` INT DEFAULT 5,
+    `next_retry_at` TIMESTAMP DEFAULT NULL,
+    `delivery_time_ms` BIGINT DEFAULT NULL,
+    `started_at` TIMESTAMP DEFAULT NULL,
+    `completed_at` TIMESTAMP DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT uk_delivery_record_key UNIQUE (`delivery_key`)
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_schedule_id ON s2_report_delivery_record(`schedule_id`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_execution_id ON s2_report_delivery_record(`execution_id`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_config_id ON s2_report_delivery_record(`config_id`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_status ON s2_report_delivery_record(`status`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_tenant_id ON s2_report_delivery_record(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_created_at ON s2_report_delivery_record(`created_at`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_status_type ON s2_report_delivery_record(`status`, `delivery_type`);
+CREATE INDEX IF NOT EXISTS idx_delivery_record_retry ON s2_report_delivery_record(`status`, `next_retry_at`);
+COMMENT ON TABLE s2_report_delivery_record IS '报表推送记录';
+
+-- ========================================
+-- 18. 数据连接表 (V18)
+-- ========================================
+
+-- 数据连接配置表 (Airbyte模型)
+CREATE TABLE IF NOT EXISTS `s2_connection` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(200) NOT NULL,
+    `description` VARCHAR(500) DEFAULT NULL,
+    `source_database_id` BIGINT NOT NULL,
+    `destination_database_id` BIGINT NOT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    `status_updated_at` TIMESTAMP DEFAULT NULL,
+    `status_message` VARCHAR(500) DEFAULT NULL,
+    `configured_catalog` TEXT DEFAULT NULL,
+    `discovered_catalog` TEXT DEFAULT NULL,
+    `discovered_catalog_at` TIMESTAMP DEFAULT NULL,
+    `schema_change_status` VARCHAR(20) DEFAULT 'NO_CHANGE',
+    `schema_change_detail` TEXT DEFAULT NULL,
+    `schedule_type` VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED',
+    `cron_expression` VARCHAR(100) DEFAULT NULL,
+    `schedule_units` INT DEFAULT NULL,
+    `schedule_time_unit` VARCHAR(20) DEFAULT NULL,
+    `state` TEXT DEFAULT NULL,
+    `state_type` VARCHAR(20) DEFAULT 'LEGACY',
+    `retry_count` INT DEFAULT 3,
+    `advanced_config` TEXT DEFAULT NULL,
+    `quartz_job_key` VARCHAR(200) DEFAULT NULL,
+    `created_by` VARCHAR(100) DEFAULT NULL,
+    `updated_by` VARCHAR(100) DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_connection_tenant ON s2_connection(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_connection_status ON s2_connection(`status`);
+CREATE INDEX IF NOT EXISTS idx_connection_source_db ON s2_connection(`source_database_id`);
+CREATE INDEX IF NOT EXISTS idx_connection_dest_db ON s2_connection(`destination_database_id`);
+COMMENT ON TABLE s2_connection IS '数据连接配置(Airbyte模型)';
+
+-- 连接事件时间线表
+CREATE TABLE IF NOT EXISTS `s2_connection_event` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `connection_id` BIGINT NOT NULL,
+    `event_type` VARCHAR(50) NOT NULL,
+    `event_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `event_data` TEXT DEFAULT NULL,
+    `user_id` BIGINT DEFAULT NULL,
+    `user_name` VARCHAR(100) DEFAULT NULL,
+    `job_id` BIGINT DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_event_connection ON s2_connection_event(`connection_id`);
+CREATE INDEX IF NOT EXISTS idx_event_time ON s2_connection_event(`event_time`);
+CREATE INDEX IF NOT EXISTS idx_event_type ON s2_connection_event(`event_type`);
+CREATE INDEX IF NOT EXISTS idx_event_tenant ON s2_connection_event(`tenant_id`);
+COMMENT ON TABLE s2_connection_event IS '连接事件时间线';
