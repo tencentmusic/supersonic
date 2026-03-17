@@ -18,6 +18,7 @@ import com.tencent.supersonic.headless.api.pojo.response.ModelResp;
 import com.tencent.supersonic.headless.server.pojo.MetricsFilter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface MetricService {
@@ -65,6 +66,8 @@ public interface MetricService {
     Set<String> getMetricTags();
 
     List<DrillDownDimension> getDrillDownDimension(Long metricId);
+
+    Map<Long, List<DrillDownDimension>> getDrillDownDimensionBatch(List<MetricResp> metricResps);
 
     void saveMetricQueryDefaultConfig(MetricQueryDefaultConfig defaultConfig, User user);
 

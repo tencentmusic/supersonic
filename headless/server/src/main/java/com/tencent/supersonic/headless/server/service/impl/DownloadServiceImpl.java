@@ -102,10 +102,10 @@ public class DownloadServiceImpl implements DownloadService {
         metaFilter.setIds(metricIds);
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
         Map<String, List<MetricResp>> metricMap = getMetricMap(metricResps);
-        List<Long> dimensionIds = metricResps.stream()
-                .map(metricResp -> metricService.getDrillDownDimension(metricResp.getId()))
-                .flatMap(Collection::stream).map(DrillDownDimension::getDimensionId)
-                .collect(Collectors.toList());
+        Map<Long, List<DrillDownDimension>> drillDownMap =
+                metricService.getDrillDownDimensionBatch(metricResps);
+        List<Long> dimensionIds = drillDownMap.values().stream().flatMap(Collection::stream)
+                .map(DrillDownDimension::getDimensionId).collect(Collectors.toList());
         metaFilter.setIds(dimensionIds);
         Map<Long, DimensionResp> dimensionRespMap = dimensionService.getDimensions(metaFilter)
                 .stream().collect(Collectors.toMap(DimensionResp::getId, d -> d));
@@ -252,9 +252,11 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     private Map<String, List<MetricResp>> getMetricMap(List<MetricResp> metricResps) {
+        Map<Long, List<DrillDownDimension>> drillDownMap =
+                metricService.getDrillDownDimensionBatch(metricResps);
         for (MetricResp metricResp : metricResps) {
             List<DrillDownDimension> drillDownDimensions =
-                    metricService.getDrillDownDimension(metricResp.getId());
+                    drillDownMap.getOrDefault(metricResp.getId(), Collections.emptyList());
             RelateDimension relateDimension =
                     RelateDimension.builder().drillDownDimensions(drillDownDimensions).build();
             metricResp.setRelateDimension(relateDimension);

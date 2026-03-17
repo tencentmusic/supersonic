@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -56,7 +57,7 @@ public class ReportScheduleDispatcher {
                     log.warn("Schedule {} attempt {}/{} failed, retry in {}s", schedule.getId(),
                             attempt, maxAttempts, delay, e);
                     try {
-                        Thread.sleep(delay * 1000);
+                        TimeUnit.SECONDS.sleep(delay);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         log.error("Retry interrupted for schedule {}", schedule.getId());

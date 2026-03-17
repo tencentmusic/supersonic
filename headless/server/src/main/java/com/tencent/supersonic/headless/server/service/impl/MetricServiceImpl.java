@@ -615,6 +615,47 @@ public class MetricServiceImpl extends ServiceImpl<MetricDOMapper, MetricDO>
     }
 
     @Override
+    public Map<Long, List<DrillDownDimension>> getDrillDownDimensionBatch(
+            List<MetricResp> metricResps) {
+        if (CollectionUtils.isEmpty(metricResps)) {
+            return Collections.emptyMap();
+        }
+        List<Long> modelIds = metricResps.stream().map(MetricResp::getModelId).distinct()
+                .collect(Collectors.toList());
+        ModelFilter modelFilter = new ModelFilter();
+        modelFilter.setIds(modelIds);
+        Map<Long, ModelResp> modelMap = modelService.getModelMap(modelFilter);
+
+        Map<Long, List<DrillDownDimension>> result = new HashMap<>();
+        for (MetricResp metricResp : metricResps) {
+            List<DrillDownDimension> drillDownDimensions = Lists.newArrayList();
+            if (metricResp.getRelateDimension() != null && !CollectionUtils
+                    .isEmpty(metricResp.getRelateDimension().getDrillDownDimensions())) {
+                for (DrillDownDimension d : metricResp.getRelateDimension()
+                        .getDrillDownDimensions()) {
+                    if (d.isInheritedFromModel() && !d.isNecessary()) {
+                        continue;
+                    }
+                    drillDownDimensions.add(d);
+                }
+            }
+            ModelResp modelResp = modelMap.get(metricResp.getModelId());
+            if (modelResp != null && modelResp.getDrillDownDimensions() != null) {
+                Set<Long> existingIds = drillDownDimensions.stream()
+                        .map(DrillDownDimension::getDimensionId).collect(Collectors.toSet());
+                for (DrillDownDimension d : modelResp.getDrillDownDimensions()) {
+                    if (!existingIds.contains(d.getDimensionId())) {
+                        d.setInheritedFromModel(true);
+                        drillDownDimensions.add(d);
+                    }
+                }
+            }
+            result.put(metricResp.getId(), drillDownDimensions);
+        }
+        return result;
+    }
+
+    @Override
     public void saveMetricQueryDefaultConfig(MetricQueryDefaultConfig defaultConfig, User user) {
         MetricQueryDefaultConfigDO defaultConfigDO =
                 metricRepository.getDefaultQueryConfig(defaultConfig.getMetricId(), user.getName());
