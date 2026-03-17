@@ -70,6 +70,17 @@ Located in `launchers/standalone/src/main/resources/db/migration/{mysql,postgres
 
 Enabled via `s2.tenant.enabled=true`. Key files: `TenantContext.java` (ThreadLocal), `TenantInterceptor.java` (HTTP), `TenantSqlInterceptor.java` (MyBatis). Excluded tables: `s2_tenant`, `s2_subscription_plan`, `s2_permission`, `s2_role_permission`, `s2_user_role`.
 
-## Design Document
+## Design Documents (AI Agent 路由)
 
-Main design doc: `docs/模板报表子系统技术设计说明书.md`. Phase 1-2 complete; Phase 3 (productization) in progress.
+三份主文档（≤400 行）只讲边界和主链路，实现级内容在 `docs/details/` 下的自包含 spec 文件中。
+
+| 需要做什么 | 先读哪个文件 |
+|-----------|-------------|
+| 理解整体架构、子系统关系 | `docs/智能运营数据中台设计方案.md` |
+| 实现模板/报表/调度/导出功能 | `docs/details/report/<对应文件>.md` |
+| 实现飞书机器人功能 | `docs/details/feishu/<对应文件>.md` |
+| 实现数据同步/连接器/RBAC | `docs/details/platform/<对应文件>.md` |
+| 找待办事项 | `docs/details/*/backlog.md` |
+| 查全部 detail 文件索引 | `docs/details/README.md` |
+
+每个 detail 文件有 frontmatter（status / module / key-files），读完即可编码。
