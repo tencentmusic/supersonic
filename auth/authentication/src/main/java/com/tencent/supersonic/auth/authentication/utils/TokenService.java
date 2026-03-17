@@ -114,8 +114,8 @@ public class TokenService {
         } catch (AccessException e) {
             log.warn("Access denied: {}", e.getMessage());
         } catch (Exception e) {
-            log.info("Cannot getClaims from appKey:{}, token:{}, reason:{}", appKey, token,
-                    e.getMessage());
+            log.info("Cannot getClaims from appKey:{}, token:{}, reason:{}", appKey,
+                    token.substring(0, Math.min(8, token.length())) + "***", e.getMessage());
         }
         return Optional.empty();
     }

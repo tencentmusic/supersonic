@@ -13,7 +13,6 @@ public class UserReq {
     @NotBlank(message = "password can not be null")
     private String password;
 
-    @NotBlank(message = "password can not be null")
     private String newPassword;
 
     private String role;

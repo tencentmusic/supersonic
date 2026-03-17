@@ -221,8 +221,13 @@ public class S2SemanticLayerService implements SemanticLayerService {
                     queryDimValueReq.getDateInfo().getEndDate());
         }
         if (StringUtils.isNotBlank(queryDimValueReq.getValue())) {
-            sql += " AND " + queryDimValueReq.getBizName() + " LIKE '%"
-                    + queryDimValueReq.getValue() + "%'";
+            String bizName = queryDimValueReq.getBizName();
+            if (!bizName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
+                throw new IllegalArgumentException("Invalid bizName identifier: " + bizName);
+            }
+            String escapedValue = queryDimValueReq.getValue().replace("\\", "\\\\")
+                    .replace("'", "\\'").replace("%", "\\%").replace("_", "\\_");
+            sql += " AND " + bizName + " LIKE '%" + escapedValue + "%' ESCAPE '\\\\'";
         }
         querySqlReq.setModelIds(Sets.newHashSet(queryDimValueReq.getModelId()));
         querySqlReq.setSql(sql);

@@ -86,6 +86,9 @@ public class UserController {
     @PostMapping("/resetPassword")
     public void resetPassword(@Valid @RequestBody UserReq userCmd, HttpServletRequest request,
             HttpServletResponse response) {
+        if (userCmd.getNewPassword() == null || userCmd.getNewPassword().isBlank()) {
+            throw new IllegalArgumentException("newPassword can not be null");
+        }
         User user = userService.getCurrentUser(request, response);
         userService.resetPassword(user.getName(), userCmd.getPassword(), userCmd.getNewPassword());
     }
