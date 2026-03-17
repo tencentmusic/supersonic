@@ -2,6 +2,7 @@ package com.tencent.supersonic.feishu.server.render;
 
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.headless.api.pojo.FollowUpHintGenerator;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class FeishuCardRenderer {
 
     private final FeishuProperties properties;
+    private final SensitiveFieldService sensitiveFieldService;
 
     private static final int MAX_HINTS = 3;
 
@@ -86,20 +88,29 @@ public class FeishuCardRenderer {
     }
 
     /**
-     * Table card: shows data as a markdown table with header and footer.
+     * Table card: shows data as a markdown table with header and footer. Sensitive columns are
+     * masked before rendering.
      */
     private Map<String, Object> renderTableCard(QueryResult result) {
         List<QueryColumn> columns = result.getQueryColumns();
         List<Map<String, Object>> rows = result.getQueryResults();
 
+        Map<String, Integer> sensitiveFields = sensitiveFieldService.getSensitiveFields();
+        boolean hasMasked = hasSensitiveColumns(columns, sensitiveFields);
+        List<Map<String, Object>> maskedRows = maskRows(rows, columns, sensitiveFields);
+
         List<String> displayNames = columns.stream().map(QueryColumn::getName).toList();
         List<String> dataKeys = columns.stream().map(QueryColumn::getNameEn).toList();
 
-        String tableMarkdown = FeishuCardTemplate.buildMarkdownTable(displayNames, dataKeys, rows);
+        String tableMarkdown =
+                FeishuCardTemplate.buildMarkdownTable(displayNames, dataKeys, maskedRows);
 
         String footer = String.format("共 %d 条结果", rows.size());
         if (result.getQueryTimeCost() != null) {
             footer += String.format("  |  耗时 %dms", result.getQueryTimeCost());
+        }
+        if (hasMasked) {
+            footer += "\n\n*部分敏感字段已脱敏*";
         }
 
         List<Object> elements = new ArrayList<>();
@@ -137,21 +148,30 @@ public class FeishuCardRenderer {
     }
 
     /**
-     * Single value card (1 row, 1-2 columns): shows as a big number display.
+     * Single value card (1 row, 1-2 columns): shows as a big number display. Sensitive columns are
+     * masked before rendering.
      */
     private Map<String, Object> renderSingleValueCard(QueryResult result) {
         List<QueryColumn> columns = result.getQueryColumns();
         Map<String, Object> row = result.getQueryResults().get(0);
 
+        Map<String, Integer> sensitiveFields = sensitiveFieldService.getSensitiveFields();
+        boolean hasMasked = hasSensitiveColumns(columns, sensitiveFields);
+
         StringBuilder content = new StringBuilder();
         for (QueryColumn col : columns) {
             Object val = row.get(col.getNameEn());
             String valStr = val != null ? val.toString() : "-";
+            Integer level = sensitiveFields.get(col.getNameEn());
+            valStr = maskValue(valStr, level);
             content.append(String.format("**%s**: %s\n", col.getName(), valStr));
         }
 
         if (result.getQueryTimeCost() != null) {
             content.append(String.format("\n耗时 %dms", result.getQueryTimeCost()));
+        }
+        if (hasMasked) {
+            content.append("\n\n*部分敏感字段已脱敏*");
         }
 
         List<Object> elements = new ArrayList<>();
@@ -345,6 +365,69 @@ public class FeishuCardRenderer {
         card.put("header", FeishuCardTemplate.buildHeader("账号绑定", "orange"));
         card.put("elements", elements);
         return card;
+    }
+
+    // ── Sensitive field masking helpers ─────────────────────────────────────────
+
+    /**
+     * Returns true if any column in the list has a HIGH or MID sensitive level.
+     */
+    private boolean hasSensitiveColumns(List<QueryColumn> columns,
+            Map<String, Integer> sensitiveFields) {
+        if (columns == null || sensitiveFields.isEmpty()) {
+            return false;
+        }
+        return columns.stream().anyMatch(col -> sensitiveFields.containsKey(col.getNameEn()));
+    }
+
+    /**
+     * Returns a copy of {@code rows} with sensitive column values replaced by masked strings.
+     * Original rows are not modified.
+     */
+    private List<Map<String, Object>> maskRows(List<Map<String, Object>> rows,
+            List<QueryColumn> columns, Map<String, Integer> sensitiveFields) {
+        if (sensitiveFields.isEmpty()) {
+            return rows;
+        }
+        return rows.stream().map(row -> {
+            Map<String, Object> maskedRow = new HashMap<>(row);
+            for (QueryColumn col : columns) {
+                Integer level = sensitiveFields.get(col.getNameEn());
+                if (level != null) {
+                    Object val = maskedRow.get(col.getNameEn());
+                    String original = val != null ? val.toString() : "";
+                    maskedRow.put(col.getNameEn(), maskValue(original, level));
+                }
+            }
+            return maskedRow;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Masks a single value according to its sensitive level.
+     * <ul>
+     * <li>HIGH (code 2): replaced entirely with {@code "***"}</li>
+     * <li>MID (code 1): first character + {@code "***"} + last character, e.g. {@code "张***明"}</li>
+     * <li>null / LOW: returned unchanged</li>
+     * </ul>
+     */
+    private String maskValue(String value, Integer sensitiveLevel) {
+        if (sensitiveLevel == null || value == null || value.isEmpty()) {
+            return value;
+        }
+        if (SensitiveLevelEnum.HIGH.getCode().equals(sensitiveLevel)) {
+            return "***";
+        }
+        if (SensitiveLevelEnum.MID.getCode().equals(sensitiveLevel)) {
+            if (value.length() == 1) {
+                return "*";
+            }
+            if (value.length() == 2) {
+                return value.charAt(0) + "*";
+            }
+            return value.charAt(0) + "***" + value.charAt(value.length() - 1);
+        }
+        return value;
     }
 
     /**
