@@ -3,6 +3,7 @@ import {
   DislikeOutlined,
   LikeOutlined,
   DownloadOutlined,
+  CloudDownloadOutlined,
   RedoOutlined,
   FileJpgOutlined,
 } from '@ant-design/icons';
@@ -21,6 +22,7 @@ type Props = {
   isParserError?: boolean;
   isSimpleMode?: boolean;
   onExportData?: () => void;
+  onServerExport?: () => Promise<void> | void;
   onReExecute?: (queryId: number) => void;
 };
 
@@ -31,10 +33,12 @@ const Tools: React.FC<Props> = ({
   isParserError = false,
   isSimpleMode = false,
   onExportData,
+  onServerExport,
   onReExecute,
 }) => {
   const [score, setScore] = useState(scoreValue || 0);
   const [exportLoading, setExportLoading] = useState<boolean>(false);
+  const [serverExportLoading, setServerExportLoading] = useState<boolean>(false);
   const prefixCls = `${CLS_PREFIX}-tools`;
 
   const like = () => {
@@ -79,6 +83,20 @@ const Tools: React.FC<Props> = ({
                 >
                   <DownloadOutlined />
                   <span className={`${prefixCls}-font-style`}>导出数据</span>
+                </Button>
+                <Button
+                  size="small"
+                  onClick={async () => {
+                    setServerExportLoading(true);
+                    await onServerExport?.();
+                    setServerExportLoading(false);
+                  }}
+                  type="text"
+                  loading={serverExportLoading}
+                  disabled={serverExportLoading}
+                >
+                  <CloudDownloadOutlined />
+                  <span className={`${prefixCls}-font-style`}>导出 Excel</span>
                 </Button>
                 {!isSimpleMode && (
                   <Button

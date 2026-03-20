@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, InputNumber, Switch, Divider, Tag, Space } from 'antd';
-import { SendOutlined } from '@ant-design/icons';
-import CronInput from './CronInput';
-import type { ReportSchedule } from '@/services/reportSchedule';
+import { BellOutlined } from '@ant-design/icons';
+import CronInput from '../../ReportSchedule/components/CronInput';
+import type { AlertRule } from '@/services/alertRule';
 import { getValidDataSetList, type ValidDataSetItem } from '@/services/reportSchedule';
 import {
   getConfigList,
@@ -10,15 +10,14 @@ import {
   DELIVERY_TYPE_MAP,
 } from '@/services/deliveryConfig';
 
-interface ScheduleFormProps {
+interface AlertRuleFormProps {
   visible: boolean;
-  record?: ReportSchedule;
-  initialDatasetId?: number;
+  record?: AlertRule;
   onCancel: () => void;
-  onSubmit: (values: Partial<ReportSchedule>) => void;
+  onSubmit: (values: Partial<AlertRule>) => void;
 }
 
-const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDatasetId, onCancel, onSubmit }) => {
+const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel, onSubmit }) => {
   const [form] = Form.useForm();
   const isEdit = !!record?.id;
   const [deliveryConfigs, setDeliveryConfigs] = useState<DeliveryConfig[]>([]);
@@ -26,7 +25,6 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
   const [dataSets, setDataSets] = useState<ValidDataSetItem[]>([]);
   const [loadingDataSets, setLoadingDataSets] = useState(false);
 
-  // Fetch delivery configs and valid datasets when modal opens
   useEffect(() => {
     if (visible) {
       fetchDeliveryConfigs();
@@ -51,7 +49,6 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
     setLoadingConfigs(true);
     try {
       const res = await getConfigList({ pageNum: 1, pageSize: 100 });
-      // Only show enabled configs
       const enabledConfigs = (res.records || []).filter((c: DeliveryConfig) => c.enabled);
       setDeliveryConfigs(enabledConfigs);
     } catch (error) {
@@ -64,12 +61,15 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
   useEffect(() => {
     if (visible) {
       if (record) {
-        // Parse deliveryConfigIds from comma-separated string to array
         const configIds = record.deliveryConfigIds
-          ? record.deliveryConfigIds.split(',').map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id))
+          ? record.deliveryConfigIds
+              .split(',')
+              .map((id) => parseInt(id.trim(), 10))
+              .filter((id) => !isNaN(id))
           : [];
         form.setFieldsValue({
           ...record,
+          enabled: record.enabled === 1,
           deliveryConfigIds: configIds,
         });
       } else {
@@ -77,29 +77,26 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
         form.setFieldsValue({
           retryCount: 3,
           retryInterval: 30,
-          outputFormat: 'EXCEL',
+          silenceMinutes: 60,
           enabled: true,
           deliveryConfigIds: [],
-          ...(initialDatasetId !== undefined ? { datasetId: initialDatasetId } : {}),
         });
       }
     }
-  }, [visible, record, initialDatasetId, form]);
+  }, [visible, record, form]);
 
   const handleOk = async () => {
     const values = await form.validateFields();
-    // Convert deliveryConfigIds array back to comma-separated string
     const configIds = values.deliveryConfigIds;
-    const submitValues = {
+    const submitValues: Partial<AlertRule> = {
       ...values,
-      deliveryConfigIds: Array.isArray(configIds) && configIds.length > 0
-        ? configIds.join(',')
-        : undefined,
+      enabled: values.enabled ? 1 : 0,
+      deliveryConfigIds:
+        Array.isArray(configIds) && configIds.length > 0 ? configIds.join(',') : undefined,
     };
     onSubmit(submitValues);
   };
 
-  // Custom option render for delivery config select
   const renderConfigOption = (config: DeliveryConfig) => {
     const typeInfo = DELIVERY_TYPE_MAP[config.deliveryType];
     return (
@@ -112,7 +109,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
 
   return (
     <Modal
-      title={isEdit ? '编辑调度任务' : '创建调度任务'}
+      title={isEdit ? '编辑告警规则' : '创建告警规则'}
       open={visible}
       onOk={handleOk}
       onCancel={onCancel}
@@ -120,10 +117,21 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
       destroyOnClose
     >
       <Form form={form} layout="vertical">
-        <Form.Item name="name" label="任务名称" rules={[{ required: true, message: '请输入任务名称' }]}>
-          <Input placeholder="如: GMV 日报" />
+        <Form.Item
+          name="name"
+          label="规则名称"
+          rules={[{ required: true, message: '请输入规则名称' }]}
+        >
+          <Input placeholder="如: 订单量异常告警" />
         </Form.Item>
-        <Form.Item name="datasetId" label="关联数据集" rules={[{ required: true, message: '请选择数据集' }]}>
+        <Form.Item name="description" label="描述">
+          <Input.TextArea rows={2} placeholder="规则描述 (可选)" />
+        </Form.Item>
+        <Form.Item
+          name="datasetId"
+          label="关联数据集"
+          rules={[{ required: true, message: '请选择数据集' }]}
+        >
           <Select
             placeholder="请选择已配置的数据集"
             allowClear
@@ -134,19 +142,13 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
           />
         </Form.Item>
         <Form.Item name="queryConfig" label="查询参数 (JSON)">
-          <Input.TextArea rows={4} placeholder='{"metrics": [...], "dimensions": [...]}' />
+          <Input.TextArea rows={3} placeholder='{"metrics": [...], "dimensions": [...]}' />
         </Form.Item>
-        <Form.Item name="cronExpression" label="调度频率" rules={[{ required: true, message: '请设置 Cron 表达式' }]}>
+        <Form.Item name="cronExpression" label="检查频率">
           <CronInput />
         </Form.Item>
-        <Form.Item name="outputFormat" label="输出格式">
-          <Select
-            options={[
-              { label: 'Excel', value: 'EXCEL' },
-              { label: 'CSV', value: 'CSV' },
-              { label: 'JSON', value: 'JSON' },
-            ]}
-          />
+        <Form.Item name="silenceMinutes" label="静默时长(分钟)">
+          <InputNumber min={0} style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item name="retryCount" label="重试次数">
           <InputNumber min={0} max={5} />
@@ -160,15 +162,15 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
 
         <Divider>
           <Space>
-            <SendOutlined />
-            <span>推送配置</span>
+            <BellOutlined />
+            <span>告警推送</span>
           </Space>
         </Divider>
 
         <Form.Item
           name="deliveryConfigIds"
           label="推送渠道"
-          extra="选择报表生成后自动推送的渠道，可多选"
+          extra="选择告警触发后自动推送的渠道，可多选"
         >
           <Select
             mode="multiple"
@@ -203,4 +205,4 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
   );
 };
 
-export default ScheduleForm;
+export default AlertRuleForm;

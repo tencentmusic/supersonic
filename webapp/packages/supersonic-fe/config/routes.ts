@@ -269,6 +269,19 @@ const ROUTES = [
     name: 'reportSchedule',
     component: './ReportSchedule',
     envEnableList: [ENV_KEY.SEMANTIC],
+    hideInMenu: true,
+  },
+  {
+    path: '/reports',
+    name: 'reports',
+    component: './Reports',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
+    path: '/task-center',
+    name: 'taskCenter',
+    component: './TaskCenter',
+    envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
     path: '/delivery-config',

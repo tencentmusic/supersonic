@@ -159,3 +159,10 @@ export function queryDimensionValues(
     value,
   });
 }
+
+export function submitExportTask(data: {
+  datasetId?: number;
+  outputFormat?: string;
+}): Promise<{ code: number; msg?: string; data?: { id: number } }> {
+  return axios.post('/api/v1/exportTasks', data);
+}

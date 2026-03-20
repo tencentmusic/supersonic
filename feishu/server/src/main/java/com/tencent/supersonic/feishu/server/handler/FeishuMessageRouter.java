@@ -14,12 +14,16 @@ public class FeishuMessageRouter {
     private final HistoryMessageHandler historyHandler;
     private final PreviewMessageHandler previewHandler;
     private final UseAgentHandler useAgentHandler;
+    private final ScheduleMessageHandler scheduleHandler;
 
     public MessageHandler route(String text) {
         if (text == null || text.isBlank())
             return helpHandler;
         String trimmed = text.trim().toLowerCase();
         // Prefix-match commands (have arguments after the command)
+        if (trimmed.startsWith("/schedule") || trimmed.equals("/schedule")) {
+            return scheduleHandler;
+        }
         if (trimmed.startsWith("/sql ") || trimmed.equals("/sql")) {
             return previewHandler;
         }

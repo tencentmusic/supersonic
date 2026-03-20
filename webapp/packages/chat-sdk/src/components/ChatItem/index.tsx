@@ -17,6 +17,7 @@ import {
   deleteQuery,
   switchEntity,
   getExecuteSummary,
+  submitExportTask,
 } from '../../service';
 import { PARSE_ERROR_TIP, PREFIX_CLS, SEARCH_EXCEPTION_TIP } from '../../common/constants';
 import { message, Spin } from 'antd';
@@ -452,6 +453,24 @@ const ChatItem: React.FC<Props> = ({
     }
   };
 
+  const handleServerExport = async () => {
+    const datasetId = data?.chatContext?.dataSet?.id || parseInfo?.dataSet?.id;
+    if (!datasetId) {
+      message.warning('当前查询暂不支持服务端导出');
+      return;
+    }
+    try {
+      const res = await submitExportTask({ datasetId, outputFormat: 'EXCEL' });
+      if (res?.code === 200) {
+        message.success('导出任务已提交，请到「任务中心」查看进度');
+      } else {
+        message.error(res?.msg || '提交导出任务失败');
+      }
+    } catch (e) {
+      message.error('提交导出任务失败');
+    }
+  };
+
   const onSelectQuestion = (question: SimilarQuestionType) => {
     onSendMsg?.(question.queryText);
   };
@@ -585,6 +604,7 @@ const ChatItem: React.FC<Props> = ({
                 onExportData={() => {
                   onExportData();
                 }}
+                onServerExport={handleServerExport}
                 isSimpleMode={isSimpleMode}
                 onReExecute={queryId => {
                   deleteQueryInfo(queryId);

@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.FollowUpHintGenerator;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -238,7 +239,8 @@ public class FeishuCardRenderer {
                 .append("| `/history` 或 `历史` | 查看最近查询记录 |\n")
                 .append("| `/template` 或 `模板` | 查看可用模板列表 |\n")
                 .append("| `/use <编号>` | 切换数据域，如 `/use 3` |\n")
-                .append("| `/sql <查询>` | 预览生成的 SQL |");
+                .append("| `/sql <查询>` | 预览生成的 SQL |\n")
+                .append("| `/schedule` | 查看/管理定时报表 |");
 
         List<Object> elements = new ArrayList<>();
         elements.add(FeishuCardTemplate.buildMarkdown(content.toString()));
@@ -363,6 +365,49 @@ public class FeishuCardRenderer {
 
         Map<String, Object> card = new HashMap<>();
         card.put("header", FeishuCardTemplate.buildHeader("账号绑定", "orange"));
+        card.put("elements", elements);
+        return card;
+    }
+
+    /**
+     * Schedule created confirmation card.
+     */
+    public Map<String, Object> renderScheduleCreatedCard(ReportScheduleDO schedule, String cronDesc) {
+        String content = String.format(
+                "**定时任务已创建** (ID: %d)\n\n"
+                        + "- **数据集**: %s\n"
+                        + "- **频率**: %s\n"
+                        + "- **格式**: %s\n\n"
+                        + "发送 `/schedule` 可查看任务列表",
+                schedule.getId(), schedule.getDatasetId(), cronDesc, schedule.getOutputFormat());
+        List<Object> elements = new ArrayList<>();
+        elements.add(FeishuCardTemplate.buildMarkdown(content));
+        Map<String, Object> card = new HashMap<>();
+        card.put("header", FeishuCardTemplate.buildHeader("定时报表", "green"));
+        card.put("elements", elements);
+        return card;
+    }
+
+    /**
+     * Schedule list card showing all schedules for the user.
+     */
+    public Map<String, Object> renderScheduleListCard(List<ReportScheduleDO> schedules) {
+        StringBuilder content = new StringBuilder();
+        if (schedules == null || schedules.isEmpty()) {
+            content.append("暂无定时任务。\n\n发送查询后，使用 `/schedule 每天9点` 创建定时任务");
+        } else {
+            content.append(String.format("**定时报表列表** (共 %d 个)\n\n", schedules.size()));
+            for (ReportScheduleDO s : schedules) {
+                String status = Boolean.TRUE.equals(s.getEnabled()) ? "[运行]" : "[暂停]";
+                content.append(String.format("%s **#%d %s** | %s\n",
+                        status, s.getId(), s.getName(), s.getCronExpression()));
+            }
+            content.append("\n`/schedule pause <id>` 暂停  |  `/schedule resume <id>` 恢复  |  `/schedule cancel <id>` 删除");
+        }
+        List<Object> elements = new ArrayList<>();
+        elements.add(FeishuCardTemplate.buildMarkdown(content.toString()));
+        Map<String, Object> card = new HashMap<>();
+        card.put("header", FeishuCardTemplate.buildHeader("定时报表", "blue"));
         card.put("elements", elements);
         return card;
     }
