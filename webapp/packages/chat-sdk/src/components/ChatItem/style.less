@@ -163,8 +163,10 @@
   &-content {
     position: relative;
     box-sizing: border-box;
+    width: 100%;
     min-width: 1px;
     max-width: 100%;
+    overflow: hidden;
     padding: 12px 20px 12px 16px;
     background: #fff;
     border: 1px solid transparent;
@@ -241,6 +243,10 @@
   }
 
   &-content-container {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     margin: 2px 0 2px 7px;
     padding: 10px 0 4px 18px;
     border-left: 1px solid var(--green);

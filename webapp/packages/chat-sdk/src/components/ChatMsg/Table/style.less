@@ -4,6 +4,9 @@
 
 .@{table-prefix-cls} {
   margin-top: 6px;
+  max-width: 100%;
+  width: 100%;
+  min-width: 0;
 
   &-photo {
     display: flex;
@@ -60,8 +63,20 @@
     margin-top: 12px;
   }
 
-  table {
-    width: 100%;
+  .ant-table-content {
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 999px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 999px;
+    }
   }
 
   &-even-row {
@@ -82,12 +97,19 @@
     background-color: #fafafa !important;
   }
 
-  .ant-table-cell { // 更新修改，解决表格内容太长导致显示的问题
+  .ant-table-cell {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 250px;
     text-align: center !important;
+  }
+
+  &-cell-text {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .ant-table-thead {

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Drawer, Table, Tag, Button, Space, Typography } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, FileSearchOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import type { ReportExecution } from '@/services/reportSchedule';
 import { getExecutionList, downloadExecutionResult } from '@/services/reportSchedule';
+import ExecutionSnapshotDrawer from './ExecutionSnapshotDrawer';
 
 const { Text } = Typography;
 
@@ -24,6 +26,7 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
   const [data, setData] = useState<ReportExecution[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const [snapshotDrawer, setSnapshotDrawer] = useState<{ visible: boolean; executionId?: number }>({ visible: false });
 
   const fetchData = async (current = 1, pageSize = 10) => {
     if (!scheduleId) return;
@@ -48,6 +51,7 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
       title: '执行时间',
       dataIndex: 'startTime',
       width: 180,
+      render: (val: string) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-'),
     },
     {
       title: '耗时',
@@ -78,9 +82,17 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
     },
     {
       title: '操作',
-      width: 120,
+      width: 180,
       render: (_: any, record: ReportExecution) => (
         <Space>
+          <Button
+            type="link"
+            size="small"
+            icon={<FileSearchOutlined />}
+            onClick={() => setSnapshotDrawer({ visible: true, executionId: record.id })}
+          >
+            查看详情
+          </Button>
           {record.status === 'SUCCESS' && record.resultLocation && (
             <Button
               type="link"
@@ -102,24 +114,32 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
   ];
 
   return (
-    <Drawer
-      title={`执行记录 - ${scheduleName || ''}`}
-      open={visible}
-      onClose={onClose}
-      width={800}
-    >
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        pagination={{
-          ...pagination,
-          onChange: (page, size) => fetchData(page, size),
-        }}
-        size="small"
+    <>
+      <Drawer
+        title={`执行记录 - ${scheduleName || ''}`}
+        open={visible}
+        onClose={onClose}
+        width={900}
+      >
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          pagination={{
+            ...pagination,
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (page, size) => fetchData(page, size),
+          }}
+          size="small"
+        />
+      </Drawer>
+      <ExecutionSnapshotDrawer
+        visible={snapshotDrawer.visible}
+        executionId={snapshotDrawer.executionId}
+        onClose={() => setSnapshotDrawer({ visible: false })}
       />
-    </Drawer>
+    </>
   );
 };
 

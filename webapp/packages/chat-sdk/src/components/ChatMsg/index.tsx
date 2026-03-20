@@ -174,9 +174,7 @@ const ChatMsg: React.FC<Props> = ({
       };
     }
     if (type === MsgContentTypeEnum.TABLE) {
-      return {
-        [queryColumns.length > 5 ? 'width' : 'minWidth']: queryColumns.length * 150,
-      };
+      return;
     }
     if (type === MsgContentTypeEnum.METRIC_TREND || type === MsgContentTypeEnum.METRIC_PIE) {
       return { width: 'calc(100vw - 410px)' };

@@ -6,20 +6,35 @@ import { NumericUnit } from '../common/constants';
 import { isString } from 'lodash';
 import { ColumnType } from '../common/type';
 
-export function formatByDataFormatType(value: number | string, type: ColumnType['dataFormatType'], dataFormat: Partial<ColumnType['dataFormat']> = {}) {
-  return `${formatByDecimalPlaces(dataFormat?.needMultiply100 ? +value * 100 : value, dataFormat?.decimalPlaces || 2)}${type === 'percent' ? '%' : ''}`;
+export function formatByDataFormatType(
+  value: number | string,
+  type: ColumnType['dataFormatType'],
+  dataFormat: Partial<ColumnType['dataFormat']> = {}
+) {
+  return `${formatByDecimalPlaces(
+    dataFormat?.needMultiply100 ? +value * 100 : value,
+    dataFormat?.decimalPlaces ?? 2,
+    true
+  )}${type === 'percent' ? '%' : ''}`;
 }
 
-export function formatByDecimalPlaces(value: number | string, decimalPlaces: number) {
+export function formatByDecimalPlaces(
+  value: number | string,
+  decimalPlaces: number,
+  keepTrailingZeros: boolean = false
+) {
   if (value === null || value === undefined || value === '') {
-    return 0;
+    return keepTrailingZeros ? Number(0).toFixed(decimalPlaces) : 0;
   }
   if (isNaN(+value) || decimalPlaces < 0 || decimalPlaces > 100) {
     return value;
   }
   let strValue = (+value).toFixed(decimalPlaces);
   if (!/^-?[0-9.]+$/g.test(strValue)) {
-    return '0';
+    return keepTrailingZeros ? Number(0).toFixed(decimalPlaces) : '0';
+  }
+  if (keepTrailingZeros) {
+    return strValue;
   }
   while (strValue.includes('.') && (strValue.endsWith('.') || strValue.endsWith('0'))) {
     strValue = strValue.slice(0, -1);

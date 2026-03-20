@@ -3,11 +3,14 @@
 @chat-msg-prefix-cls: ~'@{supersonic-chat-prefix}-chat-msg';
 
 .@{chat-msg-prefix-cls} {
+  box-sizing: border-box;
   padding: 6px 14px 8px;
   border: 1px solid var(--border-color-base);
   border-radius: 4px;
   background: #f5f8fb;
+  width: 100%;
   max-width: calc(100vw - 410px);
+  min-width: 0;
 
   &-bottom-tools {
     display: flex;
