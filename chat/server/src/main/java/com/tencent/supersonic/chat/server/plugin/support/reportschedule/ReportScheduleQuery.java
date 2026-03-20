@@ -166,7 +166,15 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return queryResult;
     }
 
-    /** Returns true if there is a non-expired pending confirmation for the given user+chat. */
+    /**
+     * Returns true if there is a non-expired pending confirmation for the given user+chat.
+     *
+     * <p>
+     * Static utility: cannot use the injected {@code confirmationService} field. {@code
+     * ContextUtils.getBean()} is intentional here — this method is called from
+     * {@link com.tencent.supersonic.chat.server.parser.ReportScheduleParser} (a different bean),
+     * not from instance methods.
+     */
     public static boolean hasPendingConfirmation(Long userId, Integer chatId) {
         ReportScheduleConfirmationService confirmationService =
                 ContextUtils.getBean(ReportScheduleConfirmationService.class);
@@ -233,6 +241,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             return ScheduleIntent.LIST;
         }
 
+        // TRIGGER checked last: "立即"/"现在" also appear in TRIGGER_NOW (inside CREATE context).
+        // preferCreate() is evaluated first; TRIGGER only fires when a schedule #ID is present.
         if (TRIGGER.stream().anyMatch(text::contains)) {
             return ScheduleIntent.TRIGGER;
         }
