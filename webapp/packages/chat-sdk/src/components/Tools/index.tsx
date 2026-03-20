@@ -22,7 +22,7 @@ type Props = {
   isParserError?: boolean;
   isSimpleMode?: boolean;
   onExportData?: () => void;
-  onServerExport?: () => void;
+  onServerExport?: () => Promise<void> | void;
   onReExecute?: (queryId: number) => void;
 };
 
@@ -38,6 +38,7 @@ const Tools: React.FC<Props> = ({
 }) => {
   const [score, setScore] = useState(scoreValue || 0);
   const [exportLoading, setExportLoading] = useState<boolean>(false);
+  const [serverExportLoading, setServerExportLoading] = useState<boolean>(false);
   const prefixCls = `${CLS_PREFIX}-tools`;
 
   const like = () => {
@@ -85,8 +86,14 @@ const Tools: React.FC<Props> = ({
                 </Button>
                 <Button
                   size="small"
-                  onClick={() => onServerExport?.()}
+                  onClick={async () => {
+                    setServerExportLoading(true);
+                    await onServerExport?.();
+                    setServerExportLoading(false);
+                  }}
                   type="text"
+                  loading={serverExportLoading}
+                  disabled={serverExportLoading}
                 >
                   <CloudDownloadOutlined />
                   <span className={`${prefixCls}-font-style`}>导出 Excel</span>

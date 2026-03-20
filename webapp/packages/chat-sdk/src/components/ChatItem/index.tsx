@@ -460,8 +460,8 @@ const ChatItem: React.FC<Props> = ({
       return;
     }
     try {
-      const res: any = await submitExportTask({ datasetId, outputFormat: 'EXCEL' });
-      if (res?.code === 200 || res?.status === 200 || res?.id) {
+      const res = await submitExportTask({ datasetId, outputFormat: 'EXCEL' });
+      if (res?.code === 200) {
         message.success('导出任务已提交，请到「任务中心」查看进度');
       } else {
         message.error(res?.msg || '提交导出任务失败');
