@@ -2,9 +2,9 @@ package com.tencent.supersonic.chat.server.executor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.chat.api.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.agent.Agent;
-import com.tencent.supersonic.chat.server.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.pojo.Aggregator;

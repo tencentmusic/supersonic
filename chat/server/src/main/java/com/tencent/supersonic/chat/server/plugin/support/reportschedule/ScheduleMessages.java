@@ -15,6 +15,13 @@ public final class ScheduleMessages {
     public static final String ERROR_UNSUPPORTED_CONFIRM = "不支持的确认操作";
     public static final String ERROR_SCHEDULE_NOT_FOUND = "未找到编号为 #%d 的报表任务";
     public static final String ERROR_SPECIFY_FREQUENCY = "请告诉我发送频率，比如「每天早上9点」或「每周一」";
+    public static final String ERROR_SPECIFY_REPORT_CONTENT =
+            "还缺少要订阅的报表内容。请先在当前会话里查出报表结果，再说「每天9点发送这个报表」。";
+    public static final String ERROR_UNSUPPORTED_REPORT_CONTEXT =
+            "当前会话查询含有具体日期条件，不支持直接定时订阅。请使用结构化查询（指定指标和维度而非自定义 SQL）后再创建定时报表。";
+    public static final String ERROR_NO_PERMISSION = "无权操作此任务，只有创建者可以管理";
+    public static final String ERROR_NO_DELIVERY_CONFIG =
+            "当前租户还没有启用可用的投递通道。请先配置飞书、邮件或 Webhook 推送，再创建定时报表。";
     public static final String ERROR_SPECIFY_CANCEL_ID = "请指定要取消的报表编号，例如「取消报表 #123」";
     public static final String ERROR_SPECIFY_PAUSE_ID = "请指定要暂停的报表编号，例如「暂停报表 #123」";
     public static final String ERROR_SPECIFY_RESUME_ID = "请指定要恢复的报表编号，例如「恢复报表 #123」";

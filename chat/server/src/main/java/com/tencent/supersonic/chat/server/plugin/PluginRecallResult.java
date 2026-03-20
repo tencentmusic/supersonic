@@ -1,5 +1,6 @@
 package com.tencent.supersonic.chat.server.plugin;
 
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,11 +1,11 @@
 package com.tencent.supersonic.chat.server.executor;
 
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.server.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.service.ChatContextService;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.pojo.ExecuteContext;
-import com.tencent.supersonic.chat.server.service.ChatContextService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;

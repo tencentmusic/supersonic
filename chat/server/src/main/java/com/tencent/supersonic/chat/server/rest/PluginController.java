@@ -2,8 +2,8 @@ package com.tencent.supersonic.chat.server.rest;
 
 import com.tencent.supersonic.auth.api.authentication.annotation.AuthenticationIgnore;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
-import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.service.PluginService;
 import com.tencent.supersonic.common.pojo.User;
 import jakarta.servlet.http.HttpServletRequest;

@@ -2,12 +2,12 @@ package com.tencent.supersonic.chat.server.listener;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
+import com.tencent.supersonic.chat.api.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.DashboardExecutor;
 import com.tencent.supersonic.chat.server.executor.ReportScheduleExecutor;
-import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
-import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;

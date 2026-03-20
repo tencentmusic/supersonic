@@ -32,6 +32,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>headless-chat</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

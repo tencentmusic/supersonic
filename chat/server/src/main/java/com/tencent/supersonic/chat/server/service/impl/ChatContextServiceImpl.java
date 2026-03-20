@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
+import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.service.ChatContextService;
 import com.tencent.supersonic.chat.server.persistence.repository.ChatContextRepository;
-import com.tencent.supersonic.chat.server.pojo.ChatContext;
-import com.tencent.supersonic.chat.server.service.ChatContextService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

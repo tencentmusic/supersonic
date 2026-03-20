@@ -30,8 +30,8 @@ public final class ScheduleKeywords {
     // Time pattern: (早上|上午|下午|晚上)?(\d{1,2})[点时]
     public static final Pattern TIME_PATTERN = Pattern.compile("(早上|上午|下午|晚上)?(\\d{1,2})[点时]");
 
-    // Schedule ID pattern: #?(\d+)
-    public static final Pattern SCHEDULE_ID_PATTERN = Pattern.compile("#?(\\d+)");
+    // Schedule ID pattern: #(\d+) — # prefix is required to avoid false positives like "取消3个报表"
+    public static final Pattern SCHEDULE_ID_PATTERN = Pattern.compile("#(\\d+)");
 
     // Cron expression patterns (ordered by specificity)
     public static final Map<String, String> CRON_PATTERNS = new LinkedHashMap<>();

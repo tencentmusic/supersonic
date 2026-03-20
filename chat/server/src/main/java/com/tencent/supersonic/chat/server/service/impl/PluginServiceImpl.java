@@ -2,11 +2,11 @@ package com.tencent.supersonic.chat.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
+import com.tencent.supersonic.chat.api.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
 import com.tencent.supersonic.chat.server.persistence.dataobject.PluginDO;
 import com.tencent.supersonic.chat.server.persistence.repository.PluginRepository;
-import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
-import com.tencent.supersonic.chat.server.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.server.plugin.event.PluginAddEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginDelEvent;
 import com.tencent.supersonic.chat.server.plugin.event.PluginUpdateEvent;

@@ -1,7 +1,7 @@
 package com.tencent.supersonic.chat.server.service;
 
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.api.pojo.request.PluginQueryReq;
-import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.common.pojo.User;
 
 import java.util.List;

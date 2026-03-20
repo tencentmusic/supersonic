@@ -1,8 +1,8 @@
 package com.tencent.supersonic.chat.server.plugin.recognize.embedding;
 
 import com.google.common.collect.Lists;
-import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
-import com.tencent.supersonic.chat.server.plugin.ParseMode;
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
+import com.tencent.supersonic.chat.api.plugin.ParseMode;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.plugin.recognize.PluginRecognizer;

@@ -52,7 +52,7 @@ public class ChatQueryController {
     }
 
     @PostMapping("getExecuteSummary")
-    public Object getExecuteSummary(@Valid @RequestBody ChatExecuteReq chatExecuteReq,
+    public Object getExecuteSummary(@RequestBody ChatExecuteReq chatExecuteReq,
             HttpServletRequest request, HttpServletResponse response) {
         chatExecuteReq.setUser(UserHolder.findUser(request, response));
         QueryResult res = chatQueryService.getTextSummary(chatExecuteReq);

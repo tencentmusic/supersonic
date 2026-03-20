@@ -1,8 +1,9 @@
 package com.tencent.supersonic.chat.server.plugin.support;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.chat.api.plugin.PluginParseResult;
+import com.tencent.supersonic.chat.api.plugin.PluginQuery;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -18,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class PluginSemanticQuery {
+public abstract class PluginSemanticQuery implements PluginQuery {
 
     protected SemanticParseInfo parseInfo;
 

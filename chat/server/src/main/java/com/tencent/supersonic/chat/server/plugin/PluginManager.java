@@ -3,6 +3,7 @@ package com.tencent.supersonic.chat.server.plugin;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.AgentToolType;
 import com.tencent.supersonic.chat.server.agent.PluginTool;

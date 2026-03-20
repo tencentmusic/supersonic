@@ -2,10 +2,10 @@ package com.tencent.supersonic.chat.server.plugin.recognize;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
+import com.tencent.supersonic.chat.api.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.api.pojo.response.ChatParseResp;
-import com.tencent.supersonic.chat.server.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.server.plugin.PluginManager;
-import com.tencent.supersonic.chat.server.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.server.plugin.PluginRecallResult;
 import com.tencent.supersonic.chat.server.pojo.ParseContext;
 import com.tencent.supersonic.chat.server.util.QueryReqConverter;
@@ -90,6 +90,13 @@ public abstract class PluginRecognizer {
         pluginParseResult.setQueryFilters(queryFilters);
         pluginParseResult.setDistance(distance);
         pluginParseResult.setQueryText(parseContext.getRequest().getQueryText());
+        pluginParseResult.setChatId(parseContext.getRequest().getChatId());
+        pluginParseResult.setQueryId(parseContext.getRequest().getQueryId());
+        if (parseContext.getRequest().getUser() != null) {
+            pluginParseResult.setUserId(parseContext.getRequest().getUser().getId());
+            pluginParseResult.setUserName(parseContext.getRequest().getUser().getName());
+            pluginParseResult.setTenantId(parseContext.getRequest().getUser().getTenantId());
+        }
         properties.put(Constants.CONTEXT, pluginParseResult);
         properties.put("type", "plugin");
         properties.put("name", plugin.getName());

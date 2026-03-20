@@ -9,9 +9,14 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AppModule;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.ChatAppManager;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
+import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.service.ReportScheduleService;
 import dev.langchain4j.data.message.AiMessage;
@@ -74,7 +79,17 @@ public class ReportScheduleExecutor implements ChatQueryExecutor {
             ScheduleParams params = extractParams(chatApp, queryText);
             validateCron(params.getCronExpression());
 
-            Long datasetId = executeContext.getParseInfo().getDataSetId();
+            SemanticParseInfo parseInfo = executeContext.getParseInfo();
+            String queryConfig = buildQueryConfig(parseInfo);
+            if (queryConfig == null) {
+                QueryResult result = new QueryResult();
+                result.setQueryMode(QUERY_MODE);
+                result.setQueryState(QueryState.INVALID);
+                result.setTextResult("当前会话的查询结果不支持定时订阅。请使用结构化查询（指定指标和维度）后再创建定时报表。");
+                return result;
+            }
+
+            Long datasetId = parseInfo.getDataSetId();
             ReportScheduleService service = ContextUtils.getBean(ReportScheduleService.class);
 
             ReportScheduleDO schedule = new ReportScheduleDO();
@@ -82,6 +97,7 @@ public class ReportScheduleExecutor implements ChatQueryExecutor {
             schedule.setDatasetId(datasetId);
             schedule.setCronExpression(params.getCronExpression());
             schedule.setOutputFormat(params.getOutputFormat());
+            schedule.setQueryConfig(queryConfig);
             schedule.setEnabled(true);
             schedule.setOwnerId(user.getId());
             schedule.setTenantId(user.getTenantId());
@@ -92,9 +108,7 @@ public class ReportScheduleExecutor implements ChatQueryExecutor {
             QueryResult result = new QueryResult();
             result.setQueryMode(QUERY_MODE);
             result.setQueryState(QueryState.SUCCESS);
-            result.setTextResult(String.format(
-                    "Report schedule created successfully\n"
-                            + "- Name: %s\n- Cron: %s\n- Format: %s\n- Task ID: %d",
+            result.setTextResult(String.format("定时报表已创建\n- 名称：%s\n- Cron：%s\n- 格式：%s\n- 任务 ID：#%d",
                     created.getName(), created.getCronExpression(), created.getOutputFormat(),
                     created.getId()));
             return result;
@@ -110,12 +124,28 @@ public class ReportScheduleExecutor implements ChatQueryExecutor {
 
     private ScheduleParams extractParams(ChatApp chatApp, String queryText) {
         String promptStr = String.format(chatApp.getPrompt(), queryText);
-        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.EMPTY_MAP);
+        Prompt prompt = PromptTemplate.from(promptStr).apply(Collections.emptyMap());
         ChatLanguageModel chatLanguageModel =
                 ModelProvider.getChatModel(chatApp.getChatModelConfig());
         Response<AiMessage> response = chatLanguageModel.generate(prompt.toUserMessage());
         String responseText = response.content().text();
         return JSONObject.parseObject(responseText, ScheduleParams.class);
+    }
+
+    private String buildQueryConfig(SemanticParseInfo parseInfo) {
+        if (parseInfo == null || parseInfo.getDataSetId() == null) {
+            return null;
+        }
+        if (parseInfo.getMetrics() == null || parseInfo.getMetrics().isEmpty()) {
+            return null;
+        }
+        if (QueryType.AGGREGATE.equals(parseInfo.getQueryType())
+                || !parseInfo.getMetrics().isEmpty()) {
+            QueryStructReq structReq = QueryReqBuilder.buildStructReq(parseInfo);
+            structReq.setDataSetId(parseInfo.getDataSetId());
+            return JsonUtil.toString(structReq);
+        }
+        return null;
     }
 
     private void validateCron(String cronExpression) {

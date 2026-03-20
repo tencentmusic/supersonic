@@ -229,6 +229,9 @@ public class ChatQueryServiceImpl implements ChatQueryService {
     @Override
     public Object queryData(ChatQueryDataReq chatQueryDataReq, User user) throws Exception {
         Integer parseId = chatQueryDataReq.getParseId();
+        if (parseId == null) {
+            throw new IllegalArgumentException("parseId must not be null");
+        }
         SemanticParseInfo parseInfo =
                 chatManageService.getParseInfo(chatQueryDataReq.getQueryId(), parseId);
         mergeParseInfo(parseInfo, chatQueryDataReq);
