@@ -51,7 +51,8 @@ const ExecuteItem: React.FC<Props> = ({
   const [showMsgContentTable, setShowMsgContentTable] = useState<boolean>(false);
   const [msgContentType, setMsgContentType] = useState<MsgContentTypeEnum>();
   const [showErrMsg, setShowErrMsg] = useState<boolean>(false);
-  const titlePrefix = queryMode === 'PLAIN_TEXT' || queryMode === 'WEB_SERVICE' ? '问答' : '数据';
+  const titlePrefix = queryMode === 'PLAIN_TEXT' || queryMode === 'WEB_SERVICE' ? '问答'
+    : queryMode === 'REPORT_SCHEDULE' ? '调度' : '数据';
 
   const getNodeTip = (title: ReactNode, tip?: string | ReactNode) => {
     return (

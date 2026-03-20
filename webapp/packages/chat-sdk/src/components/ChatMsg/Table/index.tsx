@@ -41,7 +41,7 @@ const Table: React.FC<Props> = ({ data, size, loading, question, onApplyAuth }) 
       return true;
     }
     const fieldText = `${title} ${bizName}`.toLowerCase();
-    return /金额|利息|本金|本息|余额|占比|比例|费率|利率|ratio|rate|percent|pct|amt|amount|fee|interest|principal|balance/.test(
+    return /金额|利息|罚息|本金|本息|余额|占比|比例|费率|利率|ratio|rate|percent|pct|amt|amount|fee|interest|principal|balance/.test(
       fieldText
     );
   };

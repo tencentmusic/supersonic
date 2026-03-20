@@ -147,7 +147,8 @@ const ChatItem: React.FC<Props> = ({
       (queryColumns && queryColumns.length > 0 && queryResults) ||
       queryMode === 'WEB_PAGE' ||
       queryMode === 'WEB_SERVICE' ||
-      queryMode === 'PLAIN_TEXT'
+      queryMode === 'PLAIN_TEXT' ||
+      queryMode === 'REPORT_SCHEDULE'
     ) {
       data = res.data;
       tip = '';
@@ -585,7 +586,8 @@ const ChatItem: React.FC<Props> = ({
             {executeMode &&
               !executeLoading &&
               !isSimpleMode &&
-              parseInfo?.queryMode !== 'PLAIN_TEXT' && (
+              parseInfo?.queryMode !== 'PLAIN_TEXT' &&
+              parseInfo?.queryMode !== 'REPORT_SCHEDULE' && (
                 <SimilarQuestionItem
                   queryId={parseInfo?.queryId}
                   defaultExpanded={parseTip !== '' || executeTip !== ''}
@@ -595,7 +597,8 @@ const ChatItem: React.FC<Props> = ({
               )}
           </div>
           {(parseTip !== '' || (executeMode && !executeLoading)) &&
-            parseInfo?.queryMode !== 'PLAIN_TEXT' && (
+            parseInfo?.queryMode !== 'PLAIN_TEXT' &&
+            parseInfo?.queryMode !== 'REPORT_SCHEDULE' && (
               <Tools
                 isLastMessage={isLastMessage}
                 queryId={parseInfo?.queryId || 0}
