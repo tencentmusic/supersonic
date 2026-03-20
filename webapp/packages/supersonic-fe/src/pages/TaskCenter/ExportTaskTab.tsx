@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button, Table, Tag, Space, Popconfirm, message } from 'antd';
 import { DownloadOutlined, StopOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -37,17 +37,20 @@ const ExportTaskTab: React.FC = () => {
   const [data, setData] = useState<ExportTask[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
+  const paginationRef = useRef({ current: 1, pageSize: 20 });
 
   const fetchData = async (current = 1, pageSize = 20) => {
     setLoading(true);
     try {
       const res: any = await getExportTaskList({ current, pageSize });
-      if (res?.code === 200 && res?.data) {
-        setData(res.data.records || []);
-        setPagination({ current, pageSize, total: res.data.total || 0 });
-      } else {
-        setData([]);
-      }
+      // Handle both envelope shapes: {code, data: {records, total}} and {records, total}
+      const body = (res?.code === 200 && res?.data) ? res.data : res;
+      setData(Array.isArray(body) ? body : (body?.records || []));
+      setPagination({ current, pageSize, total: body?.total || 0 });
+      paginationRef.current = { current, pageSize };
+    } catch (error) {
+      message.error('加载导出任务失败');
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -56,15 +59,19 @@ const ExportTaskTab: React.FC = () => {
   useEffect(() => {
     fetchData();
     const timer = setInterval(() => {
-      fetchData(pagination.current, pagination.pageSize);
+      fetchData(paginationRef.current.current, paginationRef.current.pageSize);
     }, 10000);
     return () => clearInterval(timer);
   }, []);
 
   const handleCancel = async (id: number) => {
-    await cancelExportTask(id);
-    message.success('已取消');
-    fetchData(pagination.current, pagination.pageSize);
+    try {
+      await cancelExportTask(id);
+      message.success('已取消');
+      fetchData(paginationRef.current.current, paginationRef.current.pageSize);
+    } catch (error) {
+      message.error('取消失败');
+    }
   };
 
   const columns = [

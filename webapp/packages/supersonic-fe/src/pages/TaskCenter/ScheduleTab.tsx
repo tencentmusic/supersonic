@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip } from 'antd';
 import {
   PlusOutlined,
@@ -107,23 +108,31 @@ const ScheduleTab: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    await deleteSchedule(id);
-    message.success(MSG.DELETE_SUCCESS);
-    fetchData(pagination.current, pagination.pageSize);
+    try {
+      await deleteSchedule(id);
+      message.success(MSG.DELETE_SUCCESS);
+      fetchData(pagination.current, pagination.pageSize);
+    } catch (error) {
+      message.error('操作失败');
+    }
   };
 
   const handleToggle = async (record: ReportSchedule, checked: boolean) => {
-    if (checked) {
-      await resumeSchedule(record.id);
-    } else {
-      await pauseSchedule(record.id);
+    try {
+      if (checked) { await resumeSchedule(record.id); } else { await pauseSchedule(record.id); }
+      fetchData(pagination.current, pagination.pageSize);
+    } catch (error) {
+      message.error('操作失败');
     }
-    fetchData(pagination.current, pagination.pageSize);
   };
 
   const handleTrigger = async (id: number) => {
-    await triggerSchedule(id);
-    message.success('已触发执行');
+    try {
+      await triggerSchedule(id);
+      message.success('已触发执行');
+    } catch (error) {
+      message.error('触发失败');
+    }
   };
 
   const columns = [
@@ -167,7 +176,7 @@ const ScheduleTab: React.FC = () => {
       title: '上次执行',
       dataIndex: 'lastExecutionTime',
       width: 180,
-      render: (val: string) => val || '-',
+      render: (val: string) => val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '推送渠道',
