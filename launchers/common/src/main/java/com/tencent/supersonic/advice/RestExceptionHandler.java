@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -86,6 +87,14 @@ public class RestExceptionHandler {
                 + (e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown");
         log.warn("argument type mismatch: {}", message);
         return ResultData.fail(ReturnCode.INVALID_REQUEST.getCode(), message);
+    }
+
+    /** Static resource not found (e.g. browser hitting root path) */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResultData<String> noResourceFoundException(NoResourceFoundException e) {
+        log.debug("resource not found: {}", e.getMessage());
+        return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), "resource not found");
     }
 
     /** default global exception handler */
