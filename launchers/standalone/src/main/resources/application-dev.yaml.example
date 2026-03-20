@@ -1,0 +1,17 @@
+# 模板：复制为同目录下的 application-dev.yaml 后再改（application-dev.yaml 已 gitignore，不会被拉取覆盖）
+#
+#   cp launchers/standalone/src/main/resources/application-dev.yaml.example \
+#      launchers/standalone/src/main/resources/application-dev.yaml
+#
+# 激活方式：application.yaml 中 spring.profiles.include 默认含 dev（S2_ENV:dev）。
+# 密钥请用环境变量或在 application-dev.yaml 内填写本地值（勿提交该文件）。
+
+s2:
+  encryption:
+    aes-key: ${S2_ENCRYPTION_KEY:}
+    aes-iv: ${S2_ENCRYPTION_IV:}
+  feishu:
+    app-id: ${FEISHU_APP_ID:}
+    app-secret: ${FEISHU_APP_SECRET:}
+    verification-token: ${FEISHU_VERIFICATION_TOKEN:}
+    encrypt-key: ${FEISHU_ENCRYPT_KEY:}

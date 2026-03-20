@@ -80,6 +80,8 @@ yarn.lock
 # Local Spring YAML overrides (may put DB passwords, Feishu keys, etc.)
 **/src/main/resources/application-local.yaml
 **/src/main/resources/application-secrets.yaml
+# Local dev profile — 联调自用，跟踪 application-dev.yaml.example 作为模板即可
+launchers/standalone/src/main/resources/application-dev.yaml
 
 # =============================================
 # Runtime & Deploy
