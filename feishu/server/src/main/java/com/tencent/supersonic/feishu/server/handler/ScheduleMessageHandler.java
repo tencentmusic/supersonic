@@ -34,12 +34,12 @@ public class ScheduleMessageHandler implements MessageHandler {
 
     @Override
     public void handle(FeishuMessage msg, User user) {
-        String text = msg.getText() != null ? msg.getText().trim() : "";
+        String text = msg.getContent() != null ? msg.getContent().trim() : "";
         String lower = text.toLowerCase();
 
         // LIST intent: /schedule list OR /schedule
-        if (lower.equals("/schedule") || lower.equals("/schedule list")
-                || lower.contains("调度列表") || lower.contains("我的调度")) {
+        if (lower.equals("/schedule") || lower.equals("/schedule list") || lower.contains("调度列表")
+                || lower.contains("我的调度")) {
             handleList(msg, user);
             return;
         }
@@ -71,17 +71,15 @@ public class ScheduleMessageHandler implements MessageHandler {
 
         // Default: show help for /schedule
         messageSender.replyText(msg.getMessageId(),
-                "定时报表命令：\n"
-                        + "• `/schedule` - 查看调度列表\n"
-                        + "• `/schedule 每天9点` - 基于最近查询创建每日定时任务\n"
-                        + "• `/schedule pause <id>` - 暂停任务\n"
-                        + "• `/schedule resume <id>` - 恢复任务\n"
+                "定时报表命令：\n" + "• `/schedule` - 查看调度列表\n" + "• `/schedule 每天9点` - 基于最近查询创建每日定时任务\n"
+                        + "• `/schedule pause <id>` - 暂停任务\n" + "• `/schedule resume <id>` - 恢复任务\n"
                         + "• `/schedule cancel <id>` - 删除任务");
     }
 
     private void handleList(FeishuMessage msg, User user) {
         try {
-            Page<ReportScheduleDO> page = reportScheduleService.getScheduleList(new Page<>(1, 20), null, null);
+            Page<ReportScheduleDO> page =
+                    reportScheduleService.getScheduleList(new Page<>(1, 20), null, null);
             Map<String, Object> card = cardRenderer.renderScheduleListCard(page.getRecords());
             messageSender.replyCard(msg.getMessageId(), card);
         } catch (Exception e) {
@@ -109,16 +107,14 @@ public class ScheduleMessageHandler implements MessageHandler {
             // 2. Parse cron expression from text (simple patterns)
             String cron = parseCron(text);
             if (cron == null) {
-                messageSender.replyText(msg.getMessageId(),
-                        "未识别调度频率，请使用如「每天9点」「每周一」等表达方式");
+                messageSender.replyText(msg.getMessageId(), "未识别调度频率，请使用如「每天9点」「每周一」等表达方式");
                 return;
             }
 
             // 3. Find default delivery config
             String deliveryConfigIds = findDefaultDeliveryConfigId();
             if (deliveryConfigIds == null) {
-                messageSender.replyText(msg.getMessageId(),
-                        "暂无可用的推送渠道，请先在后台配置推送渠道");
+                messageSender.replyText(msg.getMessageId(), "暂无可用的推送渠道，请先在后台配置推送渠道");
                 return;
             }
 
@@ -137,7 +133,8 @@ public class ScheduleMessageHandler implements MessageHandler {
 
             ReportScheduleDO created = reportScheduleService.createSchedule(schedule);
 
-            Map<String, Object> card = cardRenderer.renderScheduleCreatedCard(created, describeCron(cron));
+            Map<String, Object> card =
+                    cardRenderer.renderScheduleCreatedCard(created, describeCron(cron));
             messageSender.replyCard(msg.getMessageId(), card);
         } catch (Exception e) {
             log.error("Failed to create schedule", e);
@@ -193,16 +190,19 @@ public class ScheduleMessageHandler implements MessageHandler {
     private String parseCron(String text) {
         String lower = text.toLowerCase();
         // 每小时
-        if (lower.contains("每小时")) return "0 0 * * * ?";
+        if (lower.contains("每小时"))
+            return "0 0 * * * ?";
         // 每天 (default hour 9)
         if (lower.contains("每天") || lower.contains("daily")) {
             int hour = extractHour(lower, 9);
             return String.format("0 0 %d * * ?", hour);
         }
         // 每周/每周一
-        if (lower.contains("每周") || lower.contains("weekly")) return "0 0 9 ? * 2"; // Monday 9am
+        if (lower.contains("每周") || lower.contains("weekly"))
+            return "0 0 9 ? * 2"; // Monday 9am
         // 每月
-        if (lower.contains("每月") || lower.contains("monthly")) return "0 0 9 1 * ?"; // 1st of month
+        if (lower.contains("每月") || lower.contains("monthly"))
+            return "0 0 9 1 * ?"; // 1st of month
         return null;
     }
 
@@ -216,30 +216,35 @@ public class ScheduleMessageHandler implements MessageHandler {
     }
 
     private String describeCron(String cron) {
-        if (cron == null) return "未知频率";
+        if (cron == null)
+            return "未知频率";
         String[] p = cron.split(" ");
-        if (p.length < 6) return cron;
+        if (p.length < 6)
+            return cron;
         String hour = p[2];
         String dom = p[3];
         String dow = p[5];
-        if (!"?".equals(dow) && !"*".equals(dow)) return "每周 " + hour + ":00";
-        if (!"*".equals(dom) && !"?".equals(dom)) return "每月" + dom + "日 " + hour + ":00";
-        if ("*".equals(hour)) return "每小时";
+        if (!"?".equals(dow) && !"*".equals(dow))
+            return "每周 " + hour + ":00";
+        if (!"*".equals(dom) && !"?".equals(dom))
+            return "每月" + dom + "日 " + hour + ":00";
+        if ("*".equals(hour))
+            return "每小时";
         return "每天 " + hour + ":00";
     }
 
     private Long extractId(String text) {
         Matcher m = Pattern.compile("(\\d+)").matcher(text);
-        if (m.find()) return Long.parseLong(m.group(1));
+        if (m.find())
+            return Long.parseLong(m.group(1));
         return null;
     }
 
     private String findDefaultDeliveryConfigId() {
         try {
-            List<ReportDeliveryConfigDO> configs = reportDeliveryService.getConfigList(new Page<>(1, 100))
-                    .getRecords().stream()
-                    .filter(c -> Boolean.TRUE.equals(c.getEnabled()))
-                    .toList();
+            List<ReportDeliveryConfigDO> configs =
+                    reportDeliveryService.getConfigList(new Page<>(1, 100)).getRecords().stream()
+                            .filter(c -> Boolean.TRUE.equals(c.getEnabled())).toList();
             return configs.isEmpty() ? null : String.valueOf(configs.get(0).getId());
         } catch (Exception e) {
             log.warn("Failed to find delivery config", e);
