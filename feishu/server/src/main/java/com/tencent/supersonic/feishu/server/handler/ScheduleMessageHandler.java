@@ -3,7 +3,6 @@ package com.tencent.supersonic.feishu.server.handler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.feishu.api.pojo.FeishuMessage;
 import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuQuerySessionDO;
 import com.tencent.supersonic.feishu.server.persistence.mapper.FeishuQuerySessionMapper;
@@ -30,6 +29,8 @@ public class ScheduleMessageHandler implements MessageHandler {
     private final FeishuQuerySessionMapper sessionMapper;
     private final FeishuMessageSender messageSender;
     private final FeishuCardRenderer cardRenderer;
+    private final ReportScheduleService reportScheduleService;
+    private final ReportDeliveryService reportDeliveryService;
 
     @Override
     public void handle(FeishuMessage msg, User user) {
@@ -80,8 +81,7 @@ public class ScheduleMessageHandler implements MessageHandler {
 
     private void handleList(FeishuMessage msg, User user) {
         try {
-            ReportScheduleService svc = ContextUtils.getBean(ReportScheduleService.class);
-            Page<ReportScheduleDO> page = svc.getScheduleList(new Page<>(1, 20), null, null);
+            Page<ReportScheduleDO> page = reportScheduleService.getScheduleList(new Page<>(1, 20), null, null);
             Map<String, Object> card = cardRenderer.renderScheduleListCard(page.getRecords());
             messageSender.replyCard(msg.getMessageId(), card);
         } catch (Exception e) {
@@ -123,7 +123,6 @@ public class ScheduleMessageHandler implements MessageHandler {
             }
 
             // 4. Create schedule
-            ReportScheduleService svc = ContextUtils.getBean(ReportScheduleService.class);
             ReportScheduleDO schedule = new ReportScheduleDO();
             schedule.setName("定时报表-" + session.getQueryText());
             schedule.setDatasetId(session.getDatasetId());
@@ -136,7 +135,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             schedule.setTenantId(user.getTenantId());
             schedule.setCreatedBy(user.getName());
 
-            ReportScheduleDO created = svc.createSchedule(schedule);
+            ReportScheduleDO created = reportScheduleService.createSchedule(schedule);
 
             Map<String, Object> card = cardRenderer.renderScheduleCreatedCard(created, describeCron(cron));
             messageSender.replyCard(msg.getMessageId(), card);
@@ -153,7 +152,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             return;
         }
         try {
-            ContextUtils.getBean(ReportScheduleService.class).pauseSchedule(id);
+            reportScheduleService.pauseSchedule(id);
             messageSender.replyText(msg.getMessageId(), "已暂停任务 #" + id);
         } catch (Exception e) {
             log.error("Failed to pause schedule id={}", id, e);
@@ -168,7 +167,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             return;
         }
         try {
-            ContextUtils.getBean(ReportScheduleService.class).resumeSchedule(id);
+            reportScheduleService.resumeSchedule(id);
             messageSender.replyText(msg.getMessageId(), "已恢复任务 #" + id);
         } catch (Exception e) {
             log.error("Failed to resume schedule id={}", id, e);
@@ -183,7 +182,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             return;
         }
         try {
-            ContextUtils.getBean(ReportScheduleService.class).deleteSchedule(id);
+            reportScheduleService.deleteSchedule(id);
             messageSender.replyText(msg.getMessageId(), "已删除任务 #" + id);
         } catch (Exception e) {
             log.error("Failed to delete schedule id={}", id, e);
@@ -237,8 +236,7 @@ public class ScheduleMessageHandler implements MessageHandler {
 
     private String findDefaultDeliveryConfigId() {
         try {
-            ReportDeliveryService svc = ContextUtils.getBean(ReportDeliveryService.class);
-            List<ReportDeliveryConfigDO> configs = svc.getConfigList(new Page<>(1, 100))
+            List<ReportDeliveryConfigDO> configs = reportDeliveryService.getConfigList(new Page<>(1, 100))
                     .getRecords().stream()
                     .filter(c -> Boolean.TRUE.equals(c.getEnabled()))
                     .toList();
