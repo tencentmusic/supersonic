@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.api.pojo;
 
 import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,6 +43,8 @@ public class SchemaElement implements Serializable {
     @Builder.Default
     private Map<String, Object> extInfo = new HashMap<>();
     private DimensionTimeTypeParams typeParams;
+    @Builder.Default
+    private Integer sensitiveLevel = SensitiveLevelEnum.LOW.getCode();
 
     @Override
     public boolean equals(Object o) {

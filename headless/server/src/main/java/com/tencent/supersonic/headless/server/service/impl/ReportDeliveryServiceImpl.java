@@ -206,7 +206,7 @@ public class ReportDeliveryServiceImpl
                 recordMapper.updateById(record);
 
                 // Track consecutive failures
-                handleDeliveryFailure(config);
+                handleDeliveryFailure(config, e.getMessage());
                 if (reportMetrics != null) {
                     reportMetrics.recordDelivery("error",
                             normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
@@ -233,7 +233,7 @@ public class ReportDeliveryServiceImpl
     /**
      * Track consecutive failures and auto-disable if threshold exceeded.
      */
-    private void handleDeliveryFailure(ReportDeliveryConfigDO config) {
+    private void handleDeliveryFailure(ReportDeliveryConfigDO config, String errorMessage) {
         int failures =
                 (config.getConsecutiveFailures() != null ? config.getConsecutiveFailures() : 0) + 1;
         int maxFailures =
@@ -245,6 +245,10 @@ public class ReportDeliveryServiceImpl
 
         if (failures >= maxFailures) {
             config.setEnabled(false);
+            String reason =
+                    String.format("Auto-disabled after %d consecutive failures. Last error: %s",
+                            failures, truncate(errorMessage, 400));
+            config.setDisabledReason(reason);
             log.warn(
                     "Auto-disabling delivery config {} after {} consecutive failures (threshold: {})",
                     config.getId(), failures, maxFailures);

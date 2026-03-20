@@ -116,7 +116,8 @@ public class DataSetSchemaBuilder {
                     .dataSetName(resp.getName()).model(dim.getModelId()).id(dim.getId())
                     .name(dim.getName()).bizName(dim.getBizName()).useCnt(dim.getUseCnt())
                     .alias(alias).schemaValueMaps(schemaValueMaps).isTag(dim.getIsTag())
-                    .description(dim.getDescription()).type(SchemaElementType.DIMENSION).build();
+                    .description(dim.getDescription()).type(SchemaElementType.DIMENSION)
+                    .sensitiveLevel(dim.getSensitiveLevel()).build();
             dimToAdd.getExtInfo().put(DimensionConstants.DIMENSION_TYPE, dim.getType());
             // data type
             if (dim.getDataType() != null) {
@@ -180,7 +181,8 @@ public class DataSetSchemaBuilder {
                     .type(SchemaElementType.METRIC).useCnt(metric.getUseCnt()).alias(alias)
                     .relatedSchemaElements(getRelateSchemaElement(metric))
                     .defaultAgg(metric.getDefaultAgg()).dataFormatType(metric.getDataFormatType())
-                    .isTag(metric.getIsTag()).description(metric.getDescription()).build();
+                    .isTag(metric.getIsTag()).description(metric.getDescription())
+                    .sensitiveLevel(metric.getSensitiveLevel()).build();
             metrics.add(metricToAdd);
         }
         return metrics;

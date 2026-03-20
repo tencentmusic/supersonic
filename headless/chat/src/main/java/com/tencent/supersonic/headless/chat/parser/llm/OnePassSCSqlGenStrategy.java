@@ -108,17 +108,23 @@ public class OnePassSCSqlGenStrategy extends SqlGenStrategy {
         Map<String, Prompt> output2Prompt = new ConcurrentHashMap<>();
         prompt2Exemplar.keySet().parallelStream().forEach(prompt -> {
             SemanticSql s2Sql = extractor.generateSemanticSql(prompt.toUserMessage().singleText());
-            output2Prompt.put(s2Sql.getSql(), prompt);
+            if (s2Sql != null && s2Sql.getSql() != null) {
+                output2Prompt.put(s2Sql.getSql(), prompt);
+            }
             keyPipelineLog.info("OnePassSCSqlGenStrategy modelReq:\n{} \nmodelResp:\n{}",
                     prompt.text(), s2Sql);
         });
 
         // 4.format response.
+        if (output2Prompt.isEmpty()) {
+            return llmResp;
+        }
         Pair<String, Map<String, Double>> sqlMapPair =
                 ResponseHelper.selfConsistencyVote(Lists.newArrayList(output2Prompt.keySet()));
         llmResp.setSqlOutput(sqlMapPair.getLeft());
+        Prompt votedPrompt = output2Prompt.get(sqlMapPair.getLeft());
         List<Text2SQLExemplar> usedExemplars =
-                prompt2Exemplar.get(output2Prompt.get(sqlMapPair.getLeft()));
+                votedPrompt != null ? prompt2Exemplar.get(votedPrompt) : Lists.newArrayList();
         llmResp.setSqlRespMap(ResponseHelper.buildSqlRespMap(usedExemplars, sqlMapPair.getRight()));
 
         return llmResp;

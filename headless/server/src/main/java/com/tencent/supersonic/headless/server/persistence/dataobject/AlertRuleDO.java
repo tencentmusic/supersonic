@@ -8,23 +8,32 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName("s2_report_delivery_config")
-public class ReportDeliveryConfigDO {
+@TableName("s2_alert_rule")
+public class AlertRuleDO {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     private String name;
-    private String deliveryType;
-    private String deliveryConfig;
-    private Boolean enabled;
     private String description;
-    private Integer consecutiveFailures;
+    private Long datasetId;
+    private String queryConfig;
+    private String conditions;
+    private String cronExpression;
+    private Integer enabled;
+    private Long ownerId;
+    private String deliveryConfigIds;
+    private Integer silenceMinutes;
     private Integer maxConsecutiveFailures;
+    private Integer consecutiveFailures;
     private String disabledReason;
-    private Long tenantId;
+    private Integer retryCount;
+    private Integer retryInterval;
+    private String quartzJobKey;
+    private Date lastCheckTime;
+    private Date nextCheckTime;
     private Date createdAt;
     private Date updatedAt;
     private String createdBy;
-    private String updatedBy;
+    private Long tenantId;
 }

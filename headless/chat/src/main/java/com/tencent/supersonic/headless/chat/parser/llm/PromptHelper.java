@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.enums.DataFormatTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.common.service.ExemplarService;
 import com.tencent.supersonic.common.util.StringUtil;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.chat.parser.ParserConfig;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMReq;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.tencent.supersonic.common.pojo.DimensionConstants.*;
 import static com.tencent.supersonic.headless.chat.parser.ParserConfig.*;
@@ -37,15 +39,25 @@ public class PromptHelper {
         int selfConsistencyNumber =
                 Integer.parseInt(parserConfig.getParameterValue(PARSER_SELF_CONSISTENCY_NUMBER));
 
-        List<Text2SQLExemplar> exemplars = Lists.newArrayList();
-        exemplars.addAll(llmReq.getDynamicExemplars());
+        // Use only agent-scoped exemplars (from memory_<agentId> collection).
+        // Do NOT fall back to global system exemplars — they are generic and
+        // cause irrelevant few-shot examples for agent-specific queries.
+        List<Text2SQLExemplar> exemplars = Lists.newArrayList(llmReq.getDynamicExemplars());
 
-        int recallSize = exemplarRecallNumber - llmReq.getDynamicExemplars().size();
-        if (recallSize > 0) {
-            exemplars.addAll(exemplarService.recallExemplars(llmReq.getQueryText(), recallSize));
+        if (exemplars.isEmpty()) {
+            // No agent-scoped exemplars — auto-generate basic exemplars from the dataset schema
+            // so the LLM knows the correct field names and SQL patterns for this agent.
+            exemplars = buildSchemaExemplars(llmReq);
         }
 
         List<List<Text2SQLExemplar>> results = new ArrayList<>();
+        if (exemplars.isEmpty()) {
+            // Schema has no usable structure — proceed with zero-shot prompts.
+            for (int i = 0; i < selfConsistencyNumber; i++) {
+                results.add(new ArrayList<>());
+            }
+            return results;
+        }
         // use random collection of exemplars for each self-consistency inference
         for (int i = 0; i < selfConsistencyNumber; i++) {
             List<Text2SQLExemplar> shuffledList = new ArrayList<>(exemplars);
@@ -77,6 +89,59 @@ public class PromptHelper {
             results.add(ts);
         }
         return results;
+    }
+
+    /**
+     * Auto-generate basic few-shot exemplars from the dataset schema when no agent-specific
+     * exemplars exist. Produces one aggregate exemplar (GROUP BY date + metric) and one detail
+     * exemplar (SELECT dimensions), so the LLM learns the correct field names and SQL patterns.
+     */
+    private List<Text2SQLExemplar> buildSchemaExemplars(LLMReq llmReq) {
+        LLMReq.LLMSchema schema = llmReq.getSchema();
+        String dataSetName = schema.getDataSetName();
+        String schemaStr = buildSchemaStr(llmReq);
+        String sideInfo = buildSideInformation(llmReq);
+        List<Text2SQLExemplar> exemplars = new ArrayList<>();
+
+        SchemaElement partitionTime = schema.getPartitionTime();
+        List<SchemaElement> metrics = schema.getMetrics();
+        List<SchemaElement> dimensions = schema.getDimensions();
+
+        // Exemplar 1: aggregate — partition time + first metric
+        if (partitionTime != null && !CollectionUtils.isEmpty(metrics)) {
+            SchemaElement metric = metrics.get(0);
+            String agg = StringUtils.isNotBlank(metric.getDefaultAgg())
+                    ? metric.getDefaultAgg().toUpperCase()
+                    : "SUM";
+            String question = String.format("最近7天的%s汇总是多少", metric.getName());
+            String sql = String.format(
+                    "SELECT %s, %s(%s) FROM %s WHERE %s >= '2025-01-01' AND %s <= '2025-01-07' GROUP BY %s",
+                    partitionTime.getName(), agg, metric.getName(), dataSetName,
+                    partitionTime.getName(), partitionTime.getName(), partitionTime.getName());
+            exemplars.add(Text2SQLExemplar.builder().question(question).sideInfo(sideInfo)
+                    .dbSchema(schemaStr).sql(sql).build());
+        }
+
+        // Exemplar 2: detail — partition time + top 2 non-time dimensions
+        if (partitionTime != null && !CollectionUtils.isEmpty(dimensions)) {
+            List<String> dimNames =
+                    dimensions.stream().filter(d -> !d.getName().equals(partitionTime.getName()))
+                            .limit(2).map(SchemaElement::getName).collect(Collectors.toList());
+            String selectFields =
+                    Stream.concat(Stream.of(partitionTime.getName()), dimNames.stream())
+                            .collect(Collectors.joining(", "));
+            String question =
+                    String.format("查一下%s的明细数据", dimNames.isEmpty() ? dataSetName : dimNames.get(0));
+            String sql = String.format(
+                    "SELECT %s FROM %s WHERE %s >= '2025-01-01' AND %s <= '2025-01-07' LIMIT 1000",
+                    selectFields, dataSetName, partitionTime.getName(), partitionTime.getName());
+            exemplars.add(Text2SQLExemplar.builder().question(question).sideInfo(sideInfo)
+                    .dbSchema(schemaStr).sql(sql).build());
+        }
+
+        log.info("built {} schema-derived exemplars for dataset: {}", exemplars.size(),
+                dataSetName);
+        return exemplars;
     }
 
     public String buildSideInformation(LLMReq llmReq) {

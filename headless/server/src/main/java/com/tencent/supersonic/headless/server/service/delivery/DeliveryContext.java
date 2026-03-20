@@ -18,4 +18,12 @@ public class DeliveryContext {
     private Long rowCount;
     private Long tenantId;
     private String executionTime;
+
+    // Alert-specific fields (non-null when delivering alert notifications)
+    private Long alertRuleId; // Non-null when this is an alert delivery; use instead of scheduleId
+    private String alertContent; // Non-null when this is an alert delivery (not a report delivery)
+    private String alertSeverity; // Highest severity: "CRITICAL" or "WARNING"
+    private Integer alertedCount; // Number of triggered alert events
+    private Integer totalChecked; // Total rows evaluated
+    private String alertRuleName; // Name of the alert rule
 }

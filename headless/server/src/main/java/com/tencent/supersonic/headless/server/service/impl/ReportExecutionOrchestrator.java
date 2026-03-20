@@ -6,16 +6,13 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.ParamValidationException;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
-import com.tencent.supersonic.headless.api.pojo.SqlTemplateConfig;
-import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
-import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.core.utils.SqlTemplateEngine;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
+import com.tencent.supersonic.headless.server.pojo.ExecutionSnapshotData;
 import com.tencent.supersonic.headless.server.pojo.OutputFormat;
 import com.tencent.supersonic.headless.server.pojo.ReportExecutionContext;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplate;
@@ -48,12 +45,11 @@ public class ReportExecutionOrchestrator {
     private final ReportExecutionMapper executionMapper;
     private final SemanticLayerService semanticLayerService;
     private final SemanticTemplateService templateService;
+    private final QueryConfigParser queryConfigParser;
 
     @Autowired(required = false)
     private ReportDeliveryService deliveryService;
 
-    @Autowired(required = false)
-    private SqlTemplateEngine sqlTemplateEngine;
     @Autowired(required = false)
     private TemplateReportMetrics reportMetrics;
 
@@ -61,10 +57,12 @@ public class ReportExecutionOrchestrator {
     private String exportDir;
 
     public ReportExecutionOrchestrator(ReportExecutionMapper executionMapper,
-            SemanticLayerService semanticLayerService, SemanticTemplateService templateService) {
+            SemanticLayerService semanticLayerService, SemanticTemplateService templateService,
+            QueryConfigParser queryConfigParser) {
         this.executionMapper = executionMapper;
         this.semanticLayerService = semanticLayerService;
         this.templateService = templateService;
+        this.queryConfigParser = queryConfigParser;
     }
 
     public void execute(ReportExecutionContext ctx) {
@@ -77,7 +75,7 @@ public class ReportExecutionOrchestrator {
         execution.setStartTime(startTime);
         execution.setTenantId(ctx.getTenantId());
         execution.setTemplateVersion(ctx.getTemplateVersion());
-        execution.setExecutionSnapshot(JsonUtil.toString(ctx));
+        execution.setExecutionSnapshot(JsonUtil.toString(new ExecutionSnapshotData(ctx, null)));
         executionMapper.insert(execution);
 
         try {
@@ -119,6 +117,13 @@ public class ReportExecutionOrchestrator {
             execution.setSqlHash(computeSqlHash(queryResp.getSql()));
             execution.setRowCount(rowCount);
             execution.setResultLocation(resultLocation);
+
+            // Update snapshot: store rendered SQL + result preview for audit replay (P2)
+            List<Map<String, Object>> previewRows = buildResultPreview(queryResp.getResultList());
+            ExecutionSnapshotData finalSnapshot = new ExecutionSnapshotData(ctx, previewRows);
+            finalSnapshot.setRenderedSql(queryResp.getSql());
+            execution.setExecutionSnapshot(JsonUtil.toString(finalSnapshot));
+
             executionMapper.updateById(execution);
 
             // Step 8: Deliver output to configured channels
@@ -151,59 +156,8 @@ public class ReportExecutionOrchestrator {
     }
 
     private SemanticQueryReq parseQueryConfig(ReportExecutionContext ctx) {
-        String queryConfig = ctx.getQueryConfig();
-        if (StringUtils.isBlank(queryConfig)) {
-            throw new IllegalArgumentException("queryConfig is required");
-        }
-
-        // Path 1: Try SqlTemplateConfig (ST4 template with variable rendering)
-        try {
-            SqlTemplateConfig templateConfig =
-                    JsonUtil.toObject(queryConfig, SqlTemplateConfig.class);
-            if (templateConfig != null && StringUtils.isNotBlank(templateConfig.getTemplateSql())) {
-                if (sqlTemplateEngine == null) {
-                    throw new IllegalStateException(
-                            "SqlTemplateEngine is not available but queryConfig contains a SQL template");
-                }
-                Map<String, Object> params =
-                        ctx.getResolvedParams() != null ? ctx.getResolvedParams() : Map.of();
-                String renderedSql =
-                        sqlTemplateEngine.render(templateConfig.getTemplateSql(), params);
-                QuerySqlReq sqlReq = new QuerySqlReq();
-                sqlReq.setSql(renderedSql);
-                sqlReq.setDataSetId(ctx.getDatasetId());
-                return sqlReq;
-            }
-        } catch (IllegalStateException e) {
-            throw e;
-        } catch (Exception e) {
-            log.debug("Failed to parse as SqlTemplateConfig, trying QueryStructReq");
-        }
-
-        // Path 2: Try QueryStructReq (structured query)
-        try {
-            QueryStructReq structReq = JsonUtil.toObject(queryConfig, QueryStructReq.class);
-            if (structReq != null && structReq.getDataSetId() != null) {
-                return structReq.convert(true);
-            }
-        } catch (Exception e) {
-            log.debug("Failed to parse as QueryStructReq, trying QuerySqlReq");
-        }
-
-        // Path 3: Try QuerySqlReq (raw SQL)
-        try {
-            QuerySqlReq sqlReq = JsonUtil.toObject(queryConfig, QuerySqlReq.class);
-            if (sqlReq != null) {
-                if (sqlReq.getDataSetId() == null) {
-                    sqlReq.setDataSetId(ctx.getDatasetId());
-                }
-                return sqlReq;
-            }
-        } catch (Exception e) {
-            log.debug("Failed to parse as QuerySqlReq");
-        }
-
-        throw new IllegalArgumentException("Unable to parse queryConfig: " + queryConfig);
+        return queryConfigParser.parse(ctx.getQueryConfig(), ctx.getDatasetId(),
+                ctx.getResolvedParams());
     }
 
     private String generateOutputFile(ReportExecutionContext ctx, SemanticQueryResp queryResp)
@@ -495,5 +449,17 @@ public class ReportExecutionOrchestrator {
         if (s == null)
             return null;
         return s.length() <= maxLen ? s : s.substring(0, maxLen);
+    }
+
+    /**
+     * Capture up to 20 rows from the full result list for storage in the execution snapshot.
+     * Truncating avoids bloating the snapshot column for large result sets.
+     */
+    private List<Map<String, Object>> buildResultPreview(List<Map<String, Object>> resultList) {
+        if (resultList == null || resultList.isEmpty()) {
+            return List.of();
+        }
+        int limit = Math.min(resultList.size(), 20);
+        return new ArrayList<>(resultList.subList(0, limit));
     }
 }

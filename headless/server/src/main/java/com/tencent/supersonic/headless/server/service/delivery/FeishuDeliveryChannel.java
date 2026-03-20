@@ -18,6 +18,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -93,7 +95,11 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
     private Map<String, Object> buildPayload(FeishuConfig config, DeliveryContext context) {
         Map<String, Object> payload = new HashMap<>();
 
-        if ("interactive".equals(config.getMsgType())) {
+        if (context.getAlertContent() != null) {
+            // Alert delivery: always use interactive card
+            payload.put("msg_type", "interactive");
+            payload.put("card", buildAlertCard(context));
+        } else if ("interactive".equals(config.getMsgType())) {
             // Interactive card message
             payload.put("msg_type", "interactive");
             payload.put("card", buildCard(config, context));
@@ -104,6 +110,70 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         }
 
         return payload;
+    }
+
+    private Map<String, Object> buildAlertCard(DeliveryContext context) {
+        Map<String, Object> card = new HashMap<>();
+
+        // Header
+        Map<String, Object> header = new HashMap<>();
+        Map<String, Object> title = new HashMap<>();
+        title.put("tag", "plain_text");
+        title.put("content", "🚨 数据告警 — " + LocalDate.now(ZoneId.of("Asia/Shanghai")).toString());
+        header.put("title", title);
+        header.put("template", "CRITICAL".equals(context.getAlertSeverity()) ? "red" : "orange");
+        card.put("header", header);
+
+        // Elements
+        List<Object> elements = new ArrayList<>();
+
+        // 1. Alert summary info
+        Map<String, Object> infoDiv = new HashMap<>();
+        infoDiv.put("tag", "div");
+        Map<String, Object> infoText = new HashMap<>();
+        infoText.put("tag", "lark_md");
+        String ruleName = context.getAlertRuleName() != null ? context.getAlertRuleName() : "告警规则";
+        int totalChecked = context.getTotalChecked() != null ? context.getTotalChecked() : 0;
+        int alertedCount = context.getAlertedCount() != null ? context.getAlertedCount() : 0;
+        String executionTime = context.getExecutionTime() != null ? context.getExecutionTime() : "";
+        infoText.put("content",
+                String.format("**规则**: %s\n**检查时间**: %s\n**检查行数**: %d | **告警行数**: %d", ruleName,
+                        executionTime, totalChecked, alertedCount));
+        infoDiv.put("text", infoText);
+        elements.add(infoDiv);
+
+        // 2. Separator
+        Map<String, Object> hr1 = new HashMap<>();
+        hr1.put("tag", "hr");
+        elements.add(hr1);
+
+        // 3. Alert content (pre-rendered, already escaped)
+        Map<String, Object> contentDiv = new HashMap<>();
+        contentDiv.put("tag", "div");
+        Map<String, Object> contentText = new HashMap<>();
+        contentText.put("tag", "lark_md");
+        contentText.put("content", context.getAlertContent());
+        contentDiv.put("text", contentText);
+        elements.add(contentDiv);
+
+        // 4. Separator
+        Map<String, Object> hr2 = new HashMap<>();
+        hr2.put("tag", "hr");
+        elements.add(hr2);
+
+        // 5. Note
+        Map<String, Object> note = new HashMap<>();
+        note.put("tag", "note");
+        List<Object> noteElements = new ArrayList<>();
+        Map<String, Object> noteText = new HashMap<>();
+        noteText.put("tag", "plain_text");
+        noteText.put("content", "静默期内同一告警不重复发送");
+        noteElements.add(noteText);
+        note.put("elements", noteElements);
+        elements.add(note);
+
+        card.put("elements", elements);
+        return card;
     }
 
     private Map<String, Object> buildCard(FeishuConfig config, DeliveryContext context) {

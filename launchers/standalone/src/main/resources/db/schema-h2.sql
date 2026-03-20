@@ -1287,6 +1287,7 @@ CREATE TABLE IF NOT EXISTS `s2_report_delivery_config` (
     `description` VARCHAR(500) DEFAULT NULL,
     `consecutive_failures` INT DEFAULT 0,
     `max_consecutive_failures` INT DEFAULT 5,
+    `disabled_reason` VARCHAR(512) DEFAULT NULL,
     `tenant_id` BIGINT NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -1389,3 +1390,86 @@ CREATE INDEX IF NOT EXISTS idx_event_time ON s2_connection_event(`event_time`);
 CREATE INDEX IF NOT EXISTS idx_event_type ON s2_connection_event(`event_type`);
 CREATE INDEX IF NOT EXISTS idx_event_tenant ON s2_connection_event(`tenant_id`);
 COMMENT ON TABLE s2_connection_event IS '连接事件时间线';
+
+-- ========================================
+-- 19. 告警订阅表 (V23)
+-- ========================================
+
+-- 告警规则表
+CREATE TABLE IF NOT EXISTS `s2_alert_rule` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(200) NOT NULL,
+    `description` VARCHAR(500) DEFAULT NULL,
+    `dataset_id` BIGINT NOT NULL,
+    `query_config` TEXT NOT NULL,
+    `conditions` TEXT NOT NULL,
+    `cron_expression` VARCHAR(100) NOT NULL,
+    `enabled` TINYINT DEFAULT 1,
+    `owner_id` BIGINT DEFAULT NULL,
+    `delivery_config_ids` VARCHAR(500) DEFAULT NULL,
+    `silence_minutes` INT DEFAULT 60,
+    `max_consecutive_failures` INT DEFAULT 5,
+    `consecutive_failures` INT DEFAULT 0,
+    `disabled_reason` VARCHAR(1000) DEFAULT NULL,
+    `retry_count` INT DEFAULT 2,
+    `retry_interval` INT DEFAULT 30,
+    `quartz_job_key` VARCHAR(200) DEFAULT NULL,
+    `last_check_time` TIMESTAMP DEFAULT NULL,
+    `next_check_time` TIMESTAMP DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `created_by` VARCHAR(100) DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_alert_rule_tenant ON s2_alert_rule(`tenant_id`);
+CREATE INDEX IF NOT EXISTS idx_alert_rule_dataset ON s2_alert_rule(`dataset_id`);
+CREATE INDEX IF NOT EXISTS idx_alert_rule_enabled ON s2_alert_rule(`enabled`);
+COMMENT ON TABLE s2_alert_rule IS '告警规则表';
+
+-- 告警执行记录表
+CREATE TABLE IF NOT EXISTS `s2_alert_execution` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `rule_id` BIGINT NOT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `start_time` TIMESTAMP DEFAULT NULL,
+    `end_time` TIMESTAMP DEFAULT NULL,
+    `total_rows` BIGINT DEFAULT 0,
+    `alerted_rows` BIGINT DEFAULT 0,
+    `silenced_rows` BIGINT DEFAULT 0,
+    `error_message` VARCHAR(2000) DEFAULT NULL,
+    `execution_time_ms` BIGINT DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_alert_execution_rule ON s2_alert_execution(`rule_id`);
+CREATE INDEX IF NOT EXISTS idx_alert_execution_status ON s2_alert_execution(`status`);
+CREATE INDEX IF NOT EXISTS idx_alert_execution_tenant ON s2_alert_execution(`tenant_id`);
+COMMENT ON TABLE s2_alert_execution IS '告警执行记录表';
+
+-- 告警事件表
+CREATE TABLE IF NOT EXISTS `s2_alert_event` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `execution_id` BIGINT NOT NULL,
+    `rule_id` BIGINT NOT NULL,
+    `condition_index` INT NOT NULL,
+    `severity` VARCHAR(20) NOT NULL DEFAULT 'WARNING',
+    `alert_key` VARCHAR(300) NOT NULL,
+    `dimension_value` VARCHAR(500) DEFAULT NULL,
+    `metric_value` DOUBLE DEFAULT NULL,
+    `baseline_value` DOUBLE DEFAULT NULL,
+    `deviation_pct` DOUBLE DEFAULT NULL,
+    `message` TEXT DEFAULT NULL,
+    `delivery_status` VARCHAR(20) DEFAULT 'PENDING',
+    `silence_until` TIMESTAMP DEFAULT NULL,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX IF NOT EXISTS idx_alert_event_execution ON s2_alert_event(`execution_id`);
+CREATE INDEX IF NOT EXISTS idx_alert_event_alert_key ON s2_alert_event(`alert_key`);
+CREATE INDEX IF NOT EXISTS idx_alert_event_severity ON s2_alert_event(`severity`);
+CREATE INDEX IF NOT EXISTS idx_alert_event_rule ON s2_alert_event(`rule_id`);
+CREATE INDEX IF NOT EXISTS idx_alert_event_silence ON s2_alert_event(`silence_until`);
+COMMENT ON TABLE s2_alert_event IS '告警事件表';
