@@ -1,13 +1,19 @@
-# Dev profile — local development & integration testing defaults
-# Activate via: spring.profiles.active=h2,dev
-# WARNING: These are dev/test credentials only. Do NOT use in production.
+# Dev profile — activate with: spring.profiles.include=dev (default via application.yaml S2_ENV:dev)
+#
+# 安全约定：本文件不包含任何真实密钥默认值。本地开发请任选其一：
+#   1) 复制仓库根目录 .env.example 为 .env 并填写（Docker / 部分 IDE 可自动加载）
+#   2) 在 IDE Run Configuration 或 shell 中导出下文所列环境变量
+#   3) 在 launchers/standalone/src/main/resources/ 下创建 application-local.yaml
+#      （该文件已列入 .gitignore，不会被提交）
+#
+# 飞书 / 加解密占位与生产一致，均从环境变量读取；未配置时为空字符串。
 
 s2:
   encryption:
-    aes-key: ${S2_ENCRYPTION_KEY:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08}
-    aes-iv: ${S2_ENCRYPTION_IV:supersonic@bicom}
+    aes-key: ${S2_ENCRYPTION_KEY:}
+    aes-iv: ${S2_ENCRYPTION_IV:}
   feishu:
-    app-id: ${FEISHU_APP_ID:cli_a9016ca343785bde}
-    app-secret: ${FEISHU_APP_SECRET:Ipbce7MMYlpbtRdvG9lzkbnby6jg83Zo}
-    verification-token: ${FEISHU_VERIFICATION_TOKEN:2157XpI00t0Srvxi0LGWFcBeFLggJo1t}
-    encrypt-key: ${FEISHU_ENCRYPT_KEY:SageData}
+    app-id: ${FEISHU_APP_ID:}
+    app-secret: ${FEISHU_APP_SECRET:}
+    verification-token: ${FEISHU_VERIFICATION_TOKEN:}
+    encrypt-key: ${FEISHU_ENCRYPT_KEY:}

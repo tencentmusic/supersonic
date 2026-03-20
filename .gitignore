@@ -77,6 +77,10 @@ yarn.lock
 .env.*
 !.env.example
 
+# Local Spring YAML overrides (may put DB passwords, Feishu keys, etc.)
+**/src/main/resources/application-local.yaml
+**/src/main/resources/application-secrets.yaml
+
 # =============================================
 # Runtime & Deploy
 # =============================================
