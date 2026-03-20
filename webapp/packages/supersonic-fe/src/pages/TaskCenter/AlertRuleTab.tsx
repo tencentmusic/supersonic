@@ -76,15 +76,19 @@ const AlertRuleTab: React.FC = () => {
   };
 
   const handleFormSubmit = async (values: Partial<AlertRule>) => {
-    if (editRecord?.id) {
-      await updateRule(editRecord.id, values);
-      message.success(MSG.UPDATE_SUCCESS);
-    } else {
-      await createRule(values);
-      message.success(MSG.CREATE_SUCCESS);
+    try {
+      if (editRecord?.id) {
+        await updateRule(editRecord.id, values);
+        message.success(MSG.UPDATE_SUCCESS);
+      } else {
+        await createRule(values);
+        message.success(MSG.CREATE_SUCCESS);
+      }
+      setFormVisible(false);
+      fetchData(pagination.current, pagination.pageSize);
+    } catch (error) {
+      message.error('操作失败');
     }
-    setFormVisible(false);
-    fetchData(pagination.current, pagination.pageSize);
   };
 
   const handleDelete = async (id: number) => {
