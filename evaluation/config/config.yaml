@@ -1,1 +1,15 @@
 url: http://localhost:9080
+username: admin
+databaseId: 1
+requestTimeoutSeconds: 30
+prepareTimeoutSeconds: 180
+pollIntervalSeconds: 3
+queryIntervalSeconds: 0
+cleanupLocalArtifacts: true
+questionsPath: data/internet.txt
+goldPath: data/gold_example_dusql.txt
+tablesPath: data/tables_dusql.json
+predSqlPath: data/pred_example_dusql.txt
+errorCasePath: error_case.json
+reportPath: evaluation_report.json
+dbFileName: internet.db

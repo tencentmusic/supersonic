@@ -28,11 +28,11 @@ import json
 import sqlite3
 import traceback
 import argparse
-import yaml
 import re
 
+from eval_config import load_config
 from process_sql import tokenize, get_schema, get_tables_with_alias, Schema, get_sql
-from build_pred_result import read_query,get_pred_result
+from build_pred_result import read_query, get_pred_result
 from build_tables import build_table
 
 # Flag to disable value evaluation
@@ -482,7 +482,15 @@ def print_scores(scores, etype):
             print("{:20} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f} {:<20.3f}".format(type_, *this_scores))
 
 
-def evaluate(gold, predict, db_dir, etype, kmaps,query_path,time_cost):
+def percentile(values, ratio):
+    if not values:
+        return 0
+    ordered = sorted(values)
+    index = int(round((len(ordered) - 1) * ratio))
+    return ordered[index]
+
+
+def evaluate(gold, predict, db_dir, etype, kmaps, query_path, prediction_run, config):
     with open(gold) as f:
         glist = [l.strip().split('\t') for l in f.readlines() if len(l.strip()) > 0]
 
@@ -504,9 +512,10 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path,time_cost):
         for type_ in partial_types:
             scores[level]['partial'][type_] = {'acc': 0., 'rec': 0., 'f1': 0.,'acc_count':0,'rec_count':0}
 
-    eval_err_num = 0
-    questions=read_query(query_path)
-    index=0
+    query_runs = prediction_run["queries"]
+    time_cost = prediction_run["time_cost"]
+    questions = read_query(query_path)
+    index = 0
     for p, g in zip(plist, glist):
         p_str = p[0]
         g_str, db = g
@@ -523,16 +532,19 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path,time_cost):
 
         if etype in ["all", "exec"]:
             result = eval_exec_match(db, p_str, g_str, p_sql, g_sql)
-            #exec_score = eval_exec_match(db, p_str, g_str, p_sql, g_sql)
             if not result["equal"]:
-                element={}
-                element["query"]=questions[index]
-                element["gold_sql"]=g_str
-                element["pred_sql"]=p_str
+                element = {}
+                element["query"] = questions[index]
+                element["gold_sql"] = g_str
+                element["pred_sql"] = p_str
+                element["query_status"] = query_runs[index]["status"]
+                element["latency_seconds"] = query_runs[index]["latency_seconds"]
+                if "error" in query_runs[index]:
+                    element["query_error"] = query_runs[index]["error"]
                 if "p_res_map" in result:
-                    element["p_res_map"]=result["p_res_map"]
+                    element["p_res_map"] = result["p_res_map"]
                 if "q_res_map" in result:
-                    element["q_res_map"]=result["q_res_map"]
+                    element["q_res_map"] = result["q_res_map"]
                 log_list.append(element)
             if result["equal"]:
                 scores[hardness]['exec'] += 1.0
@@ -570,7 +582,7 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path,time_cost):
                 'exact': exact_score,
                 'partial': partial_scores
             })
-        index=index+1
+        index = index + 1
 
     for level in levels:
         if scores[level]['count'] == 0:
@@ -597,20 +609,45 @@ def evaluate(gold, predict, db_dir, etype, kmaps,query_path,time_cost):
                     scores[level]['partial'][type_]['f1'] = \
                         2.0 * scores[level]['partial'][type_]['acc'] * scores[level]['partial'][type_]['rec'] / (
                         scores[level]['partial'][type_]['rec'] + scores[level]['partial'][type_]['acc'])
-    cost_dic = {}
-    cost_dic["max_time"] = max(time_cost)
-    cost_dic["min_time"] = min(time_cost)
-    cost_dic["avg_time"] = sum(time_cost)/len(time_cost)
+    parse_failures = [item for item in query_runs if item["status"] != "success"]
+    cost_dic = {
+        "max_time": max(time_cost) if time_cost else 0,
+        "min_time": min(time_cost) if time_cost else 0,
+        "avg_time": sum(time_cost) / len(time_cost) if time_cost else 0,
+        "p95_time": percentile(time_cost, 0.95),
+        "parse_success_count": len(query_runs) - len(parse_failures),
+        "parse_failure_count": len(parse_failures),
+    }
     log_list.append(cost_dic)
     print_scores(scores, etype)
     print(scores['all']['exec'])
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    file_name=current_directory+"/error_case.json"
-    json_exist=os.path.exists(file_name)
-    if json_exist:
-        os.remove(file_name)
-    with open(file_name, 'w') as json_file:
+
+    if config.error_case_path.exists():
+        config.error_case_path.unlink()
+    with open(config.error_case_path, 'w', encoding='utf-8') as json_file:
         json.dump(log_list, json_file, indent=4, ensure_ascii=False)
+
+    report = {
+        "runId": config.run_id,
+        "resourcePrefix": prediction_run["setup"]["resource_prefix"],
+        "baseUrl": config.base_url,
+        "setup": prediction_run["setup"],
+        "summary": {
+            "sampleCount": len(query_runs),
+            "execAccuracy": scores['all']['exec'],
+            "maxLatencySeconds": cost_dic["max_time"],
+            "minLatencySeconds": cost_dic["min_time"],
+            "avgLatencySeconds": cost_dic["avg_time"],
+            "p95LatencySeconds": cost_dic["p95_time"],
+            "parseSuccessCount": cost_dic["parse_success_count"],
+            "parseFailureCount": cost_dic["parse_failure_count"],
+            "parseFailureRate": cost_dic["parse_failure_count"] / len(query_runs) if query_runs else 0,
+        },
+        "queryResults": query_runs,
+        "errorCases": log_list,
+    }
+    with open(config.report_path, 'w', encoding='utf-8') as json_file:
+        json.dump(report, json_file, indent=4, ensure_ascii=False)
 
 def eval_exec_match(db, p_str, g_str, pred, gold):
     """
@@ -625,7 +662,7 @@ def eval_exec_match(db, p_str, g_str, pred, gold):
         columns_tuple = cursor.description
         p_fields = [field_tuple[0] for field_tuple in columns_tuple]
         for index in range(0,len(p_fields)):
-            p_fields[index]=re.sub("t\d+.", "",p_fields[index].replace("`","").lower())
+            p_fields[index]=re.sub(r"t\d+\.", "",p_fields[index].replace("`","").lower())
         p_res = cursor.fetchall()
     except Exception as e:
         logging.info(e)
@@ -893,46 +930,35 @@ def build_foreign_key_map_from_json(table):
         tables[entry['db_id']] = build_foreign_key_map(entry)
     return tables
 
-def get_evaluation_result(time_cost):
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    config_file=current_directory+"/config/config.yaml"
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    db_dir=current_directory+"/data"
-    db_path=current_directory+"/data/"
-    db_file=db_path+"internet.db"
-    pred = current_directory+"/data/"+"pred_example_dusql.txt"
-    gold = current_directory+"/data/"+"gold_example_dusql.txt"
-    table= current_directory+"/data/"+"tables_dusql.json"
-    query_path=current_directory+"/data/"+"internet.txt"
-    etype="exec"
-    kmaps = build_foreign_key_map_from_json(table)
-
-    evaluate(gold, pred, db_dir, etype, kmaps,query_path,time_cost)
+def get_evaluation_result(prediction_run):
+    config = load_config()
+    etype = "exec"
+    kmaps = build_foreign_key_map_from_json(str(config.tables_path))
+    evaluate(
+        str(config.gold_path),
+        str(config.pred_sql_path),
+        str(config.data_dir),
+        etype,
+        kmaps,
+        str(config.questions_path),
+        prediction_run,
+        config,
+    )
 
 def remove_unused_file():
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    config_file=current_directory+"/config/config.yaml"
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    db_path=current_directory+"/data/"
-    db_file=db_path+"internet.db"
-    pred_file = current_directory+"/data/"+"pred_example_dusql.txt"
-
-    db_exist=os.path.exists(db_file)
-    if db_exist:
-        os.remove(db_file)
+    config = load_config()
+    if not config.cleanup_local_artifacts:
+        return
+    if config.db_path.exists():
+        os.remove(config.db_path)
         print("db_file removed!")
-    pred_exist=os.path.exists(pred_file)
-    if pred_exist:
-        os.remove(pred_file)
+    if config.pred_sql_path.exists():
+        os.remove(config.pred_sql_path)
         print("pred_file removed!")
 
 if __name__ == "__main__":
     build_table()
-    time_cost=get_pred_result()
-    get_evaluation_result(time_cost)
+    prediction_run = get_pred_result()
+    get_evaluation_result(prediction_run)
     remove_unused_file()
-
-
 
