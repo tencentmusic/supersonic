@@ -1,0 +1,45 @@
+cases:
+  - case_id: ge_001
+    skill_id: generate-entity
+    input: "Create a DO + Mapper + ServiceImpl for a new ReportSchedule entity with fields: id, tenantId, name, cronExpr, status, createdAt, updatedAt."
+    expected_output_shape:
+      - do_class
+      - mapper_interface
+      - service_interface
+      - service_impl
+    must_include:
+      - "@TableName"
+      - "@TableId"
+      - tenantId
+      - "@RequiredArgsConstructor"
+      - "BaseMapper"
+      - "ServiceImpl"
+    must_not_include:
+      - "@Autowired"
+      - raw SQL
+
+  - case_id: ge_002
+    skill_id: generate-entity
+    input: "Scaffold the data layer for a DataSyncConfig entity. Fields: id, tenantId, sourceDbId, targetDbId, syncMode, cronExpr, status, lastSyncTime."
+    expected_output_shape:
+      - do_class
+      - mapper_interface
+      - service_impl
+    must_include:
+      - "@TableName"
+      - tenantId
+      - "LambdaQueryWrapper or extends BaseMapper"
+    must_not_include:
+      - "@Autowired"
+      - invented fields
+
+  - case_id: ge_003
+    skill_id: generate-entity
+    input: "Add a Mapper for the existing s2_permission table. This is a system table excluded from multi-tenancy."
+    expected_output_shape:
+      - mapper_interface
+    must_include:
+      - "BaseMapper"
+    must_not_include:
+      - tenantId
+      - migration script

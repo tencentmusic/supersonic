@@ -89,6 +89,71 @@ alert_rule:
     - "PAUSED 是用户主动行为，DISABLED 是系统自动行为（记录 disabled_reason）"
     - "DISABLED → ENABLED 需用户主动 resume，系统不自动恢复"
 
+# ReportSchedule 状态机
+report_schedule:
+  states: [ENABLED, DISABLED, DELETED]
+  transitions:
+    - from: ENABLED
+      to: DISABLED
+      trigger: disable (用户手动禁用 或 连续失败自动禁用)
+    - from: DISABLED
+      to: ENABLED
+      trigger: enable (用户手动启用)
+    - from: [ENABLED, DISABLED]
+      to: DELETED
+      trigger: delete
+  illegal_transitions:
+    - from: DELETED
+      to: [ENABLED, DISABLED]
+      reason: "已删除的调度不可恢复"
+  notes:
+    - "enabled=false 由用户手动触发或推送渠道连续失败后系统自动触发"
+    - "quartzJobKey 在 enable/disable 时同步更新 Quartz 任务状态"
+
+# ReportExecution 状态机
+report_execution:
+  states: [PENDING, RUNNING, SUCCESS, FAILED]
+  transitions:
+    - from: PENDING
+      to: RUNNING
+      trigger: start
+    - from: RUNNING
+      to: SUCCESS
+      trigger: complete (查询执行完成，结果已写入 resultLocation)
+    - from: RUNNING
+      to: FAILED
+      trigger: error (查询超时、数仓不可用、结果超限等)
+    - from: FAILED
+      to: PENDING
+      trigger: retry (attempt < retryCount)
+  notes:
+    - "attempt 字段记录当前是第几次尝试（0-based）"
+    - "resultLocation 在 SUCCESS 后指向生成的文件路径"
+    - "sqlHash 用于同周期内相同 SQL 的结果复用"
+
+# ReportDeliveryRecord 状态机
+report_delivery_record:
+  states: [PENDING, SUCCESS, FAILED, RETRYING]
+  transitions:
+    - from: PENDING
+      to: SUCCESS
+      trigger: deliver_ok
+    - from: PENDING
+      to: FAILED
+      trigger: deliver_fail (retryCount >= maxRetries)
+    - from: PENDING
+      to: RETRYING
+      trigger: deliver_fail (retryCount < maxRetries，设置 nextRetryAt)
+    - from: RETRYING
+      to: SUCCESS
+      trigger: deliver_ok
+    - from: RETRYING
+      to: FAILED
+      trigger: deliver_fail (retryCount >= maxRetries)
+  notes:
+    - "deliveryKey 保证幂等：同一 scheduleId+executionId+configId 只创建一条记录"
+    - "ReportDeliveryConfig.consecutiveFailures 在 FAILED 时递增，达到阈值后自动禁用渠道"
+
 # AlertExecution 状态机
 alert_execution:
   states: [PENDING, RUNNING, SUCCESS, FAILED]

@@ -1,0 +1,24 @@
+cases:
+  - case_id: sd_001
+    skill_id: spec-discovery
+    input: "Add natural-language scheduled reports with tenant isolation and safe confirmation."
+    expected_output_shape:
+      - clarified_scope
+      - anti_goals
+      - spec_seed
+    must_include:
+      - tenant isolation
+      - confirmation or safety guardrail
+    must_not_include:
+      - direct implementation code
+
+  - case_id: sd_002
+    skill_id: spec-discovery
+    input: "Support alert subscriptions for dataset metrics."
+    expected_output_shape:
+      - clarified_scope
+      - anti_goals
+    must_include:
+      - abuse or misuse path
+    must_not_include:
+      - ungrounded endpoint names

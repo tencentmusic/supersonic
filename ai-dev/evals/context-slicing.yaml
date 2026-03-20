@@ -1,0 +1,26 @@
+cases:
+  - case_id: cs_001
+    skill_id: context-slicing
+    input:
+      task_type: api_generation
+      target_module: headless/server
+    expected_output_shape:
+      - required_files
+      - skipped_files
+      - load_order
+    must_include:
+      - contract or intent context
+    must_not_include:
+      - unrelated frontend files
+
+  - case_id: cs_002
+    skill_id: context-slicing
+    input:
+      task_type: review
+      target_module: chat/server
+    expected_output_shape:
+      - required_files
+      - skipped_files
+    must_include:
+      - changed code
+      - review checklist

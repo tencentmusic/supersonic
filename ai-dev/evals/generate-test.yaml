@@ -1,0 +1,19 @@
+cases:
+  - case_id: gt_001
+    skill_id: generate-test
+    input: "A service adds tenant-bound schedule creation."
+    expected_output_shape:
+      - positive_tests
+      - negative_tests
+    must_include:
+      - tenant isolation test
+    must_not_include:
+      - only happy paths
+
+  - case_id: gt_002
+    skill_id: generate-test
+    input: "A state machine adds pause and resume transitions."
+    expected_output_shape:
+      - state_transition_tests
+    must_include:
+      - illegal transition assertion

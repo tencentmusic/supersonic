@@ -1,0 +1,84 @@
+# openapi.yaml — SuperSonic API 契约（骨架）
+# 完整 API 详见各模块 Controller 定义
+
+openapi: 3.0.3
+info:
+  title: SuperSonic API
+  version: 1.0.0
+  description: SuperSonic 数据分析平台 API 契约
+
+servers:
+  - url: /api/semantic
+    description: 语义层 API（headless）
+  - url: /api/auth
+    description: 认证授权 API（auth）
+  - url: /api/chat
+    description: 对话层 API（chat）
+
+paths:
+  # --- 语义层 ---
+  /model:
+    post:
+      summary: 创建数据模型
+      tags: [Model]
+    get:
+      summary: 查询模型列表
+      tags: [Model]
+
+  /model/{id}:
+    get:
+      summary: 获取模型详情
+      tags: [Model]
+    put:
+      summary: 更新模型
+      tags: [Model]
+    delete:
+      summary: 删除模型
+      tags: [Model]
+
+  /dimension:
+    post:
+      summary: 创建维度
+      tags: [Dimension]
+    get:
+      summary: 查询维度列表
+      tags: [Dimension]
+
+  /metric:
+    post:
+      summary: 创建指标
+      tags: [Metric]
+    get:
+      summary: 查询指标列表
+      tags: [Metric]
+
+  /dataSet:
+    post:
+      summary: 创建数据集
+      tags: [DataSet]
+    get:
+      summary: 查询数据集列表
+      tags: [DataSet]
+
+  # --- 对话层 ---
+  /chat/manage/gpts:
+    post:
+      summary: 创建 Agent
+      tags: [Agent]
+    get:
+      summary: 查询 Agent 列表
+      tags: [Agent]
+
+  # --- 认证层 ---
+  /user/login:
+    post:
+      summary: 用户登录
+      tags: [Auth]
+
+  /role:
+    post:
+      summary: 创建角色
+      tags: [Role]
+    get:
+      summary: 查询角色列表
+      tags: [Role]

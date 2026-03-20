@@ -1,0 +1,152 @@
+cases:
+  - case_id: pe_001
+    description: "报表调度场景 — end-to-end pipeline for scheduled report delivery with Feishu integration"
+    pipeline:
+      - spec-discovery
+      - context-slicing
+      - generate-api
+      - generate-test
+      - code-review
+    input: "用户希望创建定时报表推送任务：支持按 cron 表达式设置发送频率（最短每小时一次），推送目标为飞书群组，任务需支持暂停/恢复，多租户隔离（A 租户不能看到 B 租户的任务），超出每天 24 次上限时拒绝创建。"
+
+    stage_checkpoints:
+      - after: spec-discovery
+        must_produce:
+          - clarified_scope
+          - anti_goals
+        checks:
+          - "anti_goals includes cross-tenant isolation: tenant A cannot read or modify tenant B schedules"
+          - "anti_goals includes no invented cron fields beyond frequency and expression"
+          - "clarified_scope confirms pause/resume as explicit lifecycle states, not soft-delete"
+          - "clarified_scope notes maximum 24 executions per day as a hard validation gate"
+
+      - after: context-slicing
+        must_produce:
+          - selected_slice
+          - rationale
+        checks:
+          - "selected_slice == Slice A (API layer)"
+          - "rationale references ReportScheduleController and ScheduleService as the primary modification surface"
+          - "context does not bleed into NL2SQL or headless semantic layer"
+
+      - after: generate-api
+        must_produce:
+          - api_change_plan
+          - controller_service_split
+          - validation_requirements
+        checks:
+          - "ReportScheduleController contains tenantId extracted from request context, not from request body"
+          - "cron expression validated against max 24 daily executions before persisting"
+          - "no business logic (status transition, delivery routing) placed inside controller"
+          - "pause and resume exposed as custom methods (:pause, :resume) per RESTful design convention"
+          - "invented fields (e.g. sendMode, targetType variants) not present unless in domain contract"
+
+      - after: generate-test
+        must_produce:
+          - test_plan
+          - test_cases
+        checks:
+          - "test covers AG-01: cross-tenant read returns 403 or empty result"
+          - "test covers AG-10: cron expression exceeding 24 daily executions is rejected with 400"
+          - "test covers pause on already-paused schedule (idempotent or explicit error)"
+          - "test covers resume from PAUSED state succeeds, resume from DELETED state is rejected"
+          - "test uses mocked TenantContext to inject tenant isolation without real DB"
+
+      - after: code-review
+        must_produce:
+          - review_findings
+          - anti_goal_coverage_report
+        checks:
+          - "no P1 findings remain open"
+          - "anti_goal_coverage_report confirms AG-01 (cross-tenant) and AG-10 (cron limit) are tested"
+          - "controller thinness verified: no direct repository calls from controller layer"
+
+    final_output_must_include:
+      - tenant isolation enforced at service layer with TenantContext
+      - cron expression validated for max 24 daily executions before save
+      - test coverage for AG-01 (cross-tenant rejection) and AG-10 (cron range limit)
+      - thin controller: business logic delegated to ScheduleService
+      - pause/resume as named lifecycle transitions, not boolean flag flips
+
+    anti_goal_coverage:
+      - AG-01: "Cross-tenant data isolation — tenant A cannot access tenant B schedules"
+      - AG-10: "Cron frequency cap — schedules exceeding 24 daily executions must be rejected at API boundary"
+
+
+  - case_id: pe_002
+    description: "告警规则场景 — end-to-end pipeline for anomaly detection alert rules with silence period"
+    pipeline:
+      - spec-discovery
+      - context-slicing
+      - generate-api
+      - generate-test
+      - code-review
+    input: "用户希望配置业务指标异常告警规则：支持设置阈值条件（高于/低于某值），告警触发后进入静默期（silenceMinutes，最短 5 分钟），连续失败 N 次才真正告警，支持启用/暂停状态切换，已删除的规则不可恢复，多租户隔离。"
+
+    stage_checkpoints:
+      - after: spec-discovery
+        must_produce:
+          - clarified_scope
+          - anti_goals
+        checks:
+          - "anti_goals includes no direct SQL execution in NL2SQL-driven alert evaluation path"
+          - "anti_goals includes silence period boundary: silenceMinutes must be >= 5"
+          - "anti_goals includes DELETED state is terminal — no resurrection allowed"
+          - "clarified_scope distinguishes consecutive-failure counter from total-failure counter"
+          - "clarified_scope confirms ENABLED and PAUSED as the only mutable states; DELETED is terminal"
+
+      - after: context-slicing
+        must_produce:
+          - selected_slice
+          - rationale
+        checks:
+          - "selected_slice == Slice B (Service logic)"
+          - "rationale explains that alert evaluation and state transition logic is service-heavy, not API-heavy"
+          - "context includes AlertRuleService and AlertEvaluationJob as key files"
+          - "context does not include NL2SQL parsing layer"
+
+      - after: generate-api
+        must_produce:
+          - api_change_plan
+          - controller_service_split
+          - validation_requirements
+        checks:
+          - "AlertRuleController exposes CRUD plus :pause and :resume custom methods"
+          - "silenceMinutes validated >= 5 at API boundary before reaching service"
+          - "tenantId injected from TenantContext, not accepted from request body"
+          - "state field in request body rejected — state transitions only via :pause/:resume/:delete endpoints"
+          - "ENABLED and PAUSED as the only states accepted on create; default is ENABLED"
+
+      - after: generate-test
+        must_produce:
+          - test_plan
+          - test_cases
+        checks:
+          - "test covers state machine: ENABLED -> PAUSED -> ENABLED (legal transitions)"
+          - "test covers illegal jump: DELETED -> ENABLED returns 400 or 409"
+          - "test covers illegal jump: PAUSED -> DELETED -> PAUSED rejected"
+          - "test covers silenceMinutes < 5 returns 400 with validation error"
+          - "test covers cross-tenant: tenant B cannot read or update tenant A alert rules"
+          - "test covers consecutive-failure threshold: N-1 failures do not trigger notification"
+
+      - after: code-review
+        must_produce:
+          - review_findings
+          - anti_goal_coverage_report
+        checks:
+          - "no P1 findings remain open"
+          - "state transitions validated at service layer, not only at controller"
+          - "silence period boundary test confirmed present in anti_goal_coverage_report"
+          - "anti_goal_coverage_report confirms DELETED-terminal anti-goal is tested"
+
+    final_output_must_include:
+      - state machine coverage for ENABLED/PAUSED/DELETED with legal and illegal transition tests
+      - silence boundary test asserting silenceMinutes >= 5 enforced at API boundary
+      - cross-tenant rejection test: tenant B receives 403 or empty result for tenant A rules
+      - consecutive-failure counter logic tested independently from notification dispatch
+      - DELETED state verified as terminal — no endpoint allows transition out of DELETED
+
+    anti_goal_coverage:
+      - AG-02: "No direct SQL in alert evaluation — metric conditions evaluated via semantic layer, not raw SQL"
+      - AG-05: "Silence period minimum — silenceMinutes must be >= 5, values below rejected at API boundary"
+      - AG-07: "DELETED state is terminal — no resurrection of deleted alert rules permitted"

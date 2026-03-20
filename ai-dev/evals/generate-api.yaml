@@ -1,0 +1,22 @@
+cases:
+  - case_id: ga_001
+    skill_id: generate-api
+    input: "Create a schedule management endpoint with tenant-safe validation."
+    expected_output_shape:
+      - api_change_plan
+      - validation_requirements
+      - test_requirements
+    must_include:
+      - validation
+      - tenant or permission handling
+    must_not_include:
+      - invented fields without contract
+
+  - case_id: ga_002
+    skill_id: generate-api
+    input: "Update an existing REST API to support trigger-now on confirmation."
+    expected_output_shape:
+      - api_change_plan
+      - controller_service_split
+    must_include:
+      - side-effect handling

@@ -1,0 +1,21 @@
+cases:
+  - case_id: cr_001
+    skill_id: code-review
+    input: "Controller contains business logic and uses field injection."
+    expected_output_shape:
+      - findings
+      - severity
+    must_include:
+      - controller business logic risk
+      - field injection risk
+    must_not_include:
+      - style-only summary first
+
+  - case_id: cr_002
+    skill_id: code-review
+    input: "New feature has no tests for anti-goals."
+    expected_output_shape:
+      - findings
+      - missing_tests
+    must_include:
+      - missing anti-goal coverage

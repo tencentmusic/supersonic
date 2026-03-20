@@ -1,0 +1,50 @@
+cases:
+  - case_id: gm_001
+    skill_id: generate-migration
+    input: "Create V21 migration to add the s2_report_schedule table with columns: id BIGINT PK AUTO_INCREMENT, tenant_id VARCHAR(64), name VARCHAR(255), cron_expr VARCHAR(128), status VARCHAR(32), created_at DATETIME, updated_at DATETIME."
+    expected_output_shape:
+      - mysql_migration_file
+      - postgresql_migration_file
+    must_include:
+      - "V21"
+      - "CREATE TABLE IF NOT EXISTS"
+      - tenant_id
+      - mysql version and postgresql version both present
+    must_not_include:
+      - "ADD COLUMN IF NOT EXISTS"
+      - version below V21
+
+  - case_id: gm_002
+    skill_id: generate-migration
+    input: "Add a last_sync_time column (DATETIME, nullable) to the existing s2_data_sync_config table. Use V22."
+    expected_output_shape:
+      - mysql_migration_file
+      - postgresql_migration_file
+    must_include:
+      - "V22"
+      - last_sync_time
+      - mysql file uses ALTER TABLE without IF NOT EXISTS on ADD COLUMN
+    must_not_include:
+      - "ADD COLUMN IF NOT EXISTS" in mysql file
+      - only one dialect file
+
+  - case_id: gm_003
+    skill_id: generate-migration
+    input: "Create a migration that uses ADD COLUMN IF NOT EXISTS in MySQL."
+    expected_output_shape:
+      - rejection_or_correction
+    must_include:
+      - explanation that MySQL does not support ADD COLUMN IF NOT EXISTS
+      - alternative approach (Flyway single-execution guarantee or information_schema check)
+    must_not_include:
+      - ADD COLUMN IF NOT EXISTS in any MySQL output
+
+  - case_id: gm_004
+    skill_id: generate-migration
+    input: "Generate only the MySQL version of migration V23 for a new s2_billing_plan table."
+    expected_output_shape:
+      - rejection_or_dual_output
+    must_include:
+      - both MySQL and PostgreSQL files
+    must_not_include:
+      - only MySQL file without PostgreSQL counterpart

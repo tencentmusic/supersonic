@@ -9,6 +9,124 @@
 
 ---
 
+## 2026-03-18　NL 定时报表 Code Review + 修复　关联切片：chat/server + ReportScheduleQuery/Executor
+
+### 本次完成了什么
+Code Review 发现 15 个问题（6 P1 + 5 P2 + 4 P3），修复其中优先级 P1/P2/部分 P3：
+
+**ReportScheduleExecutor.java（P1 全修）**：
+- P1: 补 `queryConfig`（从 parseInfo 提取 QueryStructReq，拒绝 SQL 路径）
+- P3: 成功消息改中文
+- P3: `Collections.EMPTY_MAP` → `Collections.emptyMap()`
+
+**ReportScheduleQuery.java（P1 + 部分 P2）**：
+- P1: Pause/Resume/Trigger 加归属权校验（`schedule.getOwnerId().equals(currentUserId)`）
+- P1: `PENDING_CONFIRMATIONS` 键从 `Long dataSetId` → `String "userId_dataSetId"`（防跨用户覆盖）
+- P1: `buildQueryConfig` 移除 SQL 路径（防硬编码历史日期写入 cron 配置）
+- P2: `extractIntent` TRIGGER 移至最后检查（防"现在有哪些"误识别）
+- P2: `SCHEDULE_ID_PATTERN` 要求 `#` 前缀（防数字误提取）
+
+### 遗留问题（下次会话继续）
+- [ ] **PENDING_CONFIRMATIONS 集群失效**：进程内 Map，Quartz 集群多节点不共享；失效模式：节点 A 存确认，节点 B 收"确认"消息 → 优雅失败（ERROR_NO_PENDING）。低优先级，HTTP 层通常有 session 亲和性。若需修复：新建 `report_pending_confirmation` 表存储
+- [x] **双路径冲突**：调查发现 `ReportScheduleExecutor` 无 `@Component` 且从未被 `new` 实例化，是 dead class，仅常量被 `TemplateDeployedEventListener` 引用——伪问题，不需修复
+- [x] **resolveDeliveryConfigIds 静默推送所有渠道**：改为只取第一个 enabled config（默认渠道）
+- [x] **executeCreate Map 强转 NPE**：改为 `instanceof Number` 模式匹配 + 空值返回错误响应
+- [x] **handleList 只查当前 datasetId**：改为传 `null`（列出租户全部调度，TenantSqlInterceptor 自动过滤）
+
+---
+
+## 2026-03-18　快照审计 + 安全修复 bugfix　关联切片：headless/server + webapp/ReportSchedule
+
+### 本次完成了什么
+- 修复 `ReportExecutionController.buildResultPreview()` 编译错误（方法签名不匹配，返回 null）
+- 修复前端 service URL：`/api/semantic/report-executions` → `/api/v1/report-executions`
+- P1：快照接口缺跨用户授权检查 → 加 `checkDataSetViewPermission`，无权限返回 403
+- P1：空 `authResList` 被当作"全访问" → fail-closed，空列表 = 返回空预览（AG-12）
+- P2：`ExecutionSnapshot` 存的是模板 SQL 而非渲染后 SQL → 新增 `renderedSql` 字段，存 `queryResp.getSql()`
+- P2：进程内 `Semaphore` 在 Quartz 集群下无效 → 改为 DB 计数 `SELECT COUNT(*) WHERE status='RUNNING'`
+- Code Review 发现 8 个新问题（2 P1 + 6 P2），见遗留问题
+
+### 关键决策
+
+| 决策内容 | 选择方案 | 原因摘要 |
+|---------|---------|---------|
+| 空 authResList 语义 | 空 = 无权限（fail-closed） | DataSetAuthServiceImpl 对无 authGroup 用户返回空 ArrayList，不能误判为"全访问" |
+| 列级权限 admin 旁路 | `isSuperAdmin \|\| checkDataSetAdminPermission` → return null | Admin 应能看全量，不能被自己的 authGroup 限制 |
+| 集群并发限制 | DB COUNT(RUNNING) | Quartz `isClustered=true`，进程内 Semaphore 跨节点无效；DB 是共享状态的唯一可信来源 |
+| 渲染 SQL 存储 | `ExecutionSnapshotData.renderedSql` 新字段 | `ctx.queryConfig` 是模板原文，`queryResp.getSql()` 是实际执行语句，语义不同不能混用 |
+| 向后兼容构造器 | 保留 2-arg 构造器，去掉 `@AllArgsConstructor` | 已有代码大量使用 `new ExecutionSnapshotData(ctx, previewRows)`，不能破坏签名 |
+
+### AI 推理链
+
+```
+决策：进程内 Semaphore → DB COUNT
+1. 读取 application.yaml:49，确认 org.quartz.jobStore.isClustered: true
+2. ReportScheduleDispatcher 原用 ConcurrentHashMap<Long, Semaphore>，JVM 作用域
+3. 多节点：节点 A 和 B 各有独立 Semaphore(5)，同一租户可在两节点各跑 5 个 = 实际 10 个
+4. 进程内方案完全失效
+5. 选 DB COUNT：selectCount WHERE tenant_id=? AND status='RUNNING'
+   - 共享 DB 是 Quartz 集群的基础设施，天然跨节点一致
+   - Quartz Job 不在 HTTP 链路，TenantSqlInterceptor ThreadLocal 为空，需显式加 tenantId 条件
+
+决策：空 authResList = fail-closed
+1. 读取 DataSetAuthServiceImpl.queryAuthorizedResources()
+   - AuthorizedResourceResp.authResList 初始化为 new ArrayList<>()（非 null）
+   - getAuthGroupsForUser() 对无 authGroup 用户返回空 list → authResList 仍为空
+2. 原代码：authResList.isEmpty() → return null → 调用方跳过过滤 → 所有列暴露
+3. AG-12 要求快照结果预览必须经过列级权限过滤
+4. 修复：空 = Set.of() → filterColumns 将所有列移除 → 返回空预览
+5. Admin 旁路：先判断 isSuperAdmin || checkDataSetAdminPermission，是则 return null
+```
+
+### 放弃的方案
+
+| 方案描述 | 放弃原因 |
+|---------|---------|
+| 保留进程内 Semaphore + 加 DB COUNT 双重保护 | 过度工程；DB COUNT 已足够，Semaphore 徒增复杂度 |
+| 重放时重新执行 SQL 获取结果 | 违反"审计 = 当时发生了什么"原则；结果随数据变化，不是快照 |
+| authResList 为空时返回全量（宽松模式） | 直接违反 AG-12，生产会数据泄露 |
+
+### 遗留问题（下次会话继续）
+
+- [x] **AG-08 P1**：`QueryConfigParser.parseForAlert` SqlTemplateConfig → 加 `injectAlertLimit()` 子查询包裹 `LIMIT 1000`（有 LIMIT 则跳过）
+- [x] **alertKey 超长 P1**：`AlertEvaluator.toDimensionString()` 截断到 200 字符
+- [x] **parseQueryConfig 重复实现 P2**：`ReportExecutionOrchestrator.parseQueryConfig()` 改为委托 `QueryConfigParser.parse()`，移除重复逻辑和冗余 import
+- [x] **FeishuDeliveryChannel 日期时区 P2**：`LocalDate.now(ZoneId.of("Asia/Shanghai"))`
+- [x] **DeliveryContext.scheduleId 负数约定 P2**：新增 `alertRuleId` 字段，`AlertCheckDispatcher` 改用 `.alertRuleId(rule.getId())`（移除 `-rule.getId()` hack）
+- [ ] **全链路联调**：无真实执行记录，监控/审计/Runbook 无法验证
+
+### Spec 变更建议
+
+- 文件：`ai-dev/ai-spec/domain/intent.md` 内容：AG-08 补充"SqlTemplateConfig 路径必须包含 LIMIT 子查询包裹或在 createRule 时校验拒绝"
+
+---
+
+## 2026-03-18　模板报表 P0 上线收口 SPEC Discovery　关联切片：headless/server + report + monitoring
+
+### 关键决策
+1. 联调范围收窄：单模板 × MySQL × QueryStructReq/SqlTemplateConfig × 飞书 → 先跑通一条链路再扩展
+2. 审计回放 = 快照展示，不重新执行 SQL → 审计需要的是"当时发生了什么"，重新执行可能结果已变
+3. 快照结果预览必须权限过滤 → AG-12，历史数据不能绕过列级权限
+4. Prometheus tag 禁止高基数 → AG-13，防止 templateId 导致时序膨胀 OOM
+5. 调度并发租户级上限 5 → AG-14，防止单租户慢查询独占 Quartz 线程池
+6. 告警规则全部带 `for: 5m` → 防止瞬时抖动触发告警风暴（B-09）
+7. 压测一期只做功能级基准测试 → 在 CI 用 JUnit 验证行为正确性，性能级压测后置
+8. 重放 UI 放在执行历史列表页加 Drawer → 复用现有页面，不做独立审计中心
+
+### AI 推理链
+- 用户确认 Phase 1-3 代码全部在主干（29 个组件逐项验证），瓶颈不是功能缺失而是上线收口
+- 联调是所有后续工作的前提：没有执行记录 → 监控无数据、审计无快照、Runbook 无场景
+- 破坏者模式发现 6 个高严重级风险（B-01/02/04/06/08/11/12），其中 B-11/12 直接导致新增 AG-11/12
+- 快照 SQL 脱敏和结果权限过滤是审计功能的前提，不做会产生数据泄露路径
+- 实施顺序：联调(W1-2) → 监控(W2-3) → 审计回放(W3) → Runbook+压测(W3-4)，总计 4 周
+
+### 产出文件
+- `ai-dev/ai-spec/domain/intent.md` — 新增 AG-11 ~ AG-14 + 5 条敏感级别
+- `docs/details/report/P0-上线收口实施方案.md` — 5 个收口任务的完整实施方案
+- `docs/details/README.md` — 索引新增 P0 方案引用
+
+---
+
 ## 2026-03-17　告警订阅 SPEC Discovery　关联切片：headless/server + report delivery
 
 ### 关键决策

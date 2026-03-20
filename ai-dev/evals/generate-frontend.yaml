@@ -1,0 +1,61 @@
+cases:
+  - case_id: gf_001
+    skill_id: generate-frontend
+    description: Generate a list page for report schedule management
+    input: >
+      Generate a ReportSchedule list page (type: list).
+      API: GET /api/v1/reportSchedules returns ReportScheduleResp[] with fields id, name, cronExpr, status, createdAt (ISO timestamp), updatedAt (ISO timestamp).
+      Pattern reference: webapp/packages/supersonic-fe/src/pages/DatabaseConfig/index.tsx
+    expected_output_shape:
+      - tsx_component_file
+      - service_ts_file
+      - route_config_update
+    must_include:
+      - dayjs format for createdAt and updatedAt columns
+      - process.env.API_BASE_URL in service.ts
+      - typed interface for ReportScheduleResp
+      - request utility import
+      - render function for status column
+    must_not_include:
+      - raw ISO string rendering without dayjs
+      - hardcoded /api/semantic/ URL
+      - any type for API response
+      - fetch() or axios direct calls
+
+  - case_id: gf_002
+    skill_id: generate-frontend
+    description: Generate a create/edit form modal for a new resource
+    input: >
+      Generate a DataSyncConfig create/edit form modal (type: form).
+      API: POST /api/v1/dataSyncConfigs body {name, sourceDbId, targetDbId, cronExpr, config}.
+      Pattern reference: webapp/packages/supersonic-fe/src/pages/DatabaseConfig/DatabaseCreateForm.tsx
+    expected_output_shape:
+      - tsx_modal_component
+      - service_ts_file
+    must_include:
+      - typed interface for DataSyncConfigReq
+      - process.env.API_BASE_URL in service.ts
+      - request utility import
+      - forwardRef pattern if pattern reference uses it
+    must_not_include:
+      - any type
+      - fetch() direct calls
+      - new Ant Design components not present in pattern reference
+
+  - case_id: gf_003
+    skill_id: generate-frontend
+    description: Timestamp rendering constraint — must reject raw ISO strings in table columns
+    input: >
+      Generate a simple Connections list page (type: list).
+      API: GET /api/v1/connections returns ConnectionResp[] with fields id, name, createdAt, updatedAt.
+      The developer has drafted a column definition: { title: 'Created At', dataIndex: 'createdAt' }
+      with no render function.
+      Pattern reference: webapp/packages/supersonic-fe/src/pages/DatabaseConfig/index.tsx
+    expected_output_shape:
+      - tsx_component_file
+    must_include:
+      - dayjs(value).format('YYYY-MM-DD HH:mm:ss') in render function for createdAt
+      - dayjs(value).format('YYYY-MM-DD HH:mm:ss') in render function for updatedAt
+    must_not_include:
+      - column definition for createdAt or updatedAt without a render function
+      - raw dataIndex-only column for timestamp fields
