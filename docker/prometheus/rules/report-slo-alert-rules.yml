@@ -1,67 +1,65 @@
 groups:
-  - name: supersonic-template-report-slo
+  - name: report-slo
     rules:
       - alert: ReportExecutionSuccessRateLow
         expr: |
           (
-            sum(rate(supersonic_report_execution_total{result="success"}[5m]))
+            sum(rate(supersonic_report_execution_total{status="SUCCESS"}[10m]))
             /
-            clamp_min(sum(rate(supersonic_report_execution_total[5m])), 0.0001)
+            sum(rate(supersonic_report_execution_total[10m]))
           ) < 0.95
+        for: 5m
+        labels:
+          severity: warning
+          module: template_report
+        annotations:
+          summary: "报表执行成功率低于 95%"
+          description: "最近10分钟报表执行成功率低于95%，请检查调度、数据源和权限链路。"
+
+      - alert: ReportExecutionP95High
+        expr: |
+          histogram_quantile(0.95,
+            rate(supersonic_report_execution_duration_seconds_bucket[10m])
+          ) > 10
+        for: 5m
+        labels:
+          severity: warning
+          module: template_report
+        annotations:
+          summary: "报表执行 P95 时延超过 10 秒"
+          description: "执行时延持续升高，建议检查慢SQL、连接池和下游数据源负载。"
+
+      - alert: ExportTaskPendingHigh
+        expr: supersonic_report_export_pending > 10
         for: 10m
+        labels:
+          severity: warning
+          module: template_report
+        annotations:
+          summary: "导出任务积压超过 10 个（持续 10 分钟）"
+          description: "导出任务 pending 堆积超过10个，建议检查导出线程池和任务中心处理能力。"
+
+      - alert: DeliveryFailRateHigh
+        expr: |
+          (
+            sum(rate(supersonic_report_delivery_total{status="FAILED"}[30m]))
+            /
+            sum(rate(supersonic_report_delivery_total[30m]))
+          ) > 0.05
+        for: 5m
         labels:
           severity: critical
           module: template_report
         annotations:
-          summary: "模板报表执行成功率低于95%"
-          description: "最近10分钟执行成功率低于阈值，请检查调度、数据源和权限链路。"
+          summary: "推送失败率超过 5%"
+          description: "渠道推送失败率持续偏高，请检查对应渠道配置（Webhook URL、签名Secret）与网络连通性。"
 
-      - alert: ReportExecutionP95High
-        expr: |
-          histogram_quantile(
-            0.95,
-            sum(rate(supersonic_report_execution_duration_seconds_bucket[5m])) by (le)
-          ) > 10
-        for: 10m
-        labels:
-          severity: warning
-          module: template_report
-        annotations:
-          summary: "模板报表执行P95时延超过10秒"
-          description: "执行时延持续升高，建议检查慢SQL、连接池和下游数据源负载。"
-
-      - alert: ReportExportPendingBacklogHigh
-        expr: supersonic_report_export_pending > 100
-        for: 10m
-        labels:
-          severity: warning
-          module: template_report
-        annotations:
-          summary: "导出任务积压超过100"
-          description: "导出任务 pending 堆积，建议检查导出线程池和任务中心处理能力。"
-
-      - alert: ReportDeliveryFailureRateHigh
-        expr: |
-          (
-            sum(rate(supersonic_report_delivery_total{result="error"}[5m]))
-            /
-            clamp_min(sum(rate(supersonic_report_delivery_total[5m])), 0.0001)
-          ) > 0.05
-        for: 10m
-        labels:
-          severity: warning
-          module: template_report
-        annotations:
-          summary: "报表推送失败率超过5%"
-          description: "渠道推送失败率持续偏高，请检查对应渠道配置与网络连通性。"
-
-      - alert: ReportDeliveryConfigAutoDisabled
+      - alert: DeliveryConfigAutoDisabled
         expr: supersonic_report_delivery_config_disabled > 0
-        for: 10m
+        for: 1m
         labels:
-          severity: warning
+          severity: critical
           module: template_report
         annotations:
           summary: "存在被自动禁用的推送配置"
-          description: "推送配置连续失败触发自动禁用，请运维介入处理并恢复配置。"
-
+          description: "推送配置连续失败触发自动禁用，请运维介入处理：查 s2_report_delivery_config 确认禁用原因，修复根因后手动恢复。"

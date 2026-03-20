@@ -1,0 +1,326 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "SuperSonic 模板报表子系统总览面板 — 执行成功率、延迟、导出、推送关键指标",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "执行指标",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "按 status 分组的报表执行成功率折线图。低基数 tag：status ∈ {SUCCESS, FAILED, TIMEOUT, SKIPPED}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.9 },
+              { "color": "green", "value": 0.95 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "legend": { "calcs": ["lastNotNull", "min"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (status) (rate(supersonic_report_execution_total[5m])) / ignoring(status) group_left sum(rate(supersonic_report_execution_total[5m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "执行成功率（按 status 分组）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "报表执行 P95 / P99 延迟折线图",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          },
+          "unit": "s",
+          "decimals": 2
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "p95" },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 5 },
+                    { "color": "red", "value": 10 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 2,
+      "options": {
+        "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, rate(supersonic_report_execution_duration_seconds_bucket[5m]))",
+          "legendFormat": "p95",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, rate(supersonic_report_execution_duration_seconds_bucket[5m]))",
+          "legendFormat": "p99",
+          "refId": "B"
+        }
+      ],
+      "title": "执行 P95 / P99 延迟",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "id": 101,
+      "title": "导出指标",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "导出任务状态分布堆叠柱状图。低基数 tag：status ∈ {PENDING, RUNNING, SUCCESS, FAILED}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 80,
+            "stacking": { "group": "A", "mode": "normal" }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "FAILED" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "SUCCESS" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "PENDING" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "RUNNING" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "id": 3,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (status) (rate(supersonic_report_export_total[5m]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "导出任务状态分布（堆叠柱状图）",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "当前 pending 导出任务数仪表盘。阈值：10 = warning，20 = critical",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "short",
+          "min": 0,
+          "max": 50,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 20 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "id": 4,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "supersonic_report_export_pending",
+          "legendFormat": "pending tasks",
+          "refId": "A"
+        }
+      ],
+      "title": "当前 Pending 导出任务数",
+      "type": "gauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 102,
+      "title": "推送指标",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "按渠道类型分组的推送成功率折线图。低基数 tag：channel_type ∈ {EMAIL, FEISHU, DINGTALK, WECHAT_WORK, WEBHOOK}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": ["lastNotNull", "min"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (channel_type) (rate(supersonic_report_delivery_total{status=\"SUCCESS\"}[5m])) / ignoring(status) group_left sum by (channel_type) (rate(supersonic_report_delivery_total[5m]))",
+          "legendFormat": "{{channel_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "推送成功率（按 channel_type 分组）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "被自动禁用的推送配置数。大于 0 立即告警（红色）。",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": { "color": "green", "index": 0, "text": "正常" }
+              },
+              "type": "value"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
+      "id": 6,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "supersonic_report_delivery_config_disabled",
+          "legendFormat": "disabled configs",
+          "refId": "A"
+        }
+      ],
+      "title": "被自动禁用的推送配置数",
+      "type": "stat"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["supersonic", "template-report", "overview"],
+  "templating": { "list": [] },
+  "time": { "from": "now-3h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SuperSonic 模板报表总览",
+  "uid": "supersonic-report-overview",
+  "version": 1,
+  "weekStart": ""
+}

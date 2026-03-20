@@ -1,0 +1,69 @@
+# Monitoring stack: Prometheus + Grafana + Alertmanager
+# Usage: docker-compose -f docker-compose-monitoring.yml up -d
+# Expects the main application to be reachable at host.docker.internal:9080
+# or join a shared Docker network by overriding SUPERSONIC_HOST.
+#
+# For integrated use alongside the main stack:
+#   docker-compose -f docker-compose.yml -f docker-compose-monitoring.yml up -d
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: supersonic_prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules/:/etc/prometheus/rules/:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: supersonic_grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/:ro
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: supersonic_alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:
+
+networks:
+  monitoring_network:
+    driver: bridge

@@ -1,0 +1,58 @@
+global:
+  # Default SMTP/Slack/webhook settings can be overridden per receiver.
+  # resolve_timeout: how long to wait before declaring an alert resolved.
+  resolve_timeout: 5m
+
+route:
+  # Default receiver for all alerts that don't match a child route.
+  receiver: webhook-default
+
+  # Grouping settings — collapse alerts of the same name into one notification.
+  group_by: [alertname]
+  group_wait: 30s        # Wait 30s for more alerts in the same group before sending.
+  group_interval: 5m     # Wait 5m before sending notification about new alerts in the same group.
+  repeat_interval: 4h    # Re-send notification every 4h if the alert is still firing.
+
+  # Child routes: route critical alerts with a shorter repeat interval.
+  routes:
+    - match:
+        severity: critical
+      receiver: webhook-critical
+      repeat_interval: 1h
+
+receivers:
+  - name: webhook-default
+    webhook_configs:
+      - url: "http://localhost:5001/webhook"  # Replace with your Feishu/DingTalk/PagerDuty webhook URL.
+        send_resolved: true
+
+  - name: webhook-critical
+    webhook_configs:
+      - url: "http://localhost:5001/webhook"  # Replace with your critical-alert webhook URL.
+        send_resolved: true
+
+# --- Feishu example (uncomment and fill in your bot webhook) ---
+# receivers:
+#   - name: feishu-default
+#     webhook_configs:
+#       - url: "https://open.feishu.cn/open-apis/bot/v2/hook/<your-token>"
+#         send_resolved: true
+
+# --- Email example (uncomment and configure smtp settings above) ---
+# receivers:
+#   - name: email-default
+#     email_configs:
+#       - to: "oncall@example.com"
+#         from: "alertmanager@example.com"
+#         smarthost: "smtp.example.com:587"
+#         auth_username: "alertmanager@example.com"
+#         auth_password: "<smtp-password>"
+#         send_resolved: true
+
+inhibit_rules:
+  # Suppress warning-level alerts when a critical alert with the same alertname is firing.
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: [alertname]
