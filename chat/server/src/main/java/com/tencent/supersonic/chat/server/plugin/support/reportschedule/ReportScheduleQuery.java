@@ -3,24 +3,31 @@ package com.tencent.supersonic.chat.server.plugin.support.reportschedule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.chat.api.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.api.plugin.PluginQueryManager;
-import com.tencent.supersonic.chat.api.pojo.ChatContext;
+import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
-import com.tencent.supersonic.chat.api.service.ChatContextService;
 import com.tencent.supersonic.chat.server.plugin.support.PluginSemanticQuery;
+import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleConfirmationDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
+import com.tencent.supersonic.headless.server.service.ReportScheduleConfirmationService;
 import com.tencent.supersonic.headless.server.service.ReportScheduleService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
@@ -29,24 +36,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.AFTERNOON;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.CANCEL;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.CONFIRM;
-import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.CREATE;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.CRON_PATTERNS;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.DAY_OF_WEEK;
-import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.LIST_PREFIX;
-import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.LIST_SUFFIX;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.PAUSE;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.SCHEDULE_ID_PATTERN;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.STATUS;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.TIME_PATTERN;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.TRIGGER;
+import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.TRIGGER_NOW;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.CONFIRM_CANCEL;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.CONFIRM_CREATE;
+import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.CONFIRM_CREATE_WITH_TRIGGER;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.CRON_DAILY;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.CRON_HOURLY;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.CRON_MONTHLY;
@@ -57,7 +62,6 @@ import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.S
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_NO_PERMISSION;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_OPERATION_FAILED;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_SCHEDULE_NOT_FOUND;
-import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_SESSION_MISSING;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_SPECIFY_CANCEL_ID;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_SPECIFY_FREQUENCY;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.ERROR_SPECIFY_PAUSE_ID;
@@ -78,17 +82,27 @@ import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.S
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.STATUS_RUNNING;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.SUCCESS_CANCELLED;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.SUCCESS_CREATED;
+import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.SUCCESS_CREATED_WITH_TRIGGER;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.SUCCESS_PAUSED;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.SUCCESS_RESUMED;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.SUCCESS_TRIGGERED;
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleMessages.UNKNOWN_INTENT;
 
 /**
- * Plugin query implementation for report scheduling. Handles natural language requests for
- * creating, listing, canceling, and managing scheduled reports.
+ * Plugin query for natural-language report scheduling. Handles create, list, cancel, pause, resume,
+ * trigger, and status intents via a two-step confirmation flow.
+ *
+ * <p>
+ * AI-generated logic — reviewed 2026-03-20. Key invariants:
+ * <ul>
+ * <li>Intent extraction is keyword-based (no LLM) — see {@link ScheduleKeywords}.
+ * <li>CREATE always goes through pending confirmation before persistence.
+ * <li>Tenant isolation is delegated to {@code TenantSqlInterceptor} at the DB layer.
+ * </ul>
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ReportScheduleQuery extends PluginSemanticQuery {
 
     public static final String QUERY_MODE = "REPORT_SCHEDULE";
@@ -96,14 +110,19 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
     private static final SimpleDateFormat DATE_FORMATTER =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    /** Pending confirmations cache, keyed by "userId_dataSetId" to avoid cross-user collisions */
-    private static final ConcurrentHashMap<String, PendingConfirmation> PENDING_CONFIRMATIONS =
-            new ConcurrentHashMap<>();
+    private static final int DEFAULT_RETRY_COUNT = 3;
 
-    /** Confirmation expiration time: 5 minutes */
-    private static final long CONFIRMATION_EXPIRE_MS = 5 * 60 * 1000;
+    @Value("${s2.schedule.confirmation.expire-ms:300000}")
+    private long confirmationExpireMs;
 
-    public ReportScheduleQuery() {
+    private final ReportScheduleService scheduleService;
+    private final ReportScheduleConfirmationService confirmationService;
+    private final ChatManageService chatManageService;
+    private final DataSetService dataSetService;
+    private final ReportDeliveryService deliveryService;
+
+    @PostConstruct
+    public void register() {
         PluginQueryManager.register(QUERY_MODE, this);
     }
 
@@ -117,20 +136,18 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 JsonUtil.toString(properties.get(Constants.CONTEXT)), PluginParseResult.class);
 
         String queryText = pluginParseResult.getQueryText();
-        Long dataSetId = parseInfo.getDataSetId();
+        Integer chatId = pluginParseResult.getChatId();
         Long currentUserId = pluginParseResult.getUserId();
-
-        cleanupExpiredConfirmations();
 
         ScheduleIntent intent = extractIntent(queryText);
 
         ReportScheduleResp response;
         try {
             response = switch (intent) {
-                case CONFIRM -> handleConfirm(dataSetId, currentUserId);
-                case CREATE -> handleCreate(queryText, dataSetId, pluginParseResult, currentUserId);
+                case CONFIRM -> handleConfirm(chatId, currentUserId);
+                case CREATE -> handleCreate(queryText, chatId, pluginParseResult, currentUserId);
                 case LIST -> handleList();
-                case CANCEL -> handleCancel(queryText, dataSetId, currentUserId);
+                case CANCEL -> handleCancel(queryText, chatId, currentUserId);
                 case PAUSE -> handlePause(queryText, currentUserId);
                 case RESUME -> handleResume(queryText, currentUserId);
                 case TRIGGER -> handleTrigger(queryText, currentUserId);
@@ -149,21 +166,31 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return queryResult;
     }
 
-    private void cleanupExpiredConfirmations() {
-        PENDING_CONFIRMATIONS.entrySet().removeIf(entry -> entry.getValue().isExpired());
+    /** Returns true if there is a non-expired pending confirmation for the given user+chat. */
+    public static boolean hasPendingConfirmation(Long userId, Integer chatId) {
+        ReportScheduleConfirmationService confirmationService =
+                ContextUtils.getBean(ReportScheduleConfirmationService.class);
+        return confirmationService != null && confirmationService.hasPending(userId, chatId);
     }
 
-    private void savePendingConfirmation(Long dataSetId, ScheduleIntent intent,
-            Map<String, Object> params, Long userId) {
-        if (dataSetId == null) {
-            return;
-        }
-        String key = (userId != null ? userId : 0L) + "_" + dataSetId;
+    private void savePendingConfirmation(Integer chatId, ScheduleIntent intent,
+            Map<String, Object> params, Long userId, Long tenantId,
+            ReportSubscriptionSource source) {
         long now = System.currentTimeMillis();
-        PendingConfirmation pending =
-                PendingConfirmation.builder().dataSetId(dataSetId).intent(intent).params(params)
-                        .createdAt(now).expireAt(now + CONFIRMATION_EXPIRE_MS).build();
-        PENDING_CONFIRMATIONS.put(key, pending);
+        ReportScheduleConfirmationDO confirmation = new ReportScheduleConfirmationDO();
+        confirmation.setUserId(userId);
+        confirmation.setChatId(chatId);
+        confirmation.setActionType(intent.name());
+        confirmation.setTenantId(tenantId);
+        confirmation.setPayloadJson(JsonUtil.toString(params));
+        confirmation.setCreatedAt(new Date(now));
+        confirmation.setExpireAt(new Date(now + confirmationExpireMs));
+        if (source != null) {
+            confirmation.setSourceQueryId(source.getSourceQueryId());
+            confirmation.setSourceParseId(source.getSourceParseId());
+            confirmation.setSourceDataSetId(source.getSourceDataSetId());
+        }
+        confirmationService.createPending(confirmation);
     }
 
     private ScheduleIntent extractIntent(String queryText) {
@@ -198,18 +225,14 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             return ScheduleIntent.STATUS;
         }
 
-        // List intent (checked before TRIGGER to avoid "现在有哪些" being misclassified)
-        if (LIST_PREFIX.stream().anyMatch(text::contains)
-                && LIST_SUFFIX.stream().anyMatch(text::contains)) {
-            return ScheduleIntent.LIST;
-        }
-
-        // Create intent
-        if (CREATE.stream().anyMatch(text::contains)) {
+        if (ScheduleKeywords.preferCreate(text)) {
             return ScheduleIntent.CREATE;
         }
 
-        // Trigger intent (checked last among action intents — keywords like "现在/立即" are common)
+        if (ScheduleKeywords.preferList(text)) {
+            return ScheduleIntent.LIST;
+        }
+
         if (TRIGGER.stream().anyMatch(text::contains)) {
             return ScheduleIntent.TRIGGER;
         }
@@ -217,22 +240,19 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return ScheduleIntent.UNKNOWN;
     }
 
-    private ReportScheduleResp handleConfirm(Long dataSetId, Long userId) {
-        if (dataSetId == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
-                    .message(ERROR_SESSION_MISSING).build();
-        }
-
-        String key = (userId != null ? userId : 0L) + "_" + dataSetId;
-        PendingConfirmation pending = PENDING_CONFIRMATIONS.remove(key);
-        if (pending == null || pending.isExpired()) {
+    private ReportScheduleResp handleConfirm(Integer chatId, Long userId) {
+        ReportScheduleConfirmationDO pending = confirmationService.getLatestPending(userId, chatId);
+        if (pending == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
                     .message(ERROR_NO_PENDING).build();
         }
+        confirmationService.updateStatus(pending.getId(), "CONFIRMED");
+        Map<String, Object> params = JsonUtil.toObject(pending.getPayloadJson(), Map.class);
+        ScheduleIntent intent = ScheduleIntent.valueOf(pending.getActionType());
 
-        return switch (pending.getIntent()) {
-            case CREATE -> executeCreate(pending.getParams());
-            case CANCEL -> executeCancel(pending.getParams());
+        return switch (intent) {
+            case CREATE -> executeCreate(params);
+            case CANCEL -> executeCancel(params);
             default -> ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
                     .message(ERROR_UNSUPPORTED_CONFIRM).build();
         };
@@ -254,8 +274,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         String createdBy = (String) params.get("createdBy");
         String scheduleName = (String) params.get("scheduleName");
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
-
         ReportScheduleDO schedule = new ReportScheduleDO();
         schedule.setName(scheduleName);
         schedule.setDatasetId(datasetId);
@@ -264,17 +282,28 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         schedule.setOutputFormat(outputFormat);
         schedule.setDeliveryConfigIds(deliveryConfigIds);
         schedule.setEnabled(true);
-        schedule.setRetryCount(3);
+        schedule.setRetryCount(DEFAULT_RETRY_COUNT);
         schedule.setOwnerId(ownerId);
         schedule.setTenantId(tenantId);
         schedule.setCreatedBy(createdBy);
 
         ReportScheduleDO created = scheduleService.createSchedule(schedule);
         String cronDesc = describeCron(cronExpression);
+        String channelName = resolveChannelName(deliveryConfigIds);
+
+        boolean triggerNow = Boolean.TRUE.equals(params.get("triggerNow"));
+        if (triggerNow) {
+            scheduleService.triggerNow(created.getId());
+        }
+
+        String successMsg = triggerNow
+                ? String.format(SUCCESS_CREATED_WITH_TRIGGER, created.getId(), cronDesc,
+                        channelName, created.getId())
+                : String.format(SUCCESS_CREATED, created.getId(), cronDesc, channelName,
+                        created.getId());
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(true)
-                .message(String.format(SUCCESS_CREATED, created.getId(), cronDesc, created.getId()))
-                .scheduleId(created.getId()).cronExpression(cronExpression)
+                .message(successMsg).scheduleId(created.getId()).cronExpression(cronExpression)
                 .cronDescription(cronDesc).build();
     }
 
@@ -286,7 +315,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
         Long scheduleId = ((Number) rawScheduleId).longValue();
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
         scheduleService.deleteSchedule(scheduleId);
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(true)
@@ -294,7 +322,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 .build();
     }
 
-    private ReportScheduleResp handleCreate(String queryText, Long dataSetId,
+    private ReportScheduleResp handleCreate(String queryText, Integer chatId,
             PluginParseResult pluginParseResult, Long currentUserId) {
         String cronExpression = parseCronExpression(queryText);
 
@@ -303,15 +331,15 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_FREQUENCY).needConfirm(false).build();
         }
 
-        SemanticParseInfo baseParseInfo = resolveBaseParseInfo(pluginParseResult);
-        if (baseParseInfo == null) {
+        ReportSubscriptionSource source = resolveSubscriptionSource(pluginParseResult);
+        if (source == null || source.getSourceDataSetId() == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_SPECIFY_REPORT_CONTENT).needConfirm(false).build();
         }
-        Long scheduleDatasetId = baseParseInfo.getDataSetId();
+        Long scheduleDatasetId = source.getSourceDataSetId();
 
-        String queryConfig = buildQueryConfig(baseParseInfo);
-        if (queryConfig == null) {
+        String queryConfig = source.getQueryConfigSnapshot();
+        if (StringUtils.isBlank(queryConfig)) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_UNSUPPORTED_REPORT_CONTEXT).needConfirm(false).build();
         }
@@ -324,7 +352,9 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
 
         String cronDescription = describeCron(cronExpression);
         String outputFormat = parseOutputFormat(queryText);
-        String scheduleName = buildScheduleName(pluginParseResult, cronDescription);
+        String dataSetName = getDataSetName(scheduleDatasetId);
+        String scheduleName = buildScheduleName(dataSetName, cronDescription);
+        boolean triggerNow = TRIGGER_NOW.stream().anyMatch(queryText::contains);
 
         Map<String, Object> params = new HashMap<>();
         params.put("datasetId", scheduleDatasetId);
@@ -337,20 +367,30 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         params.put("ownerId", pluginParseResult.getUserId());
         params.put("tenantId", pluginParseResult.getTenantId());
         params.put("createdBy", pluginParseResult.getUserName());
-        savePendingConfirmation(scheduleDatasetId, ScheduleIntent.CREATE, params, currentUserId);
+        params.put("triggerNow", triggerNow);
+        params.put("sourceQueryId", source.getSourceQueryId());
+        params.put("sourceParseId", source.getSourceParseId());
+        params.put("sourceDataSetId", source.getSourceDataSetId());
+        params.put("sourceSummary", source.getSummaryText());
+        savePendingConfirmation(chatId, ScheduleIntent.CREATE, params, currentUserId,
+                pluginParseResult.getTenantId(), source);
 
         ReportScheduleResp.ConfirmAction confirmAction = ReportScheduleResp.ConfirmAction.builder()
                 .action("CREATE_SCHEDULE").params(params).build();
 
+        String displayName =
+                StringUtils.isNotBlank(source.getSummaryText()) ? source.getSummaryText()
+                        : dataSetName != null ? dataSetName : String.valueOf(scheduleDatasetId);
+        String confirmMsg = triggerNow
+                ? String.format(CONFIRM_CREATE_WITH_TRIGGER, displayName, cronDescription)
+                : String.format(CONFIRM_CREATE, displayName, cronDescription);
+
         return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(true)
-                .message(String.format(CONFIRM_CREATE, scheduleDatasetId, cronDescription))
-                .needConfirm(true).confirmAction(confirmAction).cronExpression(cronExpression)
-                .cronDescription(cronDescription).build();
+                .message(confirmMsg).needConfirm(true).confirmAction(confirmAction)
+                .cronExpression(cronExpression).cronDescription(cronDescription).build();
     }
 
     private ReportScheduleResp handleList() {
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
-
         // Pass null to list ALL schedules for the current tenant (TenantSqlInterceptor filters by
         // tenant)
         Page<ReportScheduleDO> page = new Page<>(1, 20);
@@ -383,14 +423,13 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 .message(message).schedules(summaries).build();
     }
 
-    private ReportScheduleResp handleCancel(String queryText, Long dataSetId, Long currentUserId) {
+    private ReportScheduleResp handleCancel(String queryText, Integer chatId, Long currentUserId) {
         Long scheduleId = extractScheduleId(queryText);
         if (scheduleId == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(false)
                     .message(ERROR_SPECIFY_CANCEL_ID).build();
         }
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
         ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
 
         if (schedule == null) {
@@ -400,7 +439,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
 
         Map<String, Object> params = new HashMap<>();
         params.put("scheduleId", scheduleId);
-        savePendingConfirmation(dataSetId, ScheduleIntent.CANCEL, params, currentUserId);
+        savePendingConfirmation(chatId, ScheduleIntent.CANCEL, params, currentUserId,
+                schedule.getTenantId(), null);
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(true)
                 .message(String.format(CONFIRM_CANCEL, schedule.getName(), scheduleId))
@@ -417,7 +457,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_PAUSE_ID).build();
         }
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
         ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(false)
@@ -443,7 +482,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_RESUME_ID).build();
         }
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
         ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(false)
@@ -468,7 +506,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_TRIGGER_ID).build();
         }
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
         ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(false)
@@ -494,7 +531,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_STATUS_ID).build();
         }
 
-        ReportScheduleService scheduleService = ContextUtils.getBean(ReportScheduleService.class);
         Page<ReportExecutionDO> page = new Page<>(1, 10);
         Page<ReportExecutionDO> result = scheduleService.getExecutionList(page, scheduleId, null);
 
@@ -546,9 +582,10 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             return null;
         }
 
+        String normalizedQuery = queryText.replace('：', ':');
         String baseCron = null;
         for (Map.Entry<String, String> entry : CRON_PATTERNS.entrySet()) {
-            if (queryText.contains(entry.getKey())) {
+            if (normalizedQuery.contains(entry.getKey())) {
                 baseCron = entry.getValue();
                 break;
             }
@@ -559,19 +596,26 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
 
         // Try to extract specific time
-        Matcher timeMatcher = TIME_PATTERN.matcher(queryText);
+        Matcher timeMatcher = TIME_PATTERN.matcher(normalizedQuery);
         if (timeMatcher.find()) {
             String period = timeMatcher.group(1);
             int hour = Integer.parseInt(timeMatcher.group(2));
+            String minuteStr = timeMatcher.group(4); // non-null only for H:MM format
+            String halfHour = timeMatcher.group(5); // non-null only for "X点半"
 
             // Adjust hour based on period
             if (period != null && AFTERNOON.contains(period) && hour < 12) {
                 hour += 12;
             }
 
-            // Replace hour in cron expression
+            // Replace hour (and minute if specified) in cron expression
             String[] parts = baseCron.split(" ");
             parts[2] = String.valueOf(hour);
+            if (minuteStr != null) {
+                parts[1] = minuteStr;
+            } else if ("半".equals(halfHour)) {
+                parts[1] = "30";
+            }
             return String.join(" ", parts);
         }
 
@@ -619,18 +663,43 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
     }
 
-    private SemanticParseInfo resolveBaseParseInfo(PluginParseResult pluginParseResult) {
+    private ReportSubscriptionSource resolveSubscriptionSource(
+            PluginParseResult pluginParseResult) {
         if (pluginParseResult == null || pluginParseResult.getChatId() == null) {
             return null;
         }
-        ChatContextService chatContextService = ContextUtils.getBean(ChatContextService.class);
-        ChatContext chatContext =
-                chatContextService.getOrCreateContext(pluginParseResult.getChatId());
-        if (chatContext == null || chatContext.getParseInfo() == null) {
-            return null;
+        try {
+            Long currentQueryId = pluginParseResult.getQueryId();
+            for (QueryResp query : chatManageService
+                    .getChatQueries(pluginParseResult.getChatId())) {
+                if (currentQueryId != null && currentQueryId.equals(query.getQuestionId())) {
+                    continue;
+                }
+                if (query.getParseInfos() == null) {
+                    continue;
+                }
+                for (SemanticParseInfo parseInfo : query.getParseInfos()) {
+                    if (!isSchedulable(parseInfo)) {
+                        continue;
+                    }
+                    String queryConfig = buildQueryConfig(parseInfo);
+                    if (StringUtils.isBlank(queryConfig)) {
+                        continue;
+                    }
+                    String summary =
+                            StringUtils.isNotBlank(query.getQueryText()) ? query.getQueryText()
+                                    : getDataSetName(parseInfo.getDataSetId());
+                    return ReportSubscriptionSource.builder().sourceQueryId(query.getQuestionId())
+                            .sourceParseId(parseInfo.getId())
+                            .sourceDataSetId(parseInfo.getDataSetId()).sourceType("QUERY_RESULT")
+                            .queryConfigSnapshot(queryConfig).summaryText(summary).build();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to resolve report subscription source for chat {}: {}",
+                    pluginParseResult.getChatId(), e.getMessage());
         }
-        SemanticParseInfo baseParseInfo = chatContext.getParseInfo();
-        return isSchedulable(baseParseInfo) ? baseParseInfo : null;
+        return null;
     }
 
     private boolean isSchedulable(SemanticParseInfo parseInfo) {
@@ -686,7 +755,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         if (pluginParseResult == null || pluginParseResult.getTenantId() == null) {
             return null;
         }
-        ReportDeliveryService deliveryService = ContextUtils.getBean(ReportDeliveryService.class);
         List<ReportDeliveryConfigDO> configs = deliveryService.getConfigList(new Page<>(1, 100))
                 .getRecords().stream().filter(config -> Boolean.TRUE.equals(config.getEnabled()))
                 .filter(config -> pluginParseResult.getTenantId().equals(config.getTenantId()))
@@ -699,15 +767,43 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return String.valueOf(configs.get(0).getId());
     }
 
-    private String buildScheduleName(PluginParseResult pluginParseResult, String cronDescription) {
-        String base = pluginParseResult != null ? pluginParseResult.getQueryText() : null;
-        if (base == null || base.isBlank()) {
+    private String buildScheduleName(String dataSetName, String cronDescription) {
+        if (dataSetName == null || dataSetName.isBlank()) {
             return String.format(SCHEDULE_NAME_TEMPLATE, cronDescription);
         }
-        String compact = base.replaceAll("\\s+", " ").trim();
-        if (compact.length() > 32) {
-            compact = compact.substring(0, 32);
+        String name = dataSetName + " " + cronDescription;
+        if (name.length() > 40) {
+            name = name.substring(0, 40);
         }
-        return String.format("定时报表 - %s", compact);
+        return String.format(SCHEDULE_NAME_TEMPLATE, name);
+    }
+
+    private String getDataSetName(Long datasetId) {
+        if (datasetId == null) {
+            return null;
+        }
+        try {
+            DataSetResp dataSet = dataSetService.getDataSet(datasetId);
+            return dataSet != null ? dataSet.getName() : null;
+        } catch (Exception e) {
+            log.warn("Failed to get dataset name for id {}: {}", datasetId, e.getMessage());
+            return null;
+        }
+    }
+
+    private String resolveChannelName(String deliveryConfigIds) {
+        if (deliveryConfigIds == null || deliveryConfigIds.isBlank()) {
+            return "—";
+        }
+        try {
+            long configId = Long.parseLong(deliveryConfigIds.split(",")[0].trim());
+            ReportDeliveryConfigDO config = deliveryService.getConfigById(configId);
+            return config != null && config.getName() != null ? config.getName()
+                    : deliveryConfigIds;
+        } catch (Exception e) {
+            log.warn("Failed to resolve channel name for config ids {}: {}", deliveryConfigIds,
+                    e.getMessage());
+            return deliveryConfigIds;
+        }
     }
 }

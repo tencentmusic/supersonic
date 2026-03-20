@@ -124,11 +124,6 @@ class ReportScheduleQueryTest {
         emptyPage.setRecords(List.of());
         when(deliveryService.getConfigList(any())).thenReturn(emptyPage);
 
-        DataSetResp ds = new DataSetResp();
-        ds.setId(1L);
-        ds.setName("订单");
-        when(dataSetService.getDataSet(1L)).thenReturn(ds);
-
         query.setParseInfo(buildParseInfo("每天9点发给我", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
         ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
