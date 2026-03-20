@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Tabs } from 'antd';
 import { CalendarOutlined, BellOutlined, DownloadOutlined } from '@ant-design/icons';
 import ScheduleTab from './ScheduleTab';
+import AlertRuleTab from './AlertRuleTab';
 import ExportTaskTab from './ExportTaskTab';
 
 const TaskCenterPage: React.FC = () => {
@@ -24,9 +25,7 @@ const TaskCenterPage: React.FC = () => {
           <BellOutlined /> 异常提醒
         </span>
       ),
-      children: (
-        <div style={{ padding: 24, color: '#999' }}>异常提醒功能即将推出</div>
-      ),
+      children: <AlertRuleTab />,
     },
     {
       key: 'export',
