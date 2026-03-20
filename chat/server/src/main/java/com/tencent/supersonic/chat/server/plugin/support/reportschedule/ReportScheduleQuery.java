@@ -325,23 +325,16 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
     private ReportScheduleResp handleCreate(String queryText, Integer chatId,
             PluginParseResult pluginParseResult, Long currentUserId) {
         String cronExpression = parseCronExpression(queryText);
-
         if (cronExpression == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_SPECIFY_FREQUENCY).needConfirm(false).build();
         }
 
         ReportSubscriptionSource source = resolveSubscriptionSource(pluginParseResult);
-        if (source == null || source.getSourceDataSetId() == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
-                    .message(ERROR_SPECIFY_REPORT_CONTENT).needConfirm(false).build();
-        }
-        Long scheduleDatasetId = source.getSourceDataSetId();
-
-        String queryConfig = source.getQueryConfigSnapshot();
-        if (StringUtils.isBlank(queryConfig)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
-                    .message(ERROR_UNSUPPORTED_REPORT_CONTEXT).needConfirm(false).build();
+        // Validate source before resolving delivery configs (avoid unnecessary DB call)
+        ReportScheduleResp sourceError = validateSource(source, null);
+        if (sourceError != null) {
+            return sourceError;
         }
 
         String deliveryConfigIds = resolveDeliveryConfigIds(pluginParseResult);
@@ -351,15 +344,56 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
 
         String cronDescription = describeCron(cronExpression);
-        String outputFormat = parseOutputFormat(queryText);
-        String dataSetName = getDataSetName(scheduleDatasetId);
+        String dataSetName = getDataSetName(source.getSourceDataSetId());
         String scheduleName = buildScheduleName(dataSetName, cronDescription);
         boolean triggerNow = TRIGGER_NOW.stream().anyMatch(queryText::contains);
 
+        Map<String, Object> params = buildCreateParams(source.getSourceDataSetId(), cronExpression,
+                source.getQueryConfigSnapshot(), parseOutputFormat(queryText), deliveryConfigIds,
+                scheduleName, pluginParseResult, source, triggerNow);
+
+        savePendingConfirmation(chatId, ScheduleIntent.CREATE, params, currentUserId,
+                pluginParseResult.getTenantId(), source);
+
+        String displayName = StringUtils.isNotBlank(source.getSummaryText())
+                ? source.getSummaryText()
+                : dataSetName != null ? dataSetName : String.valueOf(source.getSourceDataSetId());
+        String confirmMsg = triggerNow
+                ? String.format(CONFIRM_CREATE_WITH_TRIGGER, displayName, cronDescription)
+                : String.format(CONFIRM_CREATE, displayName, cronDescription);
+
+        return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(true)
+                .message(confirmMsg).needConfirm(true)
+                .confirmAction(ReportScheduleResp.ConfirmAction.builder().action("CREATE_SCHEDULE")
+                        .params(params).build())
+                .cronExpression(cronExpression).cronDescription(cronDescription).build();
+    }
+
+    /**
+     * Validates the subscription source. Returns an error response if validation fails, or null if
+     * all checks pass. The {@code deliveryConfigIds} param is unused (retained for extensibility).
+     */
+    private ReportScheduleResp validateSource(ReportSubscriptionSource source,
+            String deliveryConfigIds) {
+        if (source == null || source.getSourceDataSetId() == null) {
+            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+                    .message(ERROR_SPECIFY_REPORT_CONTENT).needConfirm(false).build();
+        }
+        if (StringUtils.isBlank(source.getQueryConfigSnapshot())) {
+            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+                    .message(ERROR_UNSUPPORTED_REPORT_CONTEXT).needConfirm(false).build();
+        }
+        return null;
+    }
+
+    private Map<String, Object> buildCreateParams(Long datasetId, String cronExpression,
+            String queryConfig, String outputFormat, String deliveryConfigIds, String scheduleName,
+            PluginParseResult pluginParseResult, ReportSubscriptionSource source,
+            boolean triggerNow) {
         Map<String, Object> params = new HashMap<>();
-        params.put("datasetId", scheduleDatasetId);
+        params.put("datasetId", datasetId);
         params.put("cronExpression", cronExpression);
-        params.put("queryText", queryText);
+        params.put("queryText", pluginParseResult.getQueryText());
         params.put("queryConfig", queryConfig);
         params.put("outputFormat", outputFormat);
         params.put("deliveryConfigIds", deliveryConfigIds);
@@ -372,22 +406,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         params.put("sourceParseId", source.getSourceParseId());
         params.put("sourceDataSetId", source.getSourceDataSetId());
         params.put("sourceSummary", source.getSummaryText());
-        savePendingConfirmation(chatId, ScheduleIntent.CREATE, params, currentUserId,
-                pluginParseResult.getTenantId(), source);
-
-        ReportScheduleResp.ConfirmAction confirmAction = ReportScheduleResp.ConfirmAction.builder()
-                .action("CREATE_SCHEDULE").params(params).build();
-
-        String displayName =
-                StringUtils.isNotBlank(source.getSummaryText()) ? source.getSummaryText()
-                        : dataSetName != null ? dataSetName : String.valueOf(scheduleDatasetId);
-        String confirmMsg = triggerNow
-                ? String.format(CONFIRM_CREATE_WITH_TRIGGER, displayName, cronDescription)
-                : String.format(CONFIRM_CREATE, displayName, cronDescription);
-
-        return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(true)
-                .message(confirmMsg).needConfirm(true).confirmAction(confirmAction)
-                .cronExpression(cronExpression).cronDescription(cronDescription).build();
+        return params;
     }
 
     private ReportScheduleResp handleList() {
