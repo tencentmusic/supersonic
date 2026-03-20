@@ -1,13 +1,10 @@
 package com.tencent.supersonic.chat.server.listener;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.chat.api.plugin.ChatPlugin;
 import com.tencent.supersonic.chat.api.plugin.PluginParseConfig;
 import com.tencent.supersonic.chat.api.pojo.enums.MemoryStatus;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.executor.DashboardExecutor;
-import com.tencent.supersonic.chat.server.executor.ReportScheduleExecutor;
 import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
@@ -37,7 +34,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -87,41 +83,6 @@ public class TemplateDeployedEventListener {
             createPlugins(config.getPlugins(), user);
         }
 
-        // Auto-create REPORT_SCHEDULE plugin and attach to agent (if enabled in template)
-        // Skip if plugins config already contains a REPORT_SCHEDULE type plugin
-        boolean hasSchedulePluginInConfig =
-                !CollectionUtils.isEmpty(config.getPlugins()) && config.getPlugins().stream()
-                        .anyMatch(p -> ReportScheduleExecutor.QUERY_MODE.equals(p.getType()));
-
-        if (hasSchedulePluginInConfig) {
-            log.info(
-                    "Skipping auto-create REPORT_SCHEDULE plugin: already defined in plugins config");
-        } else {
-            // Check via explicit enableReportSchedulePlugin field (preferred) or chatAppOverrides
-            // (legacy)
-            boolean enableSchedulePlugin = true; // Default enabled for backward compatibility
-            if (config.getAgent() != null) {
-                // Prefer explicit field
-                if (config.getAgent().getEnableReportSchedulePlugin() != null) {
-                    enableSchedulePlugin = config.getAgent().getEnableReportSchedulePlugin();
-                } else if (config.getAgent().getChatAppOverrides() != null) {
-                    // Fallback to legacy chatAppOverrides
-                    Boolean override = config.getAgent().getChatAppOverrides()
-                            .get(ReportScheduleExecutor.APP_KEY);
-                    if (override != null) {
-                        enableSchedulePlugin = override;
-                    }
-                }
-            }
-
-            if (enableSchedulePlugin && result.getAgentConfig() != null
-                    && result.getAgentConfig().getDataSetId() != null) {
-                Long pluginId = createSchedulePlugin(result.getAgentConfig().getDataSetId(), user);
-                if (pluginId != null && result.getAgentConfig().getAgentId() != null) {
-                    addPluginToAgent(result.getAgentConfig().getAgentId(), pluginId, user);
-                }
-            }
-        }
     }
 
     private void createAgent(SemanticDeployResult.AgentConfigResult agentConfig,
@@ -214,61 +175,6 @@ public class TemplateDeployedEventListener {
             } catch (Exception e) {
                 log.warn("Failed to auto-create Plugin '{}': {}", pc.getName(), e.getMessage());
             }
-        }
-    }
-
-    private Long createSchedulePlugin(Long dataSetId, User user) {
-        try {
-            ChatPlugin plugin = new ChatPlugin();
-            plugin.setType(ReportScheduleExecutor.QUERY_MODE);
-            plugin.setName("定时报表");
-            plugin.setPattern("定时报表|定时发送|每天发送|定期报告|schedule");
-            plugin.setDataSetList(Collections.singletonList(dataSetId));
-
-            PluginParseConfig parseConfig = PluginParseConfig.builder().name("定时报表")
-                    .description("通过自然语言创建定时报表任务，支持日报、周报、月报等")
-                    .examples(Arrays.asList("每天早上9点发送日报", "每周一发送周报", "每月1号发送月度运营报告")).build();
-            plugin.setParseModeConfig(JsonUtil.toString(parseConfig));
-
-            pluginService.createPlugin(plugin, user);
-
-            // Retrieve the newly created plugin (last in list) to get its ID
-            List<ChatPlugin> allPlugins = pluginService.getPluginList();
-            ChatPlugin created = allPlugins.get(allPlugins.size() - 1);
-            log.info("Auto-created REPORT_SCHEDULE plugin with ID: {}", created.getId());
-            return created.getId();
-        } catch (Exception e) {
-            log.warn("Failed to auto-create REPORT_SCHEDULE plugin: {}", e.getMessage());
-            return null;
-        }
-    }
-
-    private void addPluginToAgent(Integer agentId, Long pluginId, User user) {
-        try {
-            Agent agent = agentService.getAgent(agentId);
-            String toolConfig = agent.getToolConfig();
-            JSONObject toolJson = JSONObject.parseObject(toolConfig);
-            if (toolJson == null) {
-                toolJson = new JSONObject();
-            }
-            JSONArray tools = toolJson.getJSONArray("tools");
-            if (tools == null) {
-                tools = new JSONArray();
-            }
-
-            JSONObject pluginTool = new JSONObject();
-            pluginTool.put("id", String.valueOf(tools.size() + 1));
-            pluginTool.put("type", "PLUGIN");
-            pluginTool.put("plugins", Collections.singletonList(pluginId));
-            tools.add(pluginTool);
-            toolJson.put("tools", tools);
-
-            agent.setToolConfig(toolJson.toJSONString());
-            agentService.updateAgent(agent, user);
-            log.info("Added REPORT_SCHEDULE plugin {} to Agent {}", pluginId, agentId);
-        } catch (Exception e) {
-            log.warn("Failed to add REPORT_SCHEDULE plugin to Agent {}: {}", agentId,
-                    e.getMessage());
         }
     }
 

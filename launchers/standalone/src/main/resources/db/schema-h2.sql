@@ -1181,6 +1181,31 @@ CREATE INDEX IF NOT EXISTS idx_report_schedule_tenant ON s2_report_schedule(`ten
 CREATE INDEX IF NOT EXISTS idx_report_schedule_dataset ON s2_report_schedule(`dataset_id`);
 COMMENT ON TABLE s2_report_schedule IS '报表调度配置';
 
+-- 报表调度确认态表
+CREATE TABLE IF NOT EXISTS `s2_report_schedule_confirmation` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `confirm_token` VARCHAR(64) NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `chat_id` INT NOT NULL,
+    `action_type` VARCHAR(50) NOT NULL,
+    `source_query_id` BIGINT DEFAULT NULL,
+    `source_parse_id` INT DEFAULT NULL,
+    `source_data_set_id` BIGINT DEFAULT NULL,
+    `payload_json` CLOB DEFAULT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `expire_at` TIMESTAMP NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_report_schedule_confirm_token
+    ON s2_report_schedule_confirmation(`confirm_token`);
+CREATE INDEX IF NOT EXISTS idx_report_schedule_confirm_user_chat_status
+    ON s2_report_schedule_confirmation(`user_id`, `chat_id`, `status`);
+CREATE INDEX IF NOT EXISTS idx_report_schedule_confirm_expire_at
+    ON s2_report_schedule_confirmation(`expire_at`);
+COMMENT ON TABLE s2_report_schedule_confirmation IS '报表调度确认态';
+
 -- 报表执行记录表
 CREATE TABLE IF NOT EXISTS `s2_report_execution` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
