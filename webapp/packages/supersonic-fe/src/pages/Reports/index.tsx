@@ -60,10 +60,14 @@ const ReportsPage: React.FC = () => {
 
   const handleScheduleSubmit = async (values: Partial<ReportSchedule>) => {
     try {
-      await createSchedule(values);
-      message.success('定时任务创建成功');
-      setScheduleFormVisible(false);
-      setSelectedDatasetId(undefined);
+      const res: any = await createSchedule(values);
+      if (res?.code === 200) {
+        message.success('创建定时任务成功');
+        setScheduleFormVisible(false);
+        setSelectedDatasetId(undefined);
+      } else {
+        message.error(res?.msg || '创建定时任务失败');
+      }
     } catch (error) {
       message.error('创建定时任务失败');
     }
