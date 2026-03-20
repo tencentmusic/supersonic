@@ -33,6 +33,7 @@
 | [03-export-async.md](report/03-export-async.md) | 同步/异步导出分流、ExportTaskService、流式写入防 OOM | 已上线 |
 | [04-scheduler-delivery.md](report/04-scheduler-delivery.md) | Quartz 动态调度、集群防重复、失败重试、多渠道投递策略 | 已上线 |
 | [05-governance.md](report/05-governance.md) | 模板下线保护、影响分析、审计日志 | 已上线 |
+| [P0-上线收口实施方案.md](report/P0-上线收口实施方案.md) | P0 上线收口：联调、监控、审计回放、Runbook、压测 | 待实施 |
 | [backlog.md](report/backlog.md) | 待开发功能清单 | 待开发 |
 
 ---
@@ -69,6 +70,4 @@
 | `飞书机器人-导出与文件发送详细设计.md` | 内容已拆入 `feishu/03-message-handlers.md` |
 | `模板报表-详细设计索引.md` | 导航表格在本 README；各专题已拆入 `report/` |
 | `模板报表-数据同步与连接器依赖说明.md` | 内容已合并到 `platform/01-datasync-connection.md` |
-
-待处理：
-- `飞书机器人-交互命令与限流详细设计.md`（详细设计根目录）— 内容已被 `feishu/03-message-handlers.md` 和 `feishu/06-infra.md` 覆盖，可删除。
+| `飞书机器人-交互命令与限流详细设计.md` | 内容已拆入 `feishu/03-message-handlers.md` + `feishu/06-infra.md` |
