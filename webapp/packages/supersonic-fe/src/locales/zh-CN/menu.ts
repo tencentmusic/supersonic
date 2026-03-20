@@ -39,6 +39,7 @@ export default {
   'menu.tenant.usage': '用量统计',
 
   'menu.reportSchedule': '报表调度',
+  'menu.reports': '固定报表',
   'menu.deliveryConfig': '推送配置',
   'menu.datasetPermission': '数据集权限',
   'menu.feishuBot': '飞书机器人',

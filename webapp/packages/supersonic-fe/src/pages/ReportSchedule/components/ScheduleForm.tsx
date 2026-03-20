@@ -13,11 +13,12 @@ import {
 interface ScheduleFormProps {
   visible: boolean;
   record?: ReportSchedule;
+  initialDatasetId?: number;
   onCancel: () => void;
   onSubmit: (values: Partial<ReportSchedule>) => void;
 }
 
-const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, onCancel, onSubmit }) => {
+const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDatasetId, onCancel, onSubmit }) => {
   const [form] = Form.useForm();
   const isEdit = !!record?.id;
   const [deliveryConfigs, setDeliveryConfigs] = useState<DeliveryConfig[]>([]);
@@ -79,10 +80,11 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, onCancel, 
           outputFormat: 'EXCEL',
           enabled: true,
           deliveryConfigIds: [],
+          ...(initialDatasetId !== undefined ? { datasetId: initialDatasetId } : {}),
         });
       }
     }
-  }, [visible, record, form]);
+  }, [visible, record, initialDatasetId, form]);
 
   const handleOk = async () => {
     const values = await form.validateFields();

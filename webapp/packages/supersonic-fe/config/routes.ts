@@ -271,6 +271,12 @@ const ROUTES = [
     envEnableList: [ENV_KEY.SEMANTIC],
   },
   {
+    path: '/reports',
+    name: 'reports',
+    component: './Reports',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
     path: '/delivery-config',
     name: 'deliveryConfig',
     component: './DeliveryConfig',
