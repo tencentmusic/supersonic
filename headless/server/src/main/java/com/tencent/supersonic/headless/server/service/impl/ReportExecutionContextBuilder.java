@@ -30,6 +30,16 @@ public class ReportExecutionContextBuilder {
                 .outputConfig(OutputConfig.builder().format(format).async(false).build()).build();
     }
 
+    /**
+     * Builds execution context for a manual (on-demand) execution triggered by an HTTP user.
+     *
+     * <p>
+     * Design intent: uses the <em>caller's</em> identity ({@code user}) rather than
+     * {@code schedule.getOwnerId()}, so that manual executions are auditable back to the person who
+     * clicked "run now". Callers must have passed ownership check before reaching this method. This
+     * differs from {@link #buildFromSchedule}, which always uses the schedule owner because there
+     * is no HTTP user context during scheduled Quartz invocations.
+     */
     public ReportExecutionContext buildManualFromSchedule(ReportScheduleDO schedule, User user) {
         OutputFormat format;
         try {

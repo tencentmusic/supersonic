@@ -39,10 +39,7 @@ public class ReportScheduleController {
     public ReportScheduleDO createSchedule(@RequestBody ReportScheduleDO schedule,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        schedule.setCreatedBy(user.getName());
-        schedule.setOwnerId(user.getId());
-        schedule.setTenantId(user.getTenantId());
-        return reportScheduleService.createSchedule(schedule);
+        return reportScheduleService.createSchedule(schedule, user);
     }
 
     @GetMapping
@@ -51,53 +48,58 @@ public class ReportScheduleController {
             @RequestParam(required = false) Long datasetId,
             @RequestParam(required = false) Boolean enabled, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
         return reportScheduleService.getScheduleList(new Page<>(current, pageSize), datasetId,
-                enabled);
+                enabled, user);
     }
 
     @GetMapping("/{id}")
     public ReportScheduleDO getScheduleById(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        return reportScheduleService.getScheduleById(id);
+        User user = UserHolder.findUser(request, response);
+        return reportScheduleService.getScheduleById(id, user);
     }
 
     @PatchMapping("/{id}")
     public ReportScheduleDO updateSchedule(@PathVariable Long id,
             @RequestBody ReportScheduleDO schedule, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
         schedule.setId(id);
-        return reportScheduleService.updateSchedule(schedule);
+        // Strip immutable fields — these must never be overwritten by the client
+        schedule.setOwnerId(null);
+        schedule.setCreatedBy(null);
+        schedule.setTenantId(null);
+        schedule.setCreatedAt(null);
+        return reportScheduleService.updateSchedule(schedule, user);
     }
 
     @DeleteMapping("/{id}")
     public void deleteSchedule(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        reportScheduleService.deleteSchedule(id);
+        User user = UserHolder.findUser(request, response);
+        reportScheduleService.deleteSchedule(id, user);
     }
 
     @PostMapping("/{id}:pause")
     public void pauseSchedule(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        reportScheduleService.pauseSchedule(id);
+        User user = UserHolder.findUser(request, response);
+        reportScheduleService.pauseSchedule(id, user);
     }
 
     @PostMapping("/{id}:resume")
     public void resumeSchedule(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        reportScheduleService.resumeSchedule(id);
+        User user = UserHolder.findUser(request, response);
+        reportScheduleService.resumeSchedule(id, user);
     }
 
     @PostMapping("/{id}:trigger")
     public void triggerNow(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        reportScheduleService.triggerNow(id);
+        User user = UserHolder.findUser(request, response);
+        reportScheduleService.triggerNow(id, user);
     }
 
     @PostMapping("/{scheduleId}:execute")
@@ -113,25 +115,26 @@ public class ReportScheduleController {
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String status, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
         return reportScheduleService.getExecutionList(new Page<>(current, pageSize), scheduleId,
-                status);
+                status, user);
     }
 
     @GetMapping("/{scheduleId}/executions/{executionId}")
     public ReportExecutionDO getExecutionById(@PathVariable Long scheduleId,
             @PathVariable Long executionId, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        return reportScheduleService.getExecutionById(executionId);
+        User user = UserHolder.findUser(request, response);
+        return reportScheduleService.getExecutionById(scheduleId, executionId, user);
     }
 
     @GetMapping("/{scheduleId}/executions/{executionId}:download")
     public ResponseEntity<Resource> downloadResult(@PathVariable Long scheduleId,
             @PathVariable Long executionId, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        ReportExecutionDO execution = reportScheduleService.getExecutionById(executionId);
+        User user = UserHolder.findUser(request, response);
+        ReportExecutionDO execution =
+                reportScheduleService.getExecutionById(scheduleId, executionId, user);
         if (execution == null || execution.getResultLocation() == null) {
             return ResponseEntity.notFound().build();
         }

@@ -7,29 +7,29 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ReportSched
 
 public interface ReportScheduleService {
 
-    ReportScheduleDO createSchedule(ReportScheduleDO schedule);
+    ReportScheduleDO createSchedule(ReportScheduleDO schedule, User user);
 
-    ReportScheduleDO updateSchedule(ReportScheduleDO schedule);
+    ReportScheduleDO updateSchedule(ReportScheduleDO schedule, User user);
 
-    void deleteSchedule(Long id);
+    void deleteSchedule(Long id, User user);
 
-    ReportScheduleDO getScheduleById(Long id);
+    ReportScheduleDO getScheduleById(Long id, User user);
 
     Page<ReportScheduleDO> getScheduleList(Page<ReportScheduleDO> page, Long datasetId,
-            Boolean enabled);
+            Boolean enabled, User user);
 
-    void pauseSchedule(Long id);
+    void pauseSchedule(Long id, User user);
 
-    void resumeSchedule(Long id);
+    void resumeSchedule(Long id, User user);
 
-    void triggerNow(Long id);
+    void triggerNow(Long id, User user);
 
     void reschedule(Long id, String newCron);
 
     Page<ReportExecutionDO> getExecutionList(Page<ReportExecutionDO> page, Long scheduleId,
-            String status);
+            String status, User user);
 
-    ReportExecutionDO getExecutionById(Long id);
+    ReportExecutionDO getExecutionById(Long scheduleId, Long id, User user);
 
     void executeReport(Long scheduleId, User user);
 }

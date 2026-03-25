@@ -530,8 +530,10 @@ public class SemanticTemplateServiceImpl extends
             SemanticDeployment deployment = convertToDeployment(lastSuccess);
             SemanticDeployResult result = deployment.getResultDetail();
             if (result != null && result.getDataSetId() != null) {
-                Page<ReportScheduleDO> activePage = reportScheduleService
-                        .getScheduleList(new Page<>(1, 1), result.getDataSetId(), true);
+                User systemReader = User.builder().id(user.getId()).name(user.getName())
+                        .tenantId(user.getTenantId()).isAdmin(1).build();
+                Page<ReportScheduleDO> activePage = reportScheduleService.getScheduleList(
+                        new Page<>(1, 1), result.getDataSetId(), true, systemReader);
                 if (activePage.getTotal() > 0) {
                     throw new InvalidArgumentException(
                             "无法下线：该模板关联 " + activePage.getTotal() + " 个活跃调度任务，请先暂停或删除相关调度");

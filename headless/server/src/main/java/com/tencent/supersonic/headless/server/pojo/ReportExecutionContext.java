@@ -19,7 +19,6 @@ public class ReportExecutionContext {
     private final ExecutionSource source;
     private final String queryConfig;
     private final Map<String, Object> resolvedParams;
-    private final PermissionSnapshot permissionSnapshot;
     private final OutputConfig outputConfig;
     private final List<Long> deliveryConfigIds;
 }

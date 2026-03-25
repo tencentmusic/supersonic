@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.ParamValidationException;
@@ -46,6 +47,7 @@ public class ReportExecutionOrchestrator {
     private final SemanticLayerService semanticLayerService;
     private final SemanticTemplateService templateService;
     private final QueryConfigParser queryConfigParser;
+    private final UserService userService;
 
     @Autowired(required = false)
     private ReportDeliveryService deliveryService;
@@ -58,11 +60,12 @@ public class ReportExecutionOrchestrator {
 
     public ReportExecutionOrchestrator(ReportExecutionMapper executionMapper,
             SemanticLayerService semanticLayerService, SemanticTemplateService templateService,
-            QueryConfigParser queryConfigParser) {
+            QueryConfigParser queryConfigParser, UserService userService) {
         this.executionMapper = executionMapper;
         this.semanticLayerService = semanticLayerService;
         this.templateService = templateService;
         this.queryConfigParser = queryConfigParser;
+        this.userService = userService;
     }
 
     public void execute(ReportExecutionContext ctx) {
@@ -146,11 +149,19 @@ public class ReportExecutionOrchestrator {
     }
 
     private User buildUserContext(ReportExecutionContext ctx) {
-        // Build user from context for permission injection
-        User user = new User();
-        user.setId(ctx.getOperatorUserId() != null ? ctx.getOperatorUserId() : 0L);
-        user.setName(
-                ctx.getOperatorUserId() != null ? "user_" + ctx.getOperatorUserId() : "system");
+        if (ctx.getOperatorUserId() == null) {
+            throw new IllegalStateException("Schedule has no ownerId, cannot execute report");
+        }
+        User user = userService.getUserById(ctx.getOperatorUserId());
+        if (user == null) {
+            throw new IllegalStateException("Owner user not found for id=" + ctx.getOperatorUserId()
+                    + ", cannot execute report");
+        }
+        if (user.getTenantId() != null && !user.getTenantId().equals(ctx.getTenantId())) {
+            throw new IllegalStateException(
+                    "Owner tenantId=" + user.getTenantId() + " does not match schedule tenantId="
+                            + ctx.getTenantId() + " for ownerId=" + ctx.getOperatorUserId());
+        }
         user.setTenantId(ctx.getTenantId());
         return user;
     }

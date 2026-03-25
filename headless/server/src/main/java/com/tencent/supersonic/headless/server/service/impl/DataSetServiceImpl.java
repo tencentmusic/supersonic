@@ -138,8 +138,10 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     public void delete(Long id, User user) {
         // Check for active report schedules referencing this dataset
         if (reportScheduleService != null) {
+            User systemReader = User.builder().id(user.getId()).name(user.getName())
+                    .tenantId(user.getTenantId()).isAdmin(1).build();
             Page<ReportScheduleDO> activePage =
-                    reportScheduleService.getScheduleList(new Page<>(1, 1), id, true);
+                    reportScheduleService.getScheduleList(new Page<>(1, 1), id, true, systemReader);
             if (activePage.getTotal() > 0) {
                 throw new InvalidArgumentException(
                         "无法删除数据集：关联 " + activePage.getTotal() + " 个活跃调度任务，请先暂停或删除相关调度");

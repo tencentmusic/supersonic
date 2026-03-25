@@ -88,6 +88,57 @@ public class QuartzJobManager {
         }
     }
 
+    public boolean jobExists(String quartzJobKey) {
+        if (quartzJobKey == null) {
+            return false;
+        }
+        try {
+            return scheduler.checkExists(resolveJobKey(quartzJobKey));
+        } catch (SchedulerException e) {
+            log.warn("Failed to check job existence: {}", quartzJobKey, e);
+            return false;
+        }
+    }
+
+    /**
+     * Cleans up any orphaned trigger or job with the same identity, then creates a fresh job +
+     * trigger. Safe to call when the Quartz state is partially corrupted (e.g. trigger exists but
+     * job is gone, or both are missing).
+     */
+    public String recreateJob(String group, String keyPrefix, Long id,
+            Class<? extends Job> jobClass, String cronExpression, JobDataMap jobDataMap) {
+        String jobKeyName = keyPrefix + id;
+        String fullKey = group + "." + jobKeyName;
+        DistributedLock lock = lockProvider.obtain("quartz:" + fullKey);
+        if (!lock.tryLock(5, 30, TimeUnit.SECONDS)) {
+            throw new LockAcquisitionException("Failed to acquire lock for job: " + fullKey);
+        }
+        try {
+            TriggerKey triggerKey = TriggerKey.triggerKey(jobKeyName, group);
+            JobKey jobKey = JobKey.jobKey(jobKeyName, group);
+            // Remove any orphaned state before recreating
+            if (scheduler.checkExists(triggerKey)) {
+                scheduler.unscheduleJob(triggerKey);
+            }
+            if (scheduler.checkExists(jobKey)) {
+                scheduler.deleteJob(jobKey);
+            }
+            JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobKeyName, group)
+                    .usingJobData(jobDataMap).storeDurably().build();
+            CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity(jobKeyName, group)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)
+                            .withMisfireHandlingInstructionFireAndProceed())
+                    .build();
+            scheduler.scheduleJob(job, trigger);
+        } catch (SchedulerException e) {
+            log.error("Failed to recreate Quartz job group={}, key={}", group, jobKeyName, e);
+            throw new RuntimeException("Failed to recreate Quartz job: " + fullKey, e);
+        } finally {
+            lock.unlock();
+        }
+        return fullKey;
+    }
+
     public void triggerJob(String quartzJobKey) {
         JobKey jobKey = resolveJobKey(quartzJobKey);
         try {
