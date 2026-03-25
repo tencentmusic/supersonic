@@ -79,7 +79,7 @@ public class ScheduleMessageHandler implements MessageHandler {
     private void handleList(FeishuMessage msg, User user) {
         try {
             Page<ReportScheduleDO> page =
-                    reportScheduleService.getScheduleList(new Page<>(1, 20), null, null);
+                    reportScheduleService.getScheduleList(new Page<>(1, 20), null, null, user);
             Map<String, Object> card = cardRenderer.renderScheduleListCard(page.getRecords());
             messageSender.replyCard(msg.getMessageId(), card);
         } catch (Exception e) {
@@ -131,7 +131,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             schedule.setTenantId(user.getTenantId());
             schedule.setCreatedBy(user.getName());
 
-            ReportScheduleDO created = reportScheduleService.createSchedule(schedule);
+            ReportScheduleDO created = reportScheduleService.createSchedule(schedule, user);
 
             Map<String, Object> card =
                     cardRenderer.renderScheduleCreatedCard(created, describeCron(cron));
@@ -149,7 +149,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             return;
         }
         try {
-            reportScheduleService.pauseSchedule(id);
+            reportScheduleService.pauseSchedule(id, user);
             messageSender.replyText(msg.getMessageId(), "已暂停任务 #" + id);
         } catch (Exception e) {
             log.error("Failed to pause schedule id={}", id, e);
@@ -164,7 +164,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             return;
         }
         try {
-            reportScheduleService.resumeSchedule(id);
+            reportScheduleService.resumeSchedule(id, user);
             messageSender.replyText(msg.getMessageId(), "已恢复任务 #" + id);
         } catch (Exception e) {
             log.error("Failed to resume schedule id={}", id, e);
@@ -179,7 +179,7 @@ public class ScheduleMessageHandler implements MessageHandler {
             return;
         }
         try {
-            reportScheduleService.deleteSchedule(id);
+            reportScheduleService.deleteSchedule(id, user);
             messageSender.replyText(msg.getMessageId(), "已删除任务 #" + id);
         } catch (Exception e) {
             log.error("Failed to delete schedule id={}", id, e);
