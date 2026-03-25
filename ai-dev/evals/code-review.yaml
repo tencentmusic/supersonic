@@ -19,3 +19,21 @@ cases:
       - missing_tests
     must_include:
       - missing anti-goal coverage
+
+  - case_id: cr_003
+    skill_id: code-review
+    input: >
+      Frontend list page defines timestamp columns as
+      { title: '创建时间', dataIndex: 'createdAt' } and
+      { title: '更新时间', dataIndex: 'updatedAt' }
+      with no render function, directly rendering raw ISO strings.
+    expected_output_shape:
+      - findings
+      - severity
+    must_include:
+      - raw ISO timestamp rendering risk
+      - missing dayjs format for createdAt
+      - missing dayjs format for updatedAt
+      - CLAUDE.md or VIBE-CHECKLIST frontend date formatting rule
+    must_not_include:
+      - no issues found

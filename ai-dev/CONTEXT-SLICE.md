@@ -42,8 +42,9 @@
 加载：
 1. @ai-spec/domain/intent.md（Anti-Goals 全文）
 2. @VIBE-CHECKLIST.md
-3. @SCRATCHPAD.md（最近 3 条）
-4. 待 Review 的代码 + 测试文件
+3. @CLAUDE.md（仓库级编码约定，如前端时间格式、API base URL、DI/Flyway 规则）
+4. @SCRATCHPAD.md（最近 3 条）
+5. 待 Review 的代码 + 测试文件
 
 跳过：openapi.yaml、entities.md
 
