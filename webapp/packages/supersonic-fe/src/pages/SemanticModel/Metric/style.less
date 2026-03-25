@@ -9,23 +9,231 @@
   min-height: calc(-110px + 100vh);
   display: flex;
   flex-direction: column;
+  background: var(--body-background);
+}
+
+.metricOverview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 20px 0;
+}
+
+.metricOverviewCard {
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.metricOverviewLabel {
+  color: var(--text-color-third);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.metricOverviewValue {
+  margin-top: 8px;
+  color: var(--text-color);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metricOverviewHint {
+  margin-top: 8px;
+  color: var(--text-color-third);
+  font-size: 12px;
 }
 
 .metricFilterWrapper {
-  margin: 20px;
-  padding: 20px;
-  padding-bottom: 5px;
-  background: #fff;
-  border-radius: 10px;
+  margin: 16px 20px;
+  padding: 16px 20px;
+  padding-bottom: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+
+  :global {
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+
+    .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 10px;
+    }
+
+    .ant-select-single .ant-select-selector .ant-select-selection-item,
+    .ant-select-single .ant-select-selector .ant-select-selection-placeholder {
+      line-height: 38px;
+      font-size: 13px;
+    }
+
+    .ant-select-single .ant-select-arrow {
+      font-size: 12px;
+    }
+  }
+}
+
+.metricFilterForm {
+  width: 100%;
+}
+
+.metricFilterAction {
+  display: flex;
+  align-items: flex-end;
+  min-width: 120px;
+  margin-left: auto;
+}
+
+.metricFilterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 18px;
+}
+
+.metricFilterField {
+  min-width: 180px;
+}
+
+.metricFilterControl {
+  min-height: 32px;
+}
+
+.metricFilterFieldLabel {
+  margin-bottom: 10px;
+  color: var(--text-color-third);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.metricTableSection {
+  margin: 0 20px 20px;
+}
+
+.metricTableHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.metricTableActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.metricTableTitle {
+  color: var(--text-color);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.metricTableSummary {
+  padding: 0;
+  color: var(--text-color-third);
+  font-size: 12px;
+  line-height: 1.5;
+  background: transparent;
+  border-radius: 0;
 }
 
 .metricTable {
-  margin: 20px;
   :global {
     .ant-pro-card-body {
       padding: 0;
     }
+
+    .ant-table-wrapper {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: var(--card-shadow);
+    }
+
+    .ant-table-thead > tr > th {
+      color: var(--text-color-third);
+      font-weight: 600;
+      background: #f7f9fc;
+    }
+
+    .ant-pro-table-list-toolbar {
+      padding: 8px 0 12px;
+    }
+
+    .ant-pagination {
+      padding: 0 12px 12px;
+    }
   }
+}
+
+.metricCatalogCell {
+  padding: 2px 0;
+}
+
+.metricCatalogSignals {
+  margin-top: 6px;
+}
+
+.metricSignalTag {
+  margin-inline-end: 0;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.metricCatalogDescription {
+  max-width: 360px;
+  margin: 6px 0 0 !important;
+  color: var(--text-color-third);
+  font-size: 13px;
+}
+
+.metricCatalogMeta {
+  margin-top: 8px;
+}
+
+.metricMetaTag {
+  margin-inline-end: 0;
+  padding: 2px 8px;
+  color: #5f748d;
+  font-size: 11px;
+  background: rgba(18, 31, 67, 0.05);
+  border: 1px solid rgba(18, 31, 67, 0.06);
+  border-radius: 999px;
+}
+
+.metricPublishTag {
+  padding: 2px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 999px;
+}
+
+.metricHeatTag {
+  min-width: 58px;
+  margin-inline-end: 0;
+  padding: 2px 10px;
+  color: #5f748d;
+  font-size: 12px;
+  text-align: center;
+  background: rgba(18, 31, 67, 0.05);
+  border: 1px solid rgba(18, 31, 67, 0.08);
+  border-radius: 999px;
 }
 
 .table {
@@ -79,72 +287,69 @@
 }
 
 .searchBox {
-  width: 740px;
-  margin: 0 auto;
-  // margin-bottom: 12px;
-  background: #fff;
-  border-radius: 10px;
-  .searchInput {
-    width: 100%;
-    border: 1px solid rgba(35, 104, 184, 0.6);
-    border-radius: 10px;
-  }
+  flex: 1;
+  min-width: 320px;
+}
+
+.metricSearchInputInner {
+  width: 100%;
+  height: 32px;
+  padding: 0 11px;
+  border: 1px solid rgba(0, 10, 36, 0.12);
+  border-radius: 8px;
+  box-shadow: none;
+
   :global {
-    .ant-select-auto-complete {
-      width: 100%;
+    &.ant-input-affix-wrapper {
+      height: 32px;
+      padding: 0 11px;
+      border: 1px solid rgba(0, 10, 36, 0.12);
+      border-radius: 8px;
+      box-shadow: none;
     }
+
     .ant-input {
-      height: 50px;
-      padding: 0 15px;
-      color: #515a6e;
-      font-size: 14px;
-      line-height: 50px;
-      background: hsla(0, 0%, 100%, 0.2);
-      border: none;
-      border-top-left-radius: 10px;
-      border-bottom-left-radius: 10px;
-      caret-color: #296df3;
-
-      &:focus {
-        border-right-width: 0 !important;
-        box-shadow: none;
-      }
-    }
-
-    .ant-input-group-addon {
-      left: 0 !important;
+      height: 22px;
       padding: 0;
-      background: hsla(0, 0%, 100%, 0.2);
-      border: none;
-      border-top-left-radius: 0;
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
-      border-bottom-left-radius: 0;
-
-      .ant-btn {
-        width: 72px;
-        height: 50px;
-        margin: 0;
-        color: rgba(35, 104, 184, 0.6);
-        font-size: 16px;
-        background-color: transparent;
-        background-color: transparent;
-        border: none;
-        box-shadow: none !important;
-
-        &::after {
-          box-shadow: none !important;
-        }
-
-        .anticon {
-          font-size: 28px;
-
-          &:hover {
-            color: @primary-color;
-          }
-        }
-      }
+      color: #515a6e;
+      font-size: 13px;
+      line-height: 22px;
     }
+
+    .ant-input-suffix {
+      margin-inline-start: 8px;
+    }
+  }
+}
+
+.metricSearchSuffix {
+  color: rgba(95, 116, 141, 0.8);
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    color: #296df3;
+  }
+}
+
+.metricTable {
+  :global {
+    .ant-table-tbody > tr > td {
+      padding-top: 14px;
+      padding-bottom: 14px;
+      vertical-align: top;
+    }
+  }
+}
+
+@media screen and (max-width: 1440px) {
+  .metricOverview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metricTableActions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 
@@ -188,12 +393,13 @@
         margin: 10px 20px 0 20px;
         padding: 0 20px;
         background-color: rgb(255, 255, 255);
-        border-radius: 8px;
-        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
       }
       .ant-tabs-tab {
         padding: 12px 0;
-        color: #344767;
+        color: var(--text-color-third);
         font-weight: 500;
       }
     }
@@ -210,7 +416,7 @@
       padding: 24px;
       min-height: calc(100vh - 78px);
       width: calc(100vw - 350px);
-      background-color: #fafafb;
+      background-color: var(--body-background);
     }
     .metricInfoContent {
       padding: 25px;
@@ -253,8 +459,9 @@
         margin: 10px 20px 0 20px;
         padding: 0 20px;
         background-color: rgb(255, 255, 255);
-        border-radius: 8px;
-        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
       }
       .ant-tabs-tab {
         padding: 12px 0;

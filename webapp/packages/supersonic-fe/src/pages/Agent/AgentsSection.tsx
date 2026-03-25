@@ -1,10 +1,11 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Popconfirm, Switch, Table } from 'antd';
+import { Button, Popconfirm, Space, Switch, Table } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { StatusEnum } from '@/common/constants';
 import styles from './style.less';
 import { AgentType } from './type';
+
 
 type Props = {
   agents: AgentType[];
@@ -18,6 +19,7 @@ type Props = {
 
 const AgentsSection: React.FC<Props> = ({
   agents,
+  loading,
   onSelectAgent,
   onDeleteAgent,
   onSaveAgent,
@@ -125,17 +127,22 @@ const AgentsSection: React.FC<Props> = ({
     <div className={styles.agentsSection}>
       <div className={styles.content}>
         <div className={styles.searchBar}>
-          <Button
-            type="primary"
-            onClick={() => {
-              onCreatBtnClick?.();
-            }}
-          >
-            <PlusOutlined />
-            新建助理
-          </Button>
+          <div className={styles.sectionMeta}>
+            <div className={styles.sectionTitle}>助理列表</div>
+          </div>
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => {
+                onCreatBtnClick?.();
+              }}
+            >
+              <PlusOutlined />
+              新建助理
+            </Button>
+          </Space>
         </div>
-        <Table columns={columns} dataSource={showAgents} />
+        <Table columns={columns} dataSource={showAgents} loading={loading} rowKey="id" />
       </div>
     </div>
   );

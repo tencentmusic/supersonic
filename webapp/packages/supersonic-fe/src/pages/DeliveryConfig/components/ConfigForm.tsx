@@ -229,10 +229,10 @@ const ConfigForm: React.FC<ConfigFormProps> = ({ visible, record, onCancel, onSu
 
       if (record) {
         await updateConfig(record.id, payload);
-        message.success('Updated successfully');
+        message.success('更新成功');
       } else {
         await createConfig(payload);
-        message.success('Created successfully');
+        message.success('创建成功');
       }
 
       onSubmit();
@@ -241,7 +241,7 @@ const ConfigForm: React.FC<ConfigFormProps> = ({ visible, record, onCancel, onSu
         // Validation error
         return;
       }
-      message.error('Save failed');
+      message.error('保存失败');
     } finally {
       setLoading(false);
     }

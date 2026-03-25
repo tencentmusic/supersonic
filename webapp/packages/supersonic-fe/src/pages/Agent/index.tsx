@@ -1,7 +1,14 @@
-import { message } from 'antd';
+import { Card, Col, Row, Statistic, message } from 'antd';
+import {
+  RobotOutlined,
+  ToolOutlined,
+  CheckCircleOutlined,
+  PauseCircleOutlined,
+} from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import AgentsSection from './AgentsSection';
 import { uuid, jsonParse } from '@/utils/utils';
+import { StatusEnum } from '@/common/constants';
 import { MSG } from '@/common/messages';
 import { deleteAgent, getAgentList, saveAgent } from './service';
 import styles from './style.less';
@@ -79,23 +86,56 @@ const Agent = () => {
     updateData();
   };
 
+  const enabledCount = agents.filter((agent) => agent.status === StatusEnum.ENABLED).length;
+  const disabledCount = agents.filter((agent) => agent.status === StatusEnum.DISABLED).length;
+  const toolsCount = agents.reduce((count, agent) => {
+    const config = jsonParse(agent.toolConfig, {});
+    return count + (config?.tools?.length || 0);
+  }, 0);
+
   return (
     <div className={styles.agent}>
       {!showDetail ? (
-        <AgentsSection
-          agents={agents}
-          loading={loading}
-          onSelectAgent={(agent) => {
-            setCurrentAgent(agent);
-            setShowDetail(true);
-          }}
-          onDeleteAgent={onDeleteAgent}
-          onSaveAgent={onSaveAgent}
-          onCreatBtnClick={() => {
-            setCurrentAgent(undefined);
-            setShowDetail(true);
-          }}
-        />
+        <div className={styles.agentOverview}>
+          <Card className={styles.agentHeroCard}>
+            <Row gutter={16}>
+              <Col span={6}>
+                <Card className={styles.agentSummaryCard}>
+                  <Statistic title="助理总数" value={agents.length} prefix={<RobotOutlined />} />
+                </Card>
+              </Col>
+              <Col span={6}>
+                <Card className={styles.agentSummaryCard}>
+                  <Statistic title="已启用" value={enabledCount} prefix={<CheckCircleOutlined />} />
+                </Card>
+              </Col>
+              <Col span={6}>
+                <Card className={styles.agentSummaryCard}>
+                  <Statistic title="已停用" value={disabledCount} prefix={<PauseCircleOutlined />} />
+                </Card>
+              </Col>
+              <Col span={6}>
+                <Card className={styles.agentSummaryCard}>
+                  <Statistic title="已配置工具" value={toolsCount} prefix={<ToolOutlined />} />
+                </Card>
+              </Col>
+            </Row>
+          </Card>
+          <AgentsSection
+            agents={agents}
+            loading={loading}
+            onSelectAgent={(agent) => {
+              setCurrentAgent(agent);
+              setShowDetail(true);
+            }}
+            onDeleteAgent={onDeleteAgent}
+            onSaveAgent={onSaveAgent}
+            onCreatBtnClick={() => {
+              setCurrentAgent(undefined);
+              setShowDetail(true);
+            }}
+          />
+        </div>
       ) : (
         <AgentDetail
           currentAgent={currentAgent}

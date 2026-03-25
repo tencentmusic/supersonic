@@ -1,0 +1,135 @@
+.taskCenterPage {
+  padding: 24px;
+}
+
+.heroCard {
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+  box-shadow: var(--card-shadow);
+
+  :global {
+    .ant-card-body {
+      padding: 20px 24px;
+    }
+  }
+}
+
+.heroHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.heroTitle {
+  margin: 0 0 8px;
+  color: var(--text-color);
+}
+
+.heroMeta {
+  min-width: 280px;
+}
+
+.statsRow {
+  margin-top: 20px;
+}
+
+.statCard {
+  height: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  :global {
+    .ant-card-body {
+      padding: 16px 18px;
+    }
+  }
+}
+
+.statLabel {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-color-third);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValue {
+  margin-bottom: 4px;
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.statHint {
+  font-size: 13px;
+  color: var(--text-color-third);
+}
+
+.contentCard {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--card-shadow);
+
+  :global {
+    .ant-card-body {
+      padding: 12px 20px 20px;
+    }
+
+    .ant-tabs-nav {
+      margin-bottom: 16px;
+      padding-top: 4px;
+    }
+
+    .ant-tabs-tab {
+      padding: 12px 4px;
+      color: var(--text-color-third);
+      font-weight: 500;
+    }
+
+    .ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: var(--text-color);
+    }
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.tableShell {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  :global {
+    .ant-table-wrapper {
+      padding: 0;
+    }
+
+    .ant-table-thead > tr > th {
+      color: var(--text-color-third);
+      font-weight: 600;
+      background: #f7f9fc;
+    }
+  }
+}

@@ -10,6 +10,7 @@ import {
   Card,
   Table,
   Empty,
+  Typography,
 } from 'antd';
 import {
   ApiOutlined,
@@ -38,6 +39,7 @@ import type { Dayjs } from 'dayjs';
 import styles from './style.less';
 
 const { RangePicker } = DatePicker;
+const { Title } = Typography;
 
 const UsageDashboard: React.FC = () => {
   const [tenant, setTenant] = useState<Tenant | null>(null);
@@ -214,6 +216,11 @@ const UsageDashboard: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <Card className={styles.heroCard}>
+        <Title level={3} className={styles.heroTitle}>
+          租户用量概览
+        </Title>
+      </Card>
       <Row gutter={[24, 24]}>
         {/* Today's Usage Overview */}
         <Col span={24}>

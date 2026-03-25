@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip } from 'antd';
+import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
 import { PlusOutlined, PlayCircleOutlined, UnorderedListOutlined, DeleteOutlined, EditOutlined, SendOutlined, SettingOutlined } from '@ant-design/icons';
 import { history } from 'umi';
 import ScheduleForm from './components/ScheduleForm';
@@ -34,6 +34,8 @@ const ReportSchedulePage: React.FC = () => {
       const res = await getScheduleList({ current, pageSize });
       setData(res?.records || []);
       setPagination({ current, pageSize, total: res?.total || 0 });
+    } catch (error) {
+      message.error('加载调度任务失败');
     } finally {
       setLoading(false);
     }
@@ -155,7 +157,7 @@ const ReportSchedulePage: React.FC = () => {
       title: '上次执行',
       dataIndex: 'lastExecutionTime',
       width: 180,
-      render: (val: string) => val || '-',
+      render: (val: string) => val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '推送渠道',
@@ -185,25 +187,27 @@ const ReportSchedulePage: React.FC = () => {
     },
     {
       title: '操作',
-      width: 200,
+      width: 160,
       render: (_: any, record: ReportSchedule) => (
-        <Space>
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id)}>
-            执行
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<UnorderedListOutlined />}
-            onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
-          >
-            记录
-          </Button>
-          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+        <Space size="small">
+          <Tooltip title="编辑">
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          </Tooltip>
+          <Tooltip title="立即执行">
+            <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id)} />
+          </Tooltip>
+          <Tooltip title="执行记录">
+            <Button
+              type="link"
+              size="small"
+              icon={<UnorderedListOutlined />}
+              onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
+            />
+          </Tooltip>
+          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id)} okText="确认" cancelText="取消">
+            <Tooltip title="删除">
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -225,11 +229,24 @@ const ReportSchedulePage: React.FC = () => {
       </div>
       <Table
         rowKey="id"
+        size="middle"
         columns={columns}
         dataSource={data}
         loading={loading}
+        scroll={{ x: 'max-content' }}
+        locale={{
+          emptyText: (
+            <Empty description="暂无调度任务">
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                创建调度
+              </Button>
+            </Empty>
+          ),
+        }}
         pagination={{
           ...pagination,
+          showSizeChanger: true,
+          showTotal: (total) => `共 ${total} 条`,
           onChange: (page, size) => fetchData(page, size),
         }}
       />

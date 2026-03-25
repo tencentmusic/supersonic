@@ -1,7 +1,25 @@
 .container {
   padding: 24px;
-  background: #f0f2f5;
+  background: var(--body-background);
   min-height: calc(100vh - 64px);
+}
+
+.heroCard {
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+
+  :global {
+    .ant-card-body {
+      padding: 20px 24px;
+    }
+  }
+}
+
+.heroTitle {
+  margin: 0 0 8px;
+  color: var(--text-color);
 }
 
 .loading {
@@ -13,17 +31,21 @@
 
 .card {
   margin-bottom: 16px;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
 }
 
 .statCard {
   text-align: center;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: none;
 
   :global {
     .ant-statistic-title {
       font-size: 14px;
-      color: #666;
+      color: var(--text-color-third);
       margin-bottom: 8px;
     }
 
@@ -39,31 +61,31 @@
 
 .limit {
   font-size: 12px;
-  color: #999;
+  color: var(--text-color-fourth);
   font-weight: normal;
 }
 
 .percentText {
   margin-top: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--text-color-third);
   text-align: center;
 }
 
 .iconBlue {
-  color: #1890ff;
+  color: #296df3;
 }
 
 .iconPurple {
-  color: #722ed1;
+  color: #6b7280;
 }
 
 .iconGreen {
-  color: #52c41a;
+  color: #0f766e;
 }
 
 .iconOrange {
-  color: #fa8c16;
+  color: #b45309;
 }
 
 .trendUp {

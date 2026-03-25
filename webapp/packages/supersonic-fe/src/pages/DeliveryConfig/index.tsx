@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, Tag, Space, Popconfirm, message, Switch, Tooltip, Tabs, Badge } from 'antd';
+import { Button, Table, Tag, Space, Popconfirm, message, Switch, Tooltip, Tabs, Badge, Empty } from 'antd';
+import dayjs from 'dayjs';
 import {
   PlusOutlined,
   EditOutlined,
@@ -51,7 +52,7 @@ const DeliveryConfigPage: React.FC = () => {
       setData(records);
       setPagination((prev) => ({ ...prev, current: page, pageSize: size, total }));
     } catch (error) {
-      message.error('Failed to load delivery configs');
+      message.error('加载推送配置失败');
     } finally {
       setLoading(false);
     }
@@ -74,29 +75,29 @@ const DeliveryConfigPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await deleteConfig(id);
-      message.success('Deleted successfully');
+      message.success('删除成功');
       fetchData();
     } catch (error) {
-      message.error('Failed to delete');
+      message.error('删除失败');
     }
   };
 
   const handleToggleEnabled = async (record: DeliveryConfig, enabled: boolean) => {
     try {
       await updateConfig(record.id, { ...record, enabled });
-      message.success(enabled ? 'Enabled' : 'Disabled');
+      message.success(enabled ? '已启用' : '已禁用');
       fetchData();
     } catch (error) {
-      message.error('Failed to update');
+      message.error('更新失败');
     }
   };
 
   const handleTest = async (id: number) => {
     try {
       await testConfig(id);
-      message.success('Test delivery sent successfully');
+      message.success('测试推送已发送');
     } catch (error) {
-      message.error('Test delivery failed');
+      message.error('测试推送失败');
     }
   };
 
@@ -172,6 +173,8 @@ const DeliveryConfigPage: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createdAt',
       width: 160,
+      render: (createdAt?: string) =>
+        createdAt ? dayjs(createdAt).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '创建者',
@@ -255,9 +258,20 @@ const DeliveryConfigPage: React.FC = () => {
 
           <Table
             rowKey="id"
+            size="middle"
             columns={columns}
             dataSource={data}
             loading={loading}
+            scroll={{ x: 'max-content' }}
+            locale={{
+              emptyText: (
+                <Empty description="暂无推送配置">
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                    新建配置
+                  </Button>
+                </Empty>
+              ),
+            }}
             pagination={{
               ...pagination,
               showSizeChanger: true,
@@ -272,7 +286,7 @@ const DeliveryConfigPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ marginBottom: 16 }}>推送渠道管理</h2>
+      <h2 style={{ marginBottom: 16 }}>推送渠道</h2>
 
       <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
 

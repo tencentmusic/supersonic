@@ -1,11 +1,15 @@
 import { ProLayoutProps } from '@ant-design/pro-components';
+
+/** 全站品牌主色唯一来源（Less、`configProviderTheme`、Logo 等均应对齐此值） */
+export const BRAND_PRIMARY = '#296DF3';
+
 export type DefaultSetting = ProLayoutProps & {
   pwa?: boolean;
   logo?: string;
 };
 const Settings: DefaultSetting = {
   navTheme: 'light',
-  colorPrimary: '#296DF3',
+  colorPrimary: BRAND_PRIMARY,
   layout: 'top',
   contentWidth: 'Fluid',
   fixedHeader: false,

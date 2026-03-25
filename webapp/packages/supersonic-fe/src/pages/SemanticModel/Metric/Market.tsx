@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { message, Space, Popconfirm, Spin } from 'antd';
+import { message, Space, Popconfirm, Spin, Tag, Typography } from 'antd';
 import MetricAddClass from './components/MetricAddClass';
 import React, { useRef, useState, useEffect } from 'react';
 import { history, useModel } from '@umijs/max';
@@ -22,6 +22,8 @@ import styles from './style.less';
 import { ISemantic } from '../data';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import { ColumnsConfig } from '../components/TableColumnRender';
+
+const { Paragraph } = Typography;
 
 type Props = {};
 
@@ -172,6 +174,59 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
 
   const columnsConfig = ColumnsConfig();
 
+  const marketStats = [
+    {
+      label: '当前结果',
+      value: pagination.total,
+      hint: '符合当前筛选条件的指标数',
+    },
+    {
+      label: '核心指标',
+      value: dataSource.filter((item) => `${item.sensitiveLevel}` === '2').length,
+      hint: '需要重点维护与优先巡检',
+    },
+    {
+      label: '我创建的',
+      value: dataSource.filter((item) => item.createdBy === currentUser.name).length,
+      hint: '当前页由我维护的指标',
+    },
+    {
+      label: '高频引用',
+      value: dataSource.filter((item) => (item.useCnt || 0) >= 10).length,
+      hint: '引用频次较高，适合优先关注',
+    },
+  ];
+
+  const topUsedMetric = [...dataSource].sort((a, b) => (b.useCnt || 0) - (a.useCnt || 0))[0];
+  const latestUpdatedMetric = [...dataSource].sort(
+    (a, b) => dayjs(b.updatedAt).valueOf() - dayjs(a.updatedAt).valueOf(),
+  )[0];
+
+  const renderMetricCatalogInfo = (_: any, record: ISemantic.IMetricItem) => (
+    <div className={styles.metricCatalogCell}>
+      {columnsConfig.indicatorInfo.render(_, record)}
+      <Space size={[8, 8]} wrap className={styles.metricCatalogSignals}>
+        {`${record.sensitiveLevel}` === '2' ? (
+          <Tag color="error" className={styles.metricSignalTag}>
+            核心指标
+          </Tag>
+        ) : null}
+      </Space>
+      {record.description ? (
+        <Paragraph
+          className={styles.metricCatalogDescription}
+          ellipsis={{ tooltip: record.description, rows: 2 }}
+        >
+          {record.description}
+        </Paragraph>
+      ) : null}
+      <Space size={[8, 8]} wrap className={styles.metricCatalogMeta}>
+        {record.domainName ? <Tag className={styles.metricMetaTag}>{record.domainName}</Tag> : null}
+        {record.modelName ? <Tag className={styles.metricMetaTag}>{record.modelName}</Tag> : null}
+      </Space>
+    </div>
+  );
+
   const columns: ProColumns[] = [
     {
       dataIndex: 'id',
@@ -183,22 +238,9 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
     {
       dataIndex: 'name',
       title: '指标',
-      width: 280,
+      width: 420,
       fixed: 'left',
-      render: columnsConfig.indicatorInfo.render,
-    },
-    {
-      dataIndex: 'sensitiveLevel',
-      title: '敏感度',
-      valueEnum: SENSITIVE_LEVEL_ENUM,
-      render: columnsConfig.sensitiveLevel.render,
-    },
-    {
-      dataIndex: 'description',
-      title: '描述',
-      search: false,
-      width: 300,
-      render: columnsConfig.description.render,
+      render: renderMetricCatalogInfo,
     },
     {
       dataIndex: 'status',
@@ -208,13 +250,30 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
       render: columnsConfig.state.render,
     },
     {
-      dataIndex: 'createdBy',
-      title: '创建人',
+      dataIndex: 'sensitiveLevel',
+      title: '敏感度',
+      valueEnum: SENSITIVE_LEVEL_ENUM,
+      render: columnsConfig.sensitiveLevel.render,
+    },
+    {
+      dataIndex: 'useCnt',
+      title: '引用热度',
+      width: 110,
       search: false,
+      render: (_, record) => (
+        <Tag className={styles.metricHeatTag}>{record.useCnt ? `${record.useCnt} 次` : '未引用'}</Tag>
+      ),
+    },
+    {
+      dataIndex: 'createdBy',
+      title: '维护人',
+      search: false,
+      width: 120,
     },
     {
       dataIndex: 'updatedAt',
       title: '更新时间',
+      width: 180,
       search: false,
       render: (value: any) => {
         return value && value !== '-' ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
@@ -345,24 +404,18 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
 
   return (
     <>
+      <div className={styles.metricOverview}>
+        {marketStats.map((item) => (
+          <div className={styles.metricOverviewCard} key={item.label}>
+            <div className={styles.metricOverviewLabel}>{item.label}</div>
+            <div className={styles.metricOverviewValue}>{item.value}</div>
+            <div className={styles.metricOverviewHint}>{item.hint}</div>
+          </div>
+        ))}
+      </div>
       <div className={styles.metricFilterWrapper}>
         <MetricFilter
           initFilterValues={filterParams}
-          extraNode={
-            <BatchCtrlDropDownButton
-              key="ctrlBtnList"
-              downloadLoading={downloadLoading}
-              onDeleteConfirm={() => {
-                queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
-              }}
-              disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
-              extenderList={['batchAddClass']}
-              onMenuClick={onMenuClick}
-              onDownloadDateRangeChange={(searchDateRange, pickerType) => {
-                downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
-              }}
-            />
-          }
           onFiltersChange={(_, values) => {
             if (_.showType !== undefined) {
               setLoading(true);
@@ -391,37 +444,66 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
             />
           </Spin>
         ) : (
-          <ProTable
-            className={`${styles.metricTable}`}
-            actionRef={actionRef}
-            rowKey="id"
-            search={false}
-            dataSource={dataSource}
-            columns={columns}
-            pagination={pagination}
-            size="large"
-            scroll={{ x: 1500 }}
-            tableAlertRender={() => {
-              return false;
-            }}
-            sticky={{ offsetHeader: 0 }}
-            rowSelection={{
-              type: 'checkbox',
-              ...rowSelection,
-            }}
-            loading={loading}
-            onChange={(data: any) => {
-              const { current, pageSize, total } = data;
-              const pagin = {
-                current,
-                pageSize,
-                total,
-              };
-              setPagination(pagin);
-              queryMetricList({ ...pagin, ...filterParams });
-            }}
-            options={false}
-          />
+          <div className={styles.metricTableSection}>
+            <div className={styles.metricTableHeader}>
+              <div>
+                <div className={styles.metricTableTitle}>指标目录</div>
+              </div>
+              <div className={styles.metricTableActions}>
+                <div className={styles.metricTableSummary}>
+                  {topUsedMetric ? `高频指标：${topUsedMetric.name}` : '高频指标：-'}
+                  {latestUpdatedMetric
+                    ? ` · 最近更新：${dayjs(latestUpdatedMetric.updatedAt).format('MM-DD HH:mm')}`
+                    : ''}
+                  {selectedRowKeys.length ? ` · 已选择 ${selectedRowKeys.length} 项` : ''}
+                </div>
+                <BatchCtrlDropDownButton
+                  key="ctrlBtnList"
+                  downloadLoading={downloadLoading}
+                  onDeleteConfirm={() => {
+                    queryBatchUpdateStatus(selectedRowKeys, StatusEnum.DELETED);
+                  }}
+                  disabledList={hasAllPermission ? [] : ['batchStart', 'batchStop', 'batchDelete']}
+                  extenderList={['batchAddClass']}
+                  onMenuClick={onMenuClick}
+                  onDownloadDateRangeChange={(searchDateRange, pickerType) => {
+                    downloadMetricQuery(selectedRowKeys, searchDateRange, pickerType);
+                  }}
+                />
+              </div>
+            </div>
+            <ProTable
+              className={`${styles.metricTable}`}
+              actionRef={actionRef}
+              rowKey="id"
+              search={false}
+              dataSource={dataSource}
+              columns={columns}
+              pagination={pagination}
+              size="large"
+              scroll={{ x: 1400 }}
+              tableAlertRender={() => {
+                return false;
+              }}
+              sticky={{ offsetHeader: 0 }}
+              rowSelection={{
+                type: 'checkbox',
+                ...rowSelection,
+              }}
+              loading={loading}
+              onChange={(data: any) => {
+                const { current, pageSize, total } = data;
+                const pagin = {
+                  current,
+                  pageSize,
+                  total,
+                };
+                setPagination(pagin);
+                queryMetricList({ ...pagin, ...filterParams });
+              }}
+              options={false}
+            />
+          </div>
         )}
       </>
 

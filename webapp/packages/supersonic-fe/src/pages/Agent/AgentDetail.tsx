@@ -1,6 +1,4 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Switch } from 'antd';
-import { StatusEnum } from '@/common/constants';
 import styles from './style.less';
 import { AgentType } from './type';
 import AgentForm from './AgentForm';
@@ -22,22 +20,8 @@ const ToolsSection: React.FC<Props> = ({
     <div className={styles.toolsSection}>
       <div className={styles.toolsSectionTitleBar}>
         <ArrowLeftOutlined className={styles.backIcon} onClick={goBack} />
-        <div className={styles.agentTitle}>{currentAgent?.name}</div>
-        <div className={styles.toggleStatus}>
-          {currentAgent?.status === StatusEnum.DISABLED ? '已禁用' : <span className={styles.online}>已启用</span>}
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <Switch
-              size="small"
-              defaultChecked={currentAgent?.status === StatusEnum.ENABLED}
-              onChange={(value) => {
-                onSaveAgent({ ...currentAgent, status: value ? StatusEnum.ENABLED : StatusEnum.DISABLED }, true);
-              }}
-            />
-          </span>
+        <div className={styles.agentTitleBlock}>
+          <div className={styles.agentTitle}>{currentAgent?.name || '新建助理'}</div>
         </div>
       </div>
       <div className={styles.basicInfo}>

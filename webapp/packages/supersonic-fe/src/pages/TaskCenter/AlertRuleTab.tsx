@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Table, Switch, Space, Popconfirm, message, Tooltip } from 'antd';
+import { Button, Table, Switch, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
 import {
   PlusOutlined,
   PlayCircleOutlined,
@@ -22,6 +22,7 @@ import {
 import type { AlertRule } from '@/services/alertRule';
 import { getValidDataSetList } from '@/services/reportSchedule';
 import { MSG } from '@/common/messages';
+import styles from './style.less';
 
 const AlertRuleTab: React.FC = () => {
   const [data, setData] = useState<AlertRule[]>([]);
@@ -42,6 +43,8 @@ const AlertRuleTab: React.FC = () => {
       const res = await getRuleList({ current, pageSize });
       setData(res?.records || []);
       setPagination({ current, pageSize, total: res?.total || 0 });
+    } catch (error) {
+      message.error('加载告警规则失败');
     } finally {
       setLoading(false);
     }
@@ -171,37 +174,27 @@ const AlertRuleTab: React.FC = () => {
     },
     {
       title: '操作',
-      width: 220,
+      width: 160,
       render: (_: any, record: AlertRule) => (
-        <Space>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<PlayCircleOutlined />}
-            onClick={() => handleTrigger(record.id!)}
-          >
-            触发
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<UnorderedListOutlined />}
-            onClick={() =>
-              setExecutionDrawer({ visible: true, ruleId: record.id, name: record.name })
-            }
-          >
-            执行记录
-          </Button>
-          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id!)}>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+        <Space size="small">
+          <Tooltip title="编辑">
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          </Tooltip>
+          <Tooltip title="立即触发">
+            <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id!)} />
+          </Tooltip>
+          <Tooltip title="执行记录">
+            <Button
+              type="link"
+              size="small"
+              icon={<UnorderedListOutlined />}
+              onClick={() => setExecutionDrawer({ visible: true, ruleId: record.id, name: record.name })}
+            />
+          </Tooltip>
+          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id!)} okText="确认" cancelText="取消">
+            <Tooltip title="删除">
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -210,21 +203,39 @@ const AlertRuleTab: React.FC = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+      <div className={styles.sectionHeader}>
+        <div>
+          <div className={styles.sectionTitle}>异常提醒</div>
+        </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           创建规则
         </Button>
       </div>
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        pagination={{
-          ...pagination,
-          onChange: (page, size) => fetchData(page, size),
-        }}
-      />
+      <div className={styles.tableShell}>
+        <Table
+          rowKey="id"
+          size="middle"
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          scroll={{ x: 'max-content' }}
+          locale={{
+            emptyText: (
+              <Empty description="暂无告警规则">
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                  创建规则
+                </Button>
+              </Empty>
+            ),
+          }}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (page, size) => fetchData(page, size),
+          }}
+        />
+      </div>
       <AlertRuleForm
         visible={formVisible}
         record={editRecord}

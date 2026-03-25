@@ -1,38 +1,75 @@
 .agent {
-  height: calc(100vh - 56px);
+  min-height: calc(100vh - 56px);
+  background: var(--body-background);
+}
+
+.agentOverview {
+  padding: 24px;
+}
+
+.agentHeroCard {
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+
+  :global {
+    .ant-card-body {
+      padding: 16px 24px;
+    }
+  }
+}
+
+.agentSummaryCard {
+  height: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: none;
 }
 
 .agentsSection {
-  padding: 20px 40px;
-  background: #fff;
-  height: calc(100vh - 56px);
+  padding: 0;
+  background: transparent;
+  height: auto;
 
   .sectionTitle {
-    font-size: 24px;
-    font-weight: 700;
-    padding-bottom: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .sectionMeta {
+    display: flex;
+    flex-direction: column;
+    row-gap: 4px;
   }
 }
 
 .agentFormContainer {
-  width: 1000px;
+  width: 960px;
   margin: 0 auto;
 }
 
 .agentFormTitle {
   font-size: 16px;
   margin-bottom: 20px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .content {
-  // margin-top: 20px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  padding: 20px 24px;
+
   .searchBar {
     display: flex;
     align-items: center;
     column-gap: 30px;
     margin-bottom: 20px;
-    justify-content: right;
+    justify-content: space-between;
     .searchControl {
       width: 500px;
     }
@@ -126,24 +163,17 @@
   }
 }
 
-.toggleStatus {
-  display: flex;
-  align-items: center;
-  column-gap: 12px;
-  font-size: 12px;
-
-  .online {
-    color: var(--chat-blue);
-  }
-}
-
 .toolsSection {
+  padding: 24px;
   .toolsSectionTitleBar {
-    padding: 20px 30px;
+    padding: 20px 24px;
     background-color: #fff;
     display: flex;
     align-items: center;
     column-gap: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
 
     .backIcon {
       font-size: 20px;
@@ -156,10 +186,15 @@
     }
 
     .agentTitle {
+      flex: 1;
       font-size: 24px;
       font-weight: 700;
     }
   }
+}
+
+.agentTitleBlock {
+  flex: 1;
 }
 
 .paramsSection {
@@ -186,10 +221,12 @@
 }
 
 .basicInfo {
-  margin: 20px;
-  padding: 10px;
+  margin: 20px 0 0;
+  padding: 0;
   background: #fff;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
 
   .basicInfoTitle {
     display: flex;
@@ -218,10 +255,64 @@
   }
 }
 
+.agentDetailTabs {
+  :global {
+    .ant-tabs-nav {
+      margin: 0;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .ant-tabs-tab {
+      padding: 14px 0;
+      color: var(--text-color-third);
+      font-weight: 500;
+    }
+
+    .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: var(--text-color);
+    }
+
+    .ant-tabs-content-holder {
+      padding: 20px 24px 24px;
+      background: #fff;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+
+    .ant-form-item {
+      margin-bottom: 20px;
+    }
+
+    .ant-form-item-label > label {
+      color: var(--text-color-secondary);
+    }
+
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-select-selector,
+    .ant-input-textarea textarea {
+      border-radius: 10px !important;
+    }
+  }
+}
+
+.paramsSection {
+  padding: 12px 14px;
+  border: 1px dashed var(--border-color-strong);
+  border-radius: 10px;
+  background: #fbfcff;
+}
+
 .toolSection {
-  margin: 20px;
+  margin: 20px 0 0;
   background: #fff;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
 
   .toolSectionTitleBar {
     display: flex;

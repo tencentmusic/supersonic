@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import styles from './style.less';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { uuid, jsonParse } from '@/utils/utils';
+import { StatusEnum } from '@/common/constants';
 import ToolsSection from './ToolsSection';
 import globalStyles from '@/global.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
@@ -57,6 +58,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
         ...editAgent,
         enableSearch: editAgent.enableSearch !== 0,
         enableFeedback: editAgent.enableFeedback !== 0,
+        status: editAgent.status !== StatusEnum.DISABLED,
         toolConfig: { ...defaultAgentConfig, ...config },
       };
 
@@ -156,6 +158,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       examples: examples.map((example) => example.question),
       enableSearch: values.enableSearch ? 1 : 0,
       enableFeedback: values.enableFeedback ? 1 : 0,
+      status: values.status ? StatusEnum.ENABLED : StatusEnum.DISABLED,
       chatAppConfig: Object.keys(defaultChatAppConfig).reduce((mergeConfig, key) => {
         return {
           ...mergeConfig,
@@ -188,6 +191,9 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
             rules={[{ required: true, message: '请输入助理名称' }]}
           >
             <Input placeholder="请输入助理名称" />
+          </FormItem>
+          <FormItem name="status" label="启用状态" valuePropName="checked" htmlFor="">
+            <Switch checkedChildren="启用" unCheckedChildren="停用" />
           </FormItem>
           <FormItem name="enableSearch" label="开启输入联想" valuePropName="checked" htmlFor="">
             <Switch />
@@ -375,6 +381,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
       className={globalStyles.supersonicForm}
     >
       <Tabs
+        className={styles.agentDetailTabs}
         tabBarExtraContent={
           <Space>
             {activeKey !== 'memory' && activeKey !== 'permissonSetting' && (

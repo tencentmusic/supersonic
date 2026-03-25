@@ -1,22 +1,27 @@
 .projectBody {
   display: flex;
   flex-direction: row;
-  background-color: #fff;
+  background-color: var(--body-background);
   height: calc(100vh - 56px);
 
 
   .projectManger {
-    border-top: 1px solid #eee;
+    padding: 16px;
     width: 100%;
     min-height: calc(100vh - 56px);
-    background-color: #fff;
+    background-color: var(--body-background);
     display: flex;
+    gap: 16px;
     position: relative;
     .sider {
       flex: 0 0 auto;
       width: 250px;
-      border-right: 5px solid #eee;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: var(--card-shadow);
       position: relative;
+      overflow: hidden;
       transition: all 0.2s,background 0s;
       .treeContainer {
         width: 100%;
@@ -24,32 +29,32 @@
         transition: all 0.2s,background 0s;
       }
       &.siderCollapsed {
-        width: 20px;
+        width: 28px;
         & .treeContainer{
           opacity: 0;
         }
       }
       .siderCollapsedButton {
         position: absolute;
-        inset-block-start: 17px;
-        border: 1px solid #eee;
+        inset-block-start: 16px;
+        border: 1px solid var(--border-color);
         cursor: pointer;
         z-index: 101;
         width: 24px;
         height: 24px;
         text-align: center;
         border-radius: 40px;
-        inset-inline-end: -13px;
+        inset-inline-end: -12px;
         transition: transform 0.3s;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        color: rgba(0, 0, 0, 0.25);
+        color: var(--text-color-fourth);
         background-color: #ffffff;
-        box-shadow: 0 2px 8px -2px rgba(0,0,0,0.05), 0 1px 4px -1px rgba(25,15,15,0.07), 0 0 1px 0 rgba(0,0,0,0.08);
+        box-shadow: var(--card-shadow);
         &:hover {
-          color: rgba(0, 0, 0, 0.75);
+          color: var(--text-color-secondary);
         }
       }
       .domainTitle {
@@ -82,19 +87,19 @@
         }
       }
       .search {
-        width: 175px;
-        margin: 10px 0 10px 16px;
+        width: 100%;
+        margin: 0;
       }
       .projectItem {
         display: flex;
         width: 100%;
         cursor: auto;
-        line-height: 25px;
-        height: 25px;
-        color: rgb(95, 116, 141);
+        line-height: 32px;
+        min-height: 32px;
+        color: var(--text-color-secondary);
         font-weight: 500;
         .projectItemTitle {
-          font-size: 15px;
+          font-size: 14px;
           flex: 1;
           cursor: pointer;
         }
@@ -120,6 +125,11 @@
       height: calc(100vh - 56px);
       overflow: scroll;
       padding-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: var(--card-shadow);
+      position: relative;
     }
     .collapseLeftBtn {
       position: absolute;
@@ -146,8 +156,8 @@
       display: flex;
     }
     .navContainer {
-      padding: 20px;
-      padding-left: 30px;
+      padding: 18px 24px 10px;
+      border-bottom: 1px solid #f1f5f9;
     }
     // .backBtn {
     //   background-color: #f8f8f8;
@@ -171,14 +181,14 @@
           font-size: 16px;
         }
         .ant-tabs-nav-wrap {
-          padding: 0 20px;
+          padding: 0 24px;
         }
         .ant-tabs-nav {
           margin-bottom: 0;
         }
         .ant-tabs-tab {
           padding-bottom:15px;
-          color: rgb(95, 116, 141);
+          color: var(--text-color-third);
           font-weight: 500;
         }
       }
@@ -231,9 +241,36 @@
   width: 100%;
   overflow: hidden;
   .searchContainer {
-    width: 250px;
-    padding:3px 0;
-    border-bottom: 1px solid #eee;
+    width: 100%;
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+  }
+
+  :global {
+    .ant-menu {
+      border-inline-end: 0 !important;
+      background: transparent;
+      padding: 8px;
+    }
+
+    .ant-menu-item {
+      height: auto;
+      min-height: 36px;
+      line-height: 1.4;
+      margin: 2px 0;
+      border-radius: 8px;
+      padding-inline: 12px !important;
+    }
+
+    .ant-menu-item-selected {
+      background: #edf4ff;
+      box-shadow: inset 0 0 0 1px rgba(41, 109, 243, 0.08);
+    }
+
+    .ant-menu-item:hover {
+      background: #f5f8ff;
+    }
   }
 }
 
@@ -243,21 +280,46 @@
 }
 
 .classTable {
-  // padding: 0 20px;
+  padding: 0 20px 20px;
   :global {
     .ant-pro-table-search-query-filter {
       margin-bottom: 0;
     }
     .ant-pro-query-filter {
-      padding-bottom: 10px;
+      padding: 8px 0 12px;
     }
     .ant-pro-table-list-toolbar-container {
-      padding-top: 0;
+      padding: 16px 0 12px;
     }
     .ant-table-tbody > tr.ant-table-row-selected > td {
       background: none;
     }
+    .ant-table-wrapper {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .ant-table-container {
+      border-inline-start: 0 !important;
+    }
+    .ant-table-thead > tr > th {
+      color: var(--text-color-third);
+      font-weight: 600;
+      background: #f7f9fc;
+    }
   }
+}
+
+.breadcrumbBar {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .classTableSelectColumnAlignLeft {
@@ -337,30 +399,26 @@
   }
 }
 
-.breadcrumb{
-  font-size: 18px;
-  height: 48px;
-  line-height: 48px;
-  padding: 0 20px;
+.breadcrumb {
+  font-size: 14px;
+
   :global {
     .ant-breadcrumb-link {
-      height: 28px;
-      color: #709bf1;
-      cursor: pointer;
-      &:hover{
-        color: #296df3;
-      }
-    }
-    .anticon {
-      font-size: 18px;
-    }
-    li {
-      &:last-child {
-        .ant-breadcrumb-link {
-          color: #296df3;
-        }
+      color: var(--text-color-secondary);
+      transition: color 0.2s ease;
 
+      &:hover {
+        color: var(--tme-primary-color);
       }
+    }
+
+    .anticon {
+      font-size: 14px;
+    }
+
+    li:last-child .ant-breadcrumb-link {
+      color: var(--text-color);
+      font-weight: 600;
     }
   }
 }

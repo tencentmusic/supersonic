@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Table, Tag, Space, Popconfirm, message } from 'antd';
+import { Button, Table, Tag, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
 import { DownloadOutlined, StopOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {
@@ -8,6 +8,7 @@ import {
   cancelExportTask,
   ExportTask,
 } from '@/services/exportTask';
+import styles from './style.less';
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: '等待中',
@@ -118,23 +119,23 @@ const ExportTaskTab: React.FC = () => {
     },
     {
       title: '操作',
-      width: 160,
+      width: 100,
       render: (_: any, record: ExportTask) => (
-        <Space>
-          <Button
-            type="link"
-            size="small"
-            icon={<DownloadOutlined />}
-            disabled={record.status !== 'SUCCESS'}
-            onClick={() => downloadExportFile(record.id)}
-          >
-            下载
-          </Button>
+        <Space size="small">
+          <Tooltip title="下载文件">
+            <Button
+              type="link"
+              size="small"
+              icon={<DownloadOutlined />}
+              disabled={record.status !== 'SUCCESS'}
+              onClick={() => downloadExportFile(record.id)}
+            />
+          </Tooltip>
           {(record.status === 'PENDING' || record.status === 'RUNNING') && (
-            <Popconfirm title="确认取消?" onConfirm={() => handleCancel(record.id)}>
-              <Button type="link" size="small" danger icon={<StopOutlined />}>
-                取消
-              </Button>
+            <Popconfirm title="确认取消?" onConfirm={() => handleCancel(record.id)} okText="确认" cancelText="取消">
+              <Tooltip title="取消任务">
+                <Button type="link" size="small" danger icon={<StopOutlined />} />
+              </Tooltip>
             </Popconfirm>
           )}
         </Space>
@@ -143,16 +144,32 @@ const ExportTaskTab: React.FC = () => {
   ];
 
   return (
-    <Table
-      rowKey="id"
-      columns={columns}
-      dataSource={data}
-      loading={loading}
-      pagination={{
-        ...pagination,
-        onChange: (page, size) => fetchData(page, size),
-      }}
-    />
+    <div>
+      <div className={styles.sectionHeader}>
+        <div>
+          <div className={styles.sectionTitle}>导出任务</div>
+        </div>
+      </div>
+      <div className={styles.tableShell}>
+        <Table
+          rowKey="id"
+          size="middle"
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          scroll={{ x: 'max-content' }}
+          locale={{
+            emptyText: <Empty description="暂无导出任务" />,
+          }}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (page, size) => fetchData(page, size),
+          }}
+        />
+      </div>
+    </div>
   );
 };
 

@@ -3,7 +3,7 @@ import S2Icon, { ICON } from '@/components/S2Icon';
 import { Space, Spin, ConfigProvider } from 'antd';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { history, RunTimeLayoutConfig } from '@umijs/max';
-import defaultSettings from '../config/defaultSettings';
+import defaultSettings, { BRAND_PRIMARY } from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
 import { deleteUrlQuery, isMobile, getToken } from '@/utils/utils';
@@ -141,7 +141,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
         <S2Icon
           icon={ICON.iconlogobiaoshi}
           size={30}
-          color="#1672fa"
+          color={BRAND_PRIMARY}
           style={{ display: 'inline-block', marginTop: 8 }}
         />
         <div className="logo" style={{ position: 'relative', top: '-2px' }}>

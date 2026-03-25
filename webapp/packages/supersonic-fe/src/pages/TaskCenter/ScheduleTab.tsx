@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip } from 'antd';
+import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
 import {
   PlusOutlined,
   PlayCircleOutlined,
@@ -26,6 +26,7 @@ import {
 import type { ReportSchedule } from '@/services/reportSchedule';
 import { getConfigList, DeliveryConfig, DELIVERY_TYPE_MAP } from '@/services/deliveryConfig';
 import { MSG } from '@/common/messages';
+import styles from './style.less';
 
 const ScheduleTab: React.FC = () => {
   const [data, setData] = useState<ReportSchedule[]>([]);
@@ -47,6 +48,8 @@ const ScheduleTab: React.FC = () => {
       const res = await getScheduleList({ current, pageSize });
       setData(res?.records || []);
       setPagination({ current, pageSize, total: res?.total || 0 });
+    } catch (error) {
+      message.error('加载调度任务失败');
     } finally {
       setLoading(false);
     }
@@ -209,37 +212,27 @@ const ScheduleTab: React.FC = () => {
     },
     {
       title: '操作',
-      width: 200,
+      width: 160,
       render: (_: any, record: ReportSchedule) => (
-        <Space>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<PlayCircleOutlined />}
-            onClick={() => handleTrigger(record.id)}
-          >
-            执行
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<UnorderedListOutlined />}
-            onClick={() =>
-              setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })
-            }
-          >
-            记录
-          </Button>
-          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+        <Space size="small">
+          <Tooltip title="编辑">
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          </Tooltip>
+          <Tooltip title="立即执行">
+            <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id)} />
+          </Tooltip>
+          <Tooltip title="执行记录">
+            <Button
+              type="link"
+              size="small"
+              icon={<UnorderedListOutlined />}
+              onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
+            />
+          </Tooltip>
+          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id)} okText="确认" cancelText="取消">
+            <Tooltip title="删除">
+              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -248,7 +241,10 @@ const ScheduleTab: React.FC = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+      <div className={styles.sectionHeader}>
+        <div>
+          <div className={styles.sectionTitle}>定时报表</div>
+        </div>
         <Space>
           <Button
             icon={<SettingOutlined />}
@@ -261,16 +257,31 @@ const ScheduleTab: React.FC = () => {
           </Button>
         </Space>
       </div>
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        pagination={{
-          ...pagination,
-          onChange: (page, size) => fetchData(page, size),
-        }}
-      />
+      <div className={styles.tableShell}>
+        <Table
+          rowKey="id"
+          size="middle"
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          scroll={{ x: 'max-content' }}
+          locale={{
+            emptyText: (
+              <Empty description="暂无调度任务">
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                  创建调度
+                </Button>
+              </Empty>
+            ),
+          }}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (page, size) => fetchData(page, size),
+          }}
+        />
+      </div>
       <ScheduleForm
         visible={formVisible}
         record={editRecord}

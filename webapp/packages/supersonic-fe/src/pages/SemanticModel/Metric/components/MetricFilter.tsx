@@ -1,5 +1,4 @@
-import { Form, Input, Space, Row, Col } from 'antd';
-import StandardFormRow from '@/components/StandardFormRow';
+import { Form, Input, Space } from 'antd';
 import TagSelect from '@/components/TagSelect';
 import React, { ReactNode, useEffect } from 'react';
 import { SENSITIVE_LEVEL_OPTIONS } from '../../constant';
@@ -57,6 +56,7 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, extraNode, onFil
 
   return (
     <Form
+      className={styles.metricFilterForm}
       layout="inline"
       form={form}
       colon={false}
@@ -67,75 +67,53 @@ const MetricFilter: React.FC<Props> = ({ initFilterValues = {}, extraNode, onFil
         handleValuesChange(value, values);
       }}
     >
-      <StandardFormRow key="search" block>
-        <div className={styles.searchBox}>
-          <Row>
-            <Col flex="100px">
-              <span
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  position: 'relative',
-                  top: '12px',
-                }}
-              >
-                指标搜索
-              </span>
-            </Col>
-            <Col flex="auto">
-              <FormItem name="key" noStyle>
-                <div className={styles.searchInput}>
-                  <Input.Search
-                    placeholder="请输入需要查询指标的ID、指标名称、英文名称、标签"
-                    enterButton={<SearchOutlined style={{ marginTop: 5 }} />}
-                    onSearch={(value) => {
-                      onSearch(value);
-                    }}
-                  />
-                </div>
-              </FormItem>
-            </Col>
-          </Row>
+      <div className={styles.metricFilterRow}>
+        <div className={styles.metricFilterField}>
+          <div className={styles.metricFilterFieldLabel}>搜索指标</div>
+          <FormItem name="key" className={styles.metricFilterControl}>
+            <Input
+              className={styles.metricSearchInputInner}
+              placeholder="搜索指标 ID、名称、英文名、标签"
+              allowClear
+              suffix={
+                <SearchOutlined
+                  className={styles.metricSearchSuffix}
+                  onClick={() => {
+                    onSearch(form.getFieldValue('key'));
+                  }}
+                />
+              }
+              onPressEnter={(event) => {
+                onSearch((event.target as HTMLInputElement).value);
+              }}
+            />
+          </FormItem>
         </div>
-      </StandardFormRow>
-      <Row style={{ width: '100%' }}>
-        <Col flex="auto">
-          <Space size={40}>
-            {/* <StandardFormRow key="showType" title="切换为卡片" block>
-          <FormItem name="showType" valuePropName="checked">
-            <Switch size="small" />
+        <div className={styles.metricFilterField}>
+          <div className={styles.metricFilterFieldLabel}>主题域</div>
+          <FormItem name="domainIds" className={styles.metricFilterControl}>
+            <DomainTreeSelect width="100%" />
           </FormItem>
-        </StandardFormRow> */}
-            {/* <StandardFormRow key="onlyShowMe" title="仅显示我的" block>
-          <FormItem name="onlyShowMe" valuePropName="checked">
-            <Switch size="small" />
-          </FormItem>
-        </StandardFormRow> */}
-            <StandardFormRow key="domainIds" title="主题域" block>
-              <FormItem name="domainIds">
-                <DomainTreeSelect />
+        </div>
+        {filterList.map((item) => {
+          const { title, key, options } = item;
+          return (
+            <div className={styles.metricFilterField} key={key}>
+              <div className={styles.metricFilterFieldLabel}>{title}</div>
+              <FormItem name={key} className={styles.metricFilterControl}>
+                <TagSelect reverseCheckAll single>
+                  {options.map((option: any) => (
+                    <TagSelect.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </TagSelect.Option>
+                  ))}
+                </TagSelect>
               </FormItem>
-            </StandardFormRow>
-            {filterList.map((item) => {
-              const { title, key, options } = item;
-              return (
-                <StandardFormRow key={key} title={title} block>
-                  <FormItem name={key}>
-                    <TagSelect reverseCheckAll single>
-                      {options.map((item: any) => (
-                        <TagSelect.Option key={item.value} value={item.value}>
-                          {item.label}
-                        </TagSelect.Option>
-                      ))}
-                    </TagSelect>
-                  </FormItem>
-                </StandardFormRow>
-              );
-            })}
-          </Space>
-        </Col>
-        {extraNode && <Col flex="130px">{extraNode}</Col>}
-      </Row>
+            </div>
+          );
+        })}
+        {extraNode && <div className={styles.metricFilterAction}>{extraNode}</div>}
+      </div>
     </Form>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Table, Tag, Button, Space, Tooltip, Popconfirm, message } from 'antd';
 import { ReloadOutlined, RedoOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
 import {
   getRecordList,
@@ -49,7 +50,7 @@ const RecordList: React.FC<RecordListProps> = ({
       setData(records);
       setPagination((prev) => ({ ...prev, current: page, pageSize: size, total }));
     } catch (error) {
-      message.error('Failed to load delivery records');
+      message.error('加载推送记录失败');
     } finally {
       setLoading(false);
     }
@@ -64,10 +65,10 @@ const RecordList: React.FC<RecordListProps> = ({
   const handleRetry = async (id: number) => {
     try {
       await retryRecord(id);
-      message.success('Retry initiated');
+      message.success('已发起重试');
       fetchData();
     } catch (error) {
-      message.error('Retry failed');
+      message.error('重试失败');
     }
   };
 
@@ -114,11 +115,13 @@ const RecordList: React.FC<RecordListProps> = ({
       title: '开始时间',
       dataIndex: 'startedAt',
       width: 160,
+      render: (val: string) => val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '完成时间',
       dataIndex: 'completedAt',
       width: 160,
+      render: (val: string) => val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '错误信息',

@@ -1,6 +1,6 @@
-import { Tabs, Breadcrumb, Space, Radio } from 'antd';
-import React, { useRef, useEffect, useState } from 'react';
-import { history, useModel } from '@umijs/max';
+import { Breadcrumb, Space } from 'antd';
+import React from 'react';
+import { useModel } from '@umijs/max';
 import {
   HomeOutlined,
   FundViewOutlined,
@@ -118,9 +118,9 @@ const PageBreadcrumb: React.FC = () => {
     );
   }
   return (
-    <>
+    <div className={styles.breadcrumbBar}>
       <Breadcrumb className={styles.breadcrumb} separator="" items={items} />
-    </>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Table, Tag, Button, Space, Typography } from 'antd';
+import { Drawer, Table, Tag, Button, Space, Typography, Tooltip, message } from 'antd';
 import { DownloadOutlined, FileSearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { ReportExecution } from '@/services/reportSchedule';
@@ -35,6 +35,8 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
       const res = await getExecutionList(scheduleId, { current, pageSize });
       setData(res?.records || []);
       setPagination({ current, pageSize, total: res?.total || 0 });
+    } catch (error) {
+      message.error('加载执行记录失败');
     } finally {
       setLoading(false);
     }
@@ -82,31 +84,33 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
     },
     {
       title: '操作',
-      width: 180,
+      width: 120,
       render: (_: any, record: ReportExecution) => (
-        <Space>
-          <Button
-            type="link"
-            size="small"
-            icon={<FileSearchOutlined />}
-            onClick={() => setSnapshotDrawer({ visible: true, executionId: record.id })}
-          >
-            查看详情
-          </Button>
-          {record.status === 'SUCCESS' && record.resultLocation && (
+        <Space size="small">
+          <Tooltip title="查看详情">
             <Button
               type="link"
               size="small"
-              icon={<DownloadOutlined />}
-              onClick={() => downloadExecutionResult(scheduleId!, record.id)}
-            >
-              下载
-            </Button>
+              icon={<FileSearchOutlined />}
+              onClick={() => setSnapshotDrawer({ visible: true, executionId: record.id })}
+            />
+          </Tooltip>
+          {record.status === 'SUCCESS' && record.resultLocation && (
+            <Tooltip title="下载结果">
+              <Button
+                type="link"
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={() => downloadExecutionResult(scheduleId!, record.id)}
+              />
+            </Tooltip>
           )}
           {record.status === 'FAILED' && record.errorMessage && (
-            <Text type="danger" style={{ fontSize: 12 }} ellipsis title={record.errorMessage}>
-              {record.errorMessage}
-            </Text>
+            <Tooltip title={record.errorMessage}>
+              <Text type="danger" style={{ fontSize: 12 }} ellipsis>
+                {record.errorMessage}
+              </Text>
+            </Tooltip>
           )}
         </Space>
       ),

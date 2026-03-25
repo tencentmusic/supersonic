@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Tabs } from 'antd';
+import { Card, Tabs } from 'antd';
 import { CalendarOutlined, BellOutlined, DownloadOutlined } from '@ant-design/icons';
 import ScheduleTab from './ScheduleTab';
 import AlertRuleTab from './AlertRuleTab';
 import ExportTaskTab from './ExportTaskTab';
+import styles from './style.less';
 
 const TaskCenterPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('schedule');
@@ -39,9 +40,10 @@ const TaskCenterPage: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>任务中心</h2>
-      <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+    <div className={styles.taskCenterPage}>
+      <Card className={styles.contentCard}>
+        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+      </Card>
     </div>
   );
 };
