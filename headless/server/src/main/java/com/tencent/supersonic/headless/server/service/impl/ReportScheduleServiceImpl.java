@@ -283,12 +283,27 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     }
 
     /**
-     * Ensures the Quartz job for the given schedule exists. If the job is missing (or was never
-     * registered), calls {@link QuartzJobManager#recreateJob} which also cleans up any orphaned
-     * trigger before rebuilding. Updates {@code quartz_job_key} in DB if it was null or changed.
+     * Ensures the Quartz job for the given schedule exists and the DB key is correct.
+     *
+     * <p>
+     * The canonical key is always {@code REPORT.report_{id}} — this is the only format produced by
+     * {@link #createSchedule}. If the DB record has a null or stale key, it is corrected here so
+     * that subsequent {@code triggerJob / resumeJob} calls use the right value.
+     *
+     * <p>
+     * If the Quartz job is missing (or partially corrupted — e.g. orphaned trigger without job),
+     * {@link QuartzJobManager#recreateJob} cleans up and rebuilds atomically.
      */
     private void ensureJobRegistered(ReportScheduleDO schedule) {
         String expectedKey = GROUP + "." + KEY_PREFIX + schedule.getId();
+
+        // Always normalise the DB key so callers can rely on schedule.getQuartzJobKey().
+        if (!expectedKey.equals(schedule.getQuartzJobKey())) {
+            schedule.setQuartzJobKey(expectedKey);
+            schedule.setUpdatedAt(new Date());
+            baseMapper.updateById(schedule);
+        }
+
         if (quartzJobManager.jobExists(expectedKey)) {
             return;
         }
@@ -299,11 +314,6 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         jobDataMap.put("tenantId", schedule.getTenantId());
         quartzJobManager.recreateJob(GROUP, KEY_PREFIX, schedule.getId(), ReportScheduleJob.class,
                 schedule.getCronExpression(), jobDataMap);
-        if (!expectedKey.equals(schedule.getQuartzJobKey())) {
-            schedule.setQuartzJobKey(expectedKey);
-            schedule.setUpdatedAt(new Date());
-            baseMapper.updateById(schedule);
-        }
     }
 
     private void checkOwnership(ReportScheduleDO schedule, User user) {
