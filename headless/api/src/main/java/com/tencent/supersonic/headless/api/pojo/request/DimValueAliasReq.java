@@ -4,6 +4,8 @@ import com.tencent.supersonic.headless.api.pojo.DimValueMap;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author: kanedai
  * @date: 2024/10/31
@@ -15,7 +17,7 @@ public class DimValueAliasReq {
     private Long id;
 
     /**
-     * alias为空代表删除 否则更新
+     * alias 为空代表删除 否则更新
      */
-    DimValueMap dimValueMaps;
+    private List<DimValueMap> dimValueMaps;
 }
