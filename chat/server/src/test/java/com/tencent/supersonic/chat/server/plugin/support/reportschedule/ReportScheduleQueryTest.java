@@ -1,11 +1,13 @@
 package com.tencent.supersonic.chat.server.plugin.support.reportschedule;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.chat.api.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
@@ -47,15 +49,19 @@ class ReportScheduleQueryTest {
     private DataSetService dataSetService;
     @Mock
     private ReportDeliveryService deliveryService;
+    @Mock
+    private UserService userService;
 
     private ReportScheduleQuery query;
 
     @BeforeEach
     void setUp() {
         query = new ReportScheduleQuery(scheduleService, confirmationService, chatManageService,
-                dataSetService, deliveryService);
+                dataSetService, deliveryService, userService);
         org.springframework.test.util.ReflectionTestUtils.setField(query, "confirmationExpireMs",
                 300_000L);
+        lenient().when(userService.getUserById(anyLong()))
+                .thenAnswer(inv -> buildUser(inv.getArgument(0), "tester", 10L));
     }
 
     // ── Anti-Goal AG-01: cross-tenant isolation ─────────────────────────
@@ -63,7 +69,7 @@ class ReportScheduleQueryTest {
     @Test
     @DisplayName("AG-01: getScheduleById returns null for cross-tenant id → ERROR_SCHEDULE_NOT_FOUND")
     void cancelWithUnknownId_returnsNotFound() {
-        when(scheduleService.getScheduleById(999L)).thenReturn(null);
+        when(scheduleService.getScheduleById(eq(999L), any())).thenReturn(null);
 
         query.setParseInfo(buildParseInfo("取消报表 #999", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
@@ -76,7 +82,7 @@ class ReportScheduleQueryTest {
     @Test
     @DisplayName("AG-01: pause on cross-tenant id (null return) → error, not silent skip")
     void pauseWithUnknownId_returnsNotFound() {
-        when(scheduleService.getScheduleById(42L)).thenReturn(null);
+        when(scheduleService.getScheduleById(eq(42L), any())).thenReturn(null);
 
         query.setParseInfo(buildParseInfo("暂停报表 #42", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
@@ -176,10 +182,11 @@ class ReportScheduleQueryTest {
 
         // Arrange: confirmation lookup
         when(confirmationService.getLatestPending(1001L, 88)).thenReturn(stored[0]);
+        when(userService.getUserById(1001L)).thenReturn(buildUser(1001L, "tester", 10L));
 
         ReportScheduleDO created = new ReportScheduleDO();
         created.setId(123L);
-        when(scheduleService.createSchedule(any())).thenReturn(created);
+        when(scheduleService.createSchedule(any(), any())).thenReturn(created);
 
         // Act: CONFIRM
         query.setParseInfo(buildParseInfo("确认", 88, 6002L, 1001L, "tester", 10L));
@@ -188,8 +195,8 @@ class ReportScheduleQueryTest {
 
         assertTrue(confirmResp.isSuccess());
         assertEquals(123L, confirmResp.getScheduleId());
-        verify(scheduleService).createSchedule(any());
-        verify(scheduleService, never()).triggerNow(any());
+        verify(scheduleService).createSchedule(any(), any());
+        verify(scheduleService, never()).triggerNow(any(), any());
     }
 
     @Test
@@ -231,16 +238,17 @@ class ReportScheduleQueryTest {
                 Boolean.TRUE.equals(createResp.getConfirmAction().getParams().get("triggerNow")));
 
         when(confirmationService.getLatestPending(1001L, 88)).thenReturn(stored[0]);
+        when(userService.getUserById(1001L)).thenReturn(buildUser(1001L, "tester", 10L));
         ReportScheduleDO created = new ReportScheduleDO();
         created.setId(124L);
-        when(scheduleService.createSchedule(any())).thenReturn(created);
+        when(scheduleService.createSchedule(any(), any())).thenReturn(created);
 
         query.setParseInfo(buildParseInfo("确认", 88, 6002L, 1001L, "tester", 10L));
         QueryResult confirmResult = query.build();
         ReportScheduleResp confirmResp = (ReportScheduleResp) confirmResult.getResponse();
 
         assertTrue(confirmResp.isSuccess());
-        verify(scheduleService).triggerNow(124L);
+        verify(scheduleService).triggerNow(eq(124L), any());
         assertTrue(confirmResp.getMessage().contains("已触发一次立即执行"));
     }
 
@@ -264,7 +272,8 @@ class ReportScheduleQueryTest {
     void list_empty() {
         Page<ReportScheduleDO> emptyPage = new Page<>(1, 20);
         emptyPage.setRecords(List.of());
-        when(scheduleService.getScheduleList(any(), isNull(), isNull())).thenReturn(emptyPage);
+        when(scheduleService.getScheduleList(any(), isNull(), isNull(), any()))
+                .thenReturn(emptyPage);
 
         query.setParseInfo(buildParseInfo("我的定时报表有哪些", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
@@ -320,5 +329,13 @@ class ReportScheduleQueryTest {
         pi.setDataSet(dataSet);
         pi.getMetrics().add(metric);
         return pi;
+    }
+
+    private User buildUser(Long id, String name, Long tenantId) {
+        User user = new User();
+        user.setId(id);
+        user.setName(name);
+        user.setTenantId(tenantId);
+        return user;
     }
 }

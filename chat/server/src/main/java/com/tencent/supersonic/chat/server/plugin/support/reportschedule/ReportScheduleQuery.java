@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.plugin.support.reportschedule;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.chat.api.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.api.plugin.PluginQueryManager;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
@@ -8,6 +9,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.plugin.support.PluginSemanticQuery;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
 import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
@@ -120,6 +122,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
     private final ChatManageService chatManageService;
     private final DataSetService dataSetService;
     private final ReportDeliveryService deliveryService;
+    private final UserService userService;
 
     @PostConstruct
     public void register() {
@@ -261,14 +264,14 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         ScheduleIntent intent = ScheduleIntent.valueOf(pending.getActionType());
 
         return switch (intent) {
-            case CREATE -> executeCreate(params);
-            case CANCEL -> executeCancel(params);
+            case CREATE -> executeCreate(params, userId);
+            case CANCEL -> executeCancel(params, userId);
             default -> ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
                     .message(ERROR_UNSUPPORTED_CONFIRM).build();
         };
     }
 
-    private ReportScheduleResp executeCreate(Map<String, Object> params) {
+    private ReportScheduleResp executeCreate(Map<String, Object> params, Long currentUserId) {
         Object rawDatasetId = params.get("datasetId");
         if (!(rawDatasetId instanceof Number)) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
@@ -279,10 +282,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         String outputFormat = (String) params.getOrDefault("outputFormat", "EXCEL");
         String queryConfig = (String) params.get("queryConfig");
         String deliveryConfigIds = (String) params.get("deliveryConfigIds");
-        Long ownerId = params.get("ownerId")instanceof Number number ? number.longValue() : null;
-        Long tenantId = params.get("tenantId")instanceof Number number ? number.longValue() : null;
-        String createdBy = (String) params.get("createdBy");
         String scheduleName = (String) params.get("scheduleName");
+        User currentUser = requireCurrentUser(currentUserId);
 
         ReportScheduleDO schedule = new ReportScheduleDO();
         schedule.setName(scheduleName);
@@ -293,17 +294,14 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         schedule.setDeliveryConfigIds(deliveryConfigIds);
         schedule.setEnabled(true);
         schedule.setRetryCount(DEFAULT_RETRY_COUNT);
-        schedule.setOwnerId(ownerId);
-        schedule.setTenantId(tenantId);
-        schedule.setCreatedBy(createdBy);
 
-        ReportScheduleDO created = scheduleService.createSchedule(schedule);
+        ReportScheduleDO created = scheduleService.createSchedule(schedule, currentUser);
         String cronDesc = describeCron(cronExpression);
         String channelName = resolveChannelName(deliveryConfigIds);
 
         boolean triggerNow = Boolean.TRUE.equals(params.get("triggerNow"));
         if (triggerNow) {
-            scheduleService.triggerNow(created.getId());
+            scheduleService.triggerNow(created.getId(), currentUser);
         }
 
         String successMsg = triggerNow
@@ -317,7 +315,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 .cronDescription(cronDesc).build();
     }
 
-    private ReportScheduleResp executeCancel(Map<String, Object> params) {
+    private ReportScheduleResp executeCancel(Map<String, Object> params, Long currentUserId) {
         Object rawScheduleId = params.get("scheduleId");
         if (!(rawScheduleId instanceof Number)) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(false)
@@ -325,7 +323,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
         Long scheduleId = ((Number) rawScheduleId).longValue();
 
-        scheduleService.deleteSchedule(scheduleId);
+        scheduleService.deleteSchedule(scheduleId, requireCurrentUser(currentUserId));
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(true)
                 .message(String.format(SUCCESS_CANCELLED, scheduleId)).scheduleId(scheduleId)
@@ -408,9 +406,6 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         params.put("outputFormat", outputFormat);
         params.put("deliveryConfigIds", deliveryConfigIds);
         params.put("scheduleName", scheduleName);
-        params.put("ownerId", pluginParseResult.getUserId());
-        params.put("tenantId", pluginParseResult.getTenantId());
-        params.put("createdBy", pluginParseResult.getUserName());
         params.put("triggerNow", triggerNow);
         params.put("sourceQueryId", source.getSourceQueryId());
         params.put("sourceParseId", source.getSourceParseId());
@@ -423,7 +418,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         // Pass null to list ALL schedules for the current tenant (TenantSqlInterceptor filters by
         // tenant)
         Page<ReportScheduleDO> page = new Page<>(1, 20);
-        Page<ReportScheduleDO> result = scheduleService.getScheduleList(page, null, null);
+        Page<ReportScheduleDO> result = scheduleService.getScheduleList(page, null, null,
+                requireCurrentUser(parseCurrentUserId()));
 
         List<ReportScheduleResp.ScheduleSummary> summaries = new ArrayList<>();
         for (ReportScheduleDO schedule : result.getRecords()) {
@@ -459,7 +455,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_CANCEL_ID).build();
         }
 
-        ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
+        ReportScheduleDO schedule =
+                scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
 
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(false)
@@ -486,7 +483,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_PAUSE_ID).build();
         }
 
-        ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
+        ReportScheduleDO schedule =
+                scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(false)
                     .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
@@ -497,7 +495,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_NO_PERMISSION).build();
         }
 
-        scheduleService.pauseSchedule(scheduleId);
+        scheduleService.pauseSchedule(scheduleId, requireCurrentUser(currentUserId));
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(true)
                 .message(String.format(SUCCESS_PAUSED, scheduleId, scheduleId))
@@ -511,7 +509,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_RESUME_ID).build();
         }
 
-        ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
+        ReportScheduleDO schedule =
+                scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(false)
                     .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
@@ -522,7 +521,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_NO_PERMISSION).build();
         }
 
-        scheduleService.resumeSchedule(scheduleId);
+        scheduleService.resumeSchedule(scheduleId, requireCurrentUser(currentUserId));
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(true)
                 .message(String.format(SUCCESS_RESUMED, scheduleId)).scheduleId(scheduleId).build();
@@ -535,7 +534,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_TRIGGER_ID).build();
         }
 
-        ReportScheduleDO schedule = scheduleService.getScheduleById(scheduleId);
+        ReportScheduleDO schedule =
+                scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(false)
                     .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
@@ -546,7 +546,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_NO_PERMISSION).build();
         }
 
-        scheduleService.triggerNow(scheduleId);
+        scheduleService.triggerNow(scheduleId, requireCurrentUser(currentUserId));
 
         return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(true)
                 .message(String.format(SUCCESS_TRIGGERED, scheduleId)).scheduleId(scheduleId)
@@ -561,7 +561,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
 
         Page<ReportExecutionDO> page = new Page<>(1, 10);
-        Page<ReportExecutionDO> result = scheduleService.getExecutionList(page, scheduleId, null);
+        Page<ReportExecutionDO> result = scheduleService.getExecutionList(page, scheduleId, null,
+                requireCurrentUser(parseCurrentUserId()));
 
         List<ReportScheduleResp.ExecutionSummary> summaries = new ArrayList<>();
         for (ReportExecutionDO exec : result.getRecords()) {
@@ -692,6 +693,24 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
     }
 
+    private User requireCurrentUser(Long currentUserId) {
+        if (currentUserId == null) {
+            throw new IllegalArgumentException("current user is required");
+        }
+        User user = userService.getUserById(currentUserId);
+        if (user == null) {
+            throw new IllegalArgumentException("current user not found: " + currentUserId);
+        }
+        return user;
+    }
+
+    private Long parseCurrentUserId() {
+        PluginParseResult pluginParseResult = JsonUtil.toObject(
+                JsonUtil.toString(parseInfo.getProperties().get(Constants.CONTEXT)),
+                PluginParseResult.class);
+        return pluginParseResult != null ? pluginParseResult.getUserId() : null;
+    }
+
     private ReportSubscriptionSource resolveSubscriptionSource(
             PluginParseResult pluginParseResult) {
         if (pluginParseResult == null || pluginParseResult.getChatId() == null) {
@@ -707,22 +726,34 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 if (query.getParseInfos() == null) {
                     continue;
                 }
+                // Skip schedule-management queries; only consider data queries.
+                boolean hasDataParseInfo = query.getParseInfos().stream()
+                        .anyMatch(p -> !QUERY_MODE.equals(p.getQueryMode()));
+                if (!hasDataParseInfo) {
+                    continue;
+                }
+                // This is the most recent data query. Use it as the subscription source and
+                // do NOT fall back to older queries — let validateSource surface the error.
                 for (SemanticParseInfo parseInfo : query.getParseInfos()) {
+                    if (QUERY_MODE.equals(parseInfo.getQueryMode())) {
+                        continue;
+                    }
                     if (!isSchedulable(parseInfo)) {
                         continue;
                     }
                     String queryConfig = buildQueryConfig(parseInfo);
-                    if (StringUtils.isBlank(queryConfig)) {
-                        continue;
-                    }
                     String summary =
                             StringUtils.isNotBlank(query.getQueryText()) ? query.getQueryText()
                                     : getDataSetName(parseInfo.getDataSetId());
+                    // queryConfig may be null for SQL-mode queries; validateSource will
+                    // catch blank queryConfigSnapshot and return ERROR_UNSUPPORTED_REPORT_CONTEXT.
                     return ReportSubscriptionSource.builder().sourceQueryId(query.getQuestionId())
                             .sourceParseId(parseInfo.getId())
                             .sourceDataSetId(parseInfo.getDataSetId()).sourceType("QUERY_RESULT")
                             .queryConfigSnapshot(queryConfig).summaryText(summary).build();
                 }
+                // Most recent data query found but no schedulable parseInfo — stop here.
+                break;
             }
         } catch (Exception e) {
             log.warn("Failed to resolve report subscription source for chat {}: {}",

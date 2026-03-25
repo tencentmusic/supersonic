@@ -14,7 +14,8 @@ public final class ScheduleKeywords {
     private ScheduleKeywords() {}
 
     // Intent recognition keywords
-    public static final List<String> CONFIRM = Arrays.asList("确认", "是", "好的", "确定", "yes", "ok");
+    public static final List<String> CONFIRM =
+            Arrays.asList("确认", "是", "好的", "确定", "yes", "ok", "发送", "推送");
     public static final List<String> CANCEL = Arrays.asList("取消", "删除", "停止");
     public static final List<String> PAUSE = Arrays.asList("暂停");
     public static final List<String> RESUME = Arrays.asList("恢复", "继续");
@@ -35,7 +36,8 @@ public final class ScheduleKeywords {
      * Action verbs that indicate scheduling intent, but only when combined with a frequency word
      * from CREATE. Alone they are too ambiguous ("帮我查数据发给我" should not trigger scheduling).
      */
-    public static final List<String> CREATE_ACTION = Arrays.asList("发给我", "发我", "订阅", "设成", "保存成");
+    public static final List<String> CREATE_ACTION =
+            Arrays.asList("发给我", "发我", "发给", "发一下", "推给", "推一下", "订阅", "设成", "保存成");
 
     /**
      * Triggers an immediate execution after schedule creation. Distinct from TRIGGER (which
