@@ -434,26 +434,22 @@ public class ReportDeliveryServiceImpl
                 records.stream().collect(Collectors.groupingBy(r -> r.getCreatedAt().toInstant()
                         .atZone(ZoneId.systemDefault()).toLocalDate().format(formatter)));
 
-        // Build daily stats for each day in range (descending order - newest first)
-        List<DailyDeliveryStats> dailyStats = new ArrayList<>();
-        LocalDate date = LocalDate.now();
-        for (int i = 0; i < queryDays; i++) {
-            String dateStr = date.format(formatter);
-            List<ReportDeliveryRecordDO> dayRecords =
-                    byDate.getOrDefault(dateStr, new ArrayList<>());
-
-            long total = dayRecords.size();
-            long success = dayRecords.stream()
-                    .filter(r -> DeliveryStatus.SUCCESS.name().equals(r.getStatus())).count();
-            long failed = dayRecords.stream()
-                    .filter(r -> DeliveryStatus.FAILED.name().equals(r.getStatus())).count();
-            double rate = total > 0 ? (double) success / total * 100 : 0;
-
-            dailyStats.add(DailyDeliveryStats.builder().date(dateStr).total(total).success(success)
-                    .failed(failed).successRate(rate).build());
-
-            date = date.minusDays(1);
-        }
+        // Build daily stats only for dates that have records (descending order)
+        List<DailyDeliveryStats> dailyStats = byDate.entrySet().stream()
+                .sorted(Map.Entry.<String, List<ReportDeliveryRecordDO>>comparingByKey().reversed())
+                .map(entry -> {
+                    List<ReportDeliveryRecordDO> dayRecords = entry.getValue();
+                    long total = dayRecords.size();
+                    long success = dayRecords.stream()
+                            .filter(r -> DeliveryStatus.SUCCESS.name().equals(r.getStatus()))
+                            .count();
+                    long failed = dayRecords.stream()
+                            .filter(r -> DeliveryStatus.FAILED.name().equals(r.getStatus()))
+                            .count();
+                    double rate = (double) success / total * 100;
+                    return DailyDeliveryStats.builder().date(entry.getKey()).total(total)
+                            .success(success).failed(failed).successRate(rate).build();
+                }).collect(Collectors.toList());
 
         return dailyStats;
     }

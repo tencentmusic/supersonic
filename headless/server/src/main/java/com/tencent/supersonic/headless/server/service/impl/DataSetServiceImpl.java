@@ -312,6 +312,9 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         List<DataSetResp> dataSets = null;
         try {
             String tableName = SqlSelectHelper.getTableName(sql);
+            if (StringUtils.isBlank(tableName)) {
+                throw new InvalidArgumentException("从Sql参数中无法解析到物理表名");
+            }
             dataSets = getDataSets(tableName, user);
         } catch (Exception e) {
             log.error("getDataSetIdFromSql error:{}", e);

@@ -50,6 +50,26 @@ spring:
       org.quartz.jobStore.clusterCheckinInterval: 15000
       org.quartz.jobStore.misfireThreshold: 60000
       org.quartz.threadPool.threadCount: 5
+
+  mail:
+    host: ${EMAIL_HOST}
+    port: ${EMAIL_PORT}
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: ${EMAIL_SMTP_AUTH:true}
+          connectiontimeout: ${EMAIL_CONNECTION_TIMEOUT:5000}
+          timeout: ${EMAIL_TIMEOUT:5000}
+          writetimeout: ${EMAIL_WRITE_TIMEOUT:5000}
+          starttls:
+            enable: ${EMAIL_STARTTLS_ENABLE:false}
+            required: ${EMAIL_STARTTLS_REQUIRED:false}
+          ssl:
+            enable: ${EMAIL_SSL_ENABLE:false}
+
 mybatis:
   mapper-locations=classpath:mappers/custom/*.xml,classpath*:/mappers/*.xml
 

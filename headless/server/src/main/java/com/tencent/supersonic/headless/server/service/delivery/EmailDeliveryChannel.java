@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import jakarta.mail.internet.MimeMessage;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -17,14 +19,17 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Email delivery channel. Sends report as email attachment using Spring Mail.
+ * Email delivery channel. Sends report as email attachment using Spring Mail. Only activated when
+ * spring-boot-starter-mail is on classpath and spring.mail.host is configured.
  */
 @Component
+@ConditionalOnClass(name = "jakarta.mail.internet.MimeMessage")
+@ConditionalOnProperty(prefix = "spring.mail", name = "host")
+@RequiredArgsConstructor
 @Slf4j
 public class EmailDeliveryChannel implements ReportDeliveryChannel {
 
-    @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username:}")
     private String fromAddress;
@@ -36,11 +41,6 @@ public class EmailDeliveryChannel implements ReportDeliveryChannel {
 
     @Override
     public void deliver(String configJson, DeliveryContext context) throws DeliveryException {
-        if (mailSender == null) {
-            throw new DeliveryException("Email is not configured. Please configure spring.mail.*",
-                    false);
-        }
-
         EmailConfig config = parseConfig(configJson);
 
         try {

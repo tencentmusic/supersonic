@@ -4,8 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryConfigMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryRecordMapper;
+import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
+import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleMapper;
 import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryContext;
@@ -37,14 +41,19 @@ public class DeliveryRetryTask {
 
     private final ReportDeliveryRecordMapper recordMapper;
     private final ReportDeliveryConfigMapper configMapper;
+    private final ReportExecutionMapper executionMapper;
+    private final ReportScheduleMapper scheduleMapper;
     private final Map<DeliveryType, ReportDeliveryChannel> channelMap;
     @Autowired(required = false)
     private TemplateReportMetrics reportMetrics;
 
     public DeliveryRetryTask(ReportDeliveryRecordMapper recordMapper,
-            ReportDeliveryConfigMapper configMapper, List<ReportDeliveryChannel> channels) {
+            ReportDeliveryConfigMapper configMapper, ReportExecutionMapper executionMapper,
+            ReportScheduleMapper scheduleMapper, List<ReportDeliveryChannel> channels) {
         this.recordMapper = recordMapper;
         this.configMapper = configMapper;
+        this.executionMapper = executionMapper;
+        this.scheduleMapper = scheduleMapper;
         this.channelMap = channels.stream()
                 .collect(Collectors.toMap(ReportDeliveryChannel::getType, Function.identity()));
     }
@@ -112,11 +121,27 @@ public class DeliveryRetryTask {
             return;
         }
 
-        // Build context
+        // Build context from original execution and schedule data
+        Long rowCount = null;
+        String scheduleName = "Schedule " + record.getScheduleId();
+        String reportName = "Report";
+        if (record.getExecutionId() != null) {
+            ReportExecutionDO execution = executionMapper.selectById(record.getExecutionId());
+            if (execution != null) {
+                rowCount = execution.getRowCount();
+            }
+        }
+        if (record.getScheduleId() != null) {
+            ReportScheduleDO schedule = scheduleMapper.selectById(record.getScheduleId());
+            if (schedule != null) {
+                scheduleName = schedule.getName();
+                reportName = schedule.getName();
+            }
+        }
         DeliveryContext context = DeliveryContext.builder().scheduleId(record.getScheduleId())
                 .executionId(record.getExecutionId()).fileLocation(record.getFileLocation())
-                .tenantId(record.getTenantId()).scheduleName("Retry").reportName("Retry")
-                .executionTime(record.getCreatedAt().toString()).build();
+                .tenantId(record.getTenantId()).scheduleName(scheduleName).reportName(reportName)
+                .rowCount(rowCount).executionTime(record.getCreatedAt().toString()).build();
 
         long startTime = System.currentTimeMillis();
         int retryCount = record.getRetryCount() != null ? record.getRetryCount() + 1 : 1;
