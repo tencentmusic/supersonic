@@ -91,6 +91,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatQueryServiceImpl implements ChatQueryService {
 
+    private static final String REPORT_SCHEDULE_QUERY_MODE = "REPORT_SCHEDULE";
+
     private final ChatManageService chatManageService;
     private final ChatLayerService chatLayerService;
     private final SemanticLayerService semanticLayerService;
@@ -234,6 +236,10 @@ public class ChatQueryServiceImpl implements ChatQueryService {
         }
         SemanticParseInfo parseInfo =
                 chatManageService.getParseInfo(chatQueryDataReq.getQueryId(), parseId);
+        if (parseInfo != null
+                && REPORT_SCHEDULE_QUERY_MODE.equalsIgnoreCase(parseInfo.getQueryMode())) {
+            throw new IllegalArgumentException("当前消息为报表执行结果，不支持重新查询");
+        }
         mergeParseInfo(parseInfo, chatQueryDataReq);
         DataSetSchema dataSetSchema =
                 semanticLayerService.getDataSetSchema(parseInfo.getDataSetId());
@@ -364,7 +370,7 @@ public class ChatQueryServiceImpl implements ChatQueryService {
 
     private List<String> getFieldsFromSql(SemanticParseInfo parseInfo) {
         SqlInfo sqlInfo = parseInfo.getSqlInfo();
-        if (Objects.isNull(sqlInfo) || StringUtils.isNotBlank(sqlInfo.getCorrectedS2SQL())) {
+        if (Objects.isNull(sqlInfo) || StringUtils.isBlank(sqlInfo.getCorrectedS2SQL())) {
             return new ArrayList<>();
         }
         return SqlSelectHelper.getAllSelectFields(sqlInfo.getCorrectedS2SQL());

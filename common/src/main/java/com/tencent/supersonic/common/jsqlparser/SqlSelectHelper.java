@@ -176,6 +176,9 @@ public class SqlSelectHelper {
     }
 
     public static List<PlainSelect> getPlainSelect(String sql) {
+        if (StringUtils.isBlank(sql)) {
+            return new ArrayList<>();
+        }
         Select selectStatement = getSelect(sql);
         return getPlainSelect(selectStatement);
     }
@@ -244,6 +247,9 @@ public class SqlSelectHelper {
 
     public static List<PlainSelect> getPlainSelects(List<PlainSelect> plainSelectList) {
         List<PlainSelect> plainSelects = new ArrayList<>();
+        if (CollectionUtils.isEmpty(plainSelectList)) {
+            return plainSelects;
+        }
         for (PlainSelect plainSelect : plainSelectList) {
             plainSelects.add(plainSelect);
             ExpressionVisitorAdapter expressionVisitor = new ExpressionVisitorAdapter() {
@@ -504,6 +510,9 @@ public class SqlSelectHelper {
 
     public static String getTableName(String sql) {
         Table table = getTable(sql);
+        if (table == null || StringUtils.isBlank(table.getName())) {
+            return null;
+        }
         return StringUtil.replaceBackticks(table.getName());
     }
 

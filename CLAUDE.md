@@ -2,15 +2,40 @@
 
 SuperSonic is a chat-based data analytics platform that converts natural language queries to SQL using LLM integration. Supports multi-tenancy, RBAC, semantic template management, and hybrid NL2SQL parsing (rule-based + LLM-based).
 
-## Working Preferences
+## Rules
 
-- When fixing bugs, trace the FULL execution path before making changes. Do not fix symptoms — identify the actual root cause first.
-- Before implementing a fix, state the root cause hypothesis and evidence (`file:line`) — get confirmation before writing code.
-- Do not over-engineer. If a framework provides a feature, use it instead of building a custom solution.
-- For UI changes, always reference an existing page and copy its exact patterns. Do not introduce new styling patterns.
-- For large multi-file tasks, break into independent subtasks by layer (Java backend / TypeScript frontend / SQL migration) and use parallel agents.
-- Always verify import paths against existing files. After multi-file changes, run compilation to catch import errors.
+**Bug fixing**
+- Trace the FULL execution path before making changes. Do not fix symptoms — identify the actual root cause first.
+- State the root cause hypothesis and evidence (`file:line`) — get confirmation before writing code.
+- Prefer small, targeted fixes over large refactors. Deliver the minimal working fix first, then optionally suggest improvements — do not refactor without approval.
+- Proactively audit adjacent code paths for the same issue pattern — do not wait for external review to surface them.
+- Always check interceptors/aspects that silently modify behavior: `TenantInterceptor`, `TenantSqlInterceptor`, `S2DataPermissionAspect`, `ApiHeaderCheckAspect`.
+- Read ALL branches of conditionals — bugs often hide in the less-tested branch.
+- Module entry points for tracing:
+  - **auth**: `TenantInterceptor` → `UserStrategy` → `RoleService` / `PermissionService`
+  - **chat**: `ChatQueryController` → `ChatQueryServiceImpl` → executor chain (spring.factories order)
+  - **headless (NL2SQL)**: `NL2SQLParser` → mapper strategies → `LLMRequestService` → `SqlCorrector`
+  - **headless (core)**: `QueryParser` chain → `SqlQueryParser` → `DbAdaptor` → `JdbcDataSource`
+  - **headless (server)**: Domain/Model/Metric/DataSet services → `SemanticTemplateService` → event publishing
+  - **common**: `TenantSqlInterceptor` (MyBatis) → `SystemConfigService` → `ExemplarService`
+- Common misdiagnosis traps: fixing symptom site instead of origin; blaming code when config/data is wrong; ignoring interceptors/aspects; assuming first suspicious thing is the cause.
 
+**Build verification**
+- After every Java edit, run `mvn compile -pl launchers/standalone -am` to verify compilation. Do not skip this step.
+- For frontend changes, run the appropriate lint/build command.
+- If compilation fails, fix it immediately before moving on.
+
+**Git**
+- **Never commit or push without explicit user permission.** Always show a change summary and ask first.
+- Do not amend existing commits unless explicitly asked.
+
+**Debugging environment**
+- When debugging deployment or environment issues, ask the user to confirm target environment details (OS, web server, encoding, runtime versions) before proposing fixes. Do not assume.
+
+**General**
+- Do not over-engineer. Use framework features instead of custom solutions.
+- For UI changes, reference an existing page and copy its exact patterns. Do not introduce new styling.
+- For large multi-file tasks, break into subtasks by layer (Java / TypeScript / SQL) and use parallel agents.
 
 ## Tech Stack
 
@@ -21,56 +46,49 @@ SuperSonic is a chat-based data analytics platform that converts natural languag
 
 ```
 supersonic/
-├── auth/          # Authentication & authorization (api + authentication)
-├── billing/       # Subscription & billing (api + server)
-├── chat/          # Chat interactions & agent management (api + server)
+├── auth/          # Authentication & authorization
+├── billing/       # Subscription & billing
+├── chat/          # Chat interactions & agent management
 ├── common/        # Shared utilities, tenant context, MyBatis config
-├── headless/      # Core semantic layer (api + chat + core + server)
-├── feishu/        # Feishu bot integration (api + server)
+├── headless/      # Core semantic layer
+├── feishu/        # Feishu bot integration
 ├── launchers/     # Application entry points (standalone/headless/chat)
 └── webapp/        # React frontend (Ant Design Pro)
 ```
 
-**Key patterns**: Cross-module communication via Spring `ApplicationEvent` (never reflection). SPI registration via `META-INF/spring.factories`. Multi-tenant isolation via `TenantSqlInterceptor` (MyBatis plugin, auto-injects `WHERE tenant_id = ?`).
-
 ## Build & Run
 
 ```bash
-# Compile
-JAVA_HOME=/path/to/jdk21 mvn compile -pl launchers/standalone -am
-
-# Test compile
-JAVA_HOME=/path/to/jdk21 mvn test-compile -pl launchers/standalone -am
+mvn compile -pl launchers/standalone -am
+mvn test-compile -pl launchers/standalone -am
 ```
 
-- Default DB: H2 embedded. Set `S2_DB_TYPE=h2|mysql|postgresql` for alternatives.
+- Default DB: H2 embedded. `S2_DB_TYPE=h2|mysql|postgresql` for alternatives.
 - LLM env vars: `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL_NAME`
-
-## Flyway Migrations
-
-Located in `launchers/standalone/src/main/resources/db/migration/{mysql,postgresql}/`. New migrations start from **V21+**. Always create both MySQL and PostgreSQL versions. Use `IF NOT EXISTS` for idempotency.
-
-**MySQL vs PostgreSQL syntax differences:**
-- `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` — **PostgreSQL only**. MySQL does NOT support `IF NOT EXISTS` on `ADD COLUMN`. For MySQL migrations that add columns idempotently, either: (a) rely on Flyway's single-execution guarantee and skip `IF NOT EXISTS`, or (b) use a stored procedure with `information_schema.columns` check.
-- `CREATE TABLE IF NOT EXISTS` — supported by both MySQL and PostgreSQL.
-- Always test migration SQL against both dialects before committing.
 
 ## Code Conventions
 
-- **Dependency Injection**: Constructor injection via Lombok `@RequiredArgsConstructor` + `private final` fields. `@Autowired` only for `@Lazy` or `@Qualifier`.
-- **Cross-module communication**: Spring `ApplicationEvent` — never reflection or circular imports.
-- **SPI registration**: `META-INF/spring.factories` for parser, corrector, mapper, executor extensions.
-- **MyBatis-Plus**: `ServiceImpl` base class; `LambdaQueryWrapper` for type-safe queries.
-- **REST API (new modules)**: Google RESTful API design — resource-oriented URLs, standard methods + custom methods (`:verb`), `pageToken` pagination.
-- **Strategy pattern**: Delivery channels, pool types, sync modes — add new implementations without modifying existing code.
-- **Frontend date formatting**: Always use `dayjs(value).format('YYYY-MM-DD HH:mm:ss')` for timestamp display in Table columns. Never render raw ISO 8601 strings.
-- **Frontend API base URLs**: `process.env.API_BASE_URL` = `/api/semantic/`, `AUTH_API_BASE_URL` = `/api/auth/`. Some APIs use direct paths (e.g., `/api/v1/connections`).
+- **DI**: Constructor injection via `@RequiredArgsConstructor` + `private final`. `@Autowired` only for `@Lazy` / `@Qualifier`.
+- **Cross-module**: Spring `ApplicationEvent` — never reflection or circular imports.
+- **SPI**: `META-INF/spring.factories` for parser, corrector, mapper, executor extensions.
+- **MyBatis-Plus**: `ServiceImpl` base; `LambdaQueryWrapper` for type-safe queries.
+- **REST API (new modules)**: Google RESTful design — resource-oriented URLs, standard + custom methods (`:verb`), `pageToken` pagination.
+- **Strategy pattern**: Delivery channels, pool types, sync modes — add implementations without modifying existing code.
+- **Frontend dates**: `dayjs(value).format('YYYY-MM-DD HH:mm:ss')` — never raw ISO strings.
+- **Frontend API base URLs**: `API_BASE_URL` = `/api/semantic/`, `AUTH_API_BASE_URL` = `/api/auth/`. Some APIs use direct paths (e.g., `/api/v1/connections`).
+
+## Flyway Migrations
+
+Path: `launchers/standalone/src/main/resources/db/migration/{mysql,postgresql}/`. New migrations start from **V21+**. Always create both MySQL and PostgreSQL versions.
+
+- `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` — **PostgreSQL only**. MySQL does NOT support this. For MySQL: rely on Flyway single-execution guarantee, or use `information_schema.columns` check.
+- `CREATE TABLE IF NOT EXISTS` — both dialects support.
 
 ## Multi-Tenant Configuration
 
-Enabled via `s2.tenant.enabled=true`. Key files: `TenantContext.java` (ThreadLocal), `TenantInterceptor.java` (HTTP), `TenantSqlInterceptor.java` (MyBatis). Excluded tables: `s2_tenant`, `s2_subscription_plan`, `s2_permission`, `s2_role_permission`, `s2_user_role`.
+Enabled via `s2.tenant.enabled=true`. Key files: `TenantContext.java` (ThreadLocal), `TenantInterceptor.java` (HTTP), `TenantSqlInterceptor.java` (MyBatis auto-injects `WHERE tenant_id = ?`). Excluded tables: `s2_tenant`, `s2_subscription_plan`, `s2_permission`, `s2_role_permission`, `s2_user_role`.
 
-## Design Documents (AI Agent 路由)
+## Design Documents
 
 三份主文档（≤400 行）只讲边界和主链路，实现级内容在 `docs/details/` 下的自包含 spec 文件中。
 

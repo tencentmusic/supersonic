@@ -175,6 +175,12 @@ class SqlSelectHelperTest {
                 "SELECT 用户, 页面  FROM 超音数用户部门 GROUP BY 用户, 页面 ORDER BY count(*) DESC");
 
         Assert.assertEquals(allFields.size(), 2);
+
+        allFields = SqlSelectHelper.getAllSelectFields("");
+        Assert.assertTrue(allFields.isEmpty());
+
+        allFields = SqlSelectHelper.getAllSelectFields(null);
+        Assert.assertTrue(allFields.isEmpty());
     }
 
     @Test
@@ -269,6 +275,9 @@ class SqlSelectHelperTest {
                 + " and 用户 = 'alice' and 发布日期 ='11' group by 部门 limit 1";
         String tableName = SqlSelectHelper.getTableName(sql);
         Assert.assertEquals(tableName, "超音数");
+
+        tableName = SqlSelectHelper.getTableName("select 1");
+        Assert.assertNull(tableName);
     }
 
     @Test
