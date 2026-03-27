@@ -19,12 +19,33 @@ const WEEKDAYS = [
   { label: '周日', value: '1' },
 ];
 
+const parseCron = (cron?: string) => {
+  if (!cron) return null;
+  const parts = cron.trim().split(/\s+/);
+  if (parts.length < 6) return null;
+  const [, m, h, day, , week] = parts;
+  const hour = parseInt(h, 10);
+  const minute = parseInt(m, 10);
+  if (isNaN(hour) || isNaN(minute)) return null;
+  const t = dayjs().hour(hour).minute(minute).second(0);
+  if (week !== '?' && week !== '*') {
+    return { frequency: 'weekly' as const, time: t, weekday: week, monthDay: 1 };
+  }
+  if (day !== '*' && day !== '?') {
+    const d = parseInt(day, 10);
+    return { frequency: 'monthly' as const, time: t, weekday: '2', monthDay: isNaN(d) ? 1 : d };
+  }
+  return { frequency: 'daily' as const, time: t, weekday: '2', monthDay: 1 };
+};
+
 const CronInput: React.FC<CronInputProps> = ({ value, onChange }) => {
+  const parsed = parseCron(value);
   const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
-  const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
-  const [time, setTime] = useState<dayjs.Dayjs>(dayjs().hour(9).minute(0));
-  const [weekday, setWeekday] = useState('2');
-  const [monthDay, setMonthDay] = useState(1);
+  const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'monthly'>(parsed?.frequency ?? 'daily');
+  const [time, setTime] = useState<dayjs.Dayjs>(parsed?.time ?? dayjs().hour(9).minute(0));
+  const [weekday, setWeekday] = useState(parsed?.weekday ?? '2');
+  const [monthDay, setMonthDay] = useState(parsed?.monthDay ?? 1);
+  const [initialized, setInitialized] = useState(false);
 
   const generateCron = () => {
     const h = time.hour();
@@ -41,8 +62,20 @@ const CronInput: React.FC<CronInputProps> = ({ value, onChange }) => {
     }
   };
 
+  // Sync from external value changes (e.g. form.setFieldsValue)
   useEffect(() => {
-    if (mode === 'simple' && onChange) {
+    const p = parseCron(value);
+    if (p) {
+      setFrequency(p.frequency);
+      setTime(p.time);
+      setWeekday(p.weekday);
+      setMonthDay(p.monthDay);
+    }
+    setInitialized(true);
+  }, [value]);
+
+  useEffect(() => {
+    if (initialized && mode === 'simple' && onChange) {
       onChange(generateCron());
     }
   }, [frequency, time, weekday, monthDay, mode]);

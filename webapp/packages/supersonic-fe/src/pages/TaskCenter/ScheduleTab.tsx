@@ -46,8 +46,9 @@ const ScheduleTab: React.FC = () => {
     setLoading(true);
     try {
       const res = await getScheduleList({ current, pageSize });
-      setData(res?.records || []);
-      setPagination({ current, pageSize, total: res?.total || 0 });
+      const pageData = res?.data ?? res;
+      setData(pageData?.records || []);
+      setPagination({ current, pageSize, total: pageData?.total || 0 });
     } catch (error) {
       message.error('加载调度任务失败');
     } finally {
@@ -58,8 +59,9 @@ const ScheduleTab: React.FC = () => {
   const fetchDeliveryConfigs = async () => {
     try {
       const res = await getConfigList({ pageNum: 1, pageSize: 100 });
+      const pageData = res?.data ?? res;
       const configMap: Record<number, DeliveryConfig> = {};
-      (res.records || []).forEach((config: DeliveryConfig) => {
+      (pageData?.records || []).forEach((config: DeliveryConfig) => {
         configMap[config.id] = config;
       });
       setDeliveryConfigMap(configMap);
@@ -70,7 +72,8 @@ const ScheduleTab: React.FC = () => {
 
   const fetchDatasetNames = async () => {
     try {
-      const list = await getValidDataSetList();
+      const res = await getValidDataSetList();
+      const list = res?.data ?? res;
       const map: Record<number, string> = {};
       (Array.isArray(list) ? list : []).forEach((d: { id: number; name: string }) => {
         map[d.id] = d.name;

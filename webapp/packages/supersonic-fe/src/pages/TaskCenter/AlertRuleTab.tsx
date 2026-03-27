@@ -41,8 +41,9 @@ const AlertRuleTab: React.FC = () => {
     setLoading(true);
     try {
       const res = await getRuleList({ current, pageSize });
-      setData(res?.records || []);
-      setPagination({ current, pageSize, total: res?.total || 0 });
+      const pageData = res?.data ?? res;
+      setData(pageData?.records || []);
+      setPagination({ current, pageSize, total: pageData?.total || 0 });
     } catch (error) {
       message.error('加载告警规则失败');
     } finally {
@@ -52,7 +53,8 @@ const AlertRuleTab: React.FC = () => {
 
   const fetchDatasetNames = async () => {
     try {
-      const list = await getValidDataSetList();
+      const res = await getValidDataSetList();
+      const list = res?.data ?? res;
       const map: Record<number, string> = {};
       (Array.isArray(list) ? list : []).forEach((d: { id: number; name: string }) => {
         map[d.id] = d.name;

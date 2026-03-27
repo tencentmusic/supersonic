@@ -3,12 +3,7 @@ import { Button, Table, Tag, Space, Popconfirm, message, Switch, Tooltip, Tabs, 
 import dayjs from 'dayjs';
 import {
   PlusOutlined,
-  EditOutlined,
   DeleteOutlined,
-  UnorderedListOutlined,
-  SendOutlined,
-  BarChartOutlined,
-  SettingOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -23,6 +18,7 @@ import {
 import ConfigForm from './components/ConfigForm';
 import RecordList from './components/RecordList';
 import DeliveryDashboard from './components/DeliveryDashboard';
+import styles from './index.less';
 
 const DeliveryConfigPage: React.FC = () => {
   const [data, setData] = useState<DeliveryConfig[]>([]);
@@ -92,12 +88,21 @@ const DeliveryConfigPage: React.FC = () => {
     }
   };
 
+  const [testingId, setTestingId] = useState<number | null>(null);
+
   const handleTest = async (id: number) => {
+    setTestingId(id);
     try {
-      await testConfig(id);
-      message.success('测试推送已发送');
+      const res = await testConfig(id);
+      if (res?.code && res.code !== 200) {
+        message.error(res.msg || '测试推送失败');
+      } else {
+        message.success('测试推送已发送');
+      }
     } catch (error) {
       message.error('测试推送失败');
+    } finally {
+      setTestingId(null);
     }
   };
 
@@ -184,42 +189,32 @@ const DeliveryConfigPage: React.FC = () => {
     },
     {
       title: '操作',
-      width: 200,
+      width: 220,
       render: (_: any, record: DeliveryConfig) => (
         <Space size="small">
-          <Tooltip title="编辑">
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Tooltip title="测试发送">
-            <Button
-              type="link"
-              size="small"
-              icon={<SendOutlined />}
-              onClick={() => handleTest(record.id)}
-            />
-          </Tooltip>
-          <Tooltip title="推送记录">
-            <Button
-              type="link"
-              size="small"
-              icon={<UnorderedListOutlined />}
-              onClick={() => handleShowRecords(record)}
-            />
-          </Tooltip>
+          <Button type="link" size="small" onClick={() => handleEdit(record)}>
+            编辑
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            loading={testingId === record.id}
+            onClick={() => handleTest(record.id)}
+          >
+            测试
+          </Button>
+          <Button type="link" size="small" onClick={() => handleShowRecords(record)}>
+            记录
+          </Button>
           <Popconfirm
             title="确认删除此推送配置?"
             onConfirm={() => handleDelete(record.id)}
             okText="确认"
             cancelText="取消"
           >
-            <Tooltip title="删除">
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
-            </Tooltip>
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -229,19 +224,13 @@ const DeliveryConfigPage: React.FC = () => {
   const tabItems = [
     {
       key: 'dashboard',
-      label: (
-        <span>
-          <BarChartOutlined />
-          推送统计
-        </span>
-      ),
+      label: '推送统计',
       children: <DeliveryDashboard />,
     },
     {
       key: 'configs',
       label: (
         <span>
-          <SettingOutlined />
           渠道配置
           {autoDisabledCount > 0 && (
             <Badge count={autoDisabledCount} size="small" style={{ marginLeft: 8 }} />
@@ -288,7 +277,12 @@ const DeliveryConfigPage: React.FC = () => {
     <div style={{ padding: 24 }}>
       <h2 style={{ marginBottom: 16 }}>推送渠道</h2>
 
-      <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+      <Tabs
+        className={styles.deliveryTabs}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={tabItems}
+      />
 
       <ConfigForm
         visible={formVisible}

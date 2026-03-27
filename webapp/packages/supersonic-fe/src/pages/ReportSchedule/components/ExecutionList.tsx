@@ -33,8 +33,9 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
     setLoading(true);
     try {
       const res = await getExecutionList(scheduleId, { current, pageSize });
-      setData(res?.records || []);
-      setPagination({ current, pageSize, total: res?.total || 0 });
+      const pageData = res?.data ?? res;
+      setData(pageData?.records || []);
+      setPagination({ current, pageSize, total: pageData?.total || 0 });
     } catch (error) {
       message.error('加载执行记录失败');
     } finally {

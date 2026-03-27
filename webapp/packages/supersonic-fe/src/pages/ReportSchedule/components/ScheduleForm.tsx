@@ -37,7 +37,8 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
   const fetchValidDataSets = async () => {
     setLoadingDataSets(true);
     try {
-      const list = await getValidDataSetList();
+      const res = await getValidDataSetList();
+      const list = res?.data ?? res;
       setDataSets(Array.isArray(list) ? list : []);
     } catch (error) {
       console.error('Failed to load datasets', error);
@@ -51,8 +52,9 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ visible, record, initialDat
     setLoadingConfigs(true);
     try {
       const res = await getConfigList({ pageNum: 1, pageSize: 100 });
+      const pageData = res?.data ?? res;
       // Only show enabled configs
-      const enabledConfigs = (res.records || []).filter((c: DeliveryConfig) => c.enabled);
+      const enabledConfigs = (pageData?.records || []).filter((c: DeliveryConfig) => c.enabled);
       setDeliveryConfigs(enabledConfigs);
     } catch (error) {
       console.error('Failed to load delivery configs', error);
