@@ -299,15 +299,15 @@
   border-radius: 8px;
   box-shadow: none;
 
-  :global {
-    &.ant-input-affix-wrapper {
-      height: 32px;
-      padding: 0 11px;
-      border: 1px solid rgba(0, 10, 36, 0.12);
-      border-radius: 8px;
-      box-shadow: none;
-    }
+  &:global(.ant-input-affix-wrapper) {
+    height: 32px;
+    padding: 0 11px;
+    border: 1px solid rgba(0, 10, 36, 0.12);
+    border-radius: 8px;
+    box-shadow: none;
+  }
 
+  :global {
     .ant-input {
       height: 22px;
       padding: 0;

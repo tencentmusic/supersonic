@@ -1,0 +1,27 @@
+.deliveryTabs {
+  :global(.ant-tabs-ink-bar) {
+    display: none;
+  }
+
+  :global(.ant-tabs-nav::before) {
+    border-bottom: 0;
+  }
+
+  :global(.ant-tabs-tab) {
+    padding: 8px 0;
+  }
+
+  :global(.ant-tabs-tab + .ant-tabs-tab) {
+    margin-left: 16px;
+  }
+
+  :global(.ant-tabs-tab-btn) {
+    color: rgba(0, 10, 36, 0.65);
+    font-weight: 500;
+  }
+
+  :global(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+    color: rgba(0, 10, 36, 0.85);
+  }
+}
+

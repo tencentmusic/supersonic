@@ -214,11 +214,12 @@ const ParseTip: React.FC<Props> = ({
   };
 
   const { type: agentType } = properties || {};
+  const supportsReQuery = queryMode !== 'PLAIN_TEXT' && queryMode !== 'REPORT_SCHEDULE';
 
   const tipNode = (
     <div className={`${prefixCls}-tip`}>
       {getTipNode({ parseInfo: currentParseInfo, dimensionFilters, entityInfo })}
-      {!(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode()}
+      {supportsReQuery && !(!!agentType && queryMode !== 'LLM_S2SQL') && getFiltersNode()}
     </div>
   );
 
