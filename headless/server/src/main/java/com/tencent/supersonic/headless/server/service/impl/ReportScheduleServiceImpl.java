@@ -4,8 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
@@ -17,6 +21,7 @@ import com.tencent.supersonic.headless.server.service.ReportScheduleService;
 import com.tencent.supersonic.headless.server.task.ReportScheduleJob;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -115,6 +120,7 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         if (schedule.getRetryInterval() == null) {
             schedule.setRetryInterval(30);
         }
+        validateQueryConfig(schedule.getQueryConfig());
         baseMapper.insert(schedule);
 
         JobDataMap jobDataMap = new JobDataMap();
@@ -145,6 +151,7 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
             }
         }
 
+        validateQueryConfig(schedule.getQueryConfig());
         schedule.setUpdatedAt(new Date());
         baseMapper.updateById(schedule);
 
@@ -156,6 +163,65 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
             reschedule(schedule.getId(), schedule.getCronExpression());
         }
         return schedule;
+    }
+
+    /**
+     * Validates the queryConfig JSON when it can be parsed as a {@link QueryStructReq}. Ensures
+     * date-related fields are consistent with the chosen {@link DateConf.DateMode}. Silently skips
+     * validation if the JSON represents a different config format (e.g. SqlTemplateConfig or
+     * QuerySqlReq).
+     */
+    private void validateQueryConfig(String queryConfig) {
+        if (StringUtils.isBlank(queryConfig)) {
+            return;
+        }
+        QueryStructReq req;
+        try {
+            req = JsonUtil.toObject(queryConfig, QueryStructReq.class);
+        } catch (Exception e) {
+            // Not a QueryStructReq — may be SqlTemplateConfig or QuerySqlReq; skip validation
+            return;
+        }
+        if (req == null || req.getDateInfo() == null) {
+            return;
+        }
+        DateConf dateInfo = req.getDateInfo();
+        DateConf.DateMode mode = dateInfo.getDateMode();
+        if (mode == null) {
+            return;
+        }
+        switch (mode) {
+            case BETWEEN:
+                if (StringUtils.isBlank(dateInfo.getDateField())
+                        || StringUtils.isBlank(dateInfo.getStartDate())
+                        || StringUtils.isBlank(dateInfo.getEndDate())) {
+                    throw new IllegalArgumentException(
+                            "BETWEEN 模式需要 dateField、startDate 和 endDate");
+                }
+                break;
+            case RECENT:
+                if (StringUtils.isBlank(dateInfo.getDateField()) || dateInfo.getUnit() == null
+                        || dateInfo.getUnit() <= 0) {
+                    throw new IllegalArgumentException("RECENT 模式需要 dateField 和 unit");
+                }
+                break;
+            case ALL:
+                if (req.getQueryType() == QueryType.DETAIL) {
+                    throw new IllegalArgumentException("明细调度不支持 ALL 模式，请选择固定区间或最近 N 天");
+                }
+                break;
+            default:
+                break;
+        }
+        if (req.getQueryType() == QueryType.DETAIL) {
+            if (CollectionUtils.isEmpty(req.getDimensions())
+                    && CollectionUtils.isEmpty(req.getGroups())) {
+                throw new IllegalArgumentException("明细调度需要至少一个查询列");
+            }
+            if (req.getLimit() <= 0) {
+                throw new IllegalArgumentException("明细调度需要有效的 limit");
+            }
+        }
     }
 
     @Override

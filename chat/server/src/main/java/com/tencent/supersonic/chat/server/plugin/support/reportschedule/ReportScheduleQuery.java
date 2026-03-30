@@ -775,7 +775,13 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                         .isNotBlank(parseInfo.getSqlInfo().getCorrectedS2SQL()))) {
             return true;
         }
-        return parseInfo.getMetrics() != null && !parseInfo.getMetrics().isEmpty();
+        if (parseInfo.getMetrics() != null && !parseInfo.getMetrics().isEmpty()) {
+            return true;
+        }
+        // Detail queries (no metrics) are schedulable as long as we have a dataSetId.
+        return parseInfo.getQueryType() != null
+                && com.tencent.supersonic.common.pojo.enums.QueryType.DETAIL
+                        .equals(parseInfo.getQueryType());
     }
 
     private String buildQueryConfig(SemanticParseInfo parseInfo) {
@@ -793,6 +799,14 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         // SQL-based 查询含硬编码时间过滤，不支持直接订阅，返回 null 触发 ERROR_UNSUPPORTED_REPORT_CONTEXT
         // if (parseInfo.getSqlInfo() != null) { ... }
         if (parseInfo.getMetrics() != null && !parseInfo.getMetrics().isEmpty()) {
+            QueryStructReq structReq = QueryReqBuilder.buildStructReq(parseInfo);
+            structReq.setDataSetId(parseInfo.getDataSetId());
+            return JsonUtil.toString(structReq);
+        }
+        // Detail queries without metrics — build config from dimensions, dateInfo, orders, limit
+        if (parseInfo.getQueryType() != null
+                && com.tencent.supersonic.common.pojo.enums.QueryType.DETAIL
+                        .equals(parseInfo.getQueryType())) {
             QueryStructReq structReq = QueryReqBuilder.buildStructReq(parseInfo);
             structReq.setDataSetId(parseInfo.getDataSetId());
             return JsonUtil.toString(structReq);

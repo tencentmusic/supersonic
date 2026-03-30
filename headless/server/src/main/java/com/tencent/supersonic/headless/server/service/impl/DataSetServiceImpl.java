@@ -15,13 +15,16 @@ import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
+import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.request.*;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ValidDataSetResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
@@ -61,6 +64,10 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     @Lazy
     @Autowired
     private ReportScheduleService reportScheduleService;
+
+    @Lazy
+    @Autowired
+    private SchemaService schemaService;
 
     @Override
     public DataSetResp save(DataSetReq dataSetReq, User user) {
@@ -127,11 +134,28 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     }
 
     @Override
-    public List<DataSetResp> getValidDataSetList() {
+    public List<ValidDataSetResp> getValidDataSetList() {
         QueryWrapper<DataSetDO> wrapper = new QueryWrapper<>();
         wrapper.lambda().in(DataSetDO::getStatus,
                 Arrays.asList(StatusEnum.ONLINE.getCode(), StatusEnum.OFFLINE.getCode()));
-        return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
+        return list(wrapper).stream().map(dataSetDO -> {
+            DataSetResp resp = convert(dataSetDO);
+            String partitionDimName = null;
+            try {
+                DataSetSchema schema = schemaService.getDataSetSchema(resp.getId());
+                if (schema != null) {
+                    SchemaElement partitionDim = schema.getPartitionDimension();
+                    if (partitionDim != null) {
+                        partitionDimName = partitionDim.getName();
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get partition dimension for dataSet {}: {}", resp.getId(),
+                        e.getMessage());
+            }
+            return ValidDataSetResp.builder().id(resp.getId()).name(resp.getName())
+                    .domainId(resp.getDomainId()).partitionDimension(partitionDimName).build();
+        }).collect(Collectors.toList());
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
 import com.tencent.supersonic.headless.api.pojo.request.DataSetReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.ValidDataSetResp;
 import com.tencent.supersonic.headless.server.service.DataSetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,7 +62,7 @@ public class DataSetController {
      * 获取当前租户下有效（ONLINE/OFFLINE）的数据集列表，供报表调度等场景选择关联数据集。
      */
     @GetMapping("/getValidDataSetList")
-    public List<DataSetResp> getValidDataSetList() {
+    public List<ValidDataSetResp> getValidDataSetList() {
         return dataSetService.getValidDataSetList();
     }
 

@@ -375,4 +375,126 @@ class ReportScheduleServiceImplTest {
         verify(reportScheduleMapper).updateById(captor.capture());
         assertEquals("REPORT.report_5", captor.getValue().getQuartzJobKey());
     }
+
+    // ── Phase 2: queryConfig validation tests ──────────────────────────
+
+    @Test
+    void createScheduleShouldRejectBetweenWithoutDateField() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+                "{\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createSchedule(schedule, owner));
+        assertEquals("BETWEEN 模式需要 dateField、startDate 和 endDate", ex.getMessage());
+    }
+
+    @Test
+    void createScheduleShouldRejectBetweenWithoutStartDate() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        // DateConf.startDate has a default value, so we must explicitly null it
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+                "{\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\",\"startDate\":null,\"endDate\":\"2025-03-10\"}}");
+
+        assertThrows(IllegalArgumentException.class, () -> service.createSchedule(schedule, owner));
+    }
+
+    @Test
+    void createScheduleShouldRejectRecentWithoutDateField() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+                "{\"dateInfo\":{\"dateMode\":\"RECENT\",\"unit\":7,\"period\":\"DAY\"}}");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createSchedule(schedule, owner));
+        assertEquals("RECENT 模式需要 dateField 和 unit", ex.getMessage());
+    }
+
+    @Test
+    void createScheduleShouldRejectAllModeForDetailQuery() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+                "{\"dateInfo\":{\"dateMode\":\"ALL\",\"dateField\":\"workday\"},\"queryType\":\"DETAIL\"}");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createSchedule(schedule, owner));
+        assertEquals("明细调度不支持 ALL 模式，请选择固定区间或最近 N 天", ex.getMessage());
+    }
+
+    @Test
+    void createScheduleShouldAcceptValidBetweenConfig() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+                "{\"queryType\":\"DETAIL\",\"dimensions\":[{\"name\":\"workday\",\"bizName\":\"workday\"},"
+                        + "{\"name\":\"order_id\",\"bizName\":\"order_id\"}],"
+                        + "\"groups\":[\"workday\",\"order_id\"],\"limit\":500,"
+                        + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
+                        + "\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
+
+        service.createSchedule(schedule, owner);
+        verify(reportScheduleMapper).insert(any(ReportScheduleDO.class));
+    }
+
+    @Test
+    void createScheduleShouldRejectDetailWithoutDimensions() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        ReportScheduleDO schedule =
+                buildScheduleWithQueryConfig("{\"queryType\":\"DETAIL\",\"limit\":500,"
+                        + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
+                        + "\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createSchedule(schedule, owner));
+        assertEquals("明细调度需要至少一个查询列", ex.getMessage());
+    }
+
+    @Test
+    void createScheduleShouldRejectDetailWithZeroLimit() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        // limit=0 should be rejected; omitting limit defaults to 500 which is valid
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+                "{\"queryType\":\"DETAIL\",\"dimensions\":[{\"name\":\"workday\",\"bizName\":\"workday\"}],"
+                        + "\"groups\":[\"workday\"],\"limit\":0,"
+                        + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
+                        + "\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createSchedule(schedule, owner));
+        assertEquals("明细调度需要有效的 limit", ex.getMessage());
+    }
+
+    @Test
+    void createScheduleShouldAcceptBlankQueryConfig() {
+        when(userService.getUserById(7L)).thenReturn(owner);
+        when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
+
+        ReportScheduleDO schedule = buildScheduleWithQueryConfig(null);
+
+        service.createSchedule(schedule, owner);
+        verify(reportScheduleMapper).insert(any(ReportScheduleDO.class));
+    }
+
+    private ReportScheduleDO buildScheduleWithQueryConfig(String queryConfig) {
+        ReportScheduleDO schedule = new ReportScheduleDO();
+        schedule.setOwnerId(7L);
+        schedule.setDatasetId(8L);
+        schedule.setCronExpression("0 30 14 * * ?");
+        schedule.setTenantId(1L);
+        schedule.setQueryConfig(queryConfig);
+        return schedule;
+    }
 }
