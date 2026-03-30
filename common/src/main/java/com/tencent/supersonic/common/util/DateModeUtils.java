@@ -330,7 +330,11 @@ public class DateModeUtils {
                 dateStr = listDateStr(dateInfo);
                 break;
             case RECENT:
-                dateStr = recentDateStr(dateDate, dateInfo);
+                if (dateDate != null) {
+                    dateStr = recentDateStr(dateDate, dateInfo);
+                } else {
+                    dateStr = defaultRecentDateInfo(dateInfo);
+                }
                 break;
             case AVAILABLE:
                 dateStr = hasDataModeStr(dateDate, dateInfo);

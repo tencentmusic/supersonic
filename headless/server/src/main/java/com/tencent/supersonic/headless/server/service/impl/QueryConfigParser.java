@@ -70,6 +70,9 @@ public class QueryConfigParser {
         }
 
         // Path 2: Try QueryStructReq (structured query)
+        // Return as-is instead of calling convert() — the StructQuery translator path
+        // handles dateInfo properly via SqlGenerateUtils.getDateWhereClause() and also
+        // generates correct SELECT columns from the dataset schema.
         try {
             QueryStructReq structReq = JsonUtil.toObject(queryConfig, QueryStructReq.class);
             if (structReq != null) {
@@ -77,7 +80,7 @@ public class QueryConfigParser {
                     structReq.setDataSetId(datasetId);
                 }
                 if (structReq.getDataSetId() != null) {
-                    return structReq.convert(true);
+                    return structReq;
                 }
             }
         } catch (Exception e) {

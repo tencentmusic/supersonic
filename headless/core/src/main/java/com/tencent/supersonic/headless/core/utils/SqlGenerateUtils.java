@@ -82,7 +82,7 @@ public class SqlGenerateUtils {
             }
         }
 
-        return result;
+        return StringUtils.isNotBlank(result) ? result : "*";
     }
 
     public String getSelect(StructQuery structQuery, Map<String, String> deriveMetrics) {
@@ -97,7 +97,7 @@ public class SqlGenerateUtils {
             }
         }
 
-        return result;
+        return StringUtils.isNotBlank(result) ? result : "*";
     }
 
     public String getSelectField(final Aggregator agg) {
