@@ -401,10 +401,16 @@ const AdminTenant: React.FC = () => {
                 label="租户代码"
                 rules={[
                   { required: true, message: '请输入租户代码' },
-                  { pattern: /^[a-zA-Z0-9_-]+$/, message: '只能包含字母、数字、下划线和连字符' },
+                  { pattern: /^[a-z0-9_-]+$/, message: '只能包含小写字母、数字、下划线和连字符' },
                 ]}
               >
-                <Input placeholder="请输入租户代码" disabled={!!editingTenant} />
+                <Input
+                  placeholder="请输入租户代码"
+                  disabled={!!editingTenant}
+                  onChange={(e) => {
+                    form.setFieldValue('code', e.target.value?.toLowerCase());
+                  }}
+                />
               </Form.Item>
             </Col>
           </Row>

@@ -6,7 +6,6 @@ import com.tencent.supersonic.auth.api.authentication.service.PermissionService;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.PermissionDO;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.PermissionDOMapper;
-import com.tencent.supersonic.auth.authentication.persistence.mapper.RoleDOMapper;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.UserDOMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,13 +22,10 @@ import java.util.stream.Collectors;
 public class PermissionServiceImpl implements PermissionService {
 
     private final PermissionDOMapper permissionDOMapper;
-    private final RoleDOMapper roleDOMapper;
     private final UserDOMapper userDOMapper;
 
-    public PermissionServiceImpl(PermissionDOMapper permissionDOMapper, RoleDOMapper roleDOMapper,
-            UserDOMapper userDOMapper) {
+    public PermissionServiceImpl(PermissionDOMapper permissionDOMapper, UserDOMapper userDOMapper) {
         this.permissionDOMapper = permissionDOMapper;
-        this.roleDOMapper = roleDOMapper;
         this.userDOMapper = userDOMapper;
     }
 
@@ -117,9 +112,7 @@ public class PermissionServiceImpl implements PermissionService {
                     .collect(Collectors.toList());
         }
 
-        // TODO: 用户角色现在通过 s2_user_role 关联表获取
-        // 需要实现 UserRoleDOMapper 来查询用户的角色
-        // 目前返回空权限列表，等待后续实现
+        // Non-admin users: resolve permissions via user-role-role_permission mapping.
         List<PermissionDO> permissions = permissionDOMapper.selectByUserId(userId);
         return permissions.stream().map(PermissionDO::getCode).collect(Collectors.toList());
     }

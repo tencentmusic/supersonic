@@ -6,7 +6,6 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementMatch;
 import com.tencent.supersonic.headless.api.pojo.SchemaElementType;
-import com.tencent.supersonic.headless.api.pojo.SchemaMapInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.MapModeEnum;
 import com.tencent.supersonic.headless.chat.ChatQueryContext;
 import com.tencent.supersonic.headless.chat.knowledge.EmbeddingResult;
@@ -34,9 +33,13 @@ public class EmbeddingMapper extends BaseMapper {
 
     public void doMap(ChatQueryContext chatQueryContext) {
 
-        // TODO: 如果是在LOOSE执行过了，那么在LLM_OR_RULE阶段可以不用执行，所以这里缺乏一个状态来传递，暂时先忽略这个浪费行为吧
-        SchemaMapInfo mappedInfo = chatQueryContext.getMapInfo();
-
+        // Avoid duplicated embedding retrieval when mapInfo already has matched elements
+        // and this stage is entered again in LLM_OR_RULE fallback path.
+        if (chatQueryContext.getRequest().getText2SQLType() == Text2SQLType.LLM_OR_RULE
+                && !chatQueryContext.getMapInfo().isEmpty()) {
+            log.info("skip embedding mapper because mapInfo already contains matched elements");
+            return;
+        }
         // 1. Query from embedding by queryText
         EmbeddingMatchStrategy matchStrategy = ContextUtils.getBean(EmbeddingMatchStrategy.class);
         List<EmbeddingResult> matchResults = getMatches(chatQueryContext, matchStrategy);

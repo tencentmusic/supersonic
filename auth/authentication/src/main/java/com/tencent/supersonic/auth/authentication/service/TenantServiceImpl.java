@@ -3,13 +3,19 @@ package com.tencent.supersonic.auth.authentication.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.Tenant;
 import com.tencent.supersonic.auth.api.authentication.service.TenantService;
+import com.tencent.supersonic.auth.api.authentication.service.UsageTrackingService;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.TenantDO;
+import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.TenantDOMapper;
+import com.tencent.supersonic.auth.authentication.persistence.mapper.UserDOMapper;
 import com.tencent.supersonic.common.pojo.PlanQuota;
+import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.service.SubscriptionInfoProvider;
 import com.tencent.supersonic.common.util.BeanMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +38,14 @@ public class TenantServiceImpl implements TenantService {
 
     private final TenantDOMapper tenantDOMapper;
     private final SubscriptionInfoProvider subscriptionInfoProvider;
+    private final UserDOMapper userDOMapper;
+    private final UsageTrackingService usageTrackingService;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     @Transactional
     public Tenant createTenant(Tenant tenant) {
+        tenant.setCode(normalizeTenantCode(tenant.getCode()));
         TenantDO tenantDO = convertToTenantDO(tenant);
         tenantDO.setStatus(STATUS_ACTIVE);
         tenantDO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
@@ -50,6 +60,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @Transactional
     public Tenant updateTenant(Tenant tenant) {
+        tenant.setCode(normalizeTenantCode(tenant.getCode()));
         TenantDO tenantDO = convertToTenantDO(tenant);
         tenantDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
@@ -67,8 +78,12 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Optional<Tenant> getTenantByCode(String code) {
+        String normalizedCode = normalizeTenantCode(code);
+        if (StringUtils.isBlank(normalizedCode)) {
+            return Optional.empty();
+        }
         LambdaQueryWrapper<TenantDO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TenantDO::getCode, code);
+        wrapper.apply("LOWER(code) = {0}", normalizedCode);
         TenantDO tenantDO = tenantDOMapper.selectOne(wrapper);
         return Optional.ofNullable(tenantDO).map(this::convertToTenant);
     }
@@ -132,8 +147,13 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         Integer maxUsers = quota.get().getMaxUsers();
-        return !quota.get().isUnlimited(maxUsers);
-        // TODO: count actual users with tenant_id and compare with maxUsers
+        if (quota.get().isUnlimited(maxUsers)) {
+            return false;
+        }
+        LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserDO::getTenantId, tenantId).eq(UserDO::getStatus, 1);
+        long currentUsers = userDOMapper.selectCount(wrapper);
+        return currentUsers >= maxUsers;
     }
 
     @Override
@@ -143,8 +163,11 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         Integer maxDatasets = quota.get().getMaxDatasets();
-        return !quota.get().isUnlimited(maxDatasets);
-        // TODO: count actual datasets with tenant_id and compare with maxDatasets
+        if (quota.get().isUnlimited(maxDatasets)) {
+            return false;
+        }
+        long currentDatasets = countDatasetByTenantId(tenantId);
+        return currentDatasets >= maxDatasets;
     }
 
     @Override
@@ -154,8 +177,11 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         Integer maxModels = quota.get().getMaxModels();
-        return !quota.get().isUnlimited(maxModels);
-        // TODO: count actual models with tenant_id and compare with maxModels
+        if (quota.get().isUnlimited(maxModels)) {
+            return false;
+        }
+        long currentModels = countModelByTenantId(tenantId);
+        return currentModels >= maxModels;
     }
 
     @Override
@@ -165,8 +191,11 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         Integer maxAgents = quota.get().getMaxAgents();
-        return !quota.get().isUnlimited(maxAgents);
-        // TODO: count actual agents with tenant_id and compare with maxAgents
+        if (quota.get().isUnlimited(maxAgents)) {
+            return false;
+        }
+        long currentAgents = countAgentByTenantId(tenantId);
+        return currentAgents >= maxAgents;
     }
 
     @Override
@@ -176,14 +205,21 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         Integer maxApiCalls = quota.get().getMaxApiCallsPerDay();
-        return !quota.get().isUnlimited(maxApiCalls);
-        // TODO: check today's API call count from usage table and compare with maxApiCalls
+        if (quota.get().isUnlimited(maxApiCalls)) {
+            return false;
+        }
+        int currentApiCalls = usageTrackingService.getTodayApiCalls(tenantId);
+        return currentApiCalls >= maxApiCalls;
     }
 
     @Override
     public boolean isTenantCodeAvailable(String code) {
+        String normalizedCode = normalizeTenantCode(code);
+        if (StringUtils.isBlank(normalizedCode)) {
+            return false;
+        }
         LambdaQueryWrapper<TenantDO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TenantDO::getCode, code);
+        wrapper.apply("LOWER(code) = {0}", normalizedCode);
         return tenantDOMapper.selectCount(wrapper) == 0;
     }
 
@@ -197,5 +233,29 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = new Tenant();
         BeanMapper.mapper(tenantDO, tenant);
         return tenant;
+    }
+
+    private long countDatasetByTenantId(Long tenantId) {
+        Long count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(1) FROM s2_data_set WHERE tenant_id = ? AND status <> ?", Long.class,
+                tenantId, StatusEnum.DELETED.getCode());
+        return count == null ? 0L : count;
+    }
+
+    private long countModelByTenantId(Long tenantId) {
+        Long count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(1) FROM s2_model WHERE tenant_id = ? AND status <> ?", Long.class,
+                tenantId, StatusEnum.DELETED.getCode());
+        return count == null ? 0L : count;
+    }
+
+    private long countAgentByTenantId(Long tenantId) {
+        Long count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(1) FROM s2_agent WHERE tenant_id = ?", Long.class, tenantId);
+        return count == null ? 0L : count;
+    }
+
+    private String normalizeTenantCode(String code) {
+        return StringUtils.trimToEmpty(code).toLowerCase();
     }
 }

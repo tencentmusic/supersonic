@@ -3,7 +3,9 @@ package com.tencent.supersonic.common.interceptor;
 import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.service.CurrentUserProvider;
+import com.tencent.supersonic.common.service.TenantCodeResolver;
 import com.tencent.supersonic.common.util.ContextUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,6 +45,15 @@ public class TenantInterceptor implements HandlerInterceptor {
         return null;
     }
 
+    private TenantCodeResolver getTenantCodeResolver() {
+        try {
+            return ContextUtils.getBean(TenantCodeResolver.class);
+        } catch (Exception e) {
+            log.error("TenantCodeResolver not available: {}", e.getMessage());
+            return null;
+        }
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws Exception {
@@ -58,7 +69,10 @@ public class TenantInterceptor implements HandlerInterceptor {
         if (tenantId != null && tenantId > 0) {
             TenantContext.setTenantId(tenantId);
         } else {
-            // Tenant ID not resolved, try to use default
+            if (config != null && config.isRequired()) {
+                throw new InvalidPermissionException("无法解析有效租户信息");
+            }
+            // Tenant ID not resolved, fallback to default only when tenant context is optional.
             Long defaultTenantId = config != null ? config.getDefaultTenantId() : 1L;
             TenantContext.setTenantId(defaultTenantId);
             log.warn("Using default tenant: tenantId={} for path={}", defaultTenantId, requestUri);
@@ -115,15 +129,86 @@ public class TenantInterceptor implements HandlerInterceptor {
      * Resolves tenant ID from the subdomain. Expected format: {tenant-code}.example.com
      */
     private Long resolveTenantFromSubdomain(HttpServletRequest request) {
-        String serverName = request.getServerName();
-        if (StringUtils.isNotBlank(serverName)) {
+        String serverName = extractRequestHost(request);
+        if (StringUtils.isNotBlank(serverName) && !isLoopbackOrIp(serverName)) {
             // Extract first part of hostname as tenant code
             String[] parts = serverName.split("\\.");
             if (parts.length > 2) {
-                String tenantCode = parts[0];
-                // TODO: Look up tenant ID from tenant code in database
-                log.debug("Extracted tenant code from subdomain: {}", tenantCode);
+                String tenantCode = StringUtils.trimToEmpty(parts[0]).toLowerCase();
+                Long tenantId = resolveTenantIdByCode(tenantCode);
+                if (tenantId != null && tenantId > 0) {
+                    return tenantId;
+                }
+                log.warn("[TenantResolve] Tenant not found by subdomain code: {}", tenantCode);
             }
+        }
+        return null;
+    }
+
+    private String extractRequestHost(HttpServletRequest request) {
+        String forwardedHost = request.getHeader("X-Forwarded-Host");
+        if (StringUtils.isNotBlank(forwardedHost)) {
+            return normalizeHost(forwardedHost.split(",")[0]);
+        }
+        String forwarded = request.getHeader("Forwarded");
+        if (StringUtils.isNotBlank(forwarded)) {
+            for (String entry : forwarded.split(",")) {
+                for (String part : entry.split(";")) {
+                    String trimmed = StringUtils.trimToEmpty(part);
+                    if (StringUtils.startsWithIgnoreCase(trimmed, "host=")) {
+                        return normalizeHost(trimmed.substring(5));
+                    }
+                }
+            }
+        }
+        String host = request.getHeader("Host");
+        if (StringUtils.isNotBlank(host)) {
+            return normalizeHost(host);
+        }
+        return normalizeHost(request.getServerName());
+    }
+
+    private String normalizeHost(String rawHost) {
+        String host = StringUtils.trimToEmpty(rawHost).toLowerCase();
+        if (StringUtils.isBlank(host)) {
+            return null;
+        }
+        if (host.startsWith("\"") && host.endsWith("\"") && host.length() > 1) {
+            host = host.substring(1, host.length() - 1);
+        }
+        int colonIndex = host.indexOf(':');
+        if (colonIndex > -1) {
+            host = host.substring(0, colonIndex);
+        }
+        return StringUtils.trimToNull(host);
+    }
+
+    private boolean isLoopbackOrIp(String host) {
+        return StringUtils.equalsAnyIgnoreCase(host, "localhost", "127.0.0.1", "::1")
+                || host.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
+    }
+
+    /**
+     * Resolve tenant ID by tenant code via tenantService bean.
+     *
+     * <p>
+     * This interceptor sits in common module; to avoid direct module dependency on auth-api,
+     * reflection is used to call tenantService.getTenantByCode(code) -> Optional<Tenant>.
+     * </p>
+     */
+    private Long resolveTenantIdByCode(String tenantCode) {
+        if (StringUtils.isBlank(tenantCode)) {
+            return null;
+        }
+        TenantCodeResolver resolver = getTenantCodeResolver();
+        if (resolver == null) {
+            return null;
+        }
+        try {
+            return resolver.resolveTenantId(tenantCode);
+        } catch (Exception e) {
+            log.error("[TenantResolve] Failed to resolve tenant by code {}: {}", tenantCode,
+                    e.getMessage());
         }
         return null;
     }

@@ -181,7 +181,6 @@ export async function assignRoleToUser(data: {
   userId: number;
   roleIds: number[];
 }): Promise<Result<void>> {
-  // TODO: Implement user role assignment API
   return request.post<Result<void>>(`${process.env.AUTH_API_BASE_URL}user/role`, { data });
 }
 

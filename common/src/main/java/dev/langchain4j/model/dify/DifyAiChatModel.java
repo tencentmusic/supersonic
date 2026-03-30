@@ -10,6 +10,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import lombok.Builder;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
 import static java.util.Collections.singletonList;
 
+@Slf4j
 public class DifyAiChatModel implements ChatLanguageModel {
 
     private static final String CONTENT_TYPE_JSON = "application/json";
@@ -70,10 +72,13 @@ public class DifyAiChatModel implements ChatLanguageModel {
         ensureNotEmpty(messages, "messages");
         DifyResult difyResult =
                 this.difyClient.generate(messages.get(0).toString(), this.getUserName());
-        System.out.println(difyResult.toString());
 
         if (!isNullOrEmpty(toolSpecifications)) {
-            // TODO
+            // Dify workflow endpoint currently does not support LangChain4j tool schema
+            // passthrough.
+            // Keep behavior explicit to avoid silent semantic mismatch.
+            log.warn("DifyAiChatModel ignores toolSpecifications currently, size={}",
+                    toolSpecifications.size());
         }
 
         return Response.from(AiMessage.from(difyResult.getAnswer()));
