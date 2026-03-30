@@ -33,6 +33,7 @@
 | [03-export-async.md](report/03-export-async.md) | 同步/异步导出分流、ExportTaskService、流式写入防 OOM | 已上线 |
 | [04-scheduler-delivery.md](report/04-scheduler-delivery.md) | Quartz 动态调度、集群防重复、失败重试、多渠道投递策略 | 已上线 |
 | [05-governance.md](report/05-governance.md) | 模板下线保护、影响分析、审计日志 | 已上线 |
+| [07-detail-report-schedule.md](report/07-detail-report-schedule.md) | 明细报表定时推送、固定区间冻结、结构化快照回放 | 待实施 |
 | [P0-上线收口实施方案.md](report/P0-上线收口实施方案.md) | P0 上线收口：联调、监控、审计回放、Runbook、压测 | 待实施 |
 | [backlog.md](report/backlog.md) | 待开发功能清单 | 待开发 |
 
