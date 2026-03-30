@@ -1,16 +1,29 @@
 import request from './request';
 
 const BASE = '/api/v1/reportSchedules';
+const CHAT_CONF_BASE = '/api/chat/conf';
 
 /** 有效数据集（供调度关联选择），仅包含系统已配置且状态为 ONLINE/OFFLINE 的数据集 */
 export interface ValidDataSetItem {
   id: number;
   name: string;
   domainId?: number;
+  partitionDimension?: string;
+}
+
+export interface DataSetSchemaField {
+  id: number;
+  name: string;
+  bizName: string;
 }
 
 export function getValidDataSetList(): Promise<ValidDataSetItem[]> {
   return request(`${process.env.API_BASE_URL || ''}dataSet/getValidDataSetList`, { method: 'GET' });
+}
+
+/** Returns DataSetSchema with dimensions: SchemaElement[] */
+export function getDataSetSchema(dataSetId: number): Promise<any> {
+  return request(`${CHAT_CONF_BASE}/getDataSetSchema/${dataSetId}`, { method: 'GET' });
 }
 
 export interface ReportSchedule {
