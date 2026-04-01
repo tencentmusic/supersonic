@@ -413,13 +413,11 @@ public class SchemaServiceImpl implements SchemaService {
     public List<ItemResp> getDomainDataSetTree() {
         List<DomainResp> domainResps = domainService.getDomainList();
         List<ItemResp> itemResps = domainResps.stream().map(domain -> new ItemResp(domain.getId(),
-                domain.getParentId(), domain.getName(), TypeEnums.DOMAIN))
-                .toList();
+                domain.getParentId(), domain.getName(), TypeEnums.DOMAIN)).toList();
         Map<Long, ItemResp> itemRespMap =
                 itemResps.stream().collect(Collectors.toMap(ItemResp::getId, item -> item));
-        List<DataSetResp> dataSetResps = dataSetService.getDataSetList(MetaFilter.builder()
-                        .status(StatusEnum.ONLINE.getCode())
-                .build());
+        List<DataSetResp> dataSetResps = dataSetService
+                .getDataSetList(MetaFilter.builder().status(StatusEnum.ONLINE.getCode()).build());
         for (DataSetResp dataSetResp : dataSetResps) {
             ItemResp itemResp = itemRespMap.get(dataSetResp.getDomainId());
             if (itemResp != null) {

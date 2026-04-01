@@ -13,6 +13,7 @@ public class QueryResp {
     private Long questionId;
     private Date createTime;
     private Long chatId;
+    private Integer agentId;
     private Integer score;
     private String feedback;
     private String queryText;

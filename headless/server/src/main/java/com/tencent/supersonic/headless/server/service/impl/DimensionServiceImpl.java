@@ -475,40 +475,39 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         if (StringUtils.isNotEmpty(dimensionDO.getDimValueMaps())) {
             dimValueMapList = JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class);
         }
-        
+
         // 预先处理请求列表，设置默认的 techName
         for (DimValueMap dimValueMap : req.getDimValueMaps()) {
             if (StringUtils.isEmpty(dimValueMap.getTechName())) {
                 dimValueMap.setTechName(dimValueMap.getValue());
             }
         }
-        
+
         // 构建现有数据的 Map，用于快速查找 (value -> DimValueMap)
         Map<String, DimValueMap> existingMap = dimValueMapList.stream()
                 .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
-        
+
         // 收集需要删除的 values（alias 为空的）
         Set<String> valuesToDelete = req.getDimValueMaps().stream()
                 .filter(dimValueMap -> CollectionUtils.isEmpty(dimValueMap.getAlias()))
-                .map(DimValueMap::getValue)
-                .collect(Collectors.toSet());
-        
+                .map(DimValueMap::getValue).collect(Collectors.toSet());
+
         // 一次性删除所有需要删除的数据
         if (!valuesToDelete.isEmpty()) {
-            dimValueMapList = dimValueMapList.stream()
-                    .filter(map -> !valuesToDelete.contains(map.getValue()))
-                    .collect(Collectors.toList());
+            dimValueMapList =
+                    dimValueMapList.stream().filter(map -> !valuesToDelete.contains(map.getValue()))
+                            .collect(Collectors.toList());
             // 同时从 existingMap 中移除
             existingMap.keySet().removeAll(valuesToDelete);
         }
-        
+
         // 处理新增和更新
         for (DimValueMap dimValueMap : req.getDimValueMaps()) {
             // 跳过需要删除的
             if (CollectionUtils.isEmpty(dimValueMap.getAlias())) {
                 continue;
             }
-            
+
             String value = dimValueMap.getValue();
             if (!existingMap.containsKey(value)) {
                 // 新增
@@ -520,7 +519,7 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                 existing.setAlias(dimValueMap.getAlias());
             }
         }
-        
+
         dimensionDO.setDimValueMaps(JsonUtil.toString(dimValueMapList));
         updateById(dimensionDO);
         return true;
