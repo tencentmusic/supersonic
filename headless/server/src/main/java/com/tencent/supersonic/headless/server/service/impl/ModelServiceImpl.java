@@ -1,13 +1,15 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.auth.api.authentication.service.TenantService;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.*;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.EventType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
-import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.pojo.exception.QuotaExceededException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.*;
 import com.tencent.supersonic.headless.api.pojo.enums.DimensionType;
@@ -24,7 +26,6 @@ import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.service.*;
 import com.tencent.supersonic.headless.server.utils.CoreComponentFactory;
 import com.tencent.supersonic.headless.server.utils.ModelConverter;
-import com.tencent.supersonic.headless.server.utils.NameCheckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -70,12 +71,15 @@ public class ModelServiceImpl implements ModelService {
 
     private final ThreadPoolExecutor commonExecutor;
 
+    private final TenantService tenantService;
+
     public ModelServiceImpl(ModelRepository modelRepository, DatabaseService databaseService,
             @Lazy DimensionService dimensionService, @Lazy MetricService metricService,
             DomainService domainService, UserService userService, DataSetService dataSetService,
             DateInfoRepository dateInfoRepository, ModelRelaService modelRelaService,
             ApplicationEventPublisher eventPublisher,
-            @Qualifier("commonExecutor") ThreadPoolExecutor commonExecutor) {
+            @Qualifier("commonExecutor") ThreadPoolExecutor commonExecutor,
+            TenantService tenantService) {
         this.modelRepository = modelRepository;
         this.databaseService = databaseService;
         this.dimensionService = dimensionService;
@@ -87,12 +91,16 @@ public class ModelServiceImpl implements ModelService {
         this.modelRelaService = modelRelaService;
         this.eventPublisher = eventPublisher;
         this.commonExecutor = commonExecutor;
+        this.tenantService = tenantService;
     }
 
     @Override
     @Transactional
     public ModelResp createModel(ModelReq modelReq, User user) throws Exception {
-        // checkParams(modelReq);
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null && tenantService.isModelLimitReached(tenantId)) {
+            throw new QuotaExceededException("models", "模型已达上限，请升级套餐");
+        }
         ModelDO modelDO = ModelConverter.convert(modelReq, user);
         modelRepository.createModel(modelDO);
         // create or update dimension
@@ -121,11 +129,6 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public ModelResp updateModel(ModelReq modelReq, User user) throws Exception {
-        // Comment out below checks for now, they seem unnecessary and
-        // lead to unexpected exception in updating model
-        /*
-         * checkParams(modelReq); checkRelations(modelReq);
-         */
         ModelDO modelDO = modelRepository.getModelById(modelReq.getId());
         ModelConverter.convert(modelDO, modelReq, user);
         modelRepository.updateModel(modelDO);
@@ -253,86 +256,6 @@ public class ModelServiceImpl implements ModelService {
         dbSchema.setSql(modelSchemaReq.getSql());
         dbSchema.setDbColumns(dbColumns);
         return dbSchema;
-    }
-
-    private void checkParams(ModelReq modelReq) {
-        String forbiddenCharacters = NameCheckUtils.findForbiddenCharacters(modelReq.getName());
-        if (StringUtils.isNotBlank(forbiddenCharacters)) {
-            String message = String.format("模型名称[%s]包含特殊字符(%s), 请修改", modelReq.getName(),
-                    forbiddenCharacters);
-            throw new InvalidArgumentException(message);
-        }
-
-        if (!NameCheckUtils.isValidIdentifier(modelReq.getBizName())) {
-            String message = String.format("模型英文名[%s]需要为下划线字母数字组合, 请修改", modelReq.getBizName());
-            throw new InvalidArgumentException(message);
-        }
-        if (modelReq.getModelDetail() == null) {
-            return;
-        }
-        List<Dimension> dims = modelReq.getModelDetail().getDimensions();
-        List<Measure> measures = modelReq.getModelDetail().getMeasures();
-        List<Identify> identifies = modelReq.getModelDetail().getIdentifiers();
-        for (Measure measure : measures) {
-            String measureForbiddenCharacters =
-                    NameCheckUtils.findForbiddenCharacters(measure.getName());
-            if (StringUtils.isNotBlank(measure.getName())
-                    && StringUtils.isNotBlank(measureForbiddenCharacters)) {
-                String message = String.format("度量[%s]包含特殊字符(%s), 请修改", measure.getName(),
-                        measureForbiddenCharacters);
-                throw new InvalidArgumentException(message);
-            }
-        }
-        for (Dimension dim : dims) {
-            String dimForbiddenCharacters = NameCheckUtils.findForbiddenCharacters(dim.getName());
-            if (StringUtils.isNotBlank(dim.getName())
-                    && StringUtils.isNotBlank(dimForbiddenCharacters)) {
-                String message = String.format("维度[%s]包含特殊字符(%s), 请修改", dim.getName(),
-                        dimForbiddenCharacters);
-                throw new InvalidArgumentException(message);
-            }
-        }
-        for (Identify identify : identifies) {
-            String identifyForbiddenCharacters =
-                    NameCheckUtils.findForbiddenCharacters(identify.getName());
-            if (StringUtils.isNotBlank(identify.getName())
-                    && StringUtils.isNotBlank(identifyForbiddenCharacters)) {
-                String message = String.format("主键/外键[%s]包含特殊字符(%s), 请修改", identify.getName(),
-                        identifyForbiddenCharacters);
-                throw new InvalidArgumentException(message);
-            }
-        }
-    }
-
-    private void checkRelations(ModelReq modelReq) {
-        List<ModelRela> modelRelas = modelRelaService.getModelRela(Arrays.asList(modelReq.getId()));
-        if (CollectionUtils.isEmpty(modelRelas)) {
-            return;
-        }
-        Set<String> relations = new HashSet<>();
-        for (ModelRela modelRela : modelRelas) {
-            if (modelRela.getFromModelId().equals(modelReq.getId())) {
-                modelRela.getJoinConditions().forEach(r -> relations.add(r.getLeftField()));
-            }
-            if (modelRela.getToModelId().equals(modelReq.getId())) {
-                modelRela.getJoinConditions().forEach(r -> relations.add(r.getRightField()));
-            }
-        }
-        if (relations.isEmpty()) {
-            return;
-        }
-        // any identify in model relation should not be deleted
-        if (modelReq.getModelDetail() == null
-                || CollectionUtils.isEmpty(modelReq.getModelDetail().getIdentifiers())) {
-            throw new InvalidArgumentException("模型关联中主键/外键不存在, 请检查");
-        }
-        List<String> modelIdentifiers = modelReq.getModelDetail().getIdentifiers().stream()
-                .map(Identify::getBizName).collect(Collectors.toList());
-        for (String rela : relations) {
-            if (!modelIdentifiers.contains(rela)) {
-                throw new InvalidArgumentException(String.format("模型关联中主键/外键(%s)不存在, 请检查", rela));
-            }
-        }
     }
 
     private void checkDelete(Long modelId) {

@@ -2,11 +2,14 @@ package com.tencent.supersonic.headless.server.facade.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tencent.supersonic.auth.api.authentication.service.UsageTrackingService;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
 import com.tencent.supersonic.common.pojo.enums.TaskStatusEnum;
+import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
 import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
@@ -158,6 +161,19 @@ public class S2SemanticLayerService implements SemanticLayerService {
             state = TaskStatusEnum.ERROR;
             throw e;
         } finally {
+            // Record query count (distinct from API call count tracked by interceptor)
+            try {
+                Long tenantId = TenantContext.getTenantId();
+                if (tenantId != null) {
+                    UsageTrackingService usageService =
+                            ContextUtils.getBean(UsageTrackingService.class);
+                    if (usageService != null) {
+                        usageService.recordQuery(tenantId);
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to record query usage: {}", ex.getMessage());
+            }
             statUtils.statInfo2DbAsync(state);
         }
     }

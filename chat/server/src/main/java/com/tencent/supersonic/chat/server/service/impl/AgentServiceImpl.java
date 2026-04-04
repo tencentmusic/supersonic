@@ -1,6 +1,7 @@
 package com.tencent.supersonic.chat.server.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.auth.api.authentication.service.TenantService;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.chat.api.pojo.request.ChatMemoryFilter;
 import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
@@ -13,9 +14,11 @@ import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
+import com.tencent.supersonic.common.pojo.exception.QuotaExceededException;
 import com.tencent.supersonic.common.service.ChatModelService;
 import com.tencent.supersonic.common.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +51,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     private final UserService userService;
 
+    private final TenantService tenantService;
+
     @Autowired
     @Qualifier("chatExecutor")
     private ThreadPoolExecutor executor;
@@ -79,6 +84,12 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
 
     @Override
     public Agent createAgent(Agent agent, User user) {
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            if (tenantService.isAgentLimitReached(tenantId)) {
+                throw new QuotaExceededException("agents", "智能助理已达上限，请升级套餐");
+            }
+        }
         agent.createdBy(user.getName());
         AgentDO agentDO = convert(agent);
         save(agentDO);

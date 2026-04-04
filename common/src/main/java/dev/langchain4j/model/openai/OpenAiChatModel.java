@@ -1,5 +1,7 @@
 package dev.langchain4j.model.openai;
 
+import com.tencent.supersonic.common.context.TenantContext;
+import com.tencent.supersonic.common.util.ContextUtils;
 import dev.ai4j.openai4j.OpenAiClient;
 import dev.ai4j.openai4j.OpenAiHttpException;
 import dev.ai4j.openai4j.chat.ChatCompletionRequest;
@@ -23,9 +25,11 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.spi.OpenAiChatModelBuilderFactory;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.output.TokenUsage;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Method;
 import java.net.Proxy;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -105,7 +109,8 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
 
         timeout = getOrDefault(timeout, ofSeconds(60));
 
-        this.client = OpenAiClient.builder().openAiApiKey(apiKey).baseUrl(baseUrl)
+        OpenAiClient.Builder<?, ?> openAiClientBuilder = typedBuilder(OpenAiClient.builder());
+        this.client = openAiClientBuilder.openAiApiKey(apiKey).baseUrl(baseUrl)
                 .apiVersion(apiVersion).organizationId(organizationId).callTimeout(timeout)
                 .connectTimeout(timeout).readTimeout(timeout).writeTimeout(timeout).proxy(proxy)
                 .logRequests(logRequests).logResponses(logResponses).userAgent(DEFAULT_USER_AGENT)
@@ -186,7 +191,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
 
         ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder()
                 .model(modelName).messages(toOpenAiMessages(messages)).topP(topP).stop(stop)
-                .maxTokens(maxTokens).presencePenalty(presencePenalty)
+                .maxCompletionTokens(maxTokens).presencePenalty(presencePenalty)
                 .frequencyPenalty(frequencyPenalty).logitBias(logitBias)
                 .responseFormat(responseFormat).seed(seed).user(user)
                 .parallelToolCalls(parallelToolCalls);
@@ -222,6 +227,7 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
             Response<AiMessage> response = Response.from(aiMessageFrom(chatCompletionResponse),
                     tokenUsageFrom(chatCompletionResponse.usage()),
                     finishReasonFrom(chatCompletionResponse.choices().get(0).finishReason()));
+            recordTokenUsage(response.tokenUsage());
 
             ChatModelResponse modelListenerResponse = createModelListenerResponse(
                     chatCompletionResponse.id(), chatCompletionResponse.model(), response);
@@ -257,6 +263,30 @@ public class OpenAiChatModel implements ChatLanguageModel, TokenCountEstimator {
             });
 
             throw e;
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static OpenAiClient.Builder<?, ?> typedBuilder(OpenAiClient.Builder builder) {
+        return (OpenAiClient.Builder<?, ?>) builder;
+    }
+
+    private void recordTokenUsage(TokenUsage tokenUsage) {
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId == null || tokenUsage == null || tokenUsage.totalTokenCount() == null
+                || tokenUsage.totalTokenCount() <= 0) {
+            return;
+        }
+        if (!ContextUtils.containsBean("usageTrackingServiceImpl")) {
+            return;
+        }
+        try {
+            Object usageTrackingService = ContextUtils.getBean("usageTrackingServiceImpl");
+            Method method = usageTrackingService.getClass().getMethod("recordTokenUsage",
+                    Long.class, long.class);
+            method.invoke(usageTrackingService, tenantId, tokenUsage.totalTokenCount().longValue());
+        } catch (Exception e) {
+            log.warn("Failed to record token usage for tenant {}", tenantId, e);
         }
     }
 

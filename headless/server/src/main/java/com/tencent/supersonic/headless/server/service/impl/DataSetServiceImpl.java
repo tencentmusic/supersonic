@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.auth.api.authentication.service.TenantService;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.jsqlparser.SqlSelectHelper;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -13,6 +15,7 @@ import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
+import com.tencent.supersonic.common.pojo.exception.QuotaExceededException;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetSchema;
@@ -51,6 +54,8 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
 
     private final DomainService domainService;
 
+    private final TenantService tenantService;
+
     @Lazy
     @Autowired
     private DimensionService dimensionService;
@@ -71,6 +76,10 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
 
     @Override
     public DataSetResp save(DataSetReq dataSetReq, User user) {
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null && tenantService.isDatasetLimitReached(tenantId)) {
+            throw new QuotaExceededException("datasets", "数据集已达上限，请升级套餐");
+        }
         dataSetReq.createdBy(user.getName());
         DataSetDO dataSetDO = convert(dataSetReq);
         dataSetDO.setStatus(dataSetReq.getStatus() != null ? dataSetReq.getStatus()

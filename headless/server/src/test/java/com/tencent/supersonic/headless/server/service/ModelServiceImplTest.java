@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.google.common.collect.Lists;
+import com.tencent.supersonic.auth.api.authentication.service.TenantService;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -76,13 +78,16 @@ class ModelServiceImplTest {
         DomainService domainService = Mockito.mock(DomainService.class);
         UserService userService = Mockito.mock(UserService.class);
         DateInfoRepository dateInfoRepository = Mockito.mock(DateInfoRepository.class);
-        DataSetService viewService = Mockito.mock(DataSetService.class);
+        DataSetService viewService =
+                (DataSetService) Proxy.newProxyInstance(DataSetService.class.getClassLoader(),
+                        new Class[] {DataSetService.class}, (proxy, method, args) -> null);
         ModelRelaService modelRelaService = Mockito.mock(ModelRelaService.class);
         ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         ThreadPoolExecutor commonExecutor = Mockito.mock(ThreadPoolExecutor.class);
+        TenantService tenantService = Mockito.mock(TenantService.class);
         return new ModelServiceImpl(modelRepository, databaseService, dimensionService,
                 metricService, domainService, userService, viewService, dateInfoRepository,
-                modelRelaService, eventPublisher, commonExecutor);
+                modelRelaService, eventPublisher, commonExecutor, tenantService);
     }
 
     private ModelReq mockModelReq() {
