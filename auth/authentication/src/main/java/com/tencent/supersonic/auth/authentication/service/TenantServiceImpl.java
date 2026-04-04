@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -142,60 +144,25 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean isUserLimitReached(Long tenantId) {
-        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
-        if (quota.isEmpty()) {
-            return false;
-        }
-        Integer maxUsers = quota.get().getMaxUsers();
-        if (quota.get().isUnlimited(maxUsers)) {
-            return false;
-        }
-        LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(UserDO::getTenantId, tenantId).eq(UserDO::getStatus, 1);
-        long currentUsers = userDOMapper.selectCount(wrapper);
-        return currentUsers >= maxUsers;
+        return isResourceLimitReached(tenantId, PlanQuota::getMaxUsers, this::countUserByTenantId);
     }
 
     @Override
     public boolean isDatasetLimitReached(Long tenantId) {
-        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
-        if (quota.isEmpty()) {
-            return false;
-        }
-        Integer maxDatasets = quota.get().getMaxDatasets();
-        if (quota.get().isUnlimited(maxDatasets)) {
-            return false;
-        }
-        long currentDatasets = countDatasetByTenantId(tenantId);
-        return currentDatasets >= maxDatasets;
+        return isResourceLimitReached(tenantId, PlanQuota::getMaxDatasets,
+                this::countDatasetByTenantId);
     }
 
     @Override
     public boolean isModelLimitReached(Long tenantId) {
-        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
-        if (quota.isEmpty()) {
-            return false;
-        }
-        Integer maxModels = quota.get().getMaxModels();
-        if (quota.get().isUnlimited(maxModels)) {
-            return false;
-        }
-        long currentModels = countModelByTenantId(tenantId);
-        return currentModels >= maxModels;
+        return isResourceLimitReached(tenantId, PlanQuota::getMaxModels,
+                this::countModelByTenantId);
     }
 
     @Override
     public boolean isAgentLimitReached(Long tenantId) {
-        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
-        if (quota.isEmpty()) {
-            return false;
-        }
-        Integer maxAgents = quota.get().getMaxAgents();
-        if (quota.get().isUnlimited(maxAgents)) {
-            return false;
-        }
-        long currentAgents = countAgentByTenantId(tenantId);
-        return currentAgents >= maxAgents;
+        return isResourceLimitReached(tenantId, PlanQuota::getMaxAgents,
+                this::countAgentByTenantId);
     }
 
     @Override
@@ -209,7 +176,37 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         int currentApiCalls = usageTrackingService.getTodayApiCalls(tenantId);
-        return currentApiCalls >= maxApiCalls;
+        // API calls are recorded before checking to reduce concurrent under-counting, so the
+        // request that exactly reaches the limit should still be allowed.
+        return currentApiCalls > maxApiCalls;
+    }
+
+    @Override
+    public int getApiCallUsagePercent(Long tenantId) {
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return 0;
+        }
+        Integer maxApiCalls = quota.get().getMaxApiCallsPerDay();
+        if (quota.get().isUnlimited(maxApiCalls)) {
+            return 0;
+        }
+        int currentApiCalls = usageTrackingService.getTodayApiCalls(tenantId);
+        return (int) Math.min(100, (long) currentApiCalls * 100 / maxApiCalls);
+    }
+
+    @Override
+    public int getTokenUsagePercent(Long tenantId) {
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return 0;
+        }
+        Long maxTokens = quota.get().getMaxTokensPerMonth();
+        if (quota.get().isUnlimited(maxTokens)) {
+            return 0;
+        }
+        long currentTokens = usageTrackingService.getMonthlyTokenUsage(tenantId);
+        return (int) Math.min(100, currentTokens * 100 / maxTokens);
     }
 
     @Override
@@ -233,6 +230,26 @@ public class TenantServiceImpl implements TenantService {
         Tenant tenant = new Tenant();
         BeanMapper.mapper(tenantDO, tenant);
         return tenant;
+    }
+
+    private boolean isResourceLimitReached(Long tenantId, Function<PlanQuota, Integer> maxExtractor,
+            ToLongFunction<Long> counter) {
+        Optional<PlanQuota> quota = subscriptionInfoProvider.getActivePlanQuota(tenantId);
+        if (quota.isEmpty()) {
+            return false;
+        }
+        Integer max = maxExtractor.apply(quota.get());
+        if (quota.get().isUnlimited(max)) {
+            return false;
+        }
+        long current = counter.applyAsLong(tenantId);
+        return current >= max;
+    }
+
+    private long countUserByTenantId(Long tenantId) {
+        LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserDO::getTenantId, tenantId).eq(UserDO::getStatus, 1);
+        return userDOMapper.selectCount(wrapper);
     }
 
     private long countDatasetByTenantId(Long tenantId) {

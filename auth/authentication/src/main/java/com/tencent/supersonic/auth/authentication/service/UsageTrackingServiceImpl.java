@@ -1,15 +1,14 @@
 package com.tencent.supersonic.auth.authentication.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.tencent.supersonic.auth.api.authentication.pojo.TenantUsage;
 import com.tencent.supersonic.auth.api.authentication.service.UsageTrackingService;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.TenantUsageDO;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.TenantUsageDOMapper;
 import com.tencent.supersonic.common.util.BeanMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -20,6 +19,10 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of UsageTrackingService.
+ * <p>
+ * Write methods (record*) use atomic SQL UPDATE for concurrency safety, avoiding read-modify-write
+ * race conditions. A row for today is lazily created on first access via INSERT with
+ * DuplicateKeyException guard.
  */
 @Service
 @Slf4j
@@ -32,48 +35,53 @@ public class UsageTrackingServiceImpl implements UsageTrackingService {
     }
 
     @Override
-    @Transactional
     public void recordApiCall(Long tenantId) {
-        TenantUsageDO usageDO = getOrCreateTodayUsage(tenantId);
-        usageDO.setApiCalls(usageDO.getApiCalls() + 1);
-        usageDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        tenantUsageDOMapper.updateById(usageDO);
+        LocalDate today = LocalDate.now();
+        int updated = tenantUsageDOMapper.incrementApiCalls(tenantId, today);
+        if (updated == 0) {
+            ensureTodayRowExists(tenantId);
+            tenantUsageDOMapper.incrementApiCalls(tenantId, today);
+        }
     }
 
     @Override
-    @Transactional
     public void recordTokenUsage(Long tenantId, long tokenCount) {
-        TenantUsageDO usageDO = getOrCreateTodayUsage(tenantId);
-        usageDO.setTokensUsed(usageDO.getTokensUsed() + tokenCount);
-        usageDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        tenantUsageDOMapper.updateById(usageDO);
+        LocalDate today = LocalDate.now();
+        int updated = tenantUsageDOMapper.incrementTokensUsed(tenantId, today, tokenCount);
+        if (updated == 0) {
+            ensureTodayRowExists(tenantId);
+            tenantUsageDOMapper.incrementTokensUsed(tenantId, today, tokenCount);
+        }
     }
 
     @Override
-    @Transactional
     public void recordQuery(Long tenantId) {
-        TenantUsageDO usageDO = getOrCreateTodayUsage(tenantId);
-        usageDO.setQueryCount(usageDO.getQueryCount() + 1);
-        usageDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        tenantUsageDOMapper.updateById(usageDO);
+        LocalDate today = LocalDate.now();
+        int updated = tenantUsageDOMapper.incrementQueryCount(tenantId, today);
+        if (updated == 0) {
+            ensureTodayRowExists(tenantId);
+            tenantUsageDOMapper.incrementQueryCount(tenantId, today);
+        }
     }
 
     @Override
-    @Transactional
     public void recordStorageUsage(Long tenantId, long bytes) {
-        TenantUsageDO usageDO = getOrCreateTodayUsage(tenantId);
-        usageDO.setStorageBytes(usageDO.getStorageBytes() + bytes);
-        usageDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        tenantUsageDOMapper.updateById(usageDO);
+        LocalDate today = LocalDate.now();
+        int updated = tenantUsageDOMapper.incrementStorageBytes(tenantId, today, bytes);
+        if (updated == 0) {
+            ensureTodayRowExists(tenantId);
+            tenantUsageDOMapper.incrementStorageBytes(tenantId, today, bytes);
+        }
     }
 
     @Override
-    @Transactional
     public void recordActiveUser(Long tenantId) {
-        TenantUsageDO usageDO = getOrCreateTodayUsage(tenantId);
-        usageDO.setActiveUsers(usageDO.getActiveUsers() + 1);
-        usageDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-        tenantUsageDOMapper.updateById(usageDO);
+        LocalDate today = LocalDate.now();
+        int updated = tenantUsageDOMapper.incrementActiveUsers(tenantId, today);
+        if (updated == 0) {
+            ensureTodayRowExists(tenantId);
+            tenantUsageDOMapper.incrementActiveUsers(tenantId, today);
+        }
     }
 
     @Override
@@ -101,18 +109,14 @@ public class UsageTrackingServiceImpl implements UsageTrackingService {
 
     @Override
     public int getTodayApiCalls(Long tenantId) {
-        TenantUsage usage = getTodayUsage(tenantId);
-        return usage.getApiCalls() != null ? usage.getApiCalls() : 0;
+        return tenantUsageDOMapper.selectApiCallsForDate(tenantId, LocalDate.now());
     }
 
     @Override
     public long getMonthlyTokenUsage(Long tenantId) {
         LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
-
-        List<TenantUsage> usages = getUsageRange(tenantId, firstDayOfMonth, today);
-        return usages.stream().mapToLong(u -> u.getTokensUsed() != null ? u.getTokensUsed() : 0)
-                .sum();
+        return tenantUsageDOMapper.sumTokensUsedInRange(tenantId, firstDayOfMonth, today);
     }
 
     @Override
@@ -141,15 +145,15 @@ public class UsageTrackingServiceImpl implements UsageTrackingService {
                 .build();
     }
 
-    private TenantUsageDO getOrCreateTodayUsage(Long tenantId) {
+    /**
+     * Ensures a usage row exists for the given tenant and today's date. Uses INSERT with
+     * DuplicateKeyException guard so concurrent threads don't fail — the loser simply catches the
+     * exception.
+     */
+    private void ensureTodayRowExists(Long tenantId) {
         LocalDate today = LocalDate.now();
-
-        LambdaQueryWrapper<TenantUsageDO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TenantUsageDO::getTenantId, tenantId).eq(TenantUsageDO::getUsageDate, today);
-        TenantUsageDO usageDO = tenantUsageDOMapper.selectOne(wrapper);
-
-        if (usageDO == null) {
-            usageDO = new TenantUsageDO();
+        try {
+            TenantUsageDO usageDO = new TenantUsageDO();
             usageDO.setTenantId(tenantId);
             usageDO.setUsageDate(today);
             usageDO.setApiCalls(0);
@@ -160,6 +164,25 @@ public class UsageTrackingServiceImpl implements UsageTrackingService {
             usageDO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             usageDO.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             tenantUsageDOMapper.insert(usageDO);
+        } catch (DuplicateKeyException e) {
+            // Row already created by concurrent thread — safe to ignore
+        }
+    }
+
+    /**
+     * Used by read-only methods (getTodayUsage, etc.) that need the full row.
+     */
+    private TenantUsageDO getOrCreateTodayUsage(Long tenantId) {
+        LocalDate today = LocalDate.now();
+
+        LambdaQueryWrapper<TenantUsageDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(TenantUsageDO::getTenantId, tenantId).eq(TenantUsageDO::getUsageDate, today);
+        TenantUsageDO usageDO = tenantUsageDOMapper.selectOne(wrapper);
+
+        if (usageDO == null) {
+            ensureTodayRowExists(tenantId);
+            // Re-select after insert
+            usageDO = tenantUsageDOMapper.selectOne(wrapper);
         }
 
         return usageDO;

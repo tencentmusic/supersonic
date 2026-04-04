@@ -124,4 +124,20 @@ public interface TenantService {
      * @return true if available
      */
     boolean isTenantCodeAvailable(String code);
+
+    /**
+     * Get the percentage of daily API call quota used by a tenant.
+     *
+     * @param tenantId the tenant ID
+     * @return usage percentage (0-100), or 0 if no limit is configured
+     */
+    int getApiCallUsagePercent(Long tenantId);
+
+    /**
+     * Get the percentage of monthly token quota used by a tenant.
+     *
+     * @param tenantId the tenant ID
+     * @return usage percentage (0-100), or 0 if no limit is configured
+     */
+    int getTokenUsagePercent(Long tenantId);
 }

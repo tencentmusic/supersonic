@@ -31,4 +31,8 @@ public class PlanQuota {
     public boolean isUnlimited(Integer limit) {
         return limit == null || limit == -1;
     }
+
+    public boolean isUnlimited(Long limit) {
+        return limit == null || limit == -1L;
+    }
 }

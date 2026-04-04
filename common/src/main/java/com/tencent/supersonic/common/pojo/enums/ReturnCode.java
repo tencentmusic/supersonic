@@ -5,6 +5,7 @@ public enum ReturnCode {
     INVALID_REQUEST(400, "invalid request"),
     INVALID_PERMISSION(401, "invalid permission"),
     ACCESS_ERROR(403, "access denied"),
+    QUOTA_EXCEEDED(429, "quota exceeded"),
     SYSTEM_ERROR(500, "system error");
 
     private final int code;

@@ -13,10 +13,13 @@ import java.util.List;
 @Configuration
 public class InterceptorFactory implements WebMvcConfigurer {
 
-    private List<AuthenticationInterceptor> authenticationInterceptors;
+    private final List<AuthenticationInterceptor> authenticationInterceptors;
 
-    public InterceptorFactory() {
-        authenticationInterceptors = SpringFactoriesLoader.loadFactories(
+    private final QuotaEnforcementInterceptor quotaEnforcementInterceptor;
+
+    public InterceptorFactory(QuotaEnforcementInterceptor quotaEnforcementInterceptor) {
+        this.quotaEnforcementInterceptor = quotaEnforcementInterceptor;
+        this.authenticationInterceptors = SpringFactoriesLoader.loadFactories(
                 AuthenticationInterceptor.class, Thread.currentThread().getContextClassLoader());
     }
 
@@ -39,5 +42,12 @@ public class InterceptorFactory implements WebMvcConfigurer {
                 // Public and system endpoints
                 "/api/public/**");
         log.info("TenantInterceptor registered for /api/** paths");
+
+        // Quota enforcement interceptor (must be after TenantInterceptor)
+        registry.addInterceptor(quotaEnforcementInterceptor)
+                .addPathPatterns("/api/**", "/openapi/**").excludePathPatterns(
+                        "/api/auth/user/login", "/api/auth/user/register", "/api/auth/oauth/**",
+                        "/api/auth/token/**", "/api/auth/admin/**", "/api/public/**");
+        log.info("QuotaEnforcementInterceptor registered for /api/** and /openapi/** paths");
     }
 }

@@ -7,6 +7,7 @@ import com.tencent.supersonic.auth.api.authentication.pojo.Organization;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserToken;
 import com.tencent.supersonic.auth.api.authentication.pojo.UserWithPassword;
 import com.tencent.supersonic.auth.api.authentication.request.UserReq;
+import com.tencent.supersonic.auth.api.authentication.service.TenantService;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.OrganizationDO;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserDO;
 import com.tencent.supersonic.auth.authentication.persistence.dataobject.UserOrganizationDO;
@@ -17,6 +18,7 @@ import com.tencent.supersonic.auth.authentication.persistence.repository.UserRep
 import com.tencent.supersonic.auth.authentication.utils.TokenService;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.QuotaExceededException;
 import com.tencent.supersonic.common.util.AESEncryptionUtil;
 import com.tencent.supersonic.common.util.ContextUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -188,6 +190,13 @@ public class DefaultUserAdaptor implements UserAdaptor {
 
     @Override
     public void register(UserReq userReq) {
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            TenantService tenantSvc = ContextUtils.getBean(TenantService.class);
+            if (tenantSvc != null && tenantSvc.isUserLimitReached(tenantId)) {
+                throw new QuotaExceededException("users", "用户数已达上限，请升级套餐");
+            }
+        }
         UserRepository userRepository = ContextUtils.getBean(UserRepository.class);
         List<String> userDOS = getUserNames();
         if (userDOS.contains(userReq.getName())) {
@@ -203,8 +212,7 @@ public class DefaultUserAdaptor implements UserAdaptor {
             throw new RuntimeException("password encrypt error, please try again");
         }
         // Set tenant ID from context or use default tenant (1)
-        Long tenantId = TenantContext.getTenantIdOrDefault(1L);
-        userDO.setTenantId(tenantId);
+        userDO.setTenantId(TenantContext.getTenantIdOrDefault(1L));
         userRepository.addUser(userDO);
     }
 

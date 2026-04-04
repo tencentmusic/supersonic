@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.exception.AccessException;
 import com.tencent.supersonic.common.pojo.exception.CommonException;
 import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.common.pojo.exception.QuotaExceededException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +96,13 @@ public class RestExceptionHandler {
     public ResultData<String> noResourceFoundException(NoResourceFoundException e) {
         log.debug("resource not found: {}", e.getMessage());
         return ResultData.fail(ReturnCode.SYSTEM_ERROR.getCode(), "resource not found");
+    }
+
+    @ExceptionHandler(QuotaExceededException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ResultData<String> quotaExceededException(QuotaExceededException e) {
+        log.warn("quota exceeded for resource [{}]: {}", e.getResource(), e.getMessage());
+        return ResultData.fail(ReturnCode.QUOTA_EXCEEDED.getCode(), e.getMessage());
     }
 
     /** default global exception handler */
