@@ -118,22 +118,26 @@ public class SqlReplaceHelper {
     }
 
     public static void getFromSelect(FromItem fromItem, List<PlainSelect> plainSelectList) {
-        if (!(fromItem instanceof ParenthesedSelect)) {
+        if (!(fromItem instanceof ParenthesedSelect parenthesedSelect)) {
             return;
         }
-        ParenthesedSelect parenthesedSelect = (ParenthesedSelect) fromItem;
         Select select = parenthesedSelect.getSelect();
-        if (select instanceof PlainSelect) {
-            PlainSelect plainSelect = (PlainSelect) select;
+        if (select instanceof PlainSelect plainSelect) {
             plainSelectList.add(plainSelect);
             getFromSelect(plainSelect.getFromItem(), plainSelectList);
-        } else if (select instanceof SetOperationList) {
-            SetOperationList setOperationList = (SetOperationList) select;
+        } else if (select instanceof SetOperationList setOperationList) {
             if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
                 setOperationList.getSelects().forEach(subSelectBody -> {
-                    PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                    plainSelectList.add(subPlainSelect);
-                    getFromSelect(subPlainSelect.getFromItem(), plainSelectList);
+                    if (subSelectBody instanceof PlainSelect subPlainSelect) {
+                        plainSelectList.add(subPlainSelect);
+                        getFromSelect(subPlainSelect.getFromItem(), plainSelectList);
+                    } else if (subSelectBody instanceof ParenthesedSelect subParenthesedSelect) {
+                        Select innerSelect = subParenthesedSelect.getSelect();
+                        if (innerSelect instanceof PlainSelect innerPlainSelect) {
+                            plainSelectList.add(innerPlainSelect);
+                            getFromSelect(innerPlainSelect.getFromItem(), plainSelectList);
+                        }
+                    }
                 });
             }
         }
@@ -188,8 +192,13 @@ public class SqlReplaceHelper {
                 SetOperationList setOperationList = (SetOperationList) select;
                 if (!CollectionUtils.isEmpty(setOperationList.getSelects())) {
                     setOperationList.getSelects().forEach(subSelectBody -> {
-                        PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                        replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
+                        if (subSelectBody instanceof PlainSelect) {
+                            PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
+                            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
+                        } else if (subSelectBody instanceof ParenthesedSelect) {
+                            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace,
+                                    ((ParenthesedSelect) subSelectBody).getPlainSelect());
+                        }
                     });
                 }
             }

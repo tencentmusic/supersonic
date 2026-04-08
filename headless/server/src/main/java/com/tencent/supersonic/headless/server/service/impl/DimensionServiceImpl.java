@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -474,31 +475,51 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
         if (StringUtils.isNotEmpty(dimensionDO.getDimValueMaps())) {
             dimValueMapList = JsonUtil.toList(dimensionDO.getDimValueMaps(), DimValueMap.class);
         }
-        DimValueMap dimValueMaps = req.getDimValueMaps();
-        if (StringUtils.isEmpty(dimValueMaps.getTechName())) {
-            dimValueMaps.setTechName(dimValueMaps.getValue());
-        }
-        Map<String, DimValueMap> valeAndMapInfo = dimValueMapList.stream()
-                .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
-        String value = dimValueMaps.getValue();
-        if (CollectionUtils.isEmpty(dimValueMaps.getAlias())) {
-            // 删除
-            dimValueMapList =
-                    dimValueMapList.stream().filter(map -> !map.getValue().equalsIgnoreCase(value))
-                            .collect(Collectors.toList());
-        } else {
-            // 新增
-            if (!valeAndMapInfo.keySet().contains(value)) {
-                dimValueMapList.add(dimValueMaps);
-            } else {
-                // 更新
-                dimValueMapList.stream().forEach(map -> {
-                    if (map.getValue().equalsIgnoreCase(value)) {
-                        map.setAlias(dimValueMaps.getAlias());
-                    }
-                });
+
+        // 预先处理请求列表，设置默认的 techName
+        for (DimValueMap dimValueMap : req.getDimValueMaps()) {
+            if (StringUtils.isEmpty(dimValueMap.getTechName())) {
+                dimValueMap.setTechName(dimValueMap.getValue());
             }
         }
+
+        // 构建现有数据的 Map，用于快速查找 (value -> DimValueMap)
+        Map<String, DimValueMap> existingMap = dimValueMapList.stream()
+                .collect(Collectors.toMap(DimValueMap::getValue, v -> v, (v1, v2) -> v2));
+
+        // 收集需要删除的 values（alias 为空的）
+        Set<String> valuesToDelete = req.getDimValueMaps().stream()
+                .filter(dimValueMap -> CollectionUtils.isEmpty(dimValueMap.getAlias()))
+                .map(DimValueMap::getValue).collect(Collectors.toSet());
+
+        // 一次性删除所有需要删除的数据
+        if (!valuesToDelete.isEmpty()) {
+            dimValueMapList =
+                    dimValueMapList.stream().filter(map -> !valuesToDelete.contains(map.getValue()))
+                            .collect(Collectors.toList());
+            // 同时从 existingMap 中移除
+            existingMap.keySet().removeAll(valuesToDelete);
+        }
+
+        // 处理新增和更新
+        for (DimValueMap dimValueMap : req.getDimValueMaps()) {
+            // 跳过需要删除的
+            if (CollectionUtils.isEmpty(dimValueMap.getAlias())) {
+                continue;
+            }
+
+            String value = dimValueMap.getValue();
+            if (!existingMap.containsKey(value)) {
+                // 新增
+                dimValueMapList.add(dimValueMap);
+                existingMap.put(value, dimValueMap);
+            } else {
+                // 更新 - 直接更新已存在的对象
+                DimValueMap existing = existingMap.get(value);
+                existing.setAlias(dimValueMap.getAlias());
+            }
+        }
+
         dimensionDO.setDimValueMaps(JsonUtil.toString(dimValueMapList));
         updateById(dimensionDO);
         return true;

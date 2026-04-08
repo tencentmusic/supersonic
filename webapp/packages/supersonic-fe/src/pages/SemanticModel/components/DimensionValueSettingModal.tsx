@@ -355,9 +355,11 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
               onRecordSave={(record) => {
                 modifyDimensionValue({
                   id: dimensionItem.id,
-                  dimValueMaps: {
-                    ...record,
-                  },
+                  dimValueMaps: [
+                    {
+                      ...record,
+                    },
+                  ],
                 });
               }}
               hideCtrlBtn={['deleteBtn']}
