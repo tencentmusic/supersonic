@@ -297,7 +297,9 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         }
         checkOwnership(schedule, user);
         ensureJobRegistered(schedule);
-        quartzJobManager.triggerJob(schedule.getQuartzJobKey());
+        JobDataMap triggerData = new JobDataMap();
+        triggerData.put("manual", true);
+        quartzJobManager.triggerJob(schedule.getQuartzJobKey(), triggerData);
     }
 
     @Override

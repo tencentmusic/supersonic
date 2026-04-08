@@ -3,6 +3,8 @@ package com.tencent.supersonic.headless.server.service.delivery;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Context information for report delivery.
  */
@@ -26,4 +28,5 @@ public class DeliveryContext {
     private Integer alertedCount; // Number of triggered alert events
     private Integer totalChecked; // Total rows evaluated
     private String alertRuleName; // Name of the alert rule
+    private List<Long> alertEventIds;
 }

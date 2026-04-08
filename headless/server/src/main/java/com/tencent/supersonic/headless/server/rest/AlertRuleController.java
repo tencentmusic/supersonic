@@ -6,6 +6,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertEventDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertRuleDO;
+import com.tencent.supersonic.headless.server.pojo.AlertEventTransitionReq;
 import com.tencent.supersonic.headless.server.service.AlertRuleService;
 import com.tencent.supersonic.headless.server.service.impl.AlertEvaluator;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/alertRules")
@@ -122,5 +124,23 @@ public class AlertRuleController {
         UserHolder.findUser(request, response);
         return alertRuleService.getEventList(new Page<>(current, pageSize), ruleId, severity,
                 deliveryStatus);
+    }
+
+    @GetMapping("/events/pendingCounts")
+    public Map<Long, Long> getPendingEventCounts() {
+        return alertRuleService.countPendingEventsByRule();
+    }
+
+    @GetMapping("/events/{eventId}")
+    public AlertEventDO getEvent(@PathVariable Long eventId) {
+        return alertRuleService.getEventById(eventId);
+    }
+
+    @PostMapping("/events/{eventId}:transition")
+    public AlertEventDO transitionEvent(@PathVariable Long eventId,
+            @RequestBody AlertEventTransitionReq req, HttpServletRequest request,
+            HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        return alertRuleService.transitionEvent(eventId, req, user);
     }
 }

@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Feishu (Lark) delivery channel. Sends report notification to Feishu bot webhook.
@@ -171,6 +172,38 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         noteElements.add(noteText);
         note.put("elements", noteElements);
         elements.add(note);
+
+        // Add action buttons if alert event IDs are available
+        if (context.getAlertEventIds() != null && !context.getAlertEventIds().isEmpty()) {
+            Map<String, Object> actionDiv = new HashMap<>();
+            actionDiv.put("tag", "action");
+            List<Object> actions = new ArrayList<>();
+
+            // "我已知悉" button — transitions events to CONFIRMED
+            Map<String, Object> confirmBtn = new HashMap<>();
+            confirmBtn.put("tag", "button");
+            confirmBtn.put("type", "primary");
+            confirmBtn.put("text", Map.of("tag", "plain_text", "content", "我已知悉"));
+            confirmBtn.put("value",
+                    Map.of("action", "alert_confirm", "ruleId", context.getAlertRuleId(),
+                            "eventIds", context.getAlertEventIds().stream().map(String::valueOf)
+                                    .collect(Collectors.joining(","))));
+            actions.add(confirmBtn);
+
+            // "我来处理" button — transitions events to ASSIGNED (with current user as assignee)
+            Map<String, Object> assignBtn = new HashMap<>();
+            assignBtn.put("tag", "button");
+            assignBtn.put("type", "default");
+            assignBtn.put("text", Map.of("tag", "plain_text", "content", "我来处理"));
+            assignBtn.put("value",
+                    Map.of("action", "alert_assign", "ruleId", context.getAlertRuleId(), "eventIds",
+                            context.getAlertEventIds().stream().map(String::valueOf)
+                                    .collect(Collectors.joining(","))));
+            actions.add(assignBtn);
+
+            actionDiv.put("actions", actions);
+            elements.add(actionDiv);
+        }
 
         card.put("elements", elements);
         return card;

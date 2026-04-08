@@ -14,13 +14,19 @@ public class ReportScheduleJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         Long scheduleId = context.getMergedJobDataMap().getLong("scheduleId");
-        Long tenantId = context.getMergedJobDataMap().getLong("tenantId");
+        Object tenantIdObj = context.getMergedJobDataMap().get("tenantId");
+        Long tenantId = tenantIdObj instanceof Number ? ((Number) tenantIdObj).longValue() : null;
 
-        TenantContext.setTenantId(tenantId);
+        boolean manual = context.getMergedJobDataMap().containsKey("manual")
+                && Boolean.TRUE.equals(context.getMergedJobDataMap().get("manual"));
+
+        if (tenantId != null) {
+            TenantContext.setTenantId(tenantId);
+        }
         try {
             ReportScheduleDispatcher dispatcher =
                     ContextUtils.getBean(ReportScheduleDispatcher.class);
-            dispatcher.dispatch(scheduleId);
+            dispatcher.dispatch(scheduleId, manual);
         } catch (Exception e) {
             log.error("ReportScheduleJob failed for scheduleId={}", scheduleId, e);
             throw new JobExecutionException(e);

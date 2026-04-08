@@ -1,12 +1,15 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertEventDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertRuleDO;
+import com.tencent.supersonic.headless.server.pojo.AlertEventTransitionReq;
 import com.tencent.supersonic.headless.server.service.impl.AlertEvaluator;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AlertRuleService {
 
@@ -37,4 +40,10 @@ public interface AlertRuleService {
 
     Page<AlertEventDO> getEventList(Page<AlertEventDO> page, Long ruleId, String severity,
             String deliveryStatus);
+
+    AlertEventDO getEventById(Long eventId);
+
+    AlertEventDO transitionEvent(Long eventId, AlertEventTransitionReq req, User user);
+
+    Map<Long, Long> countPendingEventsByRule();
 }

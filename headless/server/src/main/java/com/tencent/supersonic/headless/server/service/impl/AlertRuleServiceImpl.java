@@ -1,8 +1,11 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertEventDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.AlertExecutionDO;
@@ -10,14 +13,19 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.AlertRuleDO
 import com.tencent.supersonic.headless.server.persistence.mapper.AlertEventMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.AlertExecutionMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.AlertRuleMapper;
+import com.tencent.supersonic.headless.server.pojo.AlertEventTransitionReq;
+import com.tencent.supersonic.headless.server.pojo.AlertResolutionStatus;
 import com.tencent.supersonic.headless.server.service.AlertRuleService;
 import com.tencent.supersonic.headless.server.task.AlertCheckJob;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -211,6 +219,82 @@ public class AlertRuleServiceImpl extends ServiceImpl<AlertRuleMapper, AlertRule
         }
         wrapper.lambda().orderByDesc(AlertEventDO::getCreatedAt);
         return alertEventMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    public AlertEventDO getEventById(Long eventId) {
+        return alertEventMapper.selectById(eventId);
+    }
+
+    @Override
+    @Transactional
+    public AlertEventDO transitionEvent(Long eventId, AlertEventTransitionReq req, User user) {
+        AlertEventDO event = alertEventMapper.selectById(eventId);
+        if (event == null) {
+            throw new InvalidArgumentException("Alert event not found: " + eventId);
+        }
+
+        AlertResolutionStatus current = AlertResolutionStatus.valueOf(
+                event.getResolutionStatus() != null ? event.getResolutionStatus() : "OPEN");
+        AlertResolutionStatus target = req.getTargetStatus();
+
+        if (!current.canTransitionTo(target)) {
+            throw new InvalidArgumentException(
+                    String.format("Cannot transition from %s to %s", current, target));
+        }
+
+        Date now = new Date();
+        String userName = user.getName();
+
+        switch (target) {
+            case CONFIRMED:
+                event.setAcknowledgedBy(userName);
+                event.setAcknowledgedAt(now);
+                break;
+            case ASSIGNED:
+                if (event.getAcknowledgedBy() == null) {
+                    // Auto-confirm when directly assigning from OPEN
+                    event.setAcknowledgedBy(userName);
+                    event.setAcknowledgedAt(now);
+                }
+                event.setAssigneeId(req.getAssigneeId());
+                event.setAssignedAt(now);
+                break;
+            case RESOLVED:
+                event.setResolvedBy(userName);
+                event.setResolvedAt(now);
+                break;
+            case CLOSED:
+                event.setClosedAt(now);
+                break;
+            default:
+                break;
+        }
+
+        event.setResolutionStatus(target.name());
+
+        // Append notes with timestamp
+        if (req.getNotes() != null && !req.getNotes().isBlank()) {
+            String entry = String.format("[%1$tF %1$tT] %2$s → %3$s by %4$s: %5$s", now, current,
+                    target, userName, req.getNotes());
+            String existing = event.getNotes();
+            event.setNotes(existing != null ? existing + "\n" + entry : entry);
+        }
+
+        alertEventMapper.updateById(event);
+        return event;
+    }
+
+    @Override
+    public Map<Long, Long> countPendingEventsByRule() {
+        List<AlertEventDO> pendingEvents =
+                alertEventMapper.selectList(new LambdaQueryWrapper<AlertEventDO>()
+                        .in(AlertEventDO::getResolutionStatus, "OPEN", "CONFIRMED", "ASSIGNED"));
+        Map<Long, Long> counts = new HashMap<>();
+        for (AlertEventDO e : pendingEvents) {
+            counts.merge(e.getRuleId(), 1L, Long::sum);
+        }
+        return counts;
     }
 
     // === Validation methods ===

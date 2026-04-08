@@ -26,6 +26,18 @@ public class AlertEventDO {
     private String message;
     private String deliveryStatus;
     private Date silenceUntil;
+
+    // --- Resolution workflow ---
+    private String resolutionStatus; // OPEN / CONFIRMED / ASSIGNED / RESOLVED / CLOSED
+    private String acknowledgedBy;
+    private Date acknowledgedAt;
+    private Long assigneeId;
+    private Date assignedAt;
+    private String resolvedBy;
+    private Date resolvedAt;
+    private Date closedAt;
+    private String notes;
+
     private Long tenantId;
     private Date createdAt;
 }

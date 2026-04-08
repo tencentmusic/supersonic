@@ -32,13 +32,17 @@ public class ReportScheduleDispatcher {
     private int maxConcurrentPerTenant;
 
     public void dispatch(Long scheduleId) {
+        dispatch(scheduleId, false);
+    }
+
+    public void dispatch(Long scheduleId, boolean manual) {
         ReportScheduleDO schedule = scheduleMapper.selectById(scheduleId);
         if (schedule == null) {
             log.warn("Schedule not found: {}", scheduleId);
             recordScheduleDispatch("not_found");
             return;
         }
-        if (!Boolean.TRUE.equals(schedule.getEnabled())) {
+        if (!manual && !Boolean.TRUE.equals(schedule.getEnabled())) {
             log.info("Schedule {} is disabled, skipping", scheduleId);
             recordScheduleDispatch("disabled");
             return;

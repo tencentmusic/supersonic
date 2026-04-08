@@ -148,6 +148,15 @@ public class QuartzJobManager {
         }
     }
 
+    public void triggerJob(String quartzJobKey, JobDataMap triggerData) {
+        JobKey jobKey = resolveJobKey(quartzJobKey);
+        try {
+            scheduler.triggerJob(jobKey, triggerData);
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Failed to trigger job: " + quartzJobKey, e);
+        }
+    }
+
     public void rescheduleJob(String quartzJobKey, String newCron) {
         DistributedLock lock = lockProvider.obtain("quartz:" + quartzJobKey);
         if (!lock.tryLock(5, 30, TimeUnit.SECONDS)) {

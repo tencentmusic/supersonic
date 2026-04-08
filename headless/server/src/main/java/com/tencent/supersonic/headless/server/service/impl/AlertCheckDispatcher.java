@@ -198,6 +198,7 @@ public class AlertCheckDispatcher {
         });
 
         // Persist each event
+        List<Long> eventIds = new ArrayList<>();
         for (AlertEvaluator.AlertEventCandidate candidate : toDeliver) {
             AlertEventDO event = new AlertEventDO();
             event.setExecutionId(execution.getId());
@@ -211,10 +212,12 @@ public class AlertCheckDispatcher {
             event.setDeviationPct(candidate.getDeviationPct());
             event.setMessage(candidate.getMessage());
             event.setDeliveryStatus("PENDING");
+            event.setResolutionStatus("OPEN");
             event.setSilenceUntil(silenceUntil);
             event.setTenantId(rule.getTenantId());
             event.setCreatedAt(now);
             alertEventMapper.insert(event);
+            eventIds.add(event.getId());
         }
 
         // Deliver if service available and delivery configs set
@@ -257,7 +260,7 @@ public class AlertCheckDispatcher {
                             .tenantId(rule.getTenantId())
                             .executionTime(new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                     .format(new Date()))
-                            .build();
+                            .alertEventIds(eventIds).build();
 
             deliveryService.deliver(configIds, deliveryContext);
 
