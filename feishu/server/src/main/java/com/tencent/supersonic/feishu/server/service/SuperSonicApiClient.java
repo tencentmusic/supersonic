@@ -60,4 +60,16 @@ public interface SuperSonicApiClient {
      * @return the User if credentials are valid, null otherwise
      */
     User login(String username, String password, Long tenantId);
+
+    /**
+     * Transition an alert event to a new resolution status.
+     * 
+     * @param eventId the alert event ID
+     * @param targetStatus one of: CONFIRMED, ASSIGNED, RESOLVED, CLOSED
+     * @param assigneeId optional, required for ASSIGNED
+     * @param notes optional note text
+     * @param user the user performing the action
+     */
+    void transitionAlertEvent(Long eventId, String targetStatus, Long assigneeId, String notes,
+            User user);
 }

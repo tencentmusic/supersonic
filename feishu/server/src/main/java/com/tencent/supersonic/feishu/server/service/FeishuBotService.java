@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.feishu.api.cache.FeishuCacheService;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.api.pojo.FeishuMessage;
+import com.tencent.supersonic.feishu.server.handler.CardActionHandler;
 import com.tencent.supersonic.feishu.server.handler.FeishuMessageRouter;
 import com.tencent.supersonic.feishu.server.handler.MessageHandler;
 import com.tencent.supersonic.feishu.server.metrics.FeishuMeterBinder;
@@ -34,12 +35,14 @@ public class FeishuBotService {
     private final ThreadPoolTaskExecutor feishuExecutor;
     private final FeishuMeterBinder meterBinder;
     private final FeishuBindTokenService bindTokenService;
+    private final CardActionHandler cardActionHandler;
 
     public FeishuBotService(FeishuMessageRouter router, FeishuUserMappingService userMappingService,
             FeishuMessageSender messageSender, FeishuCardRenderer cardRenderer,
             FeishuProperties properties, FeishuCacheService cacheService,
             @Qualifier("feishuExecutor") ThreadPoolTaskExecutor feishuExecutor,
-            FeishuMeterBinder meterBinder, FeishuBindTokenService bindTokenService) {
+            FeishuMeterBinder meterBinder, FeishuBindTokenService bindTokenService,
+            CardActionHandler cardActionHandler) {
         this.router = router;
         this.userMappingService = userMappingService;
         this.messageSender = messageSender;
@@ -49,9 +52,21 @@ public class FeishuBotService {
         this.feishuExecutor = feishuExecutor;
         this.meterBinder = meterBinder;
         this.bindTokenService = bindTokenService;
+        this.cardActionHandler = cardActionHandler;
     }
 
     public void handleEventAsync(String eventType, Map<String, Object> event) {
+        if ("card.action.trigger".equals(eventType)) {
+            feishuExecutor.execute(() -> {
+                try {
+                    handleCardAction(event);
+                } catch (Exception e) {
+                    log.error("Failed to handle card action", e);
+                }
+            });
+            return;
+        }
+
         if (!"im.message.receive_v1".equals(eventType) && !"message".equals(eventType)) {
             log.debug("Ignoring event type: {}", eventType);
             return;
@@ -70,6 +85,48 @@ public class FeishuBotService {
             meterBinder.incrementExecutorRejection();
             replyBusy(event);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void handleCardAction(Map<String, Object> event) {
+        // Feishu card action event structure:
+        // { "event": { "operator": { "open_id": "..." }, "action": { "value": {...}, "tag":
+        // "button" } } }
+        Map<String, Object> eventBody = (Map<String, Object>) event.get("event");
+        if (eventBody == null) {
+            log.warn("Card action event missing 'event' body");
+            return;
+        }
+
+        Map<String, Object> operator = (Map<String, Object>) eventBody.get("operator");
+        String openId = operator != null ? String.valueOf(operator.get("open_id")) : null;
+        if (openId == null) {
+            log.warn("Card action event missing operator open_id");
+            return;
+        }
+
+        Map<String, Object> action = (Map<String, Object>) eventBody.get("action");
+        if (action == null) {
+            log.warn("Card action event missing action");
+            return;
+        }
+
+        Map<String, Object> actionValue = (Map<String, Object>) action.get("value");
+        if (actionValue == null) {
+            log.warn("Card action missing value payload");
+            return;
+        }
+
+        // Resolve user
+        FeishuUserMappingService.ResolvedMapping mapping =
+                userMappingService.resolveMapping(openId);
+        if (mapping == null || mapping.user() == null) {
+            log.warn("Cannot resolve Feishu user for open_id: {}", openId);
+            return;
+        }
+
+        // Send confirmation to operator's open_id (sendCard uses receive_id_type=open_id)
+        cardActionHandler.handle(actionValue, mapping.user(), openId);
     }
 
     /**

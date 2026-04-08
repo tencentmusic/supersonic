@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -259,6 +260,29 @@ public class HttpSuperSonicApiClient implements SuperSonicApiClient {
         } catch (Exception e) {
             log.error("Failed to get agent list: {}", e.getMessage(), e);
             return List.of();
+        }
+    }
+
+    @Override
+    public void transitionAlertEvent(Long eventId, String targetStatus, Long assigneeId,
+            String notes, User user) {
+        String url =
+                properties.getApiBaseUrl() + "/api/v1/alertRules/events/" + eventId + ":transition";
+        HttpHeaders headers = buildHeaders(user);
+        Map<String, Object> body = new HashMap<>();
+        body.put("targetStatus", targetStatus);
+        if (assigneeId != null) {
+            body.put("assigneeId", assigneeId);
+        }
+        if (notes != null) {
+            body.put("notes", notes);
+        }
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        try {
+            restTemplate.postForObject(url, entity, String.class);
+        } catch (Exception e) {
+            log.error("Failed to transition alert event {}: {}", eventId, e.getMessage());
+            throw e;
         }
     }
 
