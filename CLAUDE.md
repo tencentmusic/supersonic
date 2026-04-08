@@ -22,7 +22,7 @@ SuperSonic is a chat-based data analytics platform that converts natural languag
 
 **Build verification**
 - After every Java edit, run `mvn compile -pl launchers/standalone -am` to verify compilation. Do not skip this step.
-- For frontend changes, run the appropriate lint/build command.
+- For frontend changes, run the appropriate lint/build command. Frontend requires **Node.js 18+** (see `webapp/.nvmrc` and `webapp/packages/supersonic-fe/package.json` `engines`).
 - If compilation fails, fix it immediately before moving on.
 
 **Git**
