@@ -9,6 +9,68 @@
 
 ---
 
+## 2026-04-08　运营 OS 一期 Phase A 完成 + Code Review 修复 + Phase B 规划　关联切片：headless/server + webapp/Reports + webapp/TaskCenter + feishu/server
+
+### 本次完成了什么
+
+**Phase A 执行收尾（延续上次会话）：**
+- 完成 Plan 2 (异常处置流) Tasks 17-19 验收 + Task 20 集成验证
+- 后端编译 BUILD SUCCESS (23/23 modules), 10/10 单元测试通过
+
+**Code Review 修复（5 项 Important/Suggestion）：**
+- `FixedReportServiceImpl.subscribe()` 补 `setTenantId(user.getTenantId())` — INSERT 不走 TenantSqlInterceptor
+- `AlertRuleServiceImpl.transitionEvent()` 加 `@Transactional` — 修 read-then-write 无锁问题
+- `Reports/index.tsx` 默认 viewFilter 改为 `'subscribed'`，空则回退 `''` — 对齐 spec §1.8
+- `Reports/index.tsx` 域名筛选改用 `allDomains` 独立 state — 修 filtered data 导致选项丢失
+- `AlertEventDrawer.tsx` 移除未使用的 `executionId` prop
+
+**"查看历史"功能补齐：**
+- 后端：`GET /api/v1/fixedReports/{datasetId}/executions` — 按 datasetId 跨 schedule 查分页执行记录
+- 前端：`ReportHistoryDrawer` 组件 + 表格操作列"查看历史"按钮 + 详情抽屉 onViewHistory 接入
+- 编译验证通过
+
+**Phase B 计划编写：**
+- Plan 3: `docs/superpowers/plans/2026-04-08-business-topics.md` (10 tasks) — 经营主题 CRUD + 关联对象管理 + 前端页面
+- Plan 4: `docs/superpowers/plans/2026-04-08-feishu-alert-callback.md` (7 tasks) — 飞书卡片按钮回写异常状态
+
+### 关键决策
+| 决策内容 | 选择方案 | 原因摘要 |
+|---------|---------|---------|
+| 经营主题与子对象关联方式 | 泛型 join table `s2_business_topic_item(topic_id, item_type, item_id)` | 比在每个 DO 加 topicId 灵活，支持 N:M，不侵入现有表结构 |
+| 飞书卡片按钮粒度 | 一卡多事件 + "确认全部/接手全部" | 一事件一卡会刷屏；批量操作更符合"轻消费"定位 |
+| 查看历史接口设计 | `GET /fixedReports/{datasetId}/executions` 而非复用 schedule 级 API | 固定报表工作台视角是 dataset，不是 schedule；用户不关心具体哪个 schedule 产生的执行 |
+| Code review 中 countPendingEventsByRule SQL 优化 | 跳过 | Phase A 规模不需要 GROUP BY 优化，标注 suggestion 待后续 |
+| Code review 中"查看历史"no-op | 实现而非跳过 | spec §1.3 明确要求"查看历史"作为主列表操作，补齐后 spec 覆盖更完整 |
+
+### AI 推理链（关键决策必填）
+决策：经营主题关联方式
+1. 我读取了 spec §5.2："每个主题至少挂载固定报表集合、异常处置流集合、相关定时报表任务"
+2. 我注意到"集合"意味着 N:M（一个报表可属于多个主题）
+3. 我考虑了 (A) 在 ReportScheduleDO/AlertRuleDO 加 topicId FK 和 (B) 独立 join table
+4. (A) 的问题：1:N 限制（一个对象只能属于一个主题）；需要 ALTER 已有表；固定报表是虚拟对象（无自己的表），没地方加 FK
+5. 因此选择 (B) `s2_business_topic_item`，用 `item_type` + `item_id` 泛型引用，不侵入现有 schema
+
+### 放弃的方案
+| 方案描述 | 放弃原因 |
+|---------|---------|
+| 为每个 DO 加 topicId 列 | 固定报表是虚拟对象无表可加；限制 1:N |
+| 飞书一事件一卡片 | 告警可能产生几十个事件，会刷屏 |
+| 复用现有 ExecutionList 组件做"查看历史" | ExecutionList 按 scheduleId 查询，固定报表需按 datasetId 聚合 |
+| `@Transactional` + 乐观锁 version 列 | 需要 ALTER TABLE 加 version 列 + 全量改 update 逻辑，Phase A 先用 @Transactional 兜底 |
+
+### 遗留问题（下次会话继续）
+- [ ] **Phase B 执行**：Plan 3 (经营主题) + Plan 4 (飞书回写) 待选择执行方式并实施
+- [ ] **Phase C 规划**：每日经营驾驶舱 (§5.1) + 可信度与责任账本 (§5.6)
+- [ ] **transitionEvent 乐观锁**：当前仅 @Transactional，高并发场景仍有 last-write-wins 风险，后续考虑 version 列
+- [ ] **countPendingEventsByRule SQL 优化**：用 GROUP BY 替代全量加载到内存
+- [ ] **所有代码未提交**：Phase A + Code Review 修复 + 查看历史 均未 git commit，需要整理提交
+- [ ] **"最近查看"视图过滤**：spec §1.3 列了"全部/我订阅的/最近查看"三个视图，目前只实现了前两个
+
+### Spec 变更建议
+- 文件：`docs/product/运营数据工作台产品设计说明书.md` §5.5 内容：异常处置流应补充"影响主题"字段的数据来源说明——当前异常通过 AlertRule 触发，AlertRule 与主题的关联通过 topic_item 表，但 AlertEvent 本身不直接携带主题信息，需要 join 查询
+
+---
+
 ## 2026-03-18　NL 定时报表 Code Review + 修复　关联切片：chat/server + ReportScheduleQuery/Executor
 
 ### 本次完成了什么

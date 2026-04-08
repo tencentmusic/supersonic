@@ -89,6 +89,16 @@
 - **加载**：列表/详情骨架屏或 `Spin` 包裹规则统一（避免同一产品有的页面白屏等待）。
 - **错误**：接口失败 `message.error` 与 Result 页的使用边界（可列表失败用 message，整页不可用 Result）。
 
+### 工程约定（列表与请求）
+
+| 场景 | 推荐组件 / 行为 |
+|------|-----------------|
+| **列表无数据**（业务上确实为空） | `PageEmpty`（[`webapp/packages/supersonic-fe/src/components/PageEmpty`](../../webapp/packages/supersonic-fe/src/components/PageEmpty)）或 antd `Empty` + 一句引导 + 可选主按钮 |
+| **列表请求失败** | `message.error`；**首次加载**失败建议清空表格数据；**翻页/筛选/刷新**失败建议保留当前数据（详见 [`request.ts` 文件头注释](../../webapp/packages/supersonic-fe/src/services/request.ts)） |
+| **整页不可用** | antd `Result`（403/无权限、缺配置等），不用表格内 Empty 冒充整页错误 |
+
+独立说明全文：[前端反馈规范（空态 / 加载 / 错误）](./frontend-feedback-conventions.md)。
+
 ### 交付物
 
 1. **文案清单**：各核心列表空状态一句中文 + 可选主操作。
