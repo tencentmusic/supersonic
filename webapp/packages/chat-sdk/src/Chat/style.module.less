@@ -1,8 +1,8 @@
 .chat {
   height: 100%;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%),
-    linear-gradient(90deg, #f3f3f7 0%, #f3f3f7 20%, #ebf0f9 60%, #f3f3f7 80%, #f3f3f7 100%);
+  // 与主应用内容区 #f5f7fa 对齐，避免问数页与调度等页背景割裂
+  background: #f5f7fa;
 
   .chatSection {
     display: flex;
@@ -11,12 +11,28 @@
     overflow: hidden;
 
     .chatApp {
+      position: relative;
       display: flex;
       flex: 1;
       flex-direction: column;
       height: 100%;
       min-width: 0;
       color: rgba(0, 0, 0, 0.87);
+
+      .chatAppState {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 240px;
+        padding: 24px;
+      }
+
+      .chatEmptyHint {
+        color: var(--text-color-third, rgba(0, 0, 0, 0.45));
+        font-size: 14px;
+      }
 
       .chatBody {
         display: flex;
@@ -38,7 +54,7 @@
             align-items: baseline;
             width: 100%;
             padding: 14px 16px;
-            background: rgba(243, 243, 247, 0.85);
+            background: rgba(245, 247, 250, 0.92);
             backdrop-filter: blur(2px);
 
             .chatHeaderTitle {

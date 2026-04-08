@@ -2,6 +2,45 @@
   padding: 24px;
 }
 
+.pageTitle {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color, rgba(0, 10, 36, 0.85));
+}
+
+.taskCenterTabs {
+  :global(.ant-tabs-ink-bar) {
+    display: none;
+  }
+
+  :global(.ant-tabs-nav) {
+    margin-bottom: 16px;
+    padding-top: 4px;
+  }
+
+  :global(.ant-tabs-nav::before) {
+    border-bottom: 0;
+  }
+
+  :global(.ant-tabs-tab) {
+    padding: 8px 0;
+  }
+
+  :global(.ant-tabs-tab + .ant-tabs-tab) {
+    margin-left: 16px;
+  }
+
+  :global(.ant-tabs-tab-btn) {
+    color: rgba(0, 10, 36, 0.65);
+    font-weight: 500;
+  }
+
+  :global(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+    color: rgba(0, 10, 36, 0.85);
+  }
+}
+
 .heroCard {
   margin-bottom: 20px;
   border: 1px solid var(--border-color);
@@ -80,21 +119,6 @@
   :global {
     .ant-card-body {
       padding: 12px 20px 20px;
-    }
-
-    .ant-tabs-nav {
-      margin-bottom: 16px;
-      padding-top: 4px;
-    }
-
-    .ant-tabs-tab {
-      padding: 12px 4px;
-      color: var(--text-color-third);
-      font-weight: 500;
-    }
-
-    .ant-tabs-tab-active .ant-tabs-tab-btn {
-      color: var(--text-color);
     }
   }
 }

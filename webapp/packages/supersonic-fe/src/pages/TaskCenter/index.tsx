@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Card, Tabs } from 'antd';
-import { CalendarOutlined, BellOutlined, DownloadOutlined } from '@ant-design/icons';
 import ScheduleTab from './ScheduleTab';
 import AlertRuleTab from './AlertRuleTab';
 import ExportTaskTab from './ExportTaskTab';
@@ -12,37 +11,31 @@ const TaskCenterPage: React.FC = () => {
   const tabItems = [
     {
       key: 'schedule',
-      label: (
-        <span>
-          <CalendarOutlined /> 定时报表
-        </span>
-      ),
+      label: '定时报表',
       children: <ScheduleTab />,
     },
     {
       key: 'alert',
-      label: (
-        <span>
-          <BellOutlined /> 异常提醒
-        </span>
-      ),
+      label: '异常提醒',
       children: <AlertRuleTab />,
     },
     {
       key: 'export',
-      label: (
-        <span>
-          <DownloadOutlined /> 导出任务
-        </span>
-      ),
+      label: '导出任务',
       children: <ExportTaskTab />,
     },
   ];
 
   return (
     <div className={styles.taskCenterPage}>
+      <h1 className={styles.pageTitle}>任务中心</h1>
       <Card className={styles.contentCard}>
-        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+        <Tabs
+          className={styles.taskCenterTabs}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={tabItems}
+        />
       </Card>
     </div>
   );

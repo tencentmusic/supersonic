@@ -22,7 +22,19 @@ import { HistoryMsgItemType, MsgDataType, SendMsgParamsType } from '../common/ty
 import { getHistoryMsg } from '../service';
 import ShowCase from '../ShowCase';
 import { jsonParse } from '../utils/utils';
-import { ConfigProvider, Drawer, Modal, Row, Col, Space, Switch, Tooltip } from 'antd';
+import {
+  ConfigProvider,
+  Drawer,
+  Modal,
+  Row,
+  Col,
+  Space,
+  Switch,
+  Tooltip,
+  Spin,
+  Empty,
+  Button,
+} from 'antd';
 import locale from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
@@ -73,6 +85,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   const [mobileAgentsVisible, setMobileAgentsVisible] = useState(false);
   const [agentListVisible, setAgentListVisible] = useState(true);
   const [showCaseVisible, setShowCaseVisible] = useState(false);
+  const [agentInitLoading, setAgentInitLoading] = useState(true);
 
   const [isSimpleMode, setIsSimpleMode] = useState<boolean>(false);
   const [isDebugMode, setIsDebugMode] = useState<boolean>(true);
@@ -124,19 +137,24 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
   };
 
   const initAgentList = async () => {
-    const res = await queryAgentList();
-    const agentListValue = (res.data || []).filter(
-      item => item.status === 1 && (agentIds === undefined || agentIds.includes(item.id))
-    );
-    setAgentList(agentListValue);
-    if (agentListValue.length > 0) {
-      const agentId = initialAgentId || localStorage.getItem('AGENT_ID');
-      if (agentId) {
-        const agent = agentListValue.find(item => item.id === +agentId);
-        updateCurrentAgent(agent || agentListValue[0]);
-      } else {
-        updateCurrentAgent(agentListValue[0]);
+    setAgentInitLoading(true);
+    try {
+      const res = await queryAgentList();
+      const agentListValue = (res.data || []).filter(
+        item => item.status === 1 && (agentIds === undefined || agentIds.includes(item.id))
+      );
+      setAgentList(agentListValue);
+      if (agentListValue.length > 0) {
+        const agentId = initialAgentId || localStorage.getItem('AGENT_ID');
+        if (agentId) {
+          const agent = agentListValue.find(item => item.id === +agentId);
+          updateCurrentAgent(agent || agentListValue[0]);
+        } else {
+          updateCurrentAgent(agentListValue[0]);
+        }
       }
+    } finally {
+      setAgentInitLoading(false);
     }
   };
 
@@ -397,7 +415,28 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
             />
           )}
           <div className={styles.chatApp}>
-            {currentConversation && (
+            {agentInitLoading && (
+              <div className={styles.chatAppState}>
+                <Spin size="large" tip="加载助理列表…" />
+              </div>
+            )}
+            {!agentInitLoading && agentList.length === 0 && (
+              <div className={styles.chatAppState}>
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="暂无可用助理"
+                >
+                  {onAddAgent ? (
+                    <Button type="primary" onClick={onAddAgent}>
+                      创建助理
+                    </Button>
+                  ) : (
+                    <span className={styles.chatEmptyHint}>请联系管理员配置助理</span>
+                  )}
+                </Empty>
+              </div>
+            )}
+            {!agentInitLoading && agentList.length > 0 && currentConversation && (
               <div className={styles.chatBody}>
                 <div className={styles.chatContent}>
                   {currentAgent && !isMobile && !noInput && (
@@ -476,7 +515,7 @@ const Chat: ForwardRefRenderFunction<any, Props> = (
             onCloseConversation={onCloseConversation}
             ref={conversationRef}
           />
-          {currentAgent &&
+          {!agentInitLoading && agentList.length > 0 && currentAgent &&
             (isMobile ? (
               <Drawer
                 title="showcase"

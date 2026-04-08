@@ -272,6 +272,12 @@ const ROUTES = [
     hideInMenu: true,
   },
   {
+    path: '/business-topics',
+    name: 'businessTopics',
+    component: './BusinessTopics',
+    envEnableList: [ENV_KEY.SEMANTIC],
+  },
+  {
     path: '/reports',
     name: 'reports',
     component: './Reports',

@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
-import {
-  PlusOutlined,
-  PlayCircleOutlined,
-  UnorderedListOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  SendOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { PlusOutlined, SendOutlined, SettingOutlined } from '@ant-design/icons';
 import { history } from 'umi';
 import ScheduleForm from '../ReportSchedule/components/ScheduleForm';
 import ExecutionList from '../ReportSchedule/components/ExecutionList';
@@ -142,7 +134,7 @@ const ScheduleTab: React.FC = () => {
   };
 
   const columns = [
-    { title: '任务名称', dataIndex: 'name', width: 200 },
+    { title: '任务名称', dataIndex: 'name', width: 200, ellipsis: true },
     {
       title: '关联数据集',
       dataIndex: 'datasetId',
@@ -215,27 +207,27 @@ const ScheduleTab: React.FC = () => {
     },
     {
       title: '操作',
-      width: 160,
+      width: 200,
+      fixed: 'right' as const,
       render: (_: any, record: ReportSchedule) => (
-        <Space size="small">
-          <Tooltip title="编辑">
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          </Tooltip>
-          <Tooltip title="立即执行">
-            <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id)} />
-          </Tooltip>
-          <Tooltip title="执行记录">
-            <Button
-              type="link"
-              size="small"
-              icon={<UnorderedListOutlined />}
-              onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
-            />
-          </Tooltip>
+        <Space size={4} wrap>
+          <Button type="link" size="small" onClick={() => handleEdit(record)}>
+            编辑
+          </Button>
+          <Button type="link" size="small" onClick={() => handleTrigger(record.id)}>
+            立即执行
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
+          >
+            执行记录
+          </Button>
           <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id)} okText="确认" cancelText="取消">
-            <Tooltip title="删除">
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
-            </Tooltip>
+            <Button type="link" size="small" danger>
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -264,6 +256,7 @@ const ScheduleTab: React.FC = () => {
         <Table
           rowKey="id"
           size="middle"
+          bordered={false}
           columns={columns}
           dataSource={data}
           loading={loading}

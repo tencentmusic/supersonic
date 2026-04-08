@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Drawer, Table, Tag, Button, Space, Typography, Tooltip, message } from 'antd';
-import { DownloadOutlined, FileSearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { ReportExecution } from '@/services/reportSchedule';
 import { getExecutionList, downloadExecutionResult } from '@/services/reportSchedule';
 import ExecutionSnapshotDrawer from './ExecutionSnapshotDrawer';
+import PageEmpty from '@/components/PageEmpty';
 
 const { Text } = Typography;
 
@@ -26,6 +26,7 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
   const [data, setData] = useState<ReportExecution[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const listLoadSucceededRef = useRef(false);
   const [snapshotDrawer, setSnapshotDrawer] = useState<{ visible: boolean; executionId?: number }>({ visible: false });
 
   const fetchData = async (current = 1, pageSize = 10) => {
@@ -36,8 +37,13 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
       const pageData = res?.data ?? res;
       setData(pageData?.records || []);
       setPagination({ current, pageSize, total: pageData?.total || 0 });
+      listLoadSucceededRef.current = true;
     } catch (error) {
       message.error('加载执行记录失败');
+      if (!listLoadSucceededRef.current) {
+        setData([]);
+        setPagination((p) => ({ ...p, current, pageSize, total: 0 }));
+      }
     } finally {
       setLoading(false);
     }
@@ -45,6 +51,7 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
 
   useEffect(() => {
     if (visible && scheduleId) {
+      listLoadSucceededRef.current = false;
       fetchData();
     }
   }, [visible, scheduleId]);
@@ -85,26 +92,24 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
     },
     {
       title: '操作',
-      width: 120,
+      width: 140,
       render: (_: any, record: ReportExecution) => (
-        <Space size="small">
-          <Tooltip title="查看详情">
+        <Space size={4} wrap>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => setSnapshotDrawer({ visible: true, executionId: record.id })}
+          >
+            详情
+          </Button>
+          {record.status === 'SUCCESS' && record.resultLocation && (
             <Button
               type="link"
               size="small"
-              icon={<FileSearchOutlined />}
-              onClick={() => setSnapshotDrawer({ visible: true, executionId: record.id })}
-            />
-          </Tooltip>
-          {record.status === 'SUCCESS' && record.resultLocation && (
-            <Tooltip title="下载结果">
-              <Button
-                type="link"
-                size="small"
-                icon={<DownloadOutlined />}
-                onClick={() => downloadExecutionResult(scheduleId!, record.id)}
-              />
-            </Tooltip>
+              onClick={() => downloadExecutionResult(scheduleId!, record.id)}
+            >
+              下载
+            </Button>
           )}
           {record.status === 'FAILED' && record.errorMessage && (
             <Tooltip title={record.errorMessage}>
@@ -131,12 +136,18 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
           columns={columns}
           dataSource={data}
           loading={loading}
+          bordered={false}
+          scroll={{ x: 'max-content' }}
+          size="middle"
+          locale={{
+            emptyText: <PageEmpty description="暂无执行记录，调度触发成功后将在此展示" />,
+          }}
           pagination={{
             ...pagination,
+            showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
             onChange: (page, size) => fetchData(page, size),
           }}
-          size="small"
         />
       </Drawer>
       <ExecutionSnapshotDrawer

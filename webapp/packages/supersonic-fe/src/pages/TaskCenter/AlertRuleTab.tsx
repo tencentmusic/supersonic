@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Table, Switch, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
-import {
-  PlusOutlined,
-  PlayCircleOutlined,
-  UnorderedListOutlined,
-  DeleteOutlined,
-  EditOutlined,
-} from '@ant-design/icons';
+import { Button, Table, Switch, Space, Popconfirm, message, Tooltip, Empty, Tag } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import AlertRuleForm from './components/AlertRuleForm';
 import AlertExecutionDrawer from './components/AlertExecutionDrawer';
+import AlertEventDrawer from './components/AlertEventDrawer';
 import {
   getRuleList,
   createRule,
@@ -18,6 +13,7 @@ import {
   pauseRule,
   resumeRule,
   triggerRule,
+  getPendingEventCounts,
 } from '@/services/alertRule';
 import type { AlertRule } from '@/services/alertRule';
 import { getValidDataSetList } from '@/services/reportSchedule';
@@ -35,6 +31,12 @@ const AlertRuleTab: React.FC = () => {
     ruleId?: number;
     name?: string;
   }>({ visible: false });
+  const [eventDrawer, setEventDrawer] = useState<{
+    visible: boolean;
+    ruleId?: number;
+    name?: string;
+  }>({ visible: false });
+  const [pendingCounts, setPendingCounts] = useState<Record<number, number>>({});
   const [datasetNameMap, setDatasetNameMap] = useState<Record<number, string>>({});
 
   const fetchData = async (current = 1, pageSize = 20) => {
@@ -48,6 +50,16 @@ const AlertRuleTab: React.FC = () => {
       message.error('加载告警规则失败');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPendingCounts = async () => {
+    try {
+      const res: any = await getPendingEventCounts();
+      const counts = res?.data ?? res;
+      setPendingCounts(counts || {});
+    } catch {
+      // silent — badge counts are non-critical
     }
   };
 
@@ -68,6 +80,7 @@ const AlertRuleTab: React.FC = () => {
   useEffect(() => {
     fetchData();
     fetchDatasetNames();
+    fetchPendingCounts();
   }, []);
 
   const handleCreate = () => {
@@ -176,27 +189,41 @@ const AlertRuleTab: React.FC = () => {
     },
     {
       title: '操作',
-      width: 160,
+      width: 200,
+      fixed: 'right' as const,
       render: (_: any, record: AlertRule) => (
-        <Space size="small">
-          <Tooltip title="编辑">
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          </Tooltip>
-          <Tooltip title="立即触发">
-            <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id!)} />
-          </Tooltip>
-          <Tooltip title="执行记录">
-            <Button
-              type="link"
-              size="small"
-              icon={<UnorderedListOutlined />}
-              onClick={() => setExecutionDrawer({ visible: true, ruleId: record.id, name: record.name })}
-            />
-          </Tooltip>
+        <Space size={4} wrap>
+          <Button type="link" size="small" onClick={() => handleEdit(record)}>
+            编辑
+          </Button>
+          <Button type="link" size="small" onClick={() => handleTrigger(record.id!)}>
+            立即触发
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => setExecutionDrawer({ visible: true, ruleId: record.id, name: record.name })}
+          >
+            执行记录
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() =>
+              setEventDrawer({ visible: true, ruleId: record.id, name: record.name })
+            }
+          >
+            异常事件
+            {pendingCounts[record.id!] ? (
+              <Tag color="red" style={{ marginLeft: 4, fontSize: 11 }}>
+                {pendingCounts[record.id!]}
+              </Tag>
+            ) : null}
+          </Button>
           <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id!)} okText="确认" cancelText="取消">
-            <Tooltip title="删除">
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
-            </Tooltip>
+            <Button type="link" size="small" danger>
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -217,6 +244,7 @@ const AlertRuleTab: React.FC = () => {
         <Table
           rowKey="id"
           size="middle"
+          bordered={false}
           columns={columns}
           dataSource={data}
           loading={loading}
@@ -249,6 +277,15 @@ const AlertRuleTab: React.FC = () => {
         ruleId={executionDrawer.ruleId}
         ruleName={executionDrawer.name}
         onClose={() => setExecutionDrawer({ visible: false })}
+      />
+      <AlertEventDrawer
+        visible={eventDrawer.visible}
+        ruleId={eventDrawer.ruleId}
+        ruleName={eventDrawer.name}
+        onClose={() => {
+          setEventDrawer({ visible: false });
+          fetchPendingCounts();
+        }}
       />
     </div>
   );

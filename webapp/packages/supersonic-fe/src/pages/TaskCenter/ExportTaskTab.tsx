@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Table, Tag, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
-import { DownloadOutlined, StopOutlined } from '@ant-design/icons';
+import { Button, Table, Tag, Space, Popconfirm, message, Empty } from 'antd';
 import dayjs from 'dayjs';
 import {
   getExportTaskList,
@@ -80,6 +79,7 @@ const ExportTaskTab: React.FC = () => {
       title: '任务名称',
       dataIndex: 'taskName',
       width: 200,
+      ellipsis: true,
       render: (val: string) => val || '—',
     },
     {
@@ -119,23 +119,23 @@ const ExportTaskTab: React.FC = () => {
     },
     {
       title: '操作',
-      width: 100,
+      width: 120,
+      fixed: 'right' as const,
       render: (_: any, record: ExportTask) => (
-        <Space size="small">
-          <Tooltip title="下载文件">
-            <Button
-              type="link"
-              size="small"
-              icon={<DownloadOutlined />}
-              disabled={record.status !== 'SUCCESS'}
-              onClick={() => downloadExportFile(record.id)}
-            />
-          </Tooltip>
+        <Space size={4} wrap>
+          <Button
+            type="link"
+            size="small"
+            disabled={record.status !== 'SUCCESS'}
+            onClick={() => downloadExportFile(record.id)}
+          >
+            下载
+          </Button>
           {(record.status === 'PENDING' || record.status === 'RUNNING') && (
             <Popconfirm title="确认取消?" onConfirm={() => handleCancel(record.id)} okText="确认" cancelText="取消">
-              <Tooltip title="取消任务">
-                <Button type="link" size="small" danger icon={<StopOutlined />} />
-              </Tooltip>
+              <Button type="link" size="small" danger>
+                取消
+              </Button>
             </Popconfirm>
           )}
         </Space>
@@ -154,6 +154,7 @@ const ExportTaskTab: React.FC = () => {
         <Table
           rowKey="id"
           size="middle"
+          bordered={false}
           columns={columns}
           dataSource={data}
           loading={loading}

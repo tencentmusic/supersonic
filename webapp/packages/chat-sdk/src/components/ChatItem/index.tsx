@@ -493,7 +493,7 @@ const ChatItem: React.FC<Props> = ({
         <div className={isMobile ? `${prefixCls}-mobile-msg-card` : ''}>
           <div className={`${prefixCls}-time`}>
             {parseTimeCost?.parseStartTime
-              ? dayjs(parseTimeCost.parseStartTime).format('M月D日 HH:mm')
+              ? dayjs(parseTimeCost.parseStartTime).format('YYYY-MM-DD HH:mm:ss')
               : ''}
           </div>
           <div className={contentClass}>

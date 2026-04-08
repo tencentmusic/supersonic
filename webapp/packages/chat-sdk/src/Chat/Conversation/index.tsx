@@ -112,7 +112,7 @@ const Conversation: ForwardRefRenderFunction<any, Props> = (
     } else if (inputDate.isSame(now.subtract(1, 'day'), 'day')) {
       return '昨天';
     }
-    return inputDate.format('MM/DD');
+    return inputDate.format('YYYY-MM-DD HH:mm:ss');
   };
 
   const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {

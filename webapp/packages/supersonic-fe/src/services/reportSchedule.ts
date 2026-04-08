@@ -96,7 +96,7 @@ export function resumeSchedule(id: number) {
 }
 
 export function triggerSchedule(id: number) {
-  return request(`${BASE}/${id}:trigger`, { method: 'POST' });
+  return request(`${BASE}/${id}:execute`, { method: 'POST' });
 }
 
 export function getExecutionList(

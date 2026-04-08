@@ -6,3 +6,10 @@ overrides:
   supersonic-chat-sdk: link:packages/chat-sdk
 
 prefer-workspace-packages: true
+
+onlyBuiltDependencies:
+  - core-js
+  - core-js-pure
+  - es5-ext
+  - esbuild
+  - puppeteer-core

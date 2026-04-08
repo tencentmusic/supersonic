@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip, Empty } from 'antd';
-import { PlusOutlined, PlayCircleOutlined, UnorderedListOutlined, DeleteOutlined, EditOutlined, SendOutlined, SettingOutlined } from '@ant-design/icons';
+import React, { useEffect, useRef, useState } from 'react';
+import dayjs from 'dayjs';
+import { Button, Table, Tag, Switch, Space, Popconfirm, message, Tooltip } from 'antd';
+import { PlusOutlined, SendOutlined, SettingOutlined } from '@ant-design/icons';
 import { history } from 'umi';
 import ScheduleForm from './components/ScheduleForm';
 import ExecutionList from './components/ExecutionList';
+import styles from './index.less';
+import taskStyles from '../TaskCenter/style.less';
 import {
   getScheduleList,
   createSchedule,
@@ -17,10 +20,12 @@ import {
 import type { ReportSchedule } from '@/services/reportSchedule';
 import { getConfigList, DeliveryConfig, DELIVERY_TYPE_MAP } from '@/services/deliveryConfig';
 import { MSG } from '@/common/messages';
+import PageEmpty from '@/components/PageEmpty';
 
 const ReportSchedulePage: React.FC = () => {
   const [data, setData] = useState<ReportSchedule[]>([]);
   const [loading, setLoading] = useState(false);
+  const listLoadSucceededRef = useRef(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
   const [formVisible, setFormVisible] = useState(false);
   const [editRecord, setEditRecord] = useState<ReportSchedule | undefined>();
@@ -34,8 +39,13 @@ const ReportSchedulePage: React.FC = () => {
       const res = await getScheduleList({ current, pageSize });
       setData(res?.records || []);
       setPagination({ current, pageSize, total: res?.total || 0 });
+      listLoadSucceededRef.current = true;
     } catch (error) {
       message.error('加载调度任务失败');
+      if (!listLoadSucceededRef.current) {
+        setData([]);
+        setPagination((p) => ({ ...p, current, pageSize, total: 0 }));
+      }
     } finally {
       setLoading(false);
     }
@@ -122,6 +132,7 @@ const ReportSchedulePage: React.FC = () => {
       title: '任务名称',
       dataIndex: 'name',
       width: 200,
+      ellipsis: true,
     },
     {
       title: '关联数据集',
@@ -187,27 +198,27 @@ const ReportSchedulePage: React.FC = () => {
     },
     {
       title: '操作',
-      width: 160,
+      width: 200,
+      fixed: 'right' as const,
       render: (_: any, record: ReportSchedule) => (
-        <Space size="small">
-          <Tooltip title="编辑">
-            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          </Tooltip>
-          <Tooltip title="立即执行">
-            <Button type="link" size="small" icon={<PlayCircleOutlined />} onClick={() => handleTrigger(record.id)} />
-          </Tooltip>
-          <Tooltip title="执行记录">
-            <Button
-              type="link"
-              size="small"
-              icon={<UnorderedListOutlined />}
-              onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
-            />
-          </Tooltip>
+        <Space size={4} wrap>
+          <Button type="link" size="small" onClick={() => handleEdit(record)}>
+            编辑
+          </Button>
+          <Button type="link" size="small" onClick={() => handleTrigger(record.id)}>
+            立即执行
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => setExecutionDrawer({ visible: true, scheduleId: record.id, name: record.name })}
+          >
+            执行记录
+          </Button>
           <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id)} okText="确认" cancelText="取消">
-            <Tooltip title="删除">
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
-            </Tooltip>
+            <Button type="link" size="small" danger>
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -215,9 +226,11 @@ const ReportSchedulePage: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-        <h2 style={{ margin: 0 }}>报表调度</h2>
+    <div className={styles.reportSchedulePage}>
+      <div className={taskStyles.sectionHeader}>
+        <div>
+          <div className={taskStyles.sectionTitle}>报表调度</div>
+        </div>
         <Space>
           <Button icon={<SettingOutlined />} onClick={() => history.push('/delivery-config')}>
             推送配置
@@ -227,29 +240,35 @@ const ReportSchedulePage: React.FC = () => {
           </Button>
         </Space>
       </div>
-      <Table
-        rowKey="id"
-        size="middle"
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        scroll={{ x: 'max-content' }}
-        locale={{
-          emptyText: (
-            <Empty description="暂无调度任务">
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-                创建调度
-              </Button>
-            </Empty>
-          ),
-        }}
-        pagination={{
-          ...pagination,
-          showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 条`,
-          onChange: (page, size) => fetchData(page, size),
-        }}
-      />
+      <div className={taskStyles.tableShell}>
+        <Table
+          rowKey="id"
+          size="middle"
+          bordered={false}
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          scroll={{ x: 'max-content' }}
+          locale={{
+            emptyText: (
+              <PageEmpty
+                description="暂无调度任务，创建后可定时导出报表"
+                action={
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                    创建调度
+                  </Button>
+                }
+              />
+            ),
+          }}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (page, size) => fetchData(page, size),
+          }}
+        />
+      </div>
       <ScheduleForm
         visible={formVisible}
         record={editRecord}

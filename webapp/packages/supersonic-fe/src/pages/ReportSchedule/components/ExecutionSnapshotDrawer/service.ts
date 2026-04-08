@@ -23,6 +23,7 @@ export interface ExecutionSnapshot {
   deliveryRecords: DeliveryRecord[];
 }
 
-export function getExecutionSnapshot(executionId: number): Promise<ExecutionSnapshot> {
-  return request(`${BASE}/${executionId}/snapshot`, { method: 'GET' });
+export async function getExecutionSnapshot(executionId: number): Promise<ExecutionSnapshot> {
+  const res = await request(`${BASE}/${executionId}/snapshot`, { method: 'GET' });
+  return res?.data ?? res;
 }

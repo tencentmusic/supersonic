@@ -4,6 +4,7 @@ import { getToken } from '@/utils/utils';
 import queryString from 'query-string';
 import { Chat } from 'supersonic-chat-sdk';
 import AgentCreateModal from '@/pages/Agent/AgentCreateModal';
+import './index.less';
 
 const ChatPage = () => {
   const location = useLocation();
@@ -21,19 +22,21 @@ const ChatPage = () => {
   };
 
   return (
-    <>
-      <Chat
-        initialAgentId={agentId ? +agentId : undefined}
-        token={getToken() || ''}
-        isDeveloper
-        onAddAgent={handleAddAgent}
-      />
+    <div className="chat-page-shell">
+      <div className="chat-page-shell-main">
+        <Chat
+          initialAgentId={agentId ? +agentId : undefined}
+          token={getToken() || ''}
+          isDeveloper
+          onAddAgent={handleAddAgent}
+        />
+      </div>
       <AgentCreateModal
         visible={createModalVisible}
         onCancel={() => setCreateModalVisible(false)}
         onSuccess={handleCreateSuccess}
       />
-    </>
+    </div>
   );
 };
 

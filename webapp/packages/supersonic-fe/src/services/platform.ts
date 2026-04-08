@@ -1,4 +1,4 @@
-import request from './request';
+import request, { getStoredTenantIdNumber } from './request';
 
 /**
  * Platform Admin API Services
@@ -84,7 +84,7 @@ export async function cancelTenantSubscription(tenantId: number): Promise<Result
 
 export async function getPlatformRoles(): Promise<Result<any[]>> {
   return request.get<Result<any[]>>(`${AUTH_API_BASE}role/scope/PLATFORM`, {
-    params: { tenantId: 1 },
+    params: { tenantId: getStoredTenantIdNumber() },
   });
 }
 
@@ -98,7 +98,7 @@ export async function getRolePermissionIds(roleId: number): Promise<Result<numbe
 
 export async function createPlatformRole(roleData: any): Promise<Result<any>> {
   return request.post<Result<any>>(`${AUTH_API_BASE}role`, {
-    data: { ...roleData, scope: 'PLATFORM', tenantId: 1 },
+    data: { ...roleData, scope: 'PLATFORM', tenantId: getStoredTenantIdNumber() },
   });
 }
 

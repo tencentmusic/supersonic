@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Drawer, Table, Tag, Typography, message, Empty } from 'antd';
 import dayjs from 'dayjs';
-import type { AlertExecution } from '@/services/alertRule';
-import { getExecutions } from '@/services/alertRule';
+import { getReportExecutions } from '@/services/fixedReport';
 
 const { Text } = Typography;
 
@@ -13,43 +12,43 @@ const STATUS_MAP: Record<string, { color: string; text: string }> = {
   FAILED: { color: 'red', text: '失败' },
 };
 
-interface AlertExecutionDrawerProps {
+interface ReportHistoryDrawerProps {
   visible: boolean;
-  ruleId?: number;
-  ruleName?: string;
+  datasetId?: number;
+  reportName?: string;
   onClose: () => void;
 }
 
-const AlertExecutionDrawer: React.FC<AlertExecutionDrawerProps> = ({
+const ReportHistoryDrawer: React.FC<ReportHistoryDrawerProps> = ({
   visible,
-  ruleId,
-  ruleName,
+  datasetId,
+  reportName,
   onClose,
 }) => {
-  const [data, setData] = useState<AlertExecution[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
 
-  const fetchData = async (current = 1, pageSize = 10) => {
-    if (!ruleId) return;
+  const fetchData = async (current = 1, pageSize = 20) => {
+    if (!datasetId) return;
     setLoading(true);
     try {
-      const res = await getExecutions(ruleId, { current, pageSize });
+      const res: any = await getReportExecutions(datasetId, { current, pageSize });
       const pageData = res?.data ?? res;
       setData(pageData?.records || []);
       setPagination({ current, pageSize, total: pageData?.total || 0 });
-    } catch (e) {
-      message.error('加载执行记录失败');
+    } catch {
+      message.error('加载执行历史失败');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (visible && ruleId) {
+    if (visible && datasetId) {
       fetchData();
     }
-  }, [visible, ruleId]);
+  }, [visible, datasetId]);
 
   const columns = [
     {
@@ -65,24 +64,6 @@ const AlertExecutionDrawer: React.FC<AlertExecutionDrawerProps> = ({
       render: (ms: number) => (ms != null ? `${(ms / 1000).toFixed(1)}s` : '-'),
     },
     {
-      title: '总行数',
-      dataIndex: 'totalRows',
-      width: 100,
-      render: (val: number) => (val != null ? val : '-'),
-    },
-    {
-      title: '触发行数',
-      dataIndex: 'alertedRows',
-      width: 100,
-      render: (val: number) => (val != null ? val : '-'),
-    },
-    {
-      title: '静默行数',
-      dataIndex: 'silencedRows',
-      width: 100,
-      render: (val: number) => (val != null ? val : '-'),
-    },
-    {
       title: '状态',
       dataIndex: 'status',
       width: 100,
@@ -90,6 +71,12 @@ const AlertExecutionDrawer: React.FC<AlertExecutionDrawerProps> = ({
         const info = STATUS_MAP[status] || { color: 'default', text: status };
         return <Tag color={info.color}>{info.text}</Tag>;
       },
+    },
+    {
+      title: '数据行数',
+      dataIndex: 'rowCount',
+      width: 100,
+      render: (val: number) => (val != null ? val : '-'),
     },
     {
       title: '错误信息',
@@ -107,7 +94,7 @@ const AlertExecutionDrawer: React.FC<AlertExecutionDrawerProps> = ({
 
   return (
     <Drawer
-      title={`执行记录 - ${ruleName || ''}`}
+      title={`执行历史 - ${reportName || ''}`}
       open={visible}
       onClose={onClose}
       width={800}
@@ -134,4 +121,4 @@ const AlertExecutionDrawer: React.FC<AlertExecutionDrawerProps> = ({
   );
 };
 
-export default AlertExecutionDrawer;
+export default ReportHistoryDrawer;

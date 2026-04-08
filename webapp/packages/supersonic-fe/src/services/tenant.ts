@@ -1,4 +1,4 @@
-import request from './request';
+import request, { getStoredTenantIdNumber } from './request';
 
 // 租户相关类型定义
 export interface Tenant {
@@ -140,7 +140,7 @@ export async function activateTenant(id: number): Promise<Result<Tenant>> {
 
 export async function getTenantRoles(): Promise<Result<any[]>> {
   return request.get<Result<any[]>>(`${process.env.AUTH_API_BASE_URL}role/scope/TENANT`, {
-    params: { tenantId: 1 },
+    params: { tenantId: getStoredTenantIdNumber() },
   });
 }
 
@@ -154,7 +154,7 @@ export async function getRolePermissionIds(roleId: number): Promise<Result<numbe
 
 export async function createTenantRole(roleData: any): Promise<Result<any>> {
   return request.post<Result<any>>(`${process.env.AUTH_API_BASE_URL}role`, {
-    data: { ...roleData, scope: 'TENANT', tenantId: 1 },
+    data: { ...roleData, scope: 'TENANT', tenantId: getStoredTenantIdNumber() },
   });
 }
 

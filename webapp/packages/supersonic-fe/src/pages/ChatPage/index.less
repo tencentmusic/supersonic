@@ -1,0 +1,26 @@
+// 与 ProLayout 内容区同底色，保证问数页与全站主内容区无割裂
+.chat-page-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: calc(100vh - 112px);
+  margin: -24px;
+  padding: 24px;
+  background: #f5f7fa;
+
+  // 仅主内容区撑满；Modal 等同级节点不参与 flex 分配
+  .chat-page-shell-main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+
+    // Chat 经 ConfigProvider 包一层，需把 flex 传到内层 .chat
+    > * {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+  }
+}

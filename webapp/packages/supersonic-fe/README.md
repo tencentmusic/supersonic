@@ -4,6 +4,8 @@ This project is initialized with [Ant Design Pro](https://pro.ant.design). Follo
 
 ## Environment Prepare
 
+使用 **Node.js 18+**（推荐与仓库 [`webapp/.nvmrc`](../../.nvmrc) 一致，例如 `nvm use`）。低于 18 时 Umi / ESLint 等可能无法正常运行。
+
 Install `node_modules`:
 
 ```bash
