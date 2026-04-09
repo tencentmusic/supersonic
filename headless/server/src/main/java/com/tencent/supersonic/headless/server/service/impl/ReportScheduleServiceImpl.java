@@ -15,7 +15,9 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecu
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleMapper;
+import com.tencent.supersonic.headless.server.pojo.ExecutionSnapshotData;
 import com.tencent.supersonic.headless.server.pojo.ReportExecutionContext;
+import com.tencent.supersonic.headless.server.pojo.ReportExecutionVO;
 import com.tencent.supersonic.headless.server.service.DataSetAuthService;
 import com.tencent.supersonic.headless.server.service.ReportScheduleService;
 import com.tencent.supersonic.headless.server.task.ReportScheduleJob;
@@ -431,5 +433,48 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         checkOwnership(schedule, user);
         ReportExecutionContext ctx = contextBuilder.buildManualFromSchedule(schedule, user);
         orchestrator.execute(ctx);
+    }
+
+    @Override
+    public Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionDO> page, Long scheduleId,
+            String status, User user) {
+        Page<ReportExecutionDO> doPage = getExecutionList(page, scheduleId, status, user);
+        Page<ReportExecutionVO> voPage =
+                new Page<>(doPage.getCurrent(), doPage.getSize(), doPage.getTotal());
+        voPage.setRecords(doPage.getRecords().stream().map(this::toVO).toList());
+        return voPage;
+    }
+
+    private ReportExecutionVO toVO(ReportExecutionDO execution) {
+        ReportExecutionVO vo = new ReportExecutionVO();
+        vo.setId(execution.getId());
+        vo.setScheduleId(execution.getScheduleId());
+        vo.setAttempt(execution.getAttempt());
+        vo.setStatus(execution.getStatus());
+        vo.setStartTime(execution.getStartTime());
+        vo.setEndTime(execution.getEndTime());
+        vo.setResultLocation(execution.getResultLocation());
+        vo.setErrorMessage(execution.getErrorMessage());
+        vo.setRowCount(execution.getRowCount());
+        vo.setExecutionTimeMs(execution.getExecutionTimeMs());
+        vo.setTemplateVersion(execution.getTemplateVersion());
+
+        if (StringUtils.isNotBlank(execution.getExecutionSnapshot())) {
+            try {
+                ExecutionSnapshotData snapshot = JsonUtil.toObject(execution.getExecutionSnapshot(),
+                        ExecutionSnapshotData.class);
+                if (snapshot != null && snapshot.getContext() != null) {
+                    ReportExecutionContext ctx = snapshot.getContext();
+                    vo.setTemplateName(ctx.getScheduleName());
+                    vo.setTriggerType(ctx.getSource() != null ? ctx.getSource().name() : null);
+                }
+                vo.setHasPreview(snapshot != null && snapshot.getResultPreview() != null
+                        && !snapshot.getResultPreview().isEmpty());
+            } catch (Exception e) {
+                log.debug("Failed to parse executionSnapshot for execution id={}: {}",
+                        execution.getId(), e.getMessage());
+            }
+        }
+        return vo;
     }
 }

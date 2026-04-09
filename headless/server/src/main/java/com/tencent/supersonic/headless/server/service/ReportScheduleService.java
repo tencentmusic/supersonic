@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.server.pojo.ReportExecutionVO;
 
 public interface ReportScheduleService {
 
@@ -27,6 +28,9 @@ public interface ReportScheduleService {
     void reschedule(Long id, String newCron);
 
     Page<ReportExecutionDO> getExecutionList(Page<ReportExecutionDO> page, Long scheduleId,
+            String status, User user);
+
+    Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionDO> page, Long scheduleId,
             String status, User user);
 
     ReportExecutionDO getExecutionById(Long scheduleId, Long id, User user);

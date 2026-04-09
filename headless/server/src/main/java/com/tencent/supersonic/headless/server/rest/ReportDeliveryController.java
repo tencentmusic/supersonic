@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliv
 import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${spring.servlet.api-path:/api}/semantic/delivery")
 @Slf4j
+@RequiredArgsConstructor
 public class ReportDeliveryController {
 
     private final ReportDeliveryService deliveryService;
-
-    public ReportDeliveryController(ReportDeliveryService deliveryService) {
-        this.deliveryService = deliveryService;
-    }
 
     // ========== Delivery Config CRUD ==========
 
@@ -54,8 +52,8 @@ public class ReportDeliveryController {
     public ReportDeliveryConfigDO createConfig(@RequestBody ReportDeliveryConfigDO config,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        config.setCreatedBy(user != null ? user.getName() : "system");
-        config.setTenantId(user != null ? user.getTenantId() : 0L);
+        config.setCreatedBy(user.getName());
+        config.setTenantId(user.getTenantId());
         return deliveryService.createConfig(config);
     }
 
@@ -65,7 +63,8 @@ public class ReportDeliveryController {
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         config.setId(id);
-        config.setUpdatedBy(user != null ? user.getName() : "system");
+        config.setTenantId(user.getTenantId());
+        config.setUpdatedBy(user.getName());
         return deliveryService.updateConfig(config);
     }
 

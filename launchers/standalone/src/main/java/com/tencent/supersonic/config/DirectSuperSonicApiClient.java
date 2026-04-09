@@ -20,6 +20,9 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.server.pojo.AlertEventTransitionReq;
+import com.tencent.supersonic.headless.server.pojo.AlertResolutionStatus;
+import com.tencent.supersonic.headless.server.service.AlertRuleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -56,6 +59,7 @@ public class DirectSuperSonicApiClient implements SuperSonicApiClient {
     private final UserService userService;
     private final SemanticLayerService semanticLayerService;
     private final ChatLayerService chatLayerService;
+    private final AlertRuleService alertRuleService;
     private final FeishuCacheService cacheService;
     private final ObjectMapper objectMapper;
 
@@ -203,6 +207,29 @@ public class DirectSuperSonicApiClient implements SuperSonicApiClient {
         } catch (Exception e) {
             log.error("Failed to get agent list: {}", e.getMessage(), e);
             return List.of();
+        }
+    }
+
+    @Override
+    public void transitionAlertEvent(Long eventId, String targetStatus, Long assigneeId,
+            String notes, User user) {
+        AlertResolutionStatus status;
+        try {
+            status = AlertResolutionStatus.valueOf(targetStatus);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("无效的告警状态: " + targetStatus, e);
+        }
+        try {
+            AlertEventTransitionReq req = new AlertEventTransitionReq();
+            req.setTargetStatus(status);
+            req.setAssigneeId(assigneeId);
+            req.setNotes(notes);
+            alertRuleService.transitionEvent(eventId, req, user);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to transition alert event {}: {}", eventId, e.getMessage(), e);
+            throw new RuntimeException("告警事件状态转换失败: " + e.getMessage(), e);
         }
     }
 

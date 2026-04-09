@@ -5,6 +5,7 @@ import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.server.pojo.ReportExecutionVO;
 import com.tencent.supersonic.headless.server.service.ReportScheduleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -110,13 +111,13 @@ public class ReportScheduleController {
     }
 
     @GetMapping("/{scheduleId}/executions")
-    public Page<ReportExecutionDO> getExecutionList(@PathVariable Long scheduleId,
+    public Page<ReportExecutionVO> getExecutionList(@PathVariable Long scheduleId,
             @RequestParam(defaultValue = "1") int current,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String status, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        return reportScheduleService.getExecutionList(new Page<>(current, pageSize), scheduleId,
+        return reportScheduleService.getExecutionVOList(new Page<>(current, pageSize), scheduleId,
                 status, user);
     }
 
