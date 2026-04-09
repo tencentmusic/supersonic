@@ -13,7 +13,7 @@ import { useContext, useState } from 'react';
 import classNames from 'classnames';
 import { updateQAFeedback } from '../../service';
 import { useMethodRegister } from '../../hooks';
-import { ChartItemContext } from '../ChatItem';
+import { ChartItemContext } from '../ChatItem/ChartItemContext';
 
 type Props = {
   queryId: number;

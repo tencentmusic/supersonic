@@ -2,11 +2,11 @@ import { CHART_SECONDARY_COLOR, CLS_PREFIX, THEME_COLOR_LIST } from '../../../co
 import { getFormattedValue } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { ColumnType } from '../../../common/type';
 import { isArray } from 'lodash';
-import { ChartItemContext } from '../../ChatItem';
+import { ChartItemContext } from '../../ChatItem/ChartItemContext';
 import { useExportByEcharts } from '../../../hooks';
 
 type Props = {

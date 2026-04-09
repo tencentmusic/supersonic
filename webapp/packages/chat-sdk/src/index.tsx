@@ -17,25 +17,7 @@ export { default as ChatItem } from './components/ChatItem';
 
 export { default as ShowCase } from './ShowCase';
 
-export type {
-  SearchRecommendItem,
-  FieldType,
-  ModelInfoType,
-  EntityInfoType,
-  DateInfoType,
-  ChatContextType,
-  MsgValidTypeEnum,
-  MsgDataType,
-  PluginResonseType,
-  ColumnType,
-  SuggestionItemType,
-  SuggestionType,
-  SuggestionDataType,
-  FilterItemType,
-  HistoryType,
-  HistoryMsgItemType,
-  SendMsgParamsType,
-} from './common/type';
+export * from './common/type';
 
 export { searchRecommend } from './service';
 

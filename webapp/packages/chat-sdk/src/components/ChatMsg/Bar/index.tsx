@@ -18,7 +18,7 @@ import {
 import NoPermissionChart from '../NoPermissionChart';
 import { ColumnType } from '../../../common/type';
 import { Spin } from 'antd';
-import { ChartItemContext } from '../../ChatItem';
+import { ChartItemContext } from '../../ChatItem/ChartItemContext';
 import { useExportByEcharts } from '../../../hooks';
 
 type Props = {

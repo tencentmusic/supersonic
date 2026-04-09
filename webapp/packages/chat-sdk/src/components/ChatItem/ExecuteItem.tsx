@@ -9,7 +9,7 @@ import DashboardMsg from '../ChatMsg/DashboardMsg';
 import Loading from './Loading';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type Props = {

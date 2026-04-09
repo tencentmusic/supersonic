@@ -9,7 +9,8 @@ import {
   RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ChartItemContext } from './ChartItemContext';
 import {
   chatExecute,
   chatParse,
@@ -60,10 +61,7 @@ type Props = {
   onSendMsg?: (msg: string) => void;
 };
 
-export const ChartItemContext = createContext({
-  register: (...args: any[]) => {},
-  call: (...args: any[]) => {},
-});
+export { ChartItemContext };
 
 const ChatItem: React.FC<Props> = ({
   msg,

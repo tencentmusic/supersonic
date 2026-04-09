@@ -8,14 +8,14 @@ import {
 } from '../../../utils/utils';
 import type { ECharts } from 'echarts';
 import * as echarts from 'echarts';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { ColumnType } from '../../../common/type';
 import NoPermissionChart from '../NoPermissionChart';
 import classNames from 'classnames';
 import { isArray } from 'lodash';
 import { useExportByEcharts } from '../../../hooks';
-import { ChartItemContext } from '../../ChatItem';
+import { ChartItemContext } from '../../ChatItem/ChartItemContext';
 
 type Props = {
   model?: string;

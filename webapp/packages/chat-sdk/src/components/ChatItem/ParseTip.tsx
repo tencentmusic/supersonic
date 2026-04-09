@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { ChatContextType, DateInfoType, EntityInfoType, FilterItemType } from '../../common/type';
 import { Button, DatePicker, Row, Col } from 'antd';
 import { CheckCircleFilled, CloseCircleFilled, ReloadOutlined } from '@ant-design/icons';

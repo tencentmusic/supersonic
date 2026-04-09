@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Row, Col, Statistic, Table as AntTable, Tooltip, Alert, Tag, Collapse } from 'antd';
 import {
   ArrowUpOutlined,
