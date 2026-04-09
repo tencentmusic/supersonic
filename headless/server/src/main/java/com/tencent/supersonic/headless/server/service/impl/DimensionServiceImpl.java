@@ -517,6 +517,8 @@ public class DimensionServiceImpl extends ServiceImpl<DimensionDOMapper, Dimensi
                 // 更新 - 直接更新已存在的对象
                 DimValueMap existing = existingMap.get(value);
                 existing.setAlias(dimValueMap.getAlias());
+                existing.setTechName(dimValueMap.getTechName());
+                existing.setBizName(dimValueMap.getBizName());
             }
         }
 
