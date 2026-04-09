@@ -10,7 +10,7 @@ export type DefaultSetting = ProLayoutProps & {
 const Settings: DefaultSetting = {
   navTheme: 'light',
   colorPrimary: BRAND_PRIMARY,
-  layout: 'top',
+  layout: 'mix',
   contentWidth: 'Fluid',
   fixedHeader: false,
   fixSiderbar: true,
@@ -18,11 +18,7 @@ const Settings: DefaultSetting = {
   title: '',
   pwa: false,
   iconfontUrl: '//at.alicdn.com/t/c/font_4120566_x5c4www9bqm.js',
-  // splitMenus: true,
-  // menu: {
-  //   autoClose: false,
-  //   ignoreFlatMenu: true,
-  // },
+  splitMenus: true,
 };
 export const publicPath = '/webapp/';
 export const basePath = '/webapp/';
