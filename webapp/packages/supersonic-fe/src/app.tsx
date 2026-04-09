@@ -7,13 +7,14 @@ import defaultSettings, { BRAND_PRIMARY } from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
 import { isMobile, getToken } from '@/utils/utils';
+import { filterEmptyGroups } from '@/utils/menuFilter';
 import type { DefaultSetting } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
 export { requestConfig as request } from './services/request';
 import { BASE_TITLE } from '@/common/constants';
 import { ROUTE_AUTH_CODES } from '../config/routes';
-const replaceRoute = '/';
+const replaceRoute = '/operations-cockpit';
 
 Spin.setDefaultIndicator(
   <ScaleLoader color={settings['primary-color']} height={25} width={2} radius={2} margin={2} />,
@@ -157,6 +158,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
         </ConfigProvider>
       );
     },
+    menuDataRender: (menuData: any[]) => filterEmptyGroups(menuData),
     ...initialState?.settings,
   };
 };
