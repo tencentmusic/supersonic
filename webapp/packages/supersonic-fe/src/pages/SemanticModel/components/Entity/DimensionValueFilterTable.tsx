@@ -69,7 +69,7 @@ const DimensionValueFilterTable: React.FC<Props> = ({
       dataIndex: 'x',
       valueType: 'option',
       width: 150,
-      render: (_, record) => {
+      render: (_: any, record: any) => {
         return (
           <Space className={styles.ctrlBtnContainer}>
             <Popconfirm

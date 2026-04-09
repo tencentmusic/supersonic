@@ -22,6 +22,10 @@ declare global {
       orgName: string;
       access?: 'user' | 'guest' | 'admin';
       name?:string;
+      tenantId?: string | number;
+      superAdmin?: boolean;
+      isAdmin?: number | boolean;
+      permissions?: string[];
     };
 
     export interface UserItem {

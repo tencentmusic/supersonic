@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
+import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import type { Ref } from 'react';
 import type { RadioChangeEvent } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
@@ -57,7 +57,7 @@ type Props = {
   disabledAdvanceSetting?: boolean;
 };
 
-const DynamicDate: React.FC<Props> = forwardRef(
+const DynamicDate = forwardRef<any, Props>(
   (
     {
       initialValues,
@@ -174,17 +174,17 @@ const DynamicDate: React.FC<Props> = forwardRef(
       }
       if (initialValues?.dynamicAdvancedConfigType) {
         const { dynamicAdvancedConfigType } = initialValues;
-        const targetConfig = defaultConfig[dynamicAdvancedConfigType];
+        const targetConfig = defaultConfig[dynamicAdvancedConfigType as keyof typeof defaultConfig];
         if (!targetConfig) {
           return defaultConfig;
         }
-        const mergeConfig = Object.keys(targetConfig).reduce((result, key) => {
+        const mergeConfig = Object.keys(targetConfig).reduce((result: any, key) => {
           return {
             ...result,
             [key]: initialValues[key],
           };
         }, {});
-        defaultConfig[dynamicAdvancedConfigType] = mergeConfig;
+        defaultConfig[dynamicAdvancedConfigType as keyof typeof defaultConfig] = mergeConfig;
       }
       return defaultConfig;
     };
@@ -457,7 +457,7 @@ const DynamicDate: React.FC<Props> = forwardRef(
                           包含
                           {
                             datePeriodTypeWordingMap[
-                              advancedPanelFormData[DynamicAdvancedConfigType.LAST].periodType
+                              advancedPanelFormData[DynamicAdvancedConfigType.LAST].periodType as keyof typeof datePeriodTypeWordingMap
                             ]
                           }
                         </Checkbox>

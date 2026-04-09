@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Modal, Form, Input, message, Button, Space, Radio } from 'antd';
 import { createMemory } from './service';
 import { StatusEnum } from './type';

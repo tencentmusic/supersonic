@@ -13,6 +13,7 @@ export interface TagSelectOptionProps {
   style?: React.CSSProperties;
   checked?: boolean;
   onChange?: (value: string | number, state: boolean) => void;
+  children?: React.ReactNode;
 }
 
 const TagSelectOption: React.FC<TagSelectOptionProps> & {
@@ -21,7 +22,7 @@ const TagSelectOption: React.FC<TagSelectOptionProps> & {
   <CheckableTag
     checked={!!checked}
     key={value}
-    onChange={(state) => onChange && onChange(value, state)}
+    onChange={(state) => onChange && value !== undefined && onChange(value, state)}
   >
     {children}
   </CheckableTag>
@@ -86,7 +87,8 @@ const TagSelect: FC<TagSelectProps> & { Option: typeof TagSelectOption } = (prop
     const childrenArray = React.Children.toArray(children) as TagSelectOptionElement[];
     const checkedTags = childrenArray
       .filter((child) => isTagSelectOption(child))
-      .map((child) => child.props.value);
+      .map((child) => child.props.value)
+      .filter((v): v is string | number => v !== undefined);
     return checkedTags || [];
   };
 
@@ -157,7 +159,7 @@ const TagSelect: FC<TagSelectProps> & { Option: typeof TagSelectOption } = (prop
             return React.cloneElement(child, {
               key: `tag-select-${child.props.value}`,
               value: child.props.value,
-              checked: value && value.indexOf(child.props.value) > -1,
+              checked: value && child.props.value !== undefined && value.indexOf(child.props.value) > -1,
               onChange: handleTagChange,
             });
           }

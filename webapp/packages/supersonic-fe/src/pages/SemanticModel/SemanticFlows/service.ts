@@ -26,7 +26,7 @@ export namespace GraphApi {
   } as const;
 
   /** 查图的meta元信息 */
-  export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async (args) => {
+  export const queryGraphMeta: NsGraphCmd.GraphMeta.IArgs['graphMetaService'] = async (args: any) => {
     return { ...args, flowId: args.meta.flowId };
   };
   export const createPorts = (nodeId: string, count = 1, layout = 'LR') => {
@@ -277,7 +277,7 @@ export namespace GraphApi {
   };
 
   /** 添加边的api */
-  export const addEdge: NsEdgeCmd.AddEdge.IArgs['createEdgeService'] = async (args) => {
+  export const addEdge: NsEdgeCmd.AddEdge.IArgs['createEdgeService'] = async (args: any) => {
     console.info('addEdge service running, add edge:', args);
     const { edgeConfig } = args;
     return {
@@ -287,7 +287,7 @@ export namespace GraphApi {
   };
 
   /** 删除边的api */
-  export const delEdge: NsEdgeCmd.DelEdge.IArgs['deleteEdgeService'] = async (args) => {
+  export const delEdge: NsEdgeCmd.DelEdge.IArgs['deleteEdgeService'] = async (args: any) => {
     console.info('delEdge service running, del edge:', args);
     const { commandService, edgeConfig } = args;
     if (!edgeConfig?.sourceNodeData || !edgeConfig?.targetNodeData) {
@@ -341,7 +341,7 @@ export namespace GraphApi {
       Object.entries(statusMap).forEach(([, val]) => {
         const { status } = val as { status: NsGraphStatusCommand.StatusEnum };
         if (status === NsGraphStatusCommand.StatusEnum.PROCESSING) {
-          val.status = NsGraphStatusCommand.StatusEnum.ERROR;
+          (val as any).status = NsGraphStatusCommand.StatusEnum.ERROR;
         }
       });
       return {

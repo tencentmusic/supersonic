@@ -167,7 +167,7 @@ const TagObjectTable: React.FC<Props> = ({}) => {
       />
       {createModalVisible && (
         <TagObjectCreateForm
-          domainId={selectDomainId}
+          domainId={selectDomainId!}
           createModalVisible={createModalVisible}
           tagItem={tagItem}
           onSubmit={() => {

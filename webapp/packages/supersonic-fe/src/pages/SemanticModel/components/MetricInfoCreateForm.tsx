@@ -389,7 +389,7 @@ const MetricInfoCreateForm: React.FC<CreateFormProps> = ({
               setMetricRelationModalOpenState(false);
             }}
             onRefreshRelationData={() => {
-              queryDrillDownDimension(metricItem?.id);
+              queryDrillDownDimension(metricItem!.id);
             }}
           />
         </>

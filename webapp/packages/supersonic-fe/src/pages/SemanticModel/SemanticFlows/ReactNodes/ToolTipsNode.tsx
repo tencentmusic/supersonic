@@ -1,10 +1,9 @@
-import React from 'react';
 import ReactDom from 'react-dom';
 import { Tooltip } from 'antd';
 import type { EdgeView } from '@antv/x6';
 import { Graph, ToolsView } from '@antv/x6';
 class TooltipTool extends ToolsView.ToolItem<EdgeView, TooltipToolOptions> {
-  private knob: HTMLDivElement;
+  private knob!: HTMLDivElement;
 
   render() {
     if (!this.knob) {

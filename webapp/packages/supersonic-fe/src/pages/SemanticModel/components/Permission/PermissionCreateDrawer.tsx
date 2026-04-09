@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, message, Form, Space, Drawer, Input, Alert, Tag, Typography } from 'antd';
+import { Button, message, Form, Space, Drawer, Input, Alert, Typography } from 'antd';
 import { ProCard } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
 import { createGroupAuth, updateGroupAuth } from '../../service';
 import PermissionCreateForm from './PermissionCreateForm';
-import type { StateType } from '../../model';
 import SqlEditor from '@/components/SqlEditor';
 import { TransType } from '../../enum';
 import DimensionMetricVisibleTransfer from '../Entity/DimensionMetricVisibleTransfer';

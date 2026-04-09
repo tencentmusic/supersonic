@@ -1,19 +1,11 @@
-import { Tabs, Breadcrumb, Space, Radio } from 'antd';
-import React, { useRef, useEffect, useState } from 'react';
-import { history, useModel } from '@umijs/max';
+import { Tabs } from 'antd';
+import React, { useRef, useEffect } from 'react';
+import { useModel } from '@umijs/max';
 import ClassDimensionTable from './ClassDimensionTable';
 import ClassMetricTable from './ClassMetricTable';
 import PermissionSection from './Permission/PermissionSection';
-import TagObjectTable from '../Insights/components/TagObjectTable';
-import TermTable from '../components/Term/TermTable';
-import OverView from './OverView';
 import styles from './style.less';
-import { HomeOutlined, FundViewOutlined } from '@ant-design/icons';
 import { ISemantic } from '../data';
-import SemanticGraphCanvas from '../SemanticGraphCanvas';
-import Dimension from '../Dimension';
-import ModelMetric from '../components/ModelMetric';
-import View from '../View';
 
 type Props = {
   activeKey: string;

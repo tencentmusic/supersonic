@@ -16,7 +16,7 @@ const formLayout = {
 const { Item } = Form;
 
 const ForgetPwdForm: React.FC<RegisterFormProps> = (props) => {
-  const [formVals, setFormVals] = useState<Partial<RegisterFormDetail>>({
+  const [formVals, setFormVals] = useState<Partial<RegisterFormDetail & { email: string }>>({
     email: '', // 邮箱
   });
   const [saveLoading, setSaveLoading] = useState(false);
@@ -54,7 +54,7 @@ const ForgetPwdForm: React.FC<RegisterFormProps> = (props) => {
   return (
     <Modal
       width={600}
-      styles={{ padding: '32px 40px 48px' }}
+      styles={{ body: { padding: '32px 40px 48px' } }}
       destroyOnClose
       title="忘记密码"
       open={createModalVisible}

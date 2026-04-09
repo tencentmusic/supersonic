@@ -30,6 +30,8 @@ type FieldItem = {
   dateFormat?: string;
   timeGranularity?: string;
   isTag?: number;
+  isCreateDimension?: boolean;
+  isCreateMetric?: boolean;
 };
 const { Search } = Input;
 const FormItem = Form.Item;

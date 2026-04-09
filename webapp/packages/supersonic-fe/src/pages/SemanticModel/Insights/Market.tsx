@@ -40,7 +40,7 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
 
-  const [downloadLoading, setDownloadLoading] = useState<boolean>(false);
+  const [downloadLoading] = useState<boolean>(false);
 
   const [hasAllPermission, setHasAllPermission] = useState<boolean>(true);
 
@@ -146,11 +146,6 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
     } else {
       message.error(msg);
     }
-  };
-
-  const handleMetricEdit = (tagItem: ISemantic.ITagItem) => {
-    setTagItem(tagItem);
-    setCreateModalVisible(true);
   };
 
   const columnsConfig = ColumnsConfig({

@@ -8,26 +8,14 @@ import {
   createConnection,
   updateConnection,
   getJobHistory,
-  discoverSchema as discoverConnectionSchema,
   type ConnectionDO,
   type DataSyncExecutionDO,
   type DiscoveredSchema,
-  type ConfiguredStream,
 } from '@/services/connection';
-import { discoverSchemaByDatabase } from '@/services/dataSync';
+import { discoverSchemaByDatabase, type TableSyncConfig } from '@/services/dataSync';
 import CronInput from '../../../ReportSchedule/components/CronInput';
 import StreamConfigStep from './StreamConfigStep';
 import { MSG } from '@/common/messages';
-
-// Map old TableSyncConfig to ConfiguredStream
-type TableSyncConfig = {
-  sourceTable: string;
-  targetTable?: string;
-  syncMode?: 'FULL' | 'INCREMENTAL' | 'INCREMENTAL_DEDUP' | 'PARTITION_OVERWRITE';
-  cursorField?: string;
-  primaryKey?: string;
-  batchSize?: number;
-};
 
 const { Text } = Typography;
 
@@ -166,7 +154,7 @@ const SyncConfigWizard: React.FC<SyncConfigWizardProps> = ({
         // Initialize table configs if not already set
         if (tableConfigs.length === 0 && result?.tables) {
           setTableConfigs(
-            result.tables.map((t) => ({
+            result.tables.map((t: any) => ({
               sourceTable: t.tableName,
               targetTable: t.tableName,
               syncMode: 'FULL' as const,

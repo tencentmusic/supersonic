@@ -61,7 +61,7 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
         key: `${id}`,
       };
     });
-    setTransferData(data);
+    setTransferData(data as RecordType[]);
   }, [checkedMap, dimensionList]);
 
   useEffect(() => {
@@ -69,13 +69,13 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
       return;
     }
     const ids = relationsInitialValue.map((item) => `${item.dimensionId}`);
-    const relationMap = relationsInitialValue.reduce((relationCheckedMap, item: any) => {
+    const relationMap = relationsInitialValue.reduce((relationCheckedMap: Record<string, ISemantic.IDrillDownDimensionItem>, item: any) => {
       const { dimensionId } = item;
       relationCheckedMap[dimensionId] = {
         ...item,
       };
       return relationCheckedMap;
-    }, {});
+    }, {} as Record<string, ISemantic.IDrillDownDimensionItem>);
     setCheckedMap(relationMap);
     setTargetKeys(ids);
   }, [relationsInitialValue]);
@@ -202,9 +202,9 @@ const DimensionMetricRelationTableTransfer: React.FC<Props> = ({
           return false;
         }}
         targetKeys={targetKeys}
-        onChange={(newTargetKeys: string[]) => {
-          setTargetKeys(newTargetKeys);
-          handleRealtionChange(newTargetKeys, checkedMap);
+        onChange={(newTargetKeys) => {
+          setTargetKeys(newTargetKeys as string[]);
+          handleRealtionChange(newTargetKeys as string[], checkedMap);
         }}
       >
         {({

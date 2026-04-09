@@ -3,7 +3,7 @@ import type { NsGraph } from '@antv/xflow';
 import { useXFlowApp, XFlowGroupCommands } from '@antv/xflow';
 import './group.less';
 
-export const GroupNode: NsGraph.INodeRender = (props) => {
+export const GroupNode: NsGraph.INodeRender = (props: any) => {
   const { cell } = props;
   const app = useXFlowApp();
   const isCollapsed = props.data.isCollapsed || false;

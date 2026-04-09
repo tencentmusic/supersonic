@@ -10,7 +10,7 @@ import styles from '../style.less';
 type Props = {
   permissionTarget: 'model' | 'domain';
   onSubmit?: (data?: any) => void;
-  onValuesChange?: (value, values) => void;
+  onValuesChange?: (value: any, values: any) => void;
 };
 
 const FormItem = Form.Item;

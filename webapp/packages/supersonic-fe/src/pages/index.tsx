@@ -1,5 +1,6 @@
 import { useEffect, useTransition } from 'react';
 import { useLocation } from '@umijs/max';
+// @ts-ignore
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -13,7 +14,7 @@ const stopProgress = () => {
   NProgress.done();
 };
 
-const Page = ({ dom }) => {
+const Page = ({ dom }: any) => {
   const [isPending, startTransition] = useTransition();
   const location = useLocation();
 

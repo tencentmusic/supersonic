@@ -349,7 +349,7 @@ const ClassMetricTable: React.FC<Props> = ({}) => {
     type: string;
   }) => {
     const { sensitiveLevel, type, showFilter } = filterParams;
-    const params: QueryMetricListParams = { ...filterParams };
+    const params: QueryMetricListParams = { ...filterParams } as any;
     const sensitiveLevelValue = sensitiveLevel?.[0];
     const showFilterValue = showFilter?.[0];
     const typeValue = type?.[0];

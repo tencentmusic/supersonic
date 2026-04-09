@@ -2,7 +2,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input, Tag, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { useModel, history } from '@umijs/max';
+import { useModel } from '@umijs/max';
 import { StatusEnum, SemanticNodeType } from '../enum';
 import { SENSITIVE_LEVEL_ENUM, SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import {
@@ -147,7 +147,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
       url: '/model/dimension/:domainId/:modelId/:indicatorId',
       onNameClick: (record) => {
         const { id } = record;
-        toDimensionEditPage(domainId, modelId!, id);
+        toDimensionEditPage(domainId!, modelId!, id!);
         return false;
       },
     },
@@ -216,7 +216,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
 
     {
       ...columnsConfig.createInfo,
-    },
+    } as ProColumns,
     {
       title: '操作',
       dataIndex: 'x',
@@ -233,7 +233,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
                 // setDimensionItem(record);
                 // setCreateModalVisible(true);
                 const { id } = record;
-                toDimensionEditPage(domainId, modelId!, id);
+                toDimensionEditPage(domainId!, modelId!, id!);
               }}
             >
               编辑
@@ -460,10 +460,10 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
 
       {createModalVisible && (
         <DimensionInfoModal
-          modelId={modelId}
-          domainId={domainId}
+          modelId={modelId!}
+          domainId={domainId!}
           bindModalVisible={createModalVisible}
-          dimensionItem={dimensionItem}
+          dimensionItem={dimensionItem!}
           dataSourceList={dataSourceList}
           onSubmit={() => {
             setCreateModalVisible(false);
@@ -480,7 +480,7 @@ const ClassDimensionTable: React.FC<Props> = ({}) => {
         <DimensionValueSettingModal
           dimensionValueSettingList={dimensionValueSettingList}
           open={dimensionValueSettingModalVisible}
-          dimensionItem={dimensionItem}
+          dimensionItem={dimensionItem!}
           onCancel={() => {
             MrefreshDimensionList({ modelId });
 

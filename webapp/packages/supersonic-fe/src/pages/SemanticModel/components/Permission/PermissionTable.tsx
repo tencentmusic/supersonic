@@ -42,7 +42,7 @@ const PermissionTable: React.FC<Props> = ({}) => {
   const actionRef = useRef<ActionType>();
 
   const queryListData = async () => {
-    const { code, data } = await getGroupAuthInfo(modelId);
+    const { code, data } = await getGroupAuthInfo(modelId!);
     if (code === 200) {
       setIntentionList(data);
       return;

@@ -21,7 +21,7 @@ const StaticDate: React.FC<Props> = ({
   currentDateSettingType = DateSettingType.STATIC,
   onDateRangeChange,
 }: any) => {
-  const [latestDateMap, setLatestDateMap] = useState<any>({
+  const [latestDateMap] = useState<any>({
     maxPartition: dayjs().format('YYYY-MM-DD'),
   });
 
@@ -35,12 +35,12 @@ const StaticDate: React.FC<Props> = ({
     };
   });
   const [dateRangeValue, setDateRangeValue] = useState<any>([]);
-  const [pickerType, setPickerType] = useState<PickerType>(() => {
+  const [pickerType, setPickerType] = useState<DateRangePicker>(() => {
     if (dateRangeTypeProps) {
-      return DateRangeTypeToPickerMap[dateRangeTypeProps];
+      return DateRangeTypeToPickerMap[dateRangeTypeProps as keyof typeof DateRangeTypeToPickerMap];
     }
     if (staticFormData.dateRangeType) {
-      return DateRangeTypeToPickerMap[staticFormData.dateRangeType];
+      return DateRangeTypeToPickerMap[staticFormData.dateRangeType as keyof typeof DateRangeTypeToPickerMap];
     }
     return DateRangePicker.DATE;
   });
@@ -53,7 +53,7 @@ const StaticDate: React.FC<Props> = ({
     if (currentDateSettingType === DateSettingType.STATIC) {
       handleDateRangeTypePropsChange(dateRangeTypeProps);
     }
-    setPickerType(DateRangeTypeToPickerMap[dateRangeTypeProps]);
+    setPickerType(DateRangeTypeToPickerMap[dateRangeTypeProps as keyof typeof DateRangeTypeToPickerMap]);
   }, [dateRangeTypeProps, latestDateMap]);
 
   const handleDateRangeTypePropsChange = async (dateRangeType: DateRangeType) => {

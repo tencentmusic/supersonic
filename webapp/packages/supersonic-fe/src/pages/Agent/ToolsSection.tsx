@@ -57,8 +57,8 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
     }
     await saveAgent({
       ...currentAgent,
-      toolConfig: JSON.stringify(newAgentConfig) as any,
-    });
+      toolConfig: JSON.stringify(newAgentConfig),
+    } as AgentType);
     setModalVisible(false);
   };
 
@@ -72,8 +72,8 @@ const ToolsSection: React.FC<Props> = ({ currentAgent, onSaveAgent }) => {
     );
     await saveAgent({
       ...currentAgent,
-      toolConfig: JSON.stringify(newAgentConfig) as any,
-    });
+      toolConfig: JSON.stringify(newAgentConfig),
+    } as AgentType);
   };
 
   return (

@@ -33,7 +33,7 @@ const ClassModelTypeModal: React.FC<Props> = ({
   const [scriptColumns, setScriptColumns] = useState<IDataSource.IExecuteSqlColumn[]>([]);
   const [sqlParams, setSqlParams] = useState<IDataSource.ISqlParamsItem[]>([]);
 
-  const [modelItem, setModelItem] = useState<ISemantic.IModelItem>({});
+  const [modelItem, setModelItem] = useState<ISemantic.IModelItem>({} as ISemantic.IModelItem);
 
   useEffect(() => {
     if (!modelBasicItem?.id || !open) {

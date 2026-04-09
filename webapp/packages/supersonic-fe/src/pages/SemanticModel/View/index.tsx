@@ -1,5 +1,4 @@
 import React from 'react';
-import { ISemantic } from '../data';
 import DataSetTable from './components/DataSetTable';
 
 type Props = {

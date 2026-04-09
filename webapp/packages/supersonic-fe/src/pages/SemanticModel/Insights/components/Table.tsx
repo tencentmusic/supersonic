@@ -1,7 +1,8 @@
 import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import React, { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
+import React from 'react';
+
+type ColumnConfig = ColumnsType<any>[number];
 
 type Props = {
   columnConfig?: ColumnConfig[];

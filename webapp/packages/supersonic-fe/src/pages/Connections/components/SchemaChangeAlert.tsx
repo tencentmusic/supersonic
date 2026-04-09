@@ -24,11 +24,9 @@ import {
 import {
   SchemaChange,
   StreamChange,
-  ColumnChange,
   getSchemaChanges,
   discoverSchema,
   applySchemaChanges,
-  ConfiguredCatalog,
   ConnectionDO,
 } from '@/services/connection';
 

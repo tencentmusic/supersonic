@@ -86,7 +86,7 @@ const DimensionAndMetricRelationModal: React.FC<Props> = ({
       >
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <DimensionMetricRelationTableTransfer
-            metricItem={metricItem}
+            metricItem={metricItem!}
             relationsInitialValue={relationsInitialValue}
             onChange={(relations: ISemantic.IDrillDownDimensionItem[]) => {
               setRelationList(relations);

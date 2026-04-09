@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { InfoCircleOutlined, CalendarOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Input, Tooltip, Popover, Space, Button, Select, Row, Col, Tag } from 'antd';
+import { InfoCircleOutlined, CalendarOutlined } from '@ant-design/icons';
+import { Input, Tooltip, Popover, Space, Button, Row, Col, Tag } from 'antd';
 import styles from './style.less';
 import { DateMode, DateRangeType } from './type';
 import {
@@ -82,16 +82,7 @@ const MDatePicker: React.FC<Props> = ({
       DateRangeType.DAY,
   );
 
-  const staticDefaultConfig = {
-    dateSettingType: DateSettingType.STATIC,
-    dateMode: DateMode.RANGE,
-    dateRangeType: DateRangeType.DAY,
-    dateRange: [],
-    dateMultiple: [],
-    dateRangeStringDesc: '',
-  };
-
-  const [latestDateMap, setLatestDateMap] = useState<LatestDateMap>({
+  const [latestDateMap] = useState<LatestDateMap>({
     maxPartition: dayjs().format('YYYY-MM-DD'),
   });
   const [dateRangesParams] = useState(() => {

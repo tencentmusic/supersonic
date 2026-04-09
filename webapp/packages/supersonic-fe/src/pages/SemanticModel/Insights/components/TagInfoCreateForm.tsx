@@ -77,7 +77,7 @@ const TagInfoCreateForm: React.FC<CreateFormProps> = ({
   const forward = () => setCurrentStep(currentStep + 1);
   const backward = () => setCurrentStep(currentStep - 1);
 
-  const queryModelDetail = async (modelId) => {
+  const queryModelDetail = async (modelId: any) => {
     if (!modelId) {
       return;
     }

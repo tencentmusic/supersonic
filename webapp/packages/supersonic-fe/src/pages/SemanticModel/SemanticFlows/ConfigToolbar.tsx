@@ -18,7 +18,6 @@ import {
   StopOutlined,
 } from '@ant-design/icons';
 import { GraphApi } from './service';
-import type { NsGraphCmd } from '@antv/xflow';
 import { Radio } from 'antd';
 
 export namespace NSToolbarConfig {
@@ -68,7 +67,7 @@ export namespace NSToolbarConfig {
     } as NSToolbarConfig.IToolbarState;
   };
 
-  export const getToolbarItems = async () => {
+  export const getToolbarItems = async (_state?: any) => {
     const toolbarGroup1: IToolbarItemOptions[] = [];
     const toolbarGroup2: IToolbarItemOptions[] = [];
     const toolbarGroup3: IToolbarItemOptions[] = [];
@@ -77,10 +76,10 @@ export namespace NSToolbarConfig {
       id: XFlowGraphCommands.SAVE_GRAPH_DATA.id,
       iconName: 'SaveOutlined',
       tooltip: '保存数据',
-      onClick: async ({ commandService }) => {
-        commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
+      onClick: async ({ commandService }: any) => {
+        commandService.executeCommand(
           XFlowGraphCommands.SAVE_GRAPH_DATA.id,
-          { saveGraphDataService: (meta, graphData) => GraphApi.saveGraphData!(meta, graphData) },
+          { saveGraphDataService: (meta: any, graphData: any) => GraphApi.saveGraphData!(meta, graphData) },
         );
       },
     });
@@ -218,14 +217,14 @@ export const getExtraToolbarItems = async () => {
   return [{ name: 'extra', items: toolbarGroup }];
 };
 
-export const useToolbarConfig = createToolbarConfig((toolbarConfig) => {
+export const useToolbarConfig = createToolbarConfig((toolbarConfig: any) => {
   /** 生产 toolbar item */
-  toolbarConfig.setToolbarModelService(async (toolbarModel, modelService, toDispose) => {
+  toolbarConfig.setToolbarModelService(async (toolbarModel: any, modelService: any, toDispose: any) => {
     const updateToolbarModel = async () => {
       const state = await NSToolbarConfig.getToolbarState(modelService);
       const toolbarItems = await NSToolbarConfig.getToolbarItems(state);
       // const extraToolbarItems = await getExtraToolbarItems();
-      toolbarModel.setValue((toolbar) => {
+      toolbarModel.setValue((toolbar: any) => {
         toolbar.mainGroups = toolbarItems;
         // toolbar.extraGroups = extraToolbarItems;
       });

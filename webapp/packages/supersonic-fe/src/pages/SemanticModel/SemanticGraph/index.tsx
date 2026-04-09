@@ -13,11 +13,9 @@ import {
   getModelRelaList,
   getViewInfoList,
   createOrUpdateViewInfo,
-  deleteViewInfo,
 } from '../service';
 import { jsonParse } from '@/utils/utils';
-import { Item, TreeGraphData, NodeConfig, IItemBaseConfig, EdgeConfig } from '@antv/g6-core';
-import initToolBar from './components/ToolBar';
+import { Item, TreeGraphData, NodeConfig, IItemBaseConfig } from '@antv/g6-core';
 import initTooltips from './components/ToolTips';
 import initContextMenu from './components/ContextMenu';
 // import initLegend from './components/Legend';
@@ -30,8 +28,6 @@ import MetricInfoCreateForm from '../components/MetricInfoCreateForm';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import ClassModelTypeModal from '../components/ClassModelTypeModal';
 import GraphToolBar from './components/GraphToolBar';
-import GraphLegend from './components/GraphLegend';
-import GraphLegendVisibleModeItem from './components/GraphLegendVisibleModeItem';
 import ModelRelationFormDrawer from './components/ModelRelationFormDrawer';
 import ControlToolBar from './components/ControlToolBar';
 
@@ -73,9 +69,6 @@ const SemanticGraph: React.FC<Props> = ({}) => {
 
   const [confirmModalOpenState, setConfirmModalOpenState] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
-
-  const visibleModeOpenRef = useRef<boolean>(false);
-  const [visibleModeOpen, setVisibleModeOpen] = useState<boolean>(false);
 
   const graphShowTypeRef = useRef<SemanticNodeType>();
   const [graphShowTypeState, setGraphShowTypeState] = useState<SemanticNodeType>();
@@ -203,14 +196,6 @@ const SemanticGraph: React.FC<Props> = ({}) => {
     }
   };
 
-  const deleteRelationConfig = async (recordId: number) => {
-    const { code, data, msg } = await deleteViewInfo(recordId);
-    if (code === 200) {
-    } else {
-      message.error(msg);
-    }
-  };
-
   const saveRelationConfig = async (domainId: number, graphData: any) => {
     const configData = {
       id: relationConfig?.id,
@@ -221,7 +206,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
     const { code, msg } = await createOrUpdateViewInfo(configData);
     if (code === 200) {
       setRelationConfig(configData);
-      queryModelRelaList(selectDomainId);
+      queryModelRelaList(selectDomainId!);
     } else {
       message.error(msg);
     }
@@ -246,9 +231,8 @@ const SemanticGraph: React.FC<Props> = ({}) => {
   useEffect(() => {
     graphLegendDataSourceIds.current = undefined;
     graphRef.current = null;
-    queryDataSourceList({ domainId: selectDomainId });
-    queryModelRelaList(selectDomainId);
-    // deleteRelationConfig(16);
+    queryDataSourceList({ domainId: selectDomainId! });
+    queryModelRelaList(selectDomainId!);
   }, [selectDomainId]);
 
   // const getLegendDataFilterFunctions = () => {
@@ -396,7 +380,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
   };
 
   const modelRelationDataInit = (fromModelId: number, toModelId: number) => {
-    const targetData = relationDataListRef.current.find((item) => {
+    const targetData = relationDataListRef.current.find((item: any) => {
       return item.fromModelId === fromModelId && item.toModelId === toModelId;
     });
     setCurrentRelationDataItem(targetData);
@@ -445,16 +429,6 @@ const SemanticGraph: React.FC<Props> = ({}) => {
       },
     },
   };
-
-  function handleToolBarClick(code: string) {
-    if (code === 'visibleMode') {
-      visibleModeOpenRef.current = !visibleModeOpenRef.current;
-      setVisibleModeOpen(visibleModeOpenRef.current);
-      return;
-    }
-    visibleModeOpenRef.current = false;
-    setVisibleModeOpen(false);
-  }
 
   const lessNodeZoomRealAndMoveCenter = () => {
     const bbox = graphRef.current.get('group').getBBox();
@@ -508,7 +482,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
           width: 220,
           height: 80,
           afterDraw(cfg, group) {
-            group.addShape('circle', {
+            group!.addShape('circle', {
               attrs: {
                 r: 8,
                 x: 80 / 2,
@@ -524,7 +498,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
               draggable: true, // allow to catch the drag events on this shape
             });
 
-            group.addShape('circle', {
+            group!.addShape('circle', {
               attrs: {
                 r: 8,
                 x: -80 / 2,
@@ -542,9 +516,9 @@ const SemanticGraph: React.FC<Props> = ({}) => {
           },
           setState(name, value, item) {
             if (name === 'showAnchors') {
-              const anchorPoints = item
+              const anchorPoints = item!
                 .getContainer()
-                .findAll((ele) => ele.get('name') === 'anchor-point');
+                .findAll((ele: any) => ele.get('name') === 'anchor-point');
               anchorPoints.forEach((point) => {
                 // if (value || point.get('links') > 0) point.show();
                 if (value) point.show();
@@ -756,7 +730,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
         });
       });
 
-      graphRef.current.on('aftercreateedge', (e) => {
+      graphRef.current.on('aftercreateedge', (e: any) => {
         // update the sourceAnchor and targetAnchor for the newly added edge
         const model = e?.item?.getModel?.() || {};
         const { targetAnchor, sourceAnchor } = model;
@@ -811,7 +785,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
         // });
       });
 
-      graphRef.current.on('afteradditem', (e) => {
+      graphRef.current.on('afteradditem', (e: any) => {
         const model = e!.item!.getModel();
         const { sourceAnchor, targetAnchor } = model;
         if (e.item && e.item.getType() === 'edge') {
@@ -832,7 +806,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
         }
       });
 
-      graphRef.current.on('afterremoveitem', (e) => {
+      graphRef.current.on('afterremoveitem', (e: any) => {
         if (e.item && e.item.source && e.item.target) {
           const sourceNode = graphRef.current.findById(e.item.source);
           const targetNode = graphRef.current.findById(e.item.target);
@@ -841,7 +815,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
             const sourceAnchorShape = sourceNode
               .getContainer()
               .find(
-                (ele) =>
+                (ele: any) =>
                   ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === sourceAnchor,
               );
             sourceAnchorShape.set('links', sourceAnchorShape.get('links') - 1);
@@ -850,7 +824,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
             const targetAnchorShape = targetNode
               .getContainer()
               .find(
-                (ele) =>
+                (ele: any) =>
                   ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === targetAnchor,
               );
             targetAnchorShape.set('links', targetAnchorShape.get('links') - 1);
@@ -858,22 +832,22 @@ const SemanticGraph: React.FC<Props> = ({}) => {
         }
       });
 
-      graphRef.current.on('node:mouseenter', (e) => {
+      graphRef.current.on('node:mouseenter', (e: any) => {
         graphRef.current.setItemState(e.item, 'showAnchors', true);
       });
-      graphRef.current.on('node:mouseleave', (e) => {
+      graphRef.current.on('node:mouseleave', (e: any) => {
         graphRef.current.setItemState(e.item, 'showAnchors', false);
       });
-      graphRef.current.on('node:dragenter', (e) => {
+      graphRef.current.on('node:dragenter', (e: any) => {
         graphRef.current.setItemState(e.item, 'showAnchors', true);
       });
-      graphRef.current.on('node:dragleave', (e) => {
+      graphRef.current.on('node:dragleave', (e: any) => {
         graphRef.current.setItemState(e.item, 'showAnchors', false);
       });
-      graphRef.current.on('node:dragstart', (e) => {
+      graphRef.current.on('node:dragstart', (e: any) => {
         graphRef.current.setItemState(e.item, 'showAnchors', true);
       });
-      graphRef.current.on('node:dragout', (e) => {
+      graphRef.current.on('node:dragout', (e: any) => {
         graphRef.current.setItemState(e.item, 'showAnchors', false);
       });
 
@@ -932,7 +906,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
 
       const rootNode = graphRef.current.findById('root');
       graphRef.current.hideItem(rootNode);
-      getRelationConfig(selectDomainId);
+      getRelationConfig(selectDomainId!);
       if (typeof window !== 'undefined')
         window.onresize = () => {
           if (!graphRef.current || graphRef.current.get('destroyed')) return;
@@ -944,7 +918,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
 
   const updateGraphData = async (params?: { graphShowType?: SemanticNodeType }) => {
     const graphRootData = await queryDataSourceList({
-      domainId: selectDomainId,
+      domainId: selectDomainId!,
       graphShowType: params?.graphShowType,
     });
     if (graphRootData) {
@@ -963,11 +937,11 @@ const SemanticGraph: React.FC<Props> = ({}) => {
 
   const saveModelRelationEdges = () => {
     const edges = graphRef.current.getEdges();
-    const edgesModel = edges.map((edge) => edge.getModel());
+    const edgesModel = edges.map((edge: any) => edge.getModel());
     const modelRelationEdges = edgesModel.filter(
-      (edgeModel) => edgeModel.sourceAnchor && edgeModel.targetAnchor,
+      (edgeModel: any) => edgeModel.sourceAnchor && edgeModel.targetAnchor,
     );
-    saveRelationConfig(selectDomainId, modelRelationEdges);
+    saveRelationConfig(selectDomainId!, modelRelationEdges);
   };
 
   return (
@@ -1014,7 +988,8 @@ const SemanticGraph: React.FC<Props> = ({}) => {
       />
 
       <GraphToolBar
-        onClick={({ eventName }: { eventName: string }) => {
+        onClick={(params) => {
+          const eventName = params?.eventName;
           setNodeDataSource(undefined);
           if (eventName === 'createDatabase') {
             setCreateDataSourceModalOpen(true);
@@ -1048,7 +1023,8 @@ const SemanticGraph: React.FC<Props> = ({}) => {
           handleContextMenuClickEdit({ model: nodeData });
           setInfoDrawerVisible(false);
         }}
-        onNodeChange={({ eventName }: { eventName: string }) => {
+        onNodeChange={(params) => {
+          const eventName = params?.eventName;
           updateGraphData();
           setInfoDrawerVisible(false);
           if (eventName === SemanticNodeType.METRIC) {
@@ -1062,8 +1038,8 @@ const SemanticGraph: React.FC<Props> = ({}) => {
 
       {createDimensionModalVisible && (
         <DimensionInfoModal
-          modelId={modelId}
-          domainId={selectDomainId}
+          modelId={modelId!}
+          domainId={selectDomainId!}
           bindModalVisible={createDimensionModalVisible}
           dimensionItem={dimensionItem}
           dataSourceList={nodeDataSource ? [nodeDataSource] : dataSourceInfoList}
@@ -1103,7 +1079,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
             setNodeDataSource(undefined);
             setCreateDataSourceModalOpen(false);
           }}
-          dataSourceItem={nodeDataSource}
+          modelItem={nodeDataSource}
           onSubmit={() => {
             updateGraphData();
           }}
@@ -1126,7 +1102,7 @@ const SemanticGraph: React.FC<Props> = ({}) => {
         />
       }
       <ModelRelationFormDrawer
-        domainId={selectDomainId}
+        domainId={selectDomainId!}
         nodeModel={nodeModel}
         relationData={currentRelationDataItem}
         onClose={() => {

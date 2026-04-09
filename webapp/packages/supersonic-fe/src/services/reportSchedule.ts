@@ -17,7 +17,7 @@ export interface DataSetSchemaField {
   bizName: string;
 }
 
-export function getValidDataSetList(): Promise<ValidDataSetItem[]> {
+export function getValidDataSetList(): Promise<Result<ValidDataSetItem[]>> {
   return request(`${process.env.API_BASE_URL || ''}dataSet/getValidDataSetList`, { method: 'GET' });
 }
 
@@ -60,6 +60,10 @@ export interface ReportExecution {
   sqlHash?: string;
   executionTimeMs?: number;
   scanRows?: number;
+  // New fields extracted from snapshot
+  templateName?: string;
+  triggerType?: string;
+  hasPreview?: boolean;
 }
 
 export function getScheduleList(params: {

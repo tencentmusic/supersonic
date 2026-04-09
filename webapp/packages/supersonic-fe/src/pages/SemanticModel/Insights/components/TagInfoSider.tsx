@@ -22,7 +22,7 @@ import IndicatorStar from '../../components/IndicatorStar';
 
 type Props = {
   tagData: ISemantic.ITagItem;
-  onNodeChange: (params?: { eventName?: string }) => void;
+  onNodeChange?: (params?: { eventName?: string }) => void;
   onEditBtnClick?: (tagData: any) => void;
   onDimensionRelationBtnClick?: () => void;
   dimensionMap: Record<string, ISemantic.IDimensionItem>;

@@ -1,7 +1,8 @@
 /* eslint-disable */
 
-import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react';
+import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import AceEditor, { IAceOptions } from 'react-ace';
+// @ts-ignore
 import languageTools from 'ace-builds/src-min-noconflict/ext-language_tools';
 import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-min-noconflict/theme-sqlserver';
@@ -63,7 +64,7 @@ export interface ISqlEditorProps {
  * @param props ISqlEditorProps
  */
 function SqlEditor(props: ISqlEditorProps) {
-  const refEditor = useRef<ReactAce>();
+  const refEditor = useRef<ReactAce>(null);
   const {
     hints = {},
     value,
@@ -190,7 +191,7 @@ function setHintsPopover(hints: ISqlEditorProps['hints']) {
   } = languageTools;
   const customHintsCompleter = {
     identifierRegexps: [/[a-zA-Z_0-9.\-\u00A2-\uFFFF]/],
-    getCompletions: (editor, session, pos, prefix, callback) => {
+    getCompletions: (editor: any, session: any, pos: any, prefix: any, callback: any) => {
       const { tableKeywords, tableColumnKeywords, variableKeywords, columns } =
         formatCompleterFromHints(hints);
       if (prefix[prefix.length - 1] === '.') {
@@ -221,10 +222,10 @@ function formatCompleterFromHints(hints: ISqlEditorProps['hints']) {
   const tableColumnKeywords: { [tableName: string]: ICompleters[] } = {};
   const columns: ICompleters[] = [];
   let score = 1000;
-  Object.keys(hints).forEach((key) => {
+  Object.keys(hints!).forEach((key) => {
     const meta: EHintMeta = isVariable(key) as any;
     if (!meta) {
-      const { columnWithTableName, column } = genTableColumnKeywords(hints[key], key);
+      const { columnWithTableName, column } = genTableColumnKeywords(hints![key], key);
       tableColumnKeywords[key] = columnWithTableName;
       columns.push(...column);
       tableKeywords.push({
@@ -259,19 +260,19 @@ function genTableColumnKeywords(table: string[], tableName: string) {
 }
 
 function genAliasTableColumnKeywords(
-  editor,
+  editor: any,
   aliasTableName: string,
   hints: ISqlEditorProps['hints'],
 ) {
   const content = editor.getSession().getValue();
-  const tableName = Object.keys(hints).find((tableName) => {
+  const tableName = Object.keys(hints!).find((tableName) => {
     const reg = new RegExp(`.+${tableName}\\s*(as|AS)?(?=\\s+${aliasTableName}\\s*)`, 'im');
     return reg.test(content);
   });
   if (!tableName) {
     return [];
   }
-  const { columnWithTableName } = genTableColumnKeywords(hints[tableName], aliasTableName);
+  const { columnWithTableName } = genTableColumnKeywords(hints![tableName], aliasTableName);
   return columnWithTableName;
 }
 

@@ -299,6 +299,8 @@ export declare namespace ISemantic {
     isCollect: boolean;
     isPublish: boolean;
     relateDimension?: IRelateDimension;
+    containsPartitionDimensions?: boolean;
+    tags?: Record<string, string> | string[];
   }
 
   interface IMetricTrendColumn {
@@ -410,6 +412,7 @@ export declare namespace ISemantic {
     status: number;
     typeEnum: null;
     sensitiveLevel: SENSITIVE_LEVEL;
+    domainId?: number;
     modelId: number;
     type: string;
     isCollect: boolean;

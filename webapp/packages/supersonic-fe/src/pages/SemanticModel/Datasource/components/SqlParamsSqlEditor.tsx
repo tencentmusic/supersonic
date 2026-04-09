@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import type { FC } from 'react';
 import { Input, Tag, Tooltip } from 'antd';
+import type { InputRef } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
 import styles from '../style.less';
@@ -14,8 +15,8 @@ const ParamsSqlEditor: FC<ParamsItemProps> = ({ value, onChange }) => {
   const [inputValue, setInputValue] = useState<string>();
   const [editInputIndex, setEditInputIndex] = useState<number>(-1);
   const [inputVisible, setInputVisible] = useState<boolean>(false);
-  const editInput = useRef<typeof Input>(null);
-  const inputRef = useRef<typeof Input>(null);
+  const editInput = useRef<InputRef>(null);
+  const inputRef = useRef<InputRef>(null);
 
   const handleEditInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setEditInputValue(e.target.value);

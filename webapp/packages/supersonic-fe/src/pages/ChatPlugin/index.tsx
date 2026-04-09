@@ -84,7 +84,7 @@ const PluginManage = () => {
       render: (value: string) => {
         return (
           <Tag color={value === PluginTypeEnum.WEB_PAGE ? 'blue' : 'cyan'}>
-            {PLUGIN_TYPE_MAP[value]}
+            {PLUGIN_TYPE_MAP[value as keyof typeof PLUGIN_TYPE_MAP]}
           </Tag>
         );
       },
@@ -207,7 +207,7 @@ const PluginManage = () => {
             className={styles.filterItemControl}
             placeholder="请选择插件类型"
             options={Object.keys(PLUGIN_TYPE_MAP).map((key) => ({
-              label: PLUGIN_TYPE_MAP[key],
+              label: PLUGIN_TYPE_MAP[key as keyof typeof PLUGIN_TYPE_MAP],
               value: key,
             }))}
             value={type}

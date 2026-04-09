@@ -6,7 +6,7 @@ import { ISemantic } from '../data';
 import { getDimensionList } from '../service';
 import DetailContainer from '@/pages/SemanticModel/components/DetailContainer';
 import DetailSider from '@/pages/SemanticModel/components/DetailContainer/DetailSider';
-import { ProjectOutlined, ConsoleSqlOutlined } from '@ant-design/icons';
+import { ProjectOutlined } from '@ant-design/icons';
 import DimensionInfoForm from '../components/DimensionInfoForm';
 import DetailFormWrapper from '@/pages/SemanticModel/components/DetailContainer/DetailFormWrapper';
 

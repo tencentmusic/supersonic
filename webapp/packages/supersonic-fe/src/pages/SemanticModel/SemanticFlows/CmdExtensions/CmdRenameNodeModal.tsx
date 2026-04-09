@@ -56,7 +56,7 @@ export class RenameNodeCommand implements ICommand {
     // const app = useXFlowApp();
     const { args } = ctx.getArgs();
     const hooks = ctx.getHooks();
-    const result = await hooks.renameNode.call(args, async (args) => {
+    const result = await hooks.renameNode.call(args, async (args: any) => {
       const { nodeConfig, graphMeta, commandService, modelService, updateNodeNameService } = args;
       const preNodeName = nodeConfig.label;
 
@@ -73,12 +73,12 @@ export class RenameNodeCommand implements ICommand {
       const cell = x6Graph.getCellById(nodeConfig.id);
       const nodes = x6Graph.getNodes();
       const edges = x6Graph.getEdges();
-      nodes.forEach((node) => {
+      nodes.forEach((node: any) => {
         if (node !== cell) {
           x6Graph.removeCell(node);
         }
       });
-      edges.forEach((edge) => {
+      edges.forEach((edge: any) => {
         x6Graph.removeEdge(edge);
       });
       if (!cell || !cell.isNode()) {

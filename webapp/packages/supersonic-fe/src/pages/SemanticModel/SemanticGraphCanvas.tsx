@@ -1,9 +1,6 @@
 // import { Radio } from 'antd';
-import React, { useState } from 'react';
-import { connect } from '@umijs/max';
+import React from 'react';
 import styles from './components/style.less';
-import type { StateType } from './model';
-import { SemanticNodeType } from './enum';
 // import SemanticFlow from './SemanticFlows';
 import SemanticGraph from './SemanticGraph';
 

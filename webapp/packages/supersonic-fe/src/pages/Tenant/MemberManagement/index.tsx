@@ -4,16 +4,14 @@ import {
   Button,
   Modal,
   Form,
-  Input,
   Select,
   message,
   Space,
-  Popconfirm,
   Card,
   Tag,
   TreeSelect,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, UserAddOutlined } from '@ant-design/icons';
+
 import { getUserList } from '@/services/user';
 import { getOrganizationTree, assignUserToOrganization } from '@/services/organization';
 import { getTenantRoles, assignRoleToUser } from '@/services/tenant';

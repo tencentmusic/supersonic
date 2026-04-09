@@ -50,7 +50,7 @@ const MetricTrendSection: React.FC<Props> = ({
     dateField: DateFieldMap[DateRangeType.DAY],
     period: DateRangeType.DAY,
   });
-  const [rowNumber, setRowNumber] = useState<number>(5);
+  const [rowNumber] = useState<number>(5);
 
   const [tableColumnConfig, setTableColumnConfig] = useState<ColumnConfig[]>([]);
 
@@ -177,11 +177,11 @@ const MetricTrendSection: React.FC<Props> = ({
                           let dateField = DateFieldMap[DateRangeType.DAY];
                           let period = DateRangeType.DAY;
                           if (DateSettingType.DYNAMIC === dateSettingType) {
-                            dateField = DateFieldMap[dynamicParams.dateRangeType];
+                            dateField = DateFieldMap[dynamicParams.dateRangeType as keyof typeof DateFieldMap];
                             period = dynamicParams.dateRangeType;
                           }
                           if (DateSettingType.STATIC === dateSettingType) {
-                            dateField = DateFieldMap[staticParams.dateRangeType];
+                            dateField = DateFieldMap[staticParams.dateRangeType as keyof typeof DateFieldMap];
                             period = staticParams.dateRangeType;
                           }
                           setPeriodDate({ startDate, endDate, dateField, period });

@@ -23,7 +23,7 @@ export function getModelList() {
 }
 
 export function getDataSetSchema(dataSetId: number) {
-  return request.get<Result<{ list: DimensionType[] }>>(
+  return request.get<Result<{ dimensions: DimensionType[] }>>(
     `/api/chat/conf/getDataSetSchema/${dataSetId}`,
   );
 }

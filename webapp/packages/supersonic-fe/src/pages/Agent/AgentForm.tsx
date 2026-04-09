@@ -77,7 +77,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
   const queryLlmList = async () => {
     const { code, data } = await getLlmList();
     if (code === 200 && data) {
-      const options = data.map((item) => {
+      const options = data.map((item: any) => {
         return {
           label: item.name,
           value: item.id,
@@ -289,7 +289,7 @@ const AgentForm: React.FC<Props> = ({ editAgent, onSaveAgent, onCreateToolBtnCli
                       currentChatModel === item.value ? styles.agentChatModelCellActive : ''
                     }`}
                     onClick={() => {
-                      setCurrentChatModel(item.value);
+                      setCurrentChatModel(item.value as string);
                     }}
                   >
                     <FormItem

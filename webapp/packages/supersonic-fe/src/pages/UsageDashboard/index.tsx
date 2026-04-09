@@ -17,8 +17,6 @@ import {
   CloudOutlined,
   DatabaseOutlined,
   TeamOutlined,
-  RiseOutlined,
-  FallOutlined,
 } from '@ant-design/icons';
 import { ProCard } from '@ant-design/pro-components';
 import {
@@ -42,7 +40,7 @@ const { RangePicker } = DatePicker;
 const { Title } = Typography;
 
 const UsageDashboard: React.FC = () => {
-  const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [, setTenant] = useState<Tenant | null>(null);
   const [todayUsage, setTodayUsage] = useState<TenantUsage | null>(null);
   const [monthlyUsage, setMonthlyUsage] = useState<TenantUsage | null>(null);
   const [rangeUsage, setRangeUsage] = useState<TenantUsage[]>([]);
@@ -144,12 +142,6 @@ const UsageDashboard: React.FC = () => {
     if (percent >= 90) return '#ff4d4f';
     if (percent >= 70) return '#faad14';
     return '#52c41a';
-  };
-
-  const getTrend = (current: number, previous: number) => {
-    if (previous === 0) return { percent: 0, isUp: true };
-    const percent = Math.round(((current - previous) / previous) * 100);
-    return { percent: Math.abs(percent), isUp: percent >= 0 };
   };
 
   const usageColumns = [

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Radio, Select } from 'antd'
+import { Modal, Form, Input, Radio } from 'antd'
 import _ from 'lodash'
 import { EntityType, EntityTypeDisplay } from '../const'
 import './index.less';

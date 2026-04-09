@@ -79,7 +79,7 @@ export namespace MockApi {
   }
 
   /** 添加节点 */
-  export const addNode: NsNodeCmd.AddNode.IArgs['createNodeService'] = async args => {
+  export const addNode: NsNodeCmd.AddNode.IArgs['createNodeService'] = async (args: any) => {
     const { nodeConfig } = args
     const promise: Promise<NsGraph.INodeConfig> = new Promise(resolve => {
       setTimeout(() => {
@@ -92,8 +92,7 @@ export namespace MockApi {
     return res
   }
   /** 删除节点 */
-  export const delNode: NsNodeCmd.DelNode.IArgs['deleteNodeService'] = async args => {
-    const { nodeConfig } = args
+  export const delNode: NsNodeCmd.DelNode.IArgs['deleteNodeService'] = async (args: any) => {
     const promise: Promise<boolean> = new Promise(resolve => {
       setTimeout(() => {
         resolve(true)
@@ -103,7 +102,7 @@ export namespace MockApi {
     return res
   }
   /** 添加边 */
-  export const addEdge: NsEdgeCmd.AddEdge.IArgs['createEdgeService'] = async args => {
+  export const addEdge: NsEdgeCmd.AddEdge.IArgs['createEdgeService'] = async (args: any) => {
     const { edgeConfig } = args
     const promise: Promise<NsGraph.IEdgeConfig> = new Promise(resolve => {
       setTimeout(() => {
@@ -116,8 +115,7 @@ export namespace MockApi {
     return res
   }
   /** 删除边 */
-  export const delEdge: NsEdgeCmd.DelEdge.IArgs['deleteEdgeService'] = async args => {
-    const { edgeConfig } = args
+  export const delEdge: NsEdgeCmd.DelEdge.IArgs['deleteEdgeService'] = async (args: any) => {
     const promise: Promise<boolean> = new Promise(resolve => {
       setTimeout(() => {
         resolve(true)

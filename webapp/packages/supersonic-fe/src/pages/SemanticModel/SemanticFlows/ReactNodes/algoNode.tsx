@@ -38,7 +38,7 @@ export const AlgoIcon: React.FC<IProps> = (props) => {
   }
 };
 
-export const AlgoNode: NsGraph.INodeRender = (props) => {
+export const AlgoNode: NsGraph.INodeRender = (props: any) => {
   const { data } = props;
   const dataSourceData = data.payload;
 

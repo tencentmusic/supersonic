@@ -2,6 +2,8 @@ import type { NsGraph } from '@antv/xflow'
 
 /** 实体数据模型 */
 export interface EntityModel {
+  /** 节点id（画布/图引擎使用） */
+  id?: string | number
   /** 实体id */
   entityId: string
   /** 实体name */
@@ -27,7 +29,13 @@ export interface EntityProperty {
 }
 
 /** 画布实体渲染模型 */
-export interface EntityCanvasModel extends EntityModel, NsGraph.INodeConfig {}
+export interface EntityCanvasModel extends EntityModel, NsGraph.INodeConfig {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  [key: string]: any
+}
 
 /** 画布连线渲染模型 */
 export type RelationCanvasModel = NsGraph.IEdgeConfig

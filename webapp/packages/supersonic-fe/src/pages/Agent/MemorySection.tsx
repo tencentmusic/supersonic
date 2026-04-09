@@ -242,25 +242,25 @@ const MemorySection = ({ agentId }: Props) => {
         const [sortKey, sortValue] = target;
         if (sortKey && sortValue) {
           sortParams = {
-            orderCondition: sortKeyMap[sortKey] || sortKey,
-            sort: sortValueMap[sortValue] || 'desc',
+            orderCondition: sortKeyMap[sortKey as string] || sortKey,
+            sort: sortValueMap[sortValue as string] || 'desc',
           };
         }
       }
     }
     setLoading(true);
     const res = await getMemeoryList({
-      agentId,
+      agentId: agentId!,
       chatMemoryFilter: filtersValue || filters,
-      current: current || 1,
-      pageSize,
+      current: current ?? 1,
+      pageSize: pageSize ?? 10,
       ...sortParams,
     });
     setLoading(false);
     const { list, total, pageNum } = res.data;
     setDataSource(list);
     setPagination({
-      pageSize,
+      pageSize: pageSize ?? 10,
       current: pageNum,
       total,
     });

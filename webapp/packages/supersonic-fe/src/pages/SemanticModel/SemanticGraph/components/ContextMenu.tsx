@@ -12,11 +12,11 @@ type InitContextMenuProps = {
 export const getMenuConfig = (props?: InitContextMenuProps) => {
   const { onMenuClick } = props || {};
   return {
-    getContent(evt) {
+    getContent(evt: any) {
       const nodeData = evt?.item?._cfg?.model;
       const { name, nodeType } = nodeData as any;
       if (nodeData) {
-        const nodeTypeConfig = SEMANTIC_NODE_TYPE_CONFIG[nodeType] || {};
+        const nodeTypeConfig = SEMANTIC_NODE_TYPE_CONFIG[nodeType as keyof typeof SEMANTIC_NODE_TYPE_CONFIG] || {};
         let ulNode = `
         <li title='编辑' key='edit' >编辑</li>
         <li title='删除' key='delete' >删除</li>
@@ -45,7 +45,7 @@ export const getMenuConfig = (props?: InitContextMenuProps) => {
       }
       return `<div>当前节点信息获取失败</div>`;
     },
-    handleMenuClick(target, item) {
+    handleMenuClick(target: any, item: any) {
       const targetKey = target.getAttribute('key') || '';
       onMenuClick?.(targetKey, item);
     },

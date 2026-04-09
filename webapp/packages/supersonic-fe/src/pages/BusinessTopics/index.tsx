@@ -11,6 +11,7 @@ import {
   deleteTopic,
 } from '@/services/businessTopic';
 import type { BusinessTopic } from '@/services/businessTopic';
+import { MSG } from '@/common/messages';
 import taskStyles from '../TaskCenter/style.less';
 import styles from './style.less';
 
@@ -36,7 +37,7 @@ const BusinessTopicsPage: React.FC = () => {
       setData(pageData?.records || []);
       setPagination({ current, pageSize, total: pageData?.total || 0 });
     } catch {
-      message.error('加载经营主题失败');
+      message.error(MSG.OPERATION_FAILED);
       setData([]);
     } finally {
       setLoading(false);
@@ -61,25 +62,25 @@ const BusinessTopicsPage: React.FC = () => {
     try {
       if (editRecord?.id) {
         await updateTopic(editRecord.id, values);
-        message.success('更新成功');
+        message.success(MSG.UPDATE_SUCCESS);
       } else {
         await createTopic(values);
-        message.success('创建成功');
+        message.success(MSG.CREATE_SUCCESS);
       }
       setFormVisible(false);
       fetchData(pagination.current, pagination.pageSize);
     } catch {
-      message.error(editRecord ? '更新失败' : '创建失败');
+      message.error(MSG.OPERATION_FAILED);
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deleteTopic(id);
-      message.success('已删除');
+      message.success(MSG.DELETE_SUCCESS);
       fetchData(pagination.current, pagination.pageSize);
     } catch {
-      message.error('删除失败');
+      message.error(MSG.DELETE_FAILED);
     }
   };
 

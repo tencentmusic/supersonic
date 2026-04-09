@@ -20,7 +20,7 @@ const TagDetail: React.FC<Props> = () => {
 
   const [metricMap, setMetricMap] = useState<Record<string, ISemantic.IMetricItem>>({});
 
-  const [relationDimensionOptions, setRelationDimensionOptions] = useState<
+  const [relationDimensionOptions] = useState<
     { value: string; label: string; modelId: number }[]
   >([]);
 
@@ -136,7 +136,7 @@ const TagDetail: React.FC<Props> = () => {
               dimensionMap={dimensionMap}
               metricMap={metricMap}
               // relationDimensionOptions={relationDimensionOptions}
-              tagData={tagData}
+              tagData={tagData!}
             />
           </div>
         </div>

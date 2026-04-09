@@ -1,9 +1,9 @@
 import G6 from '@antv/g6';
 
-let graph;
+let graph: any;
 
 const ERROR_COLOR = '#F5222D';
-const getNodeConfig = (node) => {
+const getNodeConfig = (node: any) => {
   if (node.nodeError) {
     return {
       basicColor: ERROR_COLOR,
@@ -34,7 +34,7 @@ const getNodeConfig = (node) => {
   return config;
 };
 
-const COLLAPSE_ICON = function COLLAPSE_ICON(x, y, r) {
+const COLLAPSE_ICON = function COLLAPSE_ICON(x: any, y: any, r: any) {
   return [
     ['M', x - r, y],
     ['a', r, r, 0, 1, 0, r * 2, 0],
@@ -43,7 +43,7 @@ const COLLAPSE_ICON = function COLLAPSE_ICON(x, y, r) {
     ['L', x - r + 2 * r - 4, y],
   ];
 };
-const EXPAND_ICON = function EXPAND_ICON(x, y, r) {
+const EXPAND_ICON = function EXPAND_ICON(x: any, y: any, r: any) {
   return [
     ['M', x - r, y],
     ['a', r, r, 0, 1, 0, r * 2, 0],
@@ -55,7 +55,7 @@ const EXPAND_ICON = function EXPAND_ICON(x, y, r) {
   ];
 };
 const nodeBasicMethod = {
-  createNodeBox: (group, config, w, h, isRoot) => {
+  createNodeBox: (group: any, config: any, w: any, h: any, isRoot: any) => {
     /* 最外面的大矩形 */
     const container = group.addShape('rect', {
       attrs: {
@@ -112,7 +112,7 @@ const nodeBasicMethod = {
     return container;
   },
   /* 生成树上的 marker */
-  createNodeMarker: (group, collapsed, x, y) => {
+  createNodeMarker: (group: any, collapsed: any, x: any, y: any) => {
     group.addShape('circle', {
       attrs: {
         x,
@@ -140,11 +140,11 @@ const nodeBasicMethod = {
       name: 'collapse-icon',
     });
   },
-  afterDraw: (cfg, group) => {
+  afterDraw: (cfg: any, group: any) => {
     /* 操作 marker 的背景色显示隐藏 */
-    const icon = group.find((element) => element.get('name') === 'collapse-icon');
+    const icon = group.find((element: any) => element.get('name') === 'collapse-icon');
     if (icon) {
-      const bg = group.find((element) => element.get('name') === 'collapse-icon-bg');
+      const bg = group.find((element: any) => element.get('name') === 'collapse-icon-bg');
       icon.on('mouseenter', () => {
         bg.attr('opacity', 1);
         graph.get('canvas').draw();
@@ -155,13 +155,13 @@ const nodeBasicMethod = {
       });
     }
     /* ip 显示 */
-    const ipBox = group.find((element) => element.get('name') === 'ip-box');
+    const ipBox = group.find((element: any) => element.get('name') === 'ip-box');
     if (ipBox) {
       /* ip 复制的几个元素 */
-      const ipLine = group.find((element) => element.get('name') === 'ip-cp-line');
-      const ipBG = group.find((element) => element.get('name') === 'ip-cp-bg');
-      const ipIcon = group.find((element) => element.get('name') === 'ip-cp-icon');
-      const ipCPBox = group.find((element) => element.get('name') === 'ip-cp-box');
+      const ipLine = group.find((element: any) => element.get('name') === 'ip-cp-line');
+      const ipBG = group.find((element: any) => element.get('name') === 'ip-cp-bg');
+      const ipIcon = group.find((element: any) => element.get('name') === 'ip-cp-icon');
+      const ipCPBox = group.find((element: any) => element.get('name') === 'ip-cp-box');
 
       const onMouseEnter = () => {
         ipLine.attr('opacity', 1);
@@ -190,7 +190,7 @@ const nodeBasicMethod = {
       ipCPBox.on('click', () => {});
     }
   },
-  setState: (name, value, item) => {
+  setState: (name: any, value: any, item: any) => {
     const hasOpacityClass = [
       'ip-cp-line',
       'ip-cp-bg',
@@ -204,14 +204,14 @@ const nodeBasicMethod = {
     graph.setAutoPaint(false);
     if (name === 'emptiness') {
       if (value) {
-        childrens.forEach((shape) => {
+        childrens.forEach((shape: any) => {
           if (hasOpacityClass.indexOf(shape.get('name')) > -1) {
             return;
           }
           shape.attr('opacity', 0.4);
         });
       } else {
-        childrens.forEach((shape) => {
+        childrens.forEach((shape: any) => {
           if (hasOpacityClass.indexOf(shape.get('name')) > -1) {
             return;
           }
@@ -425,8 +425,8 @@ G6.registerNode('card-node', {
 });
 
 const container = document.getElementById('container');
-const width = container.scrollWidth;
-const height = container.scrollHeight || 500;
+const width = container!.scrollWidth;
+const height = container!.scrollHeight || 500;
 graph = new G6.Graph({
   container: 'container',
   width,
@@ -479,7 +479,7 @@ const data = {
   edges: [],
 };
 
-graph.data(data);
+graph.data(data as any);
 graph.render();
 
 if (typeof window !== 'undefined')

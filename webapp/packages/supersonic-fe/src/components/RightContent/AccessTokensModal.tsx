@@ -1,14 +1,12 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { Button, Form, Input, message, Modal, Table } from 'antd';
-import { useBoolean, useDynamicList, useRequest } from 'ahooks';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import { Button, message, Modal } from 'antd';
+import { useBoolean } from 'ahooks';
 import {
-  changePassword,
   generateAccessToken,
   getUserAccessTokens,
   removeAccessToken,
 } from '@/services/user';
-import { encryptPassword, encryptKey, copyText } from '@/utils/utils';
-import { API } from '@/services/API';
+import { copyText } from '@/utils/utils';
 import { MSG } from '@/common/messages';
 import { EditableProTable, ProColumns } from '@ant-design/pro-components';
 import { CopyOutlined } from '@ant-design/icons';
@@ -147,7 +145,6 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
     <Modal
       title="访问令牌"
       open={open}
-      onClose={closeModal}
       onCancel={closeModal}
       width={1200}
       footer={false}

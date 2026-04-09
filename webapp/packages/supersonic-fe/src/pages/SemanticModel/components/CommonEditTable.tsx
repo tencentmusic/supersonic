@@ -13,10 +13,16 @@ type Props = {
   hideCtrlBtn?: string[];
   editableProTableProps?: any;
   onDataSourceChange?: (dataSource: any) => void;
-  extenderCtrlColumn?: (text, record, _, action) => ReactNode[];
-  editableActionRender?: (row, config, defaultDom, actionRef) => ReactNode[];
+  extenderCtrlColumn?: (text: any, record: any, _: any, action: any) => ReactNode[];
+  editableActionRender?: (row: any, config: any, defaultDom: any, actionRef: any) => ReactNode[];
   onRecordSave?: (record: any) => void;
   ref?: any;
+  position?: string;
+  search?: boolean;
+  request?: () => Promise<any>;
+  pagination?: any;
+  onDelete?: (data: any) => void;
+  editable?: any;
 };
 
 export type CommonEditTableRef = {
@@ -73,7 +79,7 @@ const CommonEditTable: React.FC<Props> = forwardRef(
         title: '操作',
         dataIndex: 'x',
         valueType: 'option',
-        render: (text, record, _, action) => {
+        render: (text: any, record: any, _: any, action: any) => {
           return (
             <Space>
               {!hideCtrlBtn?.includes('editable') && (
@@ -112,7 +118,7 @@ const CommonEditTable: React.FC<Props> = forwardRef(
       },
     ];
 
-    const defaultActionRender = (row, config, defaultDom) => {
+    const defaultActionRender = (row: any, config: any, defaultDom: any) => {
       return editableActionRender?.(row, config, defaultDom, actionRef);
     };
     const actionRender = editableActionRender ? defaultActionRender : undefined;

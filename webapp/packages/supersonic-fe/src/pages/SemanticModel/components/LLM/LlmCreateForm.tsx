@@ -1,8 +1,8 @@
 import { useEffect, forwardRef, useImperativeHandle, useState, useRef } from 'react';
 import type { ForwardRefRenderFunction } from 'react';
-import { message, Form, Input, Select, Button, Space, Slider, InputNumber } from 'antd';
+import { message, Form, Input } from 'antd';
 import { saveLlmConfig } from '../../service';
-import { ConfigParametersItem, SystemConfig, dependenciesItem } from '@/pages/System/types';
+import { ConfigParametersItem, dependenciesItem } from '@/pages/System/types';
 import { testLLMConn, getLlmConfig } from '@/services/system';
 import { formLayout } from '@/components/FormHelper/utils';
 
@@ -20,14 +20,14 @@ const TextArea = Input.TextArea;
 const LlmCreateForm: ForwardRefRenderFunction<any, Props> = ({ llmItem, onSubmit }, ref) => {
   const [form] = Form.useForm();
   const [config, setConfig] = useState<any>([]);
-  const [formData, setFormData] = useState<any>({
+  const [formData] = useState<any>({
     config: {
       timeOut: 60,
       provider: 'OPEN_AI',
       temperature: 0,
     },
   });
-  const [testLoading, setTestLoading] = useState<boolean>(false);
+  const [, setTestLoading] = useState<boolean>(false);
 
   useEffect(() => {
     form.resetFields();
@@ -69,7 +69,7 @@ const LlmCreateForm: ForwardRefRenderFunction<any, Props> = ({ llmItem, onSubmit
     if (code === 200 && data) {
       let parameters = data;
       if (llmItem?.config) {
-        parameters = data.map((item) => {
+        parameters = data.map((item: any) => {
           const target = llmItem.config[item.name];
           if (target) {
             return {

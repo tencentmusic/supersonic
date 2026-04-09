@@ -43,8 +43,6 @@ const ENV_KEY = {
   SEMANTIC: 'semantic',
 };
 
-const { APP_TARGET } = process.env;
-
 const ROUTES = [
   {
     path: '/chat/mobile',

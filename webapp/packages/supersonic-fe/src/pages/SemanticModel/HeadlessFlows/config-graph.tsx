@@ -1,6 +1,6 @@
 import { createGraphConfig } from '@antv/xflow'
 
-export const useGraphConfig = createGraphConfig(config => {
+export const useGraphConfig = createGraphConfig((config: any) => {
   /** 预设XFlow画布配置项 */
   config.setX6Config({
     grid: true,

@@ -241,6 +241,7 @@ export interface AgentConfigResult {
   examples?: string[];
   dataSetId?: number;
   dataSetName?: string;
+  agentId?: number;
 }
 
 export interface CreatedModel {

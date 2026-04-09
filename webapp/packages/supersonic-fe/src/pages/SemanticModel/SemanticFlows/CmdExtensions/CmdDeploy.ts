@@ -1,5 +1,4 @@
 import type {
-  NsGraphCmd,
   ICmdHooks as IHooks,
   NsGraph,
   IArgsBase,
@@ -48,13 +47,13 @@ export class DeployDagCommand implements ICommand {
     const ctx = this.contextProvider();
     const { args } = ctx.getArgs();
     const hooks = ctx.getHooks();
-    const result = await hooks.deployDag.call(args, async (handlerArgs) => {
+    const result = await hooks.deployDag.call(args, async (handlerArgs: any) => {
       const { commandService, deployDagService } = handlerArgs;
       /** 执行Command */
-      await commandService!.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
+      await commandService!.executeCommand(
         XFlowGraphCommands.SAVE_GRAPH_DATA.id,
         {
-          saveGraphDataService: async (meta, graph) => {
+          saveGraphDataService: async (meta: any, graph: any) => {
             await deployDagService(meta, graph);
           },
         },

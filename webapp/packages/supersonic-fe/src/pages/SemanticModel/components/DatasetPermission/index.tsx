@@ -55,8 +55,8 @@ const DatasetPermissionSection: React.FC<Props> = ({ datasetId }) => {
     queryDatasetDetail();
   }, [datasetId]);
 
-  const handleAdminChange = async (values: string[]) => {
-    const admin = values.join(',');
+  const handleAdminChange = async (values: string | string[]) => {
+    const admin = Array.isArray(values) ? values.join(',') : values;
     const { code, msg } = await updateView({
       ...datasetData,
       admin,
@@ -69,8 +69,8 @@ const DatasetPermissionSection: React.FC<Props> = ({ datasetId }) => {
     }
   };
 
-  const handleViewerChange = async (values: string[]) => {
-    const viewer = values.join(',');
+  const handleViewerChange = async (values: string | string[]) => {
+    const viewer = Array.isArray(values) ? values.join(',') : values;
     const { code, msg } = await updateView({
       ...datasetData,
       viewer,

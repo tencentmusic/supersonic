@@ -1,6 +1,7 @@
 import { Space, Checkbox } from 'antd';
-import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import React, { useState, useEffect } from 'react';
+
+type CheckboxValueType = string | number | boolean;
 import styles from '../style.less';
 
 type Props = {

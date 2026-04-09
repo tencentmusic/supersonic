@@ -38,7 +38,7 @@ const generatorSearchInputDom = (graph: Graph, onSearch: ToolBarSearchCallBack) 
   const domString =
     '<input placeholder="请输入指标/维度名称" class="ant-input" id="toolBarSearchInput" type="text" value="" />';
   const searchInputDom = createDom(domString);
-  searchInputDom.addEventListener('keydown', (event) => {
+  searchInputDom.addEventListener('keydown', (event: any) => {
     if (event.key === 'Enter') {
       searchNode(graph, onSearch);
     }
@@ -91,7 +91,7 @@ const searchInputDOM = (graph: Graph, onSearch: ToolBarSearchCallBack) => {
   return searchDom;
 };
 
-function zoomGraph(graph, ratio) {
+function zoomGraph(graph: any, ratio: any) {
   const width = graph.get('width');
   const height = graph.get('height');
   const centerX = width / 2;
@@ -114,7 +114,7 @@ const initToolBar = ({
   const elements = defaultContentDom.querySelectorAll(
     'li[code="redo"], li[code="undo"], li[code="realZoom"]',
   );
-  elements.forEach((element) => {
+  elements.forEach((element: any) => {
     element.remove();
   });
   const searchBtnDom = `<li code="search">

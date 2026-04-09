@@ -116,12 +116,12 @@ const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     const { validateFields } = form;
     const content = await validateFields();
-    await loginDone({ ...content, password: encryptPassword(content.password, encryptKey) });
+    await loginDone({ ...content, password: encryptPassword(content.password, encryptKey as any) });
   };
 
   // 处理注册弹窗确定按钮
   const handleRegister = async (values: RegisterFormDetail) => {
-    const enCodeValues = { ...values, password: encryptPassword(values.password, encryptKey) };
+    const enCodeValues = { ...values, password: encryptPassword(values.password, encryptKey as any) };
     const { code, msg } = await userRegister(enCodeValues);
     if (code === 200) {
       message.success('注册成功');

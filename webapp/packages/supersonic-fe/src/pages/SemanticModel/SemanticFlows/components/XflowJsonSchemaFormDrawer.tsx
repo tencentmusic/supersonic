@@ -18,7 +18,7 @@ const XflowJsonSchemaFormDrawer: React.FC<CreateFormProps> = ({
   const defaultFormSchemaService: NsJsonSchemaForm.IFormSchemaService = async () => {
     return { tabs: [] };
   };
-  const defaultControlMapService: NsJsonSchemaForm.IControlMapService = (controlMap) => {
+  const defaultControlMapService: NsJsonSchemaForm.IControlMapService = (controlMap: any) => {
     return controlMap;
   };
   return (

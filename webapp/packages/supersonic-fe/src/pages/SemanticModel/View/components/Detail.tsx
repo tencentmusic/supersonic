@@ -1,4 +1,4 @@
-import { message, Form } from 'antd';
+import { message } from 'antd';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useModel, Helmet } from '@umijs/max';
 import { BASE_TITLE } from '@/common/constants';
@@ -71,7 +71,7 @@ const DataSetDetail: React.FC<Props> = () => {
   }, [selectDomainId]);
 
   const queryDomainAllModel = async () => {
-    const { code, data, msg } = await getAllModelByDomainId(selectDomainId);
+    const { code, data, msg } = await getAllModelByDomainId(selectDomainId!);
     if (code === 200) {
       setModelList(data);
     } else {
@@ -117,7 +117,7 @@ const DataSetDetail: React.FC<Props> = () => {
               <DatasetCreateForm
                 ref={detailFormRef}
                 activeKey={activeMenu.key}
-                domainId={selectDomainId}
+                domainId={selectDomainId!}
                 datasetItem={detailData}
                 modelList={modelList}
               />

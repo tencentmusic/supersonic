@@ -23,7 +23,6 @@ import TableTitleTooltips from '../../components/TableTitleTooltips';
 import MetricExpressionEditor from '../../components/MetricExpressionEditor';
 import useMetricForm, { queryParamsTypeParamsKey } from '../../hooks/useMetricForm';
 import { MetricSettingKey, MetricSettingWording } from '../constants';
-import { ISemantic } from '../../data';
 import { toModelList, toDomainList } from '@/pages/SemanticModel/utils';
 import globalStyles from '@/global.less';
 

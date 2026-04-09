@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { IChatConfig } from '../../data';
 import DimensionMetricVisibleTableTransfer from './DimensionMetricVisibleTableTransfer';
 
 interface RecordType {

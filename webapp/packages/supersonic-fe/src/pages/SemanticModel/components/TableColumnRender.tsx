@@ -71,7 +71,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
             <div style={{ width: 'max-content' }}>分类:</div>
             <span style={{ marginLeft: 2 }}>
               <Space size={[0, 8]} wrap>
-                {classifications.map((tag: string) => (
+                {classifications!.map((tag: string) => (
                   <Tag
                     color="#eee"
                     key={tag}
@@ -105,7 +105,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
 
   return {
     description: {
-      render: (_, record: ISemantic.IMetricItem) => (
+      render: (_: any, record: ISemantic.IMetricItem) => (
         <Paragraph
           ellipsis={{ tooltip: record.description, rows: 3 }}
           style={{ width: 250, marginBottom: 0 }}
@@ -115,7 +115,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
       ),
     },
     dimensionInfo: {
-      render: (_, record: ISemantic.IDimensionItem) => {
+      render: (_: any, record: ISemantic.IDimensionItem) => {
         const { name, alias, bizName, id, domainId, modelId } = record;
         let url = `/demension/detail/${id}`;
         if (params?.indicatorInfo) {
@@ -158,7 +158,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
       },
     },
     indicatorInfo: {
-      render: (_, record: ISemantic.IMetricItem) => {
+      render: (_: any, record: ISemantic.IMetricItem) => {
         const { name, alias, bizName, classifications, id, isCollect, domainId, modelId } = record;
 
         let url = `/metric/detail/${id}`;
@@ -205,7 +205,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
       },
     },
     sensitiveLevel: {
-      render: (_, record: ISemantic.IMetricItem) => (
+      render: (_: any, record: ISemantic.IMetricItem) => (
         <Tag
           color={SENSITIVE_LEVEL_COLOR[record.sensitiveLevel] || 'default'}
           style={{
@@ -219,7 +219,7 @@ export const ColumnsConfig = (params?: ColumnsConfigParams) => {
       ),
     },
     state: {
-      render: (status) => {
+      render: (status: any) => {
         const tagProps = {
           color: 'default',
           label: '未知',

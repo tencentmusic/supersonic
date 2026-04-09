@@ -3,7 +3,6 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import LlmSettingModal from './LlmSettingModal';
-import { ISemantic } from '../../data';
 import { deleteLlmConfig } from '../../service';
 import { getLlmList } from '@/services/system';
 import dayjs from 'dayjs';
@@ -12,7 +11,7 @@ type Props = {};
 
 const LlmTable: React.FC<Props> = ({}) => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
-  const [llmItem, setLlmItem] = useState<ISemantic.ILlmItem>();
+  const [llmItem, setLlmItem] = useState<any>();
   const [dataBaseList, setDataBaseList] = useState<any[]>([]);
 
   const actionRef = useRef<ActionType>();

@@ -1,8 +1,7 @@
 import { message, Tabs, Button, Space } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { getMetricData, getDimensionList, getDrillDownDimension } from '../service';
-import { useParams, history, Helmet } from '@umijs/max';
-import { BASE_TITLE } from '@/common/constants';
+import { useParams, history } from '@umijs/max';
 import styles from './style.less';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import MetricTrendSection from '@/pages/SemanticModel/Metric/components/MetricTrendSection';
@@ -137,7 +136,7 @@ const MetricDetail: React.FC<Props> = () => {
           <div className={styles.siderContainer}>
             <MetricInfoSider
               relationDimensionOptions={relationDimensionOptions}
-              metircData={metircData}
+              metircData={metircData!}
               onDimensionRelationBtnClick={() => {
                 setMetricRelationModalOpenState(true);
               }}

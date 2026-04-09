@@ -3,7 +3,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Input } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { StatusEnum } from '../enum';
-import { useModel, history } from '@umijs/max';
+import { useModel } from '@umijs/max';
 import { deleteModel, batchUpdateModelStatus } from '../service';
 import ClassModelTypeModal from './ClassModelTypeModal';
 import { ColumnsConfig } from './TableColumnRender';
@@ -32,7 +32,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
   const actionRef = useRef<ActionType>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [tableData, setTableData] = useState<ISemantic.IModelItem[]>([]);
-  const params = modelTableHistoryParams?.[selectDomainId];
+  const params = selectDomainId !== undefined ? modelTableHistoryParams?.[selectDomainId] : undefined;
 
   useEffect(() => {
     if (!Array.isArray(modelList)) {
@@ -58,7 +58,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
 
   const dipatchParams = (params: Record<string, any>) => {
     setModelTableHistoryParams({
-      [selectDomainId]: {
+      [selectDomainId!]: {
         ...params,
       },
     });
@@ -289,7 +289,7 @@ const ModelTable: React.FC<Props> = ({ modelList, disabledEdit = false, onModelC
       {createDataSourceModalOpen && (
         <ClassModelTypeModal
           open={createDataSourceModalOpen}
-          modelItem={modelItem}
+          modelItem={modelItem!}
           onSubmit={() => {
             onModelChange?.();
             setIsEditing(false);

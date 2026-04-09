@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Descriptions, Table, Tag, Space, Button, Popconfirm, message, Empty } from 'antd';
+import { Drawer, Descriptions, Table, Tag, Button, Popconfirm, message, Empty } from 'antd';
 import dayjs from 'dayjs';
 import type { BusinessTopic, TopicItem } from '@/services/businessTopic';
 import { getTopicDetail, removeTopicItem } from '@/services/businessTopic';
+import { MSG } from '@/common/messages';
 
 const ITEM_TYPE_MAP: Record<string, { color: string; text: string }> = {
   FIXED_REPORT: { color: 'blue', text: '固定报表' },
@@ -34,7 +35,7 @@ const TopicDetailDrawer: React.FC<TopicDetailDrawerProps> = ({
       const data = res?.data ?? res;
       setTopic(data);
     } catch {
-      message.error('加载主题详情失败');
+      message.error(MSG.OPERATION_FAILED);
     } finally {
       setLoading(false);
     }
@@ -50,11 +51,11 @@ const TopicDetailDrawer: React.FC<TopicDetailDrawerProps> = ({
     if (!topicId) return;
     try {
       await removeTopicItem(topicId, itemType, itemId);
-      message.success('已移除');
+      message.success(MSG.DELETE_SUCCESS);
       fetchDetail();
       onItemRemoved?.();
     } catch {
-      message.error('移除失败');
+      message.error(MSG.DELETE_FAILED);
     }
   };
 

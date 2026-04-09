@@ -11,21 +11,21 @@ enum ShortCut {
   CtrlDelete = 'Ctrl+Delete', // Windows按住Ctrl多选删除
 }
 
-export const useKeybindingConfig = createKeybindingConfig(config => {
-  config.setKeybindingFunc(registry => {
+export const useKeybindingConfig = createKeybindingConfig((config: any) => {
+  config.setKeybindingFunc((registry: any) => {
     return registry.registerKeybinding([
       {
         id: 'delete',
         keybinding: ShortCut.DELETE,
-        callback: async (item, modelService, commandService, e) => {
+        callback: async (item: any, modelService: any, commandService: any, e: any) => {
           /** 如果是input的delete事件, 则不走删除的回调 */
           const target = e && (e?.target as HTMLElement)
           if (target && target.tagName && target.tagName.toLowerCase() === 'input') {
             return
           }
           const cells = await MODELS.SELECTED_CELLS.useValue(modelService)
-          const nodes = cells?.filter(cell => cell.isNode())
-          const edges = cells?.filter(cell => cell.isEdge())
+          const nodes = cells?.filter((cell: any) => cell.isNode())
+          const edges = cells?.filter((cell: any) => cell.isEdge())
           if (edges?.length > 0) {
             deleteEdges(commandService, edges as X6Edge[])
           }
@@ -37,10 +37,10 @@ export const useKeybindingConfig = createKeybindingConfig(config => {
       {
         id: 'deleteAll',
         keybinding: Platform.IS_MAC ? ShortCut.CmdDelete : ShortCut.CtrlDelete,
-        callback: async (item, modelService, commandService, e) => {
+        callback: async (item: any, modelService: any, commandService: any, e: any) => {
           const cells = await MODELS.SELECTED_CELLS.useValue(modelService)
-          const nodes = cells?.filter(cell => cell.isNode())
-          const edges = cells?.filter(cell => cell.isEdge())
+          const nodes = cells?.filter((cell: any) => cell.isNode())
+          const edges = cells?.filter((cell: any) => cell.isEdge())
           deleteEdges(commandService, edges as X6Edge[])
           deleteNodes(commandService, nodes as X6Node[])
         },

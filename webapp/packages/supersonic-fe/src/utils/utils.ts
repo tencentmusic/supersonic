@@ -71,7 +71,7 @@ export function getUrlParams(originUrl: string = '') {
   }
   const paramString = url.substr(index + 1);
   const paramArr = paramString.split('&');
-  const paramObj = {};
+  const paramObj: Record<string, any> = {};
 
   paramArr.forEach((item) => {
     const itemArr = item.split('=');
@@ -415,7 +415,7 @@ export function traverseTree(treeData: any[], callback: (node: any) => void) {
   return treeData;
 }
 
-export function traverseRoutes(routes, env: string, result: any[] = []) {
+export function traverseRoutes(routes: any, env: string, result: any[] = []) {
   if (!Array.isArray(routes)) {
     return result;
   }
@@ -470,7 +470,7 @@ const keyTypeTran = {
 export const objToArray = (_obj: ObjToArrayParams, keyType: string = 'string') => {
   return Object.keys(_obj).map((key) => {
     return {
-      value: keyTypeTran[keyType](key),
+      value: keyTypeTran[keyType as keyof typeof keyTypeTran](key),
       label: _obj[key],
     };
   });

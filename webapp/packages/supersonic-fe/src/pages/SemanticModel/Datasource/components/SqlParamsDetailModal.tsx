@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { Modal, Form, Input, Select, Checkbox } from 'antd';
+import { Modal, Form, Input, Select } from 'antd';
 import { isFunction } from 'lodash';
 import { objToArray } from '@/utils/utils';
 import type { ParamsItemProps, OprType } from '../data';

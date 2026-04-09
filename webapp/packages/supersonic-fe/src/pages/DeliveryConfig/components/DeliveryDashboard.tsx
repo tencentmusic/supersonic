@@ -36,12 +36,6 @@ const DeliveryDashboard: React.FC = () => {
     fetchData();
   }, [days]);
 
-  const getSuccessRateColor = (rate: number) => {
-    if (rate >= 95) return '#52c41a';
-    if (rate >= 80) return '#faad14';
-    return '#ff4d4f';
-  };
-
   const dailyColumns = [
     {
       title: '日期',

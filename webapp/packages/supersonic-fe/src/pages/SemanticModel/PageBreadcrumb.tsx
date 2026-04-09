@@ -21,7 +21,7 @@ const PageBreadcrumb: React.FC = () => {
 
   const { selectMetric, setSelectMetric } = metricModel;
 
-  const items = [
+  const items: any[] = [
     {
       title: (
         <Space
@@ -30,7 +30,7 @@ const PageBreadcrumb: React.FC = () => {
             setSelectDimension(undefined);
             setSelectMetric(undefined);
             setSelectDataSet(undefined);
-            toDomainList(selectDomainId, 'overview');
+            toDomainList(selectDomainId!, 'overview');
           }}
         >
           <HomeOutlined />
@@ -70,10 +70,10 @@ const PageBreadcrumb: React.FC = () => {
               setSelectDimension(undefined);
               setSelectMetric(undefined);
               if (selectDimension) {
-                toModelList(selectDomainId, selectModelId!, 'dimension');
+                toModelList(selectDomainId!, selectModelId!, 'dimension');
                 return;
               }
-              toModelList(selectDomainId, selectModelId!, 'metric');
+              toModelList(selectDomainId!, selectModelId!, 'metric');
             }}
           >
             <FundViewOutlined style={{ position: 'relative', top: '2px' }} />

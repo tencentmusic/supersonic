@@ -7,7 +7,6 @@ import { XFlowGraphCommands, XFlowNodeCommands, XFlowEdgeCommands } from '@antv/
 import { CanvasMiniMap, CanvasScaleToolbar, CanvasSnapline } from '@antv/xflow';
 import { MODELS } from '@antv/xflow';
 import GraphToolbar from './GraphToolbar/index';
-import { connect } from '@umijs/max';
 
 /** 配置画布 */
 import { useGraphConfig } from './config-graph';
@@ -44,10 +43,10 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
   /** 画布配置项 */
   const graphConfig = useGraphConfig();
   /** 预设XFlow画布需要渲染的React节点 / 边 */
-  graphConfig.setNodeRender('NODE1', (props) => {
+  graphConfig.setNodeRender('NODE1', (props: any) => {
     return <Entity {...props} deleteNode={handleDeleteNode} />;
   });
-  graphConfig.setEdgeRender('EDGE1', (props) => {
+  graphConfig.setEdgeRender('EDGE1', (props: any) => {
     return <Relation {...props} deleteRelation={handleDeleteEdge} />;
   });
   /** 命令配置项 */
@@ -62,12 +61,12 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
   /** 是否展示新建关联关系弹窗 */
   const [isShowCreateRelationModal, setIsShowCreateRelationModal] = useState<boolean>(false);
   /** 连线source数据 */
-  const [relationSourceData, setRelationSourceData] = useState<EntityCanvasModel>(undefined);
+  const [relationSourceData, setRelationSourceData] = useState<EntityCanvasModel>(undefined as any);
   /** 连线target数据 */
-  const [relationTargetData, setRelationTargetData] = useState<EntityCanvasModel>(undefined);
+  const [relationTargetData, setRelationTargetData] = useState<EntityCanvasModel>(undefined as any);
 
   /** XFlow初始化完成的回调 */
-  const onLoad: IAppLoad = async (app) => {
+  const onLoad: IAppLoad = async (app: any) => {
     const graph = await app.getGraphInstance();
     graph.zoom(-0.2);
 
@@ -86,12 +85,12 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
   const watchEvent = async (appRef: IApplication) => {
     if (appRef) {
       const graph = await appRef.getGraphInstance();
-      graph.on('node:mousedown', ({ e, x, y, node, view }) => {
+      graph.on('node:mousedown', ({ e, x, y, node, view }: any) => {
         appRef.executeCommand(XFlowNodeCommands.FRONT_NODE.id, {
           nodeId: node?.getData()?.id,
         } as NsNodeCmd.FrontNode.IArgs);
       });
-      graph.on('edge:connected', ({ edge }) => {
+      graph.on('edge:connected', ({ edge }: any) => {
         const relationSourceData = edge?.getSourceNode()?.data;
         const relationTargetData = edge?.getTargetNode()?.data;
         setRelationSourceData(relationSourceData);
@@ -105,13 +104,13 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
           } as NsEdgeCmd.DelEdge.IArgs);
         }
       });
-      graph.on('node:mouseenter', ({ e, node, view }) => {
+      graph.on('node:mouseenter', ({ e, node, view }: any) => {
         changePortsVisible(true);
       });
-      graph.on('node:mouseleave', ({ e, node, view }) => {
+      graph.on('node:mouseleave', ({ e, node, view }: any) => {
         changePortsVisible(false);
       });
-      graph.on('edge:click', ({ edge }) => {
+      graph.on('edge:click', ({ edge }: any) => {
         edge.toFront();
       });
     }
@@ -126,7 +125,7 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
 
   /** 创建画布节点 */
   const handleCreateNode = async (values: any) => {
-    const { cb, ...rest } = values;
+    const { cb } = values;
 
     const graph = await app.getGraphInstance();
     /** div块鼠标的位置转换为画布的位置 */
@@ -166,7 +165,7 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
 
   /** 创建关联关系 */
   const handleCreateEdge = async (values: any) => {
-    const { cb, ...rest } = values;
+    const { cb } = values;
     const res = await app.executeCommand(XFlowEdgeCommands.ADD_EDGE.id, {
       edgeConfig: {
         id: 'fact1-other2',
@@ -206,7 +205,7 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
   };
 
   /** 设置鼠标样式 */
-  const configCursorTip = ({ left, top, display }) => {
+  const configCursorTip = ({ left, top, display }: any) => {
     cursorTipRef.style.left = left;
     cursorTipRef.style.top = top;
     cursorTipRef.style.display = display;
@@ -255,7 +254,7 @@ const HeadLessFlows: React.FC<Props> = (demoProps: Props) => {
             onDeleteNodeClick={async () => {
               const modelService = app.modelService;
               const nodes = await MODELS.SELECTED_NODES.useValue(modelService);
-              nodes.forEach((node) => {
+              nodes.forEach((node: any) => {
                 handleDeleteNode(node?.id);
               });
             }}

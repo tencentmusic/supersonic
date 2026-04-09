@@ -1,8 +1,7 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { Form, Input, message, Modal } from 'antd';
 import { useBoolean } from 'ahooks';
 import { changePassword } from '@/services/user';
-import { pick } from 'lodash';
 import { encryptPassword } from '@/utils/utils';
 import CryptoJS from 'crypto-js';
 
@@ -34,12 +33,13 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
       setConfirmLoading(true);
       // Call API to change password
       const res = await changePassword({
-        oldPassword: encryptPassword(values.oldPassword, encryptKey),
-        newPassword: encryptPassword(values.newPassword, encryptKey),
+        oldPassword: encryptPassword(values.oldPassword, encryptKey as any),
+        newPassword: encryptPassword(values.newPassword, encryptKey as any),
       });
 
       if (res && res.code !== 200) {
-        return message.warning(res.msg);
+        message.warning(res.msg);
+        return;
       }
       closeModal();
     } catch (error) {
@@ -54,7 +54,6 @@ const ChangePasswordModal = forwardRef<IRef>((_, ref) => {
       title="修改密码"
       open={open}
       onOk={handleOk}
-      onClose={closeModal}
       onCancel={closeModal}
       confirmLoading={confirmLoading}
     >

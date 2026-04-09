@@ -44,7 +44,7 @@ const OverviewContainer: React.FC<Props> = ({}) => {
   }, [selectDomainId]);
 
   const queryModelList = async () => {
-    await MrefreshModelList(selectDomainId);
+    await MrefreshModelList(selectDomainId!);
   };
 
   return (

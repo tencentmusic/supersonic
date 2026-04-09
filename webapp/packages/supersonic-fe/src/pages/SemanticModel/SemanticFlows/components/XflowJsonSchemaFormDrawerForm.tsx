@@ -14,7 +14,7 @@ export type CreateFormProps = {
   controlMapService: any;
   formSchemaService: any;
   formValueUpdateService: any;
-  selectDomainId:number
+  selectDomainId?:number
 };
 
 const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
@@ -26,7 +26,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
     sourceData: {},
     targetData: {},
   });
-  const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
+  const [, setCreateDataSourceModalOpen] = useState(false);
   const [dataSourceModalVisible, setDataSourceModalVisible] = useState(false);
   const app = useXFlowApp();
   // 借用JsonSchemaForm钩子函数对元素状态进行监听
@@ -87,7 +87,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
   return (
     <WorkspacePanel position={{}}>
       <DataSourceRelationFormDrawer
-        domainId={props.selectDomainId}
+        domainId={props.selectDomainId!}
         nodeDataSource={nodeDataSource}
         onClose={() => {
           handleDataSourceRelationDrawerClose();
@@ -97,7 +97,8 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
       {dataSourceModalVisible && (
         <ModelCreateForm
           basicInfoFormMode="fast"
-          dataSourceItem={dataSourceItem}
+          modelItem={dataSourceItem}
+          createModalVisible={dataSourceModalVisible}
           onCancel={() => {
             setDataSourceModalVisible(false);
           }}
@@ -112,10 +113,9 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
             });
             setDataSourceItem(undefined);
             commandService.executeCommand(XFlowGraphCommands.SAVE_GRAPH_DATA.id, {
-              saveGraphDataService: (meta, graphData) => GraphApi.saveGraphData!(meta, graphData),
+              saveGraphDataService: (meta: any, graphData: any) => GraphApi.saveGraphData!(meta, graphData),
             });
           }}
-          createModalVisible={dataSourceModalVisible}
         />
       )}
       <Drawer
@@ -143,7 +143,7 @@ const XflowJsonSchemaFormDrawerForm: React.FC<CreateFormProps> = (props) => {
             });
             setDataSourceItem(undefined);
             commandService.executeCommand(XFlowGraphCommands.SAVE_GRAPH_DATA.id, {
-              saveGraphDataService: (meta, graphData) => GraphApi.saveGraphData!(meta, graphData),
+              saveGraphDataService: (meta: any, graphData: any) => GraphApi.saveGraphData!(meta, graphData),
             });
           }}
         />

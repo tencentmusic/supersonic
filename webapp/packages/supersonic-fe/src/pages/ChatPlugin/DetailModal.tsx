@@ -131,13 +131,13 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
         type: 'object',
         properties: functionParams
           .filter((param) => !!param.name?.trim())
-          .reduce((acc, cur) => {
+          .reduce((acc: Record<string, { type: string | undefined; description: string | undefined }>, cur) => {
             acc[cur.name || ''] = {
               type: cur.type,
               description: cur.description,
             };
             return acc;
-          }, {}),
+          }, {} as Record<string, { type: string | undefined; description: string | undefined }>),
         required: functionParams.filter((param) => !!param.name?.trim()).map((param) => param.name),
       },
       examples: examples
@@ -236,7 +236,7 @@ const DetailModal: React.FC<Props> = ({ detail, onSubmit, onCancel }) => {
           <Select
             placeholder="请选择插件类型"
             options={Object.keys(PLUGIN_TYPE_MAP).map((key) => ({
-              label: PLUGIN_TYPE_MAP[key],
+              label: PLUGIN_TYPE_MAP[key as keyof typeof PLUGIN_TYPE_MAP],
               value: key,
             }))}
             onChange={(value) => {

@@ -39,10 +39,11 @@ const DataExploreView: React.FC<Props> = ({ initialValues, onSubmitSuccess }) =>
       }`}
     >
       <div className={styles.main}>
+        {/* @ts-ignore react-split-pane children type */}
         <SplitPane
           split="vertical"
-          onChange={(size) => {
-            localStorage.setItem('exploreRightSize', size[1]);
+          onChange={(size: any) => {
+            localStorage.setItem('exploreRightSize', (size as unknown as string[])[1]);
           }}
         >
           <div className={styles.rightListSide}>

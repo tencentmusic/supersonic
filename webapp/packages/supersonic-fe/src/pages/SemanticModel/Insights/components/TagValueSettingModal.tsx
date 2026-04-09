@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button, Modal, Space } from 'antd';
 import { KnowledgeConfigTypeEnum } from '../../enum';
 import { ISemantic } from '../../data';
@@ -11,10 +11,7 @@ export type CreateFormProps = {
   onSubmit: (values?: any) => void;
 };
 
-type TableDataSource = { techName: string; bizName: string; alias?: string[] };
-
 const TagValueSettingModal: React.FC<CreateFormProps> = ({ onCancel, open, tagItem, onSubmit }) => {
-  const [tableDataSource, setTableDataSource] = useState<TableDataSource[]>([]);
 
   // const handleSubmit = async () => {
   //   await saveDimension({ dimValueMaps });
@@ -67,7 +64,7 @@ const TagValueSettingModal: React.FC<CreateFormProps> = ({ onCancel, open, tagIt
       footer={renderFooter()}
       onCancel={onCancel}
     >
-      <DimensionValueSettingForm dataItem={tagItem} type={KnowledgeConfigTypeEnum.TAG} />
+      <DimensionValueSettingForm dataItem={tagItem as any} type={KnowledgeConfigTypeEnum.TAG} />
     </Modal>
   );
 };

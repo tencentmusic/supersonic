@@ -1,6 +1,6 @@
 import { Form, Button, Modal, Select, message } from 'antd';
 import { getMetricClassifications, batchUpdateClassifications } from '../../service';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export type Props = {
   onCancel: () => void;

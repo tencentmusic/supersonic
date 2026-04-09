@@ -30,6 +30,7 @@ export type CreateFormProps = {
   onDataBaseTableChange?: (tableName: string) => void;
   onDataSourceBtnClick?: () => void;
   onOpenDataSourceEdit?: () => void;
+  children?: React.ReactNode;
 };
 const { Step } = Steps;
 

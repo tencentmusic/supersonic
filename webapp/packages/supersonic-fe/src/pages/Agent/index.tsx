@@ -55,8 +55,8 @@ const Agent = () => {
     if (!currentAgent?.id) {
       setCurrentAgent({
         ...currentAgent,
-        toolConfig: JSON.stringify(newAgentConfig) as any,
-      });
+        toolConfig: JSON.stringify(newAgentConfig),
+      } as AgentType);
       setModalVisible(false);
       return;
     }

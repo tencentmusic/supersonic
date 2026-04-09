@@ -1,7 +1,6 @@
 import { message } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { useModel } from '@umijs/max';
-import type { StateType } from '../../model';
 import { getDomainExtendConfig, addDomainExtend, editDomainExtend } from '../../service';
 import { ProCard } from '@ant-design/pro-components';
 

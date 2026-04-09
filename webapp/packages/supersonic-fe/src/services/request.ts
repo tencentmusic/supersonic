@@ -126,7 +126,7 @@ const request: RequestMethodInUmi = (url: any, options: any) => {
 };
 const METHODS = ['get', 'post', 'delete', 'put', 'patch', 'head', 'options', 'rpc'];
 METHODS.forEach((method) => {
-  request[method] = (url: any, options: any) => {
+  (request as Record<string, any>)[method] = (url: any, options: any) => {
     return requestMethod(url, {
       ...options,
       method,

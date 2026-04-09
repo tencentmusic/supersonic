@@ -3,10 +3,6 @@ import dayjs from 'dayjs';
 import { DateRangeType } from '@/components/MDatePicker/type';
 import { IDataSource } from './data';
 
-const getRunningEnv = () => {
-  return window.location.pathname.includes('/chatSetting/') ? 'chat' : 'semantic';
-};
-
 export function getDomainList(): Promise<any> {
   return request.get(`${process.env.API_BASE_URL}domain/getDomainList`);
 }
@@ -278,7 +274,7 @@ export function createOrUpdateModelRela(data: any): Promise<any> {
 
 export function deleteModelRela(id: any): Promise<any> {
   if (!id) {
-    return;
+    return Promise.resolve();
   }
   return request(`${process.env.API_BASE_URL}modelRela/${id}`, {
     method: 'DELETE',
@@ -461,7 +457,7 @@ export function getUnAvailableItem(data: any): Promise<any> {
 
 export function getModelDetail(data: any): Promise<any> {
   if (!data.modelId) {
-    return {};
+    return Promise.resolve({});
   }
   return request.get(`${process.env.API_BASE_URL}model/getModel/${data.modelId}`);
 }

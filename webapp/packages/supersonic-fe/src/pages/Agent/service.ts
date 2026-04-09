@@ -38,7 +38,7 @@ export function getMemeoryList(data: {
   pageSize: number;
 }) {
   const { agentId, chatMemoryFilter, current, pageSize } = data;
-  return request.post<Result<{ list: MetricType[] }>>('/api/chat/memory/pageMemories', {
+  return request.post<Result<{ list: MemoryType[]; total: number; pageNum: number }>>('/api/chat/memory/pageMemories', {
     data: {
       ...data,
       chatMemoryFilter: { agentId, ...chatMemoryFilter },

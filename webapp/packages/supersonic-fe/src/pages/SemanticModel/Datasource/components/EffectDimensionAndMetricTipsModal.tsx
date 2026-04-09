@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Modal, Table, Tag, message } from 'antd';
+import { Modal, Table, Tag, message } from 'antd';
 import TransTypeTag from '../../components/TransTypeTag';
 import { SemanticNodeType } from '../../enum';
 import { ISemantic } from '../../data';
@@ -20,7 +20,7 @@ const EffectDimensionAndMetricTipsModal: React.FC<Props> = ({
   onOk,
   onCancel,
 }) => {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [, setLoading] = useState<boolean>(false);
   useEffect(() => {}, []);
 
   const queryBatchUpdateDimensionStatus = async (ids: React.Key[], status: StatusEnum) => {

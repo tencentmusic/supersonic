@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import type { ColumnsType } from 'antd/es/table';
 
 import { getTagValueDistribution } from '@/pages/SemanticModel/service';
 
@@ -9,6 +10,8 @@ import { ISemantic } from '../../data';
 import { ProCard } from '@ant-design/pro-components';
 import { TagGraph } from 'supersonic-insights-flow-components';
 import styles from '../style.less';
+
+type ColumnConfig = ColumnsType<any>[number];
 
 const { TagValueBar } = TagGraph;
 
@@ -36,7 +39,7 @@ const TagTrendSection: React.FC<Props> = ({ tagData }) => {
     setTagTrendLoading(false);
     if (code === 200 && Array.isArray(data?.valueDistributionList)) {
       const { valueDistributionList, name } = data;
-      const distributionOptions = valueDistributionList.map((item) => {
+      const distributionOptions = valueDistributionList.map((item: any) => {
         const { valueMap, valueCount } = item;
         return {
           type: valueMap,

@@ -1,42 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Form,
-  Button,
-  Input,
-  Select,
   Radio,
-  Switch,
-  InputNumber,
   message,
-  Result,
-  Row,
-  Col,
-  Space,
-  Divider,
-  Tooltip,
   Tag,
 } from 'antd';
 
 import MetricMeasuresFormTable from '../../components/MetricMeasuresFormTable';
-import { SENSITIVE_LEVEL_OPTIONS, METRIC_DEFINE_TYPE, TAG_DEFINE_TYPE } from '../../constant';
-import { formLayout } from '@/components/FormHelper/utils';
-import FormItemTitle from '@/components/FormHelper/FormItemTitle';
+import { METRIC_DEFINE_TYPE } from '../../constant';
 import styles from '../../components/style.less';
 import {
   getMetricsToCreateNewMetric,
   getModelDetail,
   getDrillDownDimension,
-  batchCreateTag,
-  batchDeleteTag,
 } from '../../service';
 import MetricMetricFormTable from '../../components/MetricMetricFormTable';
 import MetricFieldFormTable from '../../components/MetricFieldFormTable';
-import DimensionAndMetricRelationModal from '../../components/DimensionAndMetricRelationModal';
-import TableTitleTooltips from '../../components/TableTitleTooltips';
-import { createMetric, updateMetric, mockMetricAlias, getMetricTags } from '../../service';
-import { MetricSettingKey, MetricSettingWording } from '../constants';
+import { MetricSettingKey } from '../constants';
 import { ISemantic } from '../../data';
-import { history } from '@umijs/max';
 
 export type CreateFormProps = {
   datasourceId?: number;
@@ -48,20 +29,12 @@ export type CreateFormProps = {
   onSubmit?: (values: any) => void;
 };
 
-const queryParamsTypeParamsKey = {
-  [METRIC_DEFINE_TYPE.MEASURE]: 'metricDefineByMeasureParams',
-  [METRIC_DEFINE_TYPE.METRIC]: 'metricDefineByMetricParams',
-  [METRIC_DEFINE_TYPE.FIELD]: 'metricDefineByFieldParams',
-};
-
 const MetricInfoCreateSqlConfig: React.FC<CreateFormProps> = ({
   datasourceId,
   modelId,
   metricItem,
-  onSubmit,
 }) => {
   const isEdit = !!metricItem?.id;
-  const [currentStep, setCurrentStep] = useState(0);
   const formValRef = useRef({} as any);
   const [form] = Form.useForm();
   const updateFormVal = (val: any) => {
@@ -100,11 +73,7 @@ const MetricInfoCreateSqlConfig: React.FC<CreateFormProps> = ({
   const [createNewMetricList, setCreateNewMetricList] = useState<ISemantic.IMetricItem[]>([]);
   const [fieldList, setFieldList] = useState<ISemantic.IFieldTypeParamsItem[]>([]);
 
-  const [drillDownDimensions, setDrillDownDimensions] = useState<
-    ISemantic.IDrillDownDimensionItem[]
-  >([]);
-
-  const [drillDownDimensionsConfig, setDrillDownDimensionsConfig] = useState<
+  const [, setDrillDownDimensionsConfig] = useState<
     ISemantic.IDrillDownDimensionItem[]
   >([]);
 
@@ -202,7 +171,6 @@ const MetricInfoCreateSqlConfig: React.FC<CreateFormProps> = ({
       bizName,
       description,
       sensitiveLevel,
-      typeParams,
       isTag,
       dataFormat,
       dataFormatType,
@@ -275,103 +243,6 @@ const MetricInfoCreateSqlConfig: React.FC<CreateFormProps> = ({
       initData();
     }
   }, [metricItem]);
-
-  const isEmptyConditions = (
-    metricDefineType: METRIC_DEFINE_TYPE,
-    metricDefineParams:
-      | ISemantic.IMeasureTypeParams
-      | ISemantic.IMetricTypeParams
-      | ISemantic.IFieldTypeParams,
-  ) => {
-    if (metricDefineType === METRIC_DEFINE_TYPE.MEASURE) {
-      const { measures } = (metricDefineParams as ISemantic.IMeasureTypeParams) || {};
-      if (!(Array.isArray(measures) && measures.length > 0)) {
-        message.error('请添加一个度量');
-        return true;
-      }
-    }
-    if (metricDefineType === METRIC_DEFINE_TYPE.METRIC) {
-      const { metrics } = (metricDefineParams as ISemantic.IMetricTypeParams) || {};
-      if (!(Array.isArray(metrics) && metrics.length > 0)) {
-        message.error('请添加一个指标');
-        return true;
-      }
-    }
-    if (metricDefineType === METRIC_DEFINE_TYPE.FIELD) {
-      const { fields } = (metricDefineParams as ISemantic.IFieldTypeParams) || {};
-      if (!(Array.isArray(fields) && fields.length > 0)) {
-        message.error('请添加一个字段');
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const saveMetric = async (fieldsValue: any) => {
-    const queryParams = {
-      modelId: isEdit ? metricItem.modelId : modelId,
-      relateDimension: {
-        ...(metricItem?.relateDimension || {}),
-        drillDownDimensions,
-      },
-      ...fieldsValue,
-    };
-    const { alias, dataFormatType } = queryParams;
-    queryParams.alias = Array.isArray(alias) ? alias.join(',') : '';
-    if (!queryParams[queryParamsTypeParamsKey[defineType]]?.expr) {
-      message.error('请输入度量表达式');
-      return;
-    }
-    if (!dataFormatType) {
-      delete queryParams.dataFormat;
-    }
-    if (isEmptyConditions(defineType, queryParams[queryParamsTypeParamsKey[defineType]])) {
-      return;
-    }
-
-    let saveMetricQuery = createMetric;
-    if (queryParams.id) {
-      saveMetricQuery = updateMetric;
-    }
-    const { code, msg, data } = await saveMetricQuery(queryParams);
-    if (code === 200) {
-      if (queryParams.isTag) {
-        queryBatchExportTag(data.id || metricItem?.id);
-      }
-
-      if (metricItem?.id && !queryParams.isTag) {
-        queryBatchDelete(metricItem);
-      }
-      message.success('编辑指标成功');
-      onSubmit?.(queryParams);
-      return;
-    }
-    message.error(msg);
-  };
-
-  const queryBatchDelete = async (metricItem: ISemantic.IMetricItem) => {
-    const { code, msg } = await batchDeleteTag([
-      {
-        itemIds: [metricItem.id],
-        tagDefineType: TAG_DEFINE_TYPE.METRIC,
-      },
-    ]);
-    if (code === 200) {
-      return;
-    }
-    message.error(msg);
-  };
-
-  const queryBatchExportTag = async (id: number) => {
-    const { code, msg } = await batchCreateTag([
-      { itemId: id, tagDefineType: TAG_DEFINE_TYPE.METRIC },
-    ]);
-
-    if (code === 200) {
-      return;
-    }
-    message.error(msg);
-  };
 
   const queryMetricsToCreateNewMetric = async () => {
     const { code, data } = await getMetricsToCreateNewMetric({

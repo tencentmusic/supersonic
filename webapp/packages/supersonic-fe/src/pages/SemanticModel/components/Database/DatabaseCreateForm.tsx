@@ -14,7 +14,6 @@ import { ConfigParametersItem } from '../../../System/types';
 import { genneratorFormItemList } from '../../utils';
 import { ISemantic } from '../../data';
 import { encryptPassword, decryptPassword } from '@/utils/utils';
-import CryptoJS from 'crypto-js';
 import CronInput from '../../../ReportSchedule/components/CronInput';
 import {
   getSyncConfigList,
@@ -39,7 +38,6 @@ const DatabaseCreateForm: ForwardRefRenderFunction<any, Props> = (
   { domainId, databaseId, onSubmit, hideSubmitBtn = false },
   ref,
 ) => {
-  const encryptKey = CryptoJS.enc.Utf8.parse('supersonic@2024');
   const [form] = Form.useForm();
   const [selectedDbType, setSelectedDbType] = useState<string>('');
   const [databaseOptions, setDatabaseOptions] = useState<{ value: string; label: string }[]>([]);

@@ -229,7 +229,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
     },
     {
       ...columnsConfig.createInfo,
-    },
+    } as ProColumns,
 
     {
       title: '操作',
@@ -460,7 +460,7 @@ const ClassMetricTable: React.FC<Props> = ({ onEmptyMetricData }) => {
             key="create"
             type="primary"
             onClick={() => {
-              toMetricEditPage(selectDomainId, modelId!, 0);
+              toMetricEditPage(selectDomainId!, modelId!, 0);
               // setMetricItem(undefined);
               // setCreateModalVisible(true);
             }}

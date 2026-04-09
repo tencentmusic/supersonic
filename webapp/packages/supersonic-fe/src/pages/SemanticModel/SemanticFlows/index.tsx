@@ -93,7 +93,7 @@ export const SemanticFlow: React.FC<IProps> = (props) => {
   /**
    * @param app 当前XFlow工作空间
    */
-  const onLoad: IAppLoad = async (app) => {
+  const onLoad: IAppLoad = async (app: any) => {
     cache.app = app;
     initGraphCmds(cache.app);
   };

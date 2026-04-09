@@ -20,7 +20,7 @@ const DomainManager: React.FC<Props> = ({}) => {
       activeKey={activeKey}
       onMenuChange={(menuKey) => {
         setActiveKey(menuKey);
-        toDomainList(selectDomainId, menuKey);
+        toDomainList(selectDomainId!, menuKey);
       }}
     />
   );

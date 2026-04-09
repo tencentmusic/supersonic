@@ -273,8 +273,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
           )}
           {schema && schema.tables && schema.tables.length > 0 && (
             <StreamConfigStep
-              sourceSchema={schema}
-              streamConfig={streamConfig}
+              schema={schema}
+              tableConfigs={streamConfig}
               onChange={setStreamConfig}
             />
           )}

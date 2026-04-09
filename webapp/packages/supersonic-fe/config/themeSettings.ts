@@ -74,7 +74,7 @@ export const configProviderTheme: ThemeConfig = {
     Checkbox: {
       colorPrimary: BRAND_PRIMARY,
       borderRadiusSM: 4,
-      checkboxSize: 18,
+      controlInteractiveSize: 18,
     },
     Radio: {
       colorPrimary: BRAND_PRIMARY,

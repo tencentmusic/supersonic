@@ -1,10 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Button, Modal, Space, Form, Select } from 'antd';
-import { ISemantic } from '@/pages/SemanticModel/data';
 import { SENSITIVE_LEVEL_OPTIONS } from '@/pages/SemanticModel/constant';
 import { SemanticNodeType } from '@/pages/SemanticModel/enum';
 
-import { formLayout } from '@/components/FormHelper/utils';
 import {
   batchUpdateDimensionSensitiveLevel,
   batchUpdateMetricSensitiveLevel,
@@ -33,7 +31,7 @@ const BatchSensitiveLevelModal: React.FC<Props> = ({
   const batchSettingSensitiveLevel = async () => {
     const values = await form.validateFields();
     setLoading(true);
-    const { data, code } = await (type === SemanticNodeType.DIMENSION
+    const { code } = await (type === SemanticNodeType.DIMENSION
       ? batchUpdateDimensionSensitiveLevel
       : batchUpdateMetricSensitiveLevel)({
       ids,

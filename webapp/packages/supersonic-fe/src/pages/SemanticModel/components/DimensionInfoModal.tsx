@@ -3,7 +3,6 @@ import { Button, Form, Input, Modal, Select, Row, Col, Space, Tooltip, Switch } 
 import { SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
 import { formLayout } from '@/components/FormHelper/utils';
 import SqlEditor from '@/components/SqlEditor';
-import InfoTagList from './InfoTagList';
 import { ISemantic } from '../data';
 import {
   DIM_OPTIONS,
@@ -22,7 +21,6 @@ import {
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 
 import { message } from 'antd';
-import { values } from 'lodash';
 
 export type CreateFormProps = {
   modelId: number;
@@ -131,7 +129,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
         alias: alias && alias.trim() ? alias.split(',') : [],
       };
       setFieldsValue(dimensionData);
-      setFormData(dimensionData);
+      setFormData(dimensionData as any);
     }
   };
 
@@ -250,7 +248,7 @@ const DimensionInfoModal: React.FC<CreateFormProps> = ({
           </Select>
         </FormItem>
         {formData?.type &&
-          [EnumDataSourceType.PARTITION_TIME, EnumDataSourceType.TIME].includes(formData.type) && (
+          [EnumDataSourceType.PARTITION_TIME, EnumDataSourceType.TIME].includes(formData.type as EnumDataSourceType) && (
             <FormItem
               name={['ext', 'time_format']}
               label="时间格式"

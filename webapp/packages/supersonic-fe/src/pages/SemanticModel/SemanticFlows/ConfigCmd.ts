@@ -7,21 +7,21 @@ import { addDataSourceInfoAsDimensionParents } from './utils';
 import { COMMAND_CONTRIBUTIONS } from './CmdExtensions';
 import { CustomCommands } from './CmdExtensions/constants';
 
-export const useCmdConfig = createCmdConfig((config) => {
+export const useCmdConfig = createCmdConfig((config: any) => {
   // 注册全局Command扩展
   config.setCommandContributions(() => COMMAND_CONTRIBUTIONS);
   // 设置hook
-  config.setRegisterHookFn((hooks) => {
+  config.setRegisterHookFn((hooks: any) => {
     const list = [
       hooks.graphMeta.registerHook({
         name: 'get graph meta from backend',
-        handler: async (args) => {
+        handler: async (args: any) => {
           args.graphMetaService = GraphApi.queryGraphMeta;
         },
       }),
       hooks.saveGraphData.registerHook({
         name: 'save graph data',
-        handler: async (args) => {
+        handler: async (args: any) => {
           if (!args.saveGraphDataService) {
             args.saveGraphDataService = GraphApi.saveGraphData;
           }
@@ -29,19 +29,19 @@ export const useCmdConfig = createCmdConfig((config) => {
       }),
       hooks.addNode.registerHook({
         name: 'get node config from backend api',
-        handler: async (args) => {
+        handler: async (args: any) => {
           args.createNodeService = GraphApi.addNode;
         },
       }),
       hooks.delNode.registerHook({
         name: 'get edge config from backend api',
-        handler: async (args) => {
+        handler: async (args: any) => {
           args.deleteNodeService = GraphApi.delNode;
         },
       }),
       hooks.addEdge.registerHook({
         name: '获取起始和结束节点的业务数据，并写入在边上',
-        handler: async (handlerArgs, handler: any) => {
+        handler: async (handlerArgs: any, handler: any) => {
           const { commandService } = handlerArgs;
           const main = async (args: any) => {
             const res = await handler(args);
@@ -70,10 +70,10 @@ export const useCmdConfig = createCmdConfig((config) => {
                 const initGraphCmdsState: any = commandService.getGlobal('initGraphCmdsSuccess');
                 if (initGraphCmdsState) {
                   // 保存图数据
-                  commandService!.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
+                  commandService!.executeCommand(
                     XFlowGraphCommands.SAVE_GRAPH_DATA.id,
                     {
-                      saveGraphDataService: (meta, graphData) =>
+                      saveGraphDataService: (meta: any, graphData: any) =>
                         GraphApi.saveGraphData!(meta, graphData),
                     },
                   );
@@ -87,7 +87,7 @@ export const useCmdConfig = createCmdConfig((config) => {
       }),
       hooks.delEdge.registerHook({
         name: '边删除，并向后台请求删除数据源间关联关系',
-        handler: async (args) => {
+        handler: async (args: any) => {
           args.deleteEdgeService = GraphApi.delEdge;
         },
       }),
@@ -117,7 +117,7 @@ export const initGraphCmds = async (app: IApplication) => {
     /** 2. 执行布局算法 */
     {
       commandId: XFlowGraphCommands.GRAPH_LAYOUT.id,
-      getCommandOption: async (ctx) => {
+      getCommandOption: async (ctx: any) => {
         const { graphData } = ctx.getResult();
         return {
           args: {
@@ -140,7 +140,7 @@ export const initGraphCmds = async (app: IApplication) => {
     /** 3. 画布内容渲染 */
     {
       commandId: XFlowGraphCommands.GRAPH_RENDER.id,
-      getCommandOption: async (ctx) => {
+      getCommandOption: async (ctx: any) => {
         const { graphData } = ctx.getResult();
         const { edges, nodes } = graphData;
         const filterClassNodeEdges = edges.filter((item: NsGraph.IEdgeConfig) => {
@@ -214,7 +214,7 @@ export const initDimensionGraphCmds = async (args: {
     /** 2. 执行布局算法 */
     {
       commandId: XFlowGraphCommands.GRAPH_LAYOUT.id,
-      getCommandOption: async (ctx) => {
+      getCommandOption: async (ctx: any) => {
         const { graphData } = ctx.getResult();
         const targetData = {
           ...target.data,
@@ -244,7 +244,7 @@ export const initDimensionGraphCmds = async (args: {
     /** 3. 画布内容渲染 */
     {
       commandId: XFlowGraphCommands.GRAPH_RENDER.id,
-      getCommandOption: async (ctx) => {
+      getCommandOption: async (ctx: any) => {
         const { graphData } = ctx.getResult();
         return {
           args: {

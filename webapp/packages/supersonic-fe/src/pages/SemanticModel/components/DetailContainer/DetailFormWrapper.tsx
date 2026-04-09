@@ -1,5 +1,5 @@
 import { Button } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { MenuItem } from './type';
 import styles from './style.less';
 
@@ -10,13 +10,6 @@ type Props = {
 } & { children: React.ReactNode };
 
 const DetailFormWrapper: React.FC<Props> = ({ children, currentMenu, onSave }) => {
-  const [settingKey, setSettingKey] = useState<string>(currentMenu?.key);
-
-  useEffect(() => {
-    if (currentMenu) {
-      setSettingKey(currentMenu.key);
-    }
-  }, [currentMenu]);
 
   return (
     <div className={styles.infoCard}>

@@ -1,15 +1,13 @@
-import type { API } from '@/services/API';
 import { ISemantic } from './data';
 import type { DataNode } from 'antd/lib/tree';
-import { Form, Input, InputNumber, Switch, Select, Slider } from 'antd';
+import { Form, Input, Switch, Select, Slider } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import DisabledWheelNumberInput from '@/components/DisabledWheelNumberInput';
 import { ConfigParametersItem } from '../System/types';
 import { TransType } from './enum';
-import { isString, isBoolean } from 'lodash';
+import { isString } from 'lodash';
 import { ReactNode } from 'react';
 import { history } from '@umijs/max';
-import { openNewPage } from '@/utils/utils';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;

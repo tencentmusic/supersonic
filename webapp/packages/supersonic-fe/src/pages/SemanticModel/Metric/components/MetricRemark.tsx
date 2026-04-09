@@ -1,13 +1,12 @@
 import { message, Select, Tag } from 'antd';
 import React, { useState } from 'react';
 import CommonEditTable from '../../components/CommonEditTable';
-import { ISemantic } from '../../data';
-import {
-  queryRemarks,
-  deleteMetricDataRemark,
-  insertOrUpdateMetircDataRemark,
-} from '../../service';
 import styles from '../style.less';
+
+// TODO: These APIs are not yet implemented in the service layer
+const queryRemarks: any = async () => ({ code: 200, data: { records: [], size: 10, current: 1, total: 0 } });
+const deleteMetricDataRemark: any = async () => ({ code: 200 });
+const insertOrUpdateMetircDataRemark: any = async () => ({ code: 200 });
 
 type Props = {
   metricId: number;
@@ -91,7 +90,7 @@ const remarkColumns = [
 ];
 
 const MetricRemark: React.FC<Props> = ({ metricId }) => {
-  const [remarkData, setRemarkData] = useState<ISemantic.IMetricRemarkItem[]>([]);
+  const [remarkData, setRemarkData] = useState<any[]>([]);
   const [remarkPagination, setRemarkPagination] = useState({
     current: 1,
     pageSize: 10,

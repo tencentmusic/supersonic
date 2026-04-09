@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Form, Input, Select, Spin, Space } from 'antd';
 import type { Ref } from 'react';
 import styles from '../../components/style.less';
@@ -18,16 +18,16 @@ export type ModelCreateFormModalProps = {
   domainId: number;
   datasetItem: any;
   modelList: ISemantic.IModelItem[];
-  onCancel: () => void;
-  onSubmit: (values: any) => void;
+  onCancel?: () => void;
+  onSubmit?: (values: any) => void;
 };
 
-const DatasetCreateForm: React.FC<ModelCreateFormModalProps> = forwardRef(
+const DatasetCreateForm: any = forwardRef<any, ModelCreateFormModalProps>(
   (
     { activeKey, datasetItem, domainId, onCancel, onSubmit, modelList }: ModelCreateFormModalProps,
     ref: Ref<any>,
   ) => {
-    const [saveLoading, setSaveLoading] = useState<boolean>(false);
+    const [, setSaveLoading] = useState<boolean>(false);
     const [dimensionLoading, setDimensionLoading] = useState<boolean>(false);
     const [selectedModelItem, setSelectedModelItem] = useState<ISemantic.IModelItem | undefined>(
       modelList[0],

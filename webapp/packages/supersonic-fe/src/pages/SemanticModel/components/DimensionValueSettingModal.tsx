@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, message, Tabs, Input, Form, Divider } from 'antd';
+import { Button, Modal, message, Input, Form, Divider } from 'antd';
 import TableHeaderFilter from '@/components/TableHeaderFilter';
 import { ISemantic } from '../data';
 import CommonEditTable from './CommonEditTable';
 import { KnowledgeConfigTypeEnum, KnowledgeConfigStatusEnum } from '../enum';
 import BatchCtrlDropDownButton from '@/components/BatchCtrlDropDownButton';
 import {
-  updateDimension,
   updateDimensionAliasValue,
   getDictData,
   searchKnowledgeConfigQuery,
@@ -35,19 +34,19 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
   onSubmit,
 }) => {
   const [tableDataSource, setTableDataSource] = useState<TableDataSource[]>([]);
-  const [dimValueMaps, setDimValueMaps] = useState<ISemantic.IDimensionValueSettingItem[]>([]);
+  const [, setDimValueMaps] = useState<ISemantic.IDimensionValueSettingItem[]>([]);
   const [form] = Form.useForm();
-  const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
+  const [, setRefreshLoading] = useState<boolean>(false);
 
   const [knowledgeConfig, setKnowledgeConfig] = useState<ISemantic.IDictKnowledgeConfigItem>();
   const [dimensionVisibleState, setDimensionVisibleState] = useState<KnowledgeConfigStatusEnum>(
     KnowledgeConfigStatusEnum.OFFLINE,
   );
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [llmLoading, setLlmLoading] = useState<boolean>(false);
+  const [, setLlmLoading] = useState<boolean>(false);
   const [filterParams, setFilterParams] = useState<Record<string, any>>({});
-  const [menuKey, setMenuKey] = useState<string>('default');
-  const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [menuKey] = useState<string>('default');
+  const [, setSaveLoading] = useState<boolean>(false);
   const [dimensionValueFilterModalVisible, setDimensionValueFilterModalVisible] =
     useState<boolean>(false);
 
@@ -62,26 +61,6 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
     queryDictData();
     setDimValueMaps(dimensionValueSettingList);
   }, [dimensionValueSettingList]);
-
-  const handleSubmit = async () => {
-    await saveDimension({ dimValueMaps });
-    onSubmit?.(dimValueMaps);
-  };
-
-  const saveDimension = async (fieldsValue: any) => {
-    if (!dimensionItem?.id) {
-      return;
-    }
-    const queryParams = {
-      ...dimensionItem,
-      ...fieldsValue,
-    };
-    const { code, msg } = await updateDimension(queryParams);
-    if (code === 200) {
-      return;
-    }
-    message.error(msg);
-  };
 
   const editConfigQuery = async (config: Record<string, any>) => {
     if (!knowledgeConfig?.id) {
@@ -218,7 +197,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
       dataIndex: 'black',
       width: 80,
       editable: false,
-      render: (_, record: TableDataSource) => {
+      render: (_: any, record: TableDataSource) => {
         const list = knowledgeConfig?.config?.blackList;
         if (Array.isArray(list) && list.includes(record.value)) {
           return <span style={{ color: '#1677ff' }}>是</span>;
@@ -231,7 +210,7 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
       dataIndex: 'white',
       width: 80,
       editable: false,
-      render: (_, record: TableDataSource) => {
+      render: (_: any, record: TableDataSource) => {
         const list = knowledgeConfig?.config?.whiteList;
         if (Array.isArray(list) && list.includes(record.value)) {
           return <span style={{ color: '#1677ff' }}>是</span>;
@@ -309,8 +288,8 @@ const DimensionValueSettingModal: React.FC<CreateFormProps> = ({
     });
   };
 
-  const modifyDimensionValue = async (params) => {
-    const { code, data } = await updateDimensionAliasValue(params);
+  const modifyDimensionValue = async (params: any) => {
+    const { code: _code, data: _data } = await updateDimensionAliasValue(params);
   };
   return (
     <Modal

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Drawer, Tabs, Descriptions, Table, Empty, Tag, Space } from 'antd';
+import { Drawer, Tabs, Descriptions, Table, Empty, Tag } from 'antd';
 import {
   FolderOutlined,
   TableOutlined,

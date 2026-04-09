@@ -1,4 +1,3 @@
-import React from 'react';
 import type { NsGraph } from '@antv/xflow';
 import type { RelationCanvasModel } from '../interface';
 import { Popover, Popconfirm, Tooltip } from 'antd';

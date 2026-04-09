@@ -21,7 +21,7 @@ const { Text } = Typography;
 type Props = {
   metircData: ISemantic.IMetricItem;
   relationDimensionOptions: { value: string; label: string; modelId: number }[];
-  onNodeChange: (params?: { eventName?: string }) => void;
+  onNodeChange?: (params?: { eventName?: string }) => void;
   onEditBtnClick?: (metircData: any) => void;
   onDimensionRelationBtnClick?: () => void;
   [key: string]: any;

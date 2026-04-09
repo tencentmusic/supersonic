@@ -1,5 +1,15 @@
 import G6 from '@antv/g6';
 
+// Augment G6 ModelConfig to include properties used by custom nodes/edges
+declare module '@antv/g6-core/lib/types' {
+  interface ModelConfig {
+    children?: ModelConfig[];
+    sourceNode?: { getModel: () => ModelConfig; [key: string]: any };
+    targetNode?: { getModel: () => ModelConfig; [key: string]: any };
+    [key: string]: any;
+  }
+}
+
 const colors = {
   B: '#5B8FF9',
   R: '#F46649',
@@ -48,8 +58,8 @@ export const flowRectNodeRegister = () => {
         };
 
         const textConfig = {
-          textAlign: 'left',
-          textBaseline: 'bottom',
+          textAlign: 'left' as const,
+          textBaseline: 'bottom' as const,
         };
 
         const rect = group.addShape('rect', {
@@ -113,7 +123,7 @@ export const flowRectNodeRegister = () => {
             text: `${((variableValue || 0) * 100).toFixed(2)}%`,
             fontSize: 12,
             textAlign: 'right',
-            fill: colors[status],
+            fill: colors[status as keyof typeof colors],
           },
         });
 
@@ -126,7 +136,7 @@ export const flowRectNodeRegister = () => {
             y: rectBBox.maxY - 12 - 6,
             symbol,
             r: 6,
-            fill: colors[status],
+            fill: colors[status as keyof typeof colors],
           },
         });
 
@@ -145,7 +155,7 @@ export const flowRectNodeRegister = () => {
         });
 
         // bottom line background
-        const bottomBackRect = group.addShape('rect', {
+        group.addShape('rect', {
           attrs: {
             x: nodeOrigin.x,
             y: rectBBox.maxY - 4,
@@ -157,14 +167,14 @@ export const flowRectNodeRegister = () => {
         });
 
         // bottom percent
-        const bottomRect = group.addShape('rect', {
+        group.addShape('rect', {
           attrs: {
             x: nodeOrigin.x,
             y: rectBBox.maxY - 4,
             width: rate * rectBBox.width,
             height: 4,
             radius: [0, 0, 0, rectConfig.radius],
-            fill: colors[status],
+            fill: colors[status as keyof typeof colors],
           },
         });
 
@@ -203,16 +213,16 @@ export const flowRectNodeRegister = () => {
           });
         }
 
-        this.drawLinkPoints(cfg, group);
+        (this as any).drawLinkPoints(cfg, group);
         return rect;
       },
-      update(cfg, item) {
+      update(cfg, item): any {
         const { level, status, name } = cfg;
         const group = item.getContainer();
         let mask = group.find((ele) => ele.get('name') === 'mask-shape');
         let maskLabel = group.find((ele) => ele.get('name') === 'mask-label-shape');
         if (level === 0) {
-          group.get('children').forEach((child) => {
+          group.get('children').forEach((child: any) => {
             if (child.get('name')?.includes('collapse')) return;
             child.hide();
           });
@@ -224,7 +234,7 @@ export const flowRectNodeRegister = () => {
                 width: 202,
                 height: 60,
                 opacity: 0,
-                fill: colors[status],
+                fill: colors[status as keyof typeof colors],
               },
               // must be assigned in G6 3.3 and later versions. it can be any string you want, but should be unique in a custom item type
               name: 'mask-shape',
@@ -254,7 +264,7 @@ export const flowRectNodeRegister = () => {
           maskLabel.animate({ opacity: 1 }, 200);
           return mask;
         } else {
-          group.get('children').forEach((child) => {
+          group.get('children').forEach((child: any) => {
             if (child.get('name')?.includes('collapse')) return;
             child.show();
           });
@@ -273,11 +283,11 @@ export const flowRectNodeRegister = () => {
             },
           );
         }
-        this.updateLinkPoints(cfg, group);
+        (this as any).updateLinkPoints(cfg, group);
       },
       setState(name, value, item) {
         if (name === 'collapse') {
-          const group = item.getContainer();
+          const group = item!.getContainer();
           const collapseText = group.find((e) => e.get('name') === 'collapse-text');
           if (collapseText) {
             if (!value) {
@@ -305,7 +315,7 @@ export const flowRectNodeRegister = () => {
   G6.registerEdge(
     'flow-cubic',
     {
-      getControlPoints(cfg) {
+      getControlPoints(cfg): any {
         let controlPoints = cfg.controlPoints; // 指定controlPoints
         if (!controlPoints || !controlPoints.length) {
           const { startPoint, endPoint, sourceNode, targetNode } = cfg;
@@ -314,20 +324,20 @@ export const flowRectNodeRegister = () => {
             y: startY,
             coefficientX,
             coefficientY,
-          } = sourceNode ? sourceNode.getModel() : startPoint;
-          const { x: endX, y: endY } = targetNode ? targetNode.getModel() : endPoint;
+          } = (sourceNode ? sourceNode.getModel() : startPoint) as any;
+          const { x: endX, y: endY } = (targetNode ? targetNode.getModel() : endPoint) as any;
           let curveStart = (endX - startX) * coefficientX;
           let curveEnd = (endY - startY) * coefficientY;
           curveStart = curveStart > 40 ? 40 : curveStart;
           curveEnd = curveEnd < -30 ? curveEnd : -30;
           controlPoints = [
-            { x: startPoint.x + curveStart, y: startPoint.y },
-            { x: endPoint.x + curveEnd, y: endPoint.y },
+            { x: startPoint!.x + curveStart, y: startPoint!.y },
+            { x: endPoint!.x + curveEnd, y: endPoint!.y },
           ];
         }
         return controlPoints;
       },
-      getPath(points) {
+      getPath(points: any) {
         const path = [];
         path.push(['M', points[0].x, points[0].y]);
         path.push([
@@ -346,7 +356,7 @@ export const flowRectNodeRegister = () => {
   );
 };
 
-const COLLAPSE_ICON = function COLLAPSE_ICON(x, y, r) {
+const COLLAPSE_ICON = function COLLAPSE_ICON(x: any, y: any, r: any) {
   return [
     ['M', x - r, y],
     ['a', r, r, 0, 1, 0, r * 2, 0],
@@ -355,7 +365,7 @@ const COLLAPSE_ICON = function COLLAPSE_ICON(x, y, r) {
     ['L', x - r + 2 * r - 4, y],
   ];
 };
-const EXPAND_ICON = function EXPAND_ICON(x, y, r) {
+const EXPAND_ICON = function EXPAND_ICON(x: any, y: any, r: any) {
   return [
     ['M', x - r, y],
     ['a', r, r, 0, 1, 0, r * 2, 0],
@@ -367,9 +377,9 @@ const EXPAND_ICON = function EXPAND_ICON(x, y, r) {
   ];
 };
 
-export const cardNodeRegister = (graph) => {
+export const cardNodeRegister = (graph: any) => {
   const ERROR_COLOR = '#F5222D';
-  const getNodeConfig = (node) => {
+  const getNodeConfig = (node: any) => {
     if (node.nodeError) {
       return {
         basicColor: ERROR_COLOR,
@@ -401,7 +411,7 @@ export const cardNodeRegister = (graph) => {
   };
 
   const nodeBasicMethod = {
-    createNodeBox: (group, config, w, h, isRoot) => {
+    createNodeBox: (group: any, config: any, w: any, h: any, isRoot: any) => {
       /* 最外面的大矩形 */
       const container = group.addShape('rect', {
         attrs: {
@@ -458,7 +468,7 @@ export const cardNodeRegister = (graph) => {
       return container;
     },
     /* 生成树上的 marker */
-    createNodeMarker: (group, collapsed, x, y) => {
+    createNodeMarker: (group: any, collapsed: any, x: any, y: any) => {
       group.addShape('circle', {
         attrs: {
           x,
@@ -486,11 +496,11 @@ export const cardNodeRegister = (graph) => {
         name: 'collapse-icon',
       });
     },
-    afterDraw: (cfg, group) => {
+    afterDraw: (cfg: any, group: any) => {
       /* 操作 marker 的背景色显示隐藏 */
-      const icon = group.find((element) => element.get('name') === 'collapse-icon');
+      const icon = group.find((element: any) => element.get('name') === 'collapse-icon');
       if (icon) {
-        const bg = group.find((element) => element.get('name') === 'collapse-icon-bg');
+        const bg = group.find((element: any) => element.get('name') === 'collapse-icon-bg');
         icon.on('mouseenter', () => {
           bg.attr('opacity', 1);
           graph.get('canvas').draw();
@@ -501,13 +511,13 @@ export const cardNodeRegister = (graph) => {
         });
       }
       /* ip 显示 */
-      const ipBox = group.find((element) => element.get('name') === 'ip-box');
+      const ipBox = group.find((element: any) => element.get('name') === 'ip-box');
       if (ipBox) {
         /* ip 复制的几个元素 */
-        const ipLine = group.find((element) => element.get('name') === 'ip-cp-line');
-        const ipBG = group.find((element) => element.get('name') === 'ip-cp-bg');
-        const ipIcon = group.find((element) => element.get('name') === 'ip-cp-icon');
-        const ipCPBox = group.find((element) => element.get('name') === 'ip-cp-box');
+        const ipLine = group.find((element: any) => element.get('name') === 'ip-cp-line');
+        const ipBG = group.find((element: any) => element.get('name') === 'ip-cp-bg');
+        const ipIcon = group.find((element: any) => element.get('name') === 'ip-cp-icon');
+        const ipCPBox = group.find((element: any) => element.get('name') === 'ip-cp-box');
 
         const onMouseEnter = () => {
           ipLine.attr('opacity', 1);
@@ -536,7 +546,7 @@ export const cardNodeRegister = (graph) => {
         ipCPBox.on('click', () => {});
       }
     },
-    setState: (name, value, item) => {
+    setState: (name: any, value: any, item: any) => {
       const hasOpacityClass = [
         'ip-cp-line',
         'ip-cp-bg',
@@ -550,14 +560,14 @@ export const cardNodeRegister = (graph) => {
       graph.setAutoPaint(false);
       if (name === 'emptiness') {
         if (value) {
-          childrens.forEach((shape) => {
+          childrens.forEach((shape: any) => {
             if (hasOpacityClass.indexOf(shape.get('name')) > -1) {
               return;
             }
             shape.attr('opacity', 0.4);
           });
         } else {
-          childrens.forEach((shape) => {
+          childrens.forEach((shape: any) => {
             if (hasOpacityClass.indexOf(shape.get('name')) > -1) {
               return;
             }

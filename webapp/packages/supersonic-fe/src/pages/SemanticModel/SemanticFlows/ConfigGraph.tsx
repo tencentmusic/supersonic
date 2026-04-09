@@ -6,15 +6,15 @@ import { DATASOURCE_NODE_RENDER_ID, GROUP_NODE_RENDER_ID } from './constant';
 import { AlgoNode } from './ReactNodes/algoNode';
 import { GroupNode } from './ReactNodes/group';
 
-export const useGraphHookConfig = createHookConfig<IProps>((config) => {
+export const useGraphHookConfig = createHookConfig<IProps>((config: any) => {
   // 获取 Props
   // const props = proxy.getValue();
-  config.setRegisterHook((hooks) => {
+  config.setRegisterHook((hooks: any) => {
     const disposableList = [
       // 注册增加 react Node Render
       hooks.reactNodeRender.registerHook({
         name: 'add react node',
-        handler: async (renderMap) => {
+        handler: async (renderMap: any) => {
           renderMap.set(DATASOURCE_NODE_RENDER_ID, AlgoNode);
           renderMap.set(GROUP_NODE_RENDER_ID, GroupNode);
         },
@@ -23,7 +23,7 @@ export const useGraphHookConfig = createHookConfig<IProps>((config) => {
       hooks.graphOptions.registerHook({
         name: 'custom-x6-options',
         after: 'dag-extension-x6-options',
-        handler: async (options) => {
+        handler: async (options: any) => {
           const graphOptions: Graph.Options = {
             connecting: {
               allowLoop: false,

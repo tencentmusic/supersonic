@@ -18,7 +18,7 @@ type Props = {
   tagList?: ISemantic.ITagItem[];
   toolbarSolt?: ReactNode;
 };
-const ViewModelConfigTransfer: React.FC<Props> = forwardRef(
+const ViewModelConfigTransfer: any = forwardRef<any, Props>(
   (
     {
       queryType = TransType.METRIC,

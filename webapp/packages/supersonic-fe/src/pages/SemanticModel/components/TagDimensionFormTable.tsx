@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Tag, Space } from 'antd';
+import type { ActionType } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { ProCard } from  '@ant-design/pro-components';
 import SqlEditor from '@/components/SqlEditor';

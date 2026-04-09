@@ -6,7 +6,7 @@ import type { NsNodeCmd } from '@antv/xflow';
 import type { NsNodeCollapsePanel } from '@antv/xflow';
 import { Card } from 'antd';
 
-export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node, commands, modelService) => {
+export const onNodeDrop: NsNodeCollapsePanel.IOnNodeDrop = async (node: any, commands: any, modelService: any) => {
   const args: NsNodeCmd.AddNode.IArgs = {
     nodeConfig: { ...node, id: uuidv4() },
   };
@@ -21,7 +21,7 @@ const NodeDescription = (props: { name: string }) => {
   );
 };
 
-export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta, modelService) => {
+export const nodeDataService: NsNodeCollapsePanel.INodeDataService = async (meta: any, modelService: any) => {
   return [
     {
       id: '数据源',

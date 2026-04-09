@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Tag, Space } from 'antd';
+import type { ActionType } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { ProCard } from  '@ant-design/pro-components';
 import SqlEditor from '@/components/SqlEditor';
@@ -55,10 +56,10 @@ const MetricMetricFormTable: React.FC<Props> = ({
   });
 
   const [selectedKeysMap, setSelectedKeysMap] = useState<Record<string, boolean>>(() => {
-    return defineTypeParams.metrics.reduce((keyMap, item: any) => {
+    return defineTypeParams.metrics.reduce((keyMap: Record<string, boolean>, item: any) => {
       keyMap[item.bizName] = true;
       return keyMap;
-    }, {});
+    }, {} as Record<string, boolean>);
   });
 
   const columns = [
@@ -146,7 +147,7 @@ const MetricMetricFormTable: React.FC<Props> = ({
           options={false}
           tableAlertRender={false}
           scroll={{ y: 500 }}
-          rowSelection={rowSelection}
+          rowSelection={rowSelection as any}
         />
         <ProCard title={<FormLabelRequire title="表达式" />} tooltip="">
           <p

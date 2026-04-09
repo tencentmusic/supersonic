@@ -341,7 +341,7 @@ const ScopeRoleManagement: React.FC<ScopeConfig> = ({
           dataSource={permissions.map((p) => ({ key: String(p.id), title: p.name, description: p.description }))}
           titles={['可选权限', '已选权限']}
           targetKeys={selectedPermKeys}
-          onChange={setSelectedPermKeys}
+          onChange={(targetKeys) => { setSelectedPermKeys(targetKeys as string[]); }}
           render={(item) => item.title}
           listStyle={{ width: 250, height: 300 }}
         />

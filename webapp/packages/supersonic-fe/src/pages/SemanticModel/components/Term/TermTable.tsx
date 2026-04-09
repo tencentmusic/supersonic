@@ -145,7 +145,7 @@ const TermTable: React.FC<Props> = ({}) => {
   ];
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(selectedRowKeys);
+      setSelectedRowKeys(selectedRowKeys as number[]);
     },
   };
 

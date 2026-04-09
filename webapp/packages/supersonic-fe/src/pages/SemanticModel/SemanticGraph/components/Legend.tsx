@@ -1,6 +1,6 @@
 import G6 from '@antv/g6';
 
-const initLegend = ({ nodeData, filterFunctions }) => {
+const initLegend = ({ nodeData, filterFunctions }: { nodeData: any; filterFunctions: any }) => {
   const legend = new G6.Legend({
     data: {
       nodes: nodeData,

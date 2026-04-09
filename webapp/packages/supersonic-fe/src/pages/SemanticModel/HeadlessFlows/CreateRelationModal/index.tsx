@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Modal, Form, Input, Select } from 'antd'
 import type { EntityCanvasModel } from '../interface'
 

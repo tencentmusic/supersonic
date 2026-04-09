@@ -9,8 +9,8 @@ export namespace NS_DATA_SOURCE_RELATION_MODAL_OPEN_STATE {
   }
 }
 
-export const useModelServiceConfig = createModelServiceConfig((config) => {
-  config.registerModel((registry) => {
+export const useModelServiceConfig = createModelServiceConfig((config: any) => {
+  config.registerModel((registry: any) => {
     const list: Disposable[] = [
       registry.registerModel({
         id: NS_DATA_SOURCE_RELATION_MODAL_OPEN_STATE.ID,

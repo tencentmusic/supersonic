@@ -15,7 +15,7 @@ export const enumToArray = (_obj: EnumToArrayParams) => {
 
 // 枚举类转出的key value列表转key value对象
 export const enumArrayTrans = (_array: EnumToArrayItem[]) => {
-  const returnObj = {};
+  const returnObj: Record<number, string> = {};
   _array.map((item) => {
     returnObj[item.value] = item.label;
     return item;

@@ -150,7 +150,7 @@ const SqlDetail: React.FC<IProps> = ({
 
   // 计算每列的宽度，通过容器插入文档中动态得到该列数据(包括表头)的最长宽度，设为列宽度，保证每列的数据都能一行展示完
   function getKeyWidthMap(list: TaskResultItem[]): TaskResultItem {
-    const widthMap = {};
+    const widthMap: Record<string, number> = {};
     const container = document.createElement('div');
     container.id = 'resultCalcWrap';
     container.style.position = 'fixed';
@@ -466,9 +466,10 @@ const SqlDetail: React.FC<IProps> = ({
           </Tooltip>
         </div>
       </div>
+      {/* @ts-ignore react-split-pane children type */}
       <SplitPane
         split="horizontal"
-        onChange={(size) => {
+        onChange={(size: number) => {
           setEditorSize(size);
         }}
       >

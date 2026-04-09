@@ -23,13 +23,13 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
   const { selectDomainId } = domainModel;
 
   const [viewItem, setViewItem] = useState<ISemantic.IDatasetItem>();
-  const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [, setSaveLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [createDataSourceModalOpen, setCreateDataSourceModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [modelList, setModelList] = useState<ISemantic.IModelItem[]>([]);
   const actionRef = useRef<ActionType>();
-  const [editFormStep, setEditFormStep] = useState<number>(0);
+  const [editFormStep] = useState<number>(0);
 
   const updateViewStatus = async (modelData: ISemantic.IDatasetItem) => {
     setSaveLoading(true);
@@ -56,7 +56,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
 
   const queryDataSetList = async () => {
     setLoading(true);
-    const { code, data, msg } = await getDataSetList(selectDomainId);
+    const { code, data, msg } = await getDataSetList(selectDomainId!);
     setLoading(false);
     if (code === 200) {
       setViewList(data);
@@ -66,7 +66,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
   };
 
   const queryDomainAllModel = async () => {
-    const { code, data, msg } = await getAllModelByDomainId(selectDomainId);
+    const { code, data, msg } = await getAllModelByDomainId(selectDomainId!);
     if (code === 200) {
       setModelList(data);
     } else {
@@ -245,7 +245,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
       {createDataSourceModalOpen && (
         <ViewCreateFormModal
           step={editFormStep}
-          domainId={selectDomainId}
+          domainId={selectDomainId!}
           viewItem={viewItem}
           modelList={modelList}
           onSubmit={() => {
@@ -260,7 +260,7 @@ const DataSetTable: React.FC<Props> = ({ disabledEdit = false }) => {
 
       {searchModalOpen && (
         <ViewSearchFormModal
-          domainId={selectDomainId}
+          domainId={selectDomainId!}
           viewItem={viewItem}
           onSubmit={() => {
             queryDataSetList();

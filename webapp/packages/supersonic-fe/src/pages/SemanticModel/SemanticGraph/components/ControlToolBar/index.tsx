@@ -22,7 +22,7 @@ type Props = {
   onAutoZoom?: () => void;
 };
 
-function zoomGraph(graph, ratio: number) {
+function zoomGraph(graph: any, ratio: number) {
   const width = graph.get('width');
   const height = graph.get('height');
   const centerX = width / 2;

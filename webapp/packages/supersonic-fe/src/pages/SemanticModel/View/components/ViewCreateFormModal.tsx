@@ -41,7 +41,7 @@ const ViewCreateFormModal: React.FC<ModelCreateFormModalProps> = ({
     currentModel: modelList[0]?.id,
   });
 
-  const [queryType, setQueryType] = useState<string>('METRIC');
+  const [queryType] = useState<string>('METRIC');
 
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [dimensionLoading, setDimensionLoading] = useState<boolean>(false);

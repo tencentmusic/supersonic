@@ -6,27 +6,14 @@ import { history, RunTimeLayoutConfig } from '@umijs/max';
 import defaultSettings, { BRAND_PRIMARY } from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
-import { deleteUrlQuery, isMobile, getToken } from '@/utils/utils';
-import { publicPath } from '../config/defaultSettings';
+import { isMobile, getToken } from '@/utils/utils';
 import type { DefaultSetting } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
 export { requestConfig as request } from './services/request';
 import { BASE_TITLE } from '@/common/constants';
 import { ROUTE_AUTH_CODES } from '../config/routes';
-import AppPage from './pages/index';
-
 const replaceRoute = '/';
-
-const getRunningEnv = async () => {
-  try {
-    const response = await fetch(`${publicPath}supersonic.config.json`);
-    const config = await response.json();
-    return config;
-  } catch (error) {
-    console.warn('无法获取配置文件: 运行时环境将以semantic启动');
-  }
-};
 
 Spin.setDefaultIndicator(
   <ScaleLoader color={settings['primary-color']} height={25} width={2} radius={2} margin={2} />,

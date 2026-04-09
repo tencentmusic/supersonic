@@ -458,21 +458,21 @@ export const getDynamicDateRangeStringByParams = (
         includesCurrentPeriod,
       });
       dateRangeStringDesc =
-        `最近${number}${datePeriodTypeMap[periodType]}` +
-        `${includesCurrentPeriod ? `(包含${datePeriodTypeWordingMap[periodType]})` : ''}`;
+        `最近${number}${datePeriodTypeMap[periodType as keyof typeof datePeriodTypeMap]}` +
+        `${includesCurrentPeriod ? `(包含${datePeriodTypeWordingMap[periodType as keyof typeof datePeriodTypeWordingMap]})` : ''}`;
       break;
     case DynamicAdvancedConfigType.HISTORY:
       dateRangeMoment = shortCutDateRangeMap[DynamicAdvancedConfigType.HISTORY]({
         number,
         periodType,
       });
-      dateRangeStringDesc = `过去第${number}${datePeriodTypeMap[periodType]}`;
+      dateRangeStringDesc = `过去第${number}${datePeriodTypeMap[periodType as keyof typeof datePeriodTypeMap]}`;
       break;
     case DynamicAdvancedConfigType.FROM_DATE_PERIOD:
       dateRangeMoment = shortCutDateRangeMap[DynamicAdvancedConfigType.FROM_DATE_PERIOD]({
         perPeriodType,
       });
-      dateRangeStringDesc = `自从${perDatePeriodTypeMap[perPeriodType]}00:00:00至此刻`;
+      dateRangeStringDesc = `自从${perDatePeriodTypeMap[perPeriodType as keyof typeof perDatePeriodTypeMap]}00:00:00至此刻`;
       break;
     case DynamicAdvancedConfigType.FROM_DATE:
       dateRangeMoment = shortCutDateRangeMap[DynamicAdvancedConfigType.FROM_DATE]({

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Form, Switch, Space, Button, Tooltip, message, Select } from 'antd';
+import { Form, Switch, Space, Button, Tooltip, message } from 'antd';
 import FormItemTitle from '@/components/FormHelper/FormItemTitle';
 import { RedoOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { formLayout } from '@/components/FormHelper/utils';
@@ -42,7 +42,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
 
   const [dimensionVisible, setDimensionVisible] = useState<boolean>(false);
   const [taskItemState, setTaskItemState] = useState<ISemantic.IDictKnowledgeTaskItem>();
-  const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [, setSaveLoading] = useState<boolean>(false);
   const [refreshLoading, setRefreshLoading] = useState<boolean>(false);
 
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
@@ -72,7 +72,7 @@ const DimensionValueSettingForm: React.FC<Props> = ({
     if (taskItemState?.taskStatus) {
       return (
         <span style={{ color: '#5493ff', fontWeight: 'bold' }}>
-          {DictTaskState[`${taskItemState?.taskStatus || 'unknown'}`]}
+          {DictTaskState[`${taskItemState?.taskStatus || 'unknown'}` as keyof typeof DictTaskState]}
         </span>
       );
     }

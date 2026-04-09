@@ -9,6 +9,7 @@ type StandardFormRowProps = {
   grid?: boolean;
   style?: React.CSSProperties;
   titleClassName?: string;
+  children?: React.ReactNode;
 };
 
 const StandardFormRow: React.FC<StandardFormRowProps> = ({

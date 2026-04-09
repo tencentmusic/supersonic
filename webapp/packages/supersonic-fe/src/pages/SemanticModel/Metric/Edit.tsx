@@ -75,7 +75,7 @@ const MetricDetail: React.FC<Props> = () => {
             menuList={settingList}
             detailData={metircData}
             onMenuKeyChange={(key: string) => {
-              setSettingKey(key);
+              setSettingKey(key as MetricSettingKey);
             }}
           />
         }

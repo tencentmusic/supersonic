@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { NsNodeCmd, NsEdgeCmd, IMenuOptions, NsGraph, NsGraphCmd } from '@antv/xflow';
-import type { NsRenameNodeCmd } from './CmdExtensions/CmdRenameNodeModal';
+import type { IMenuOptions, NsGraph } from '@antv/xflow';
 import { createCtxMenuConfig, MenuItemType } from '@antv/xflow';
 import { IconStore, XFlowNodeCommands, XFlowEdgeCommands, XFlowGraphCommands } from '@antv/xflow';
 import { initDimensionGraphCmds } from './ConfigCmd';
-import type { NsConfirmModalCmd } from './CmdExtensions/CmdConfirmModal';
 import { NS_DATA_SOURCE_RELATION_MODAL_OPEN_STATE } from './ConfigModelService';
 import { DeleteOutlined, EditOutlined, StopOutlined } from '@ant-design/icons';
 import { CustomCommands } from './CmdExtensions/constants';
@@ -21,17 +19,17 @@ export namespace NsMenuItemConfig {
     id: XFlowEdgeCommands.DEL_EDGE.id,
     label: '删除边',
     iconName: 'DeleteOutlined',
-    onClick: async (args) => {
+    onClick: async (args: any) => {
       const { target, commandService, modelService } = args;
-      await commandService.executeCommand<NsEdgeCmd.DelEdge.IArgs>(XFlowEdgeCommands.DEL_EDGE.id, {
+      await commandService.executeCommand(XFlowEdgeCommands.DEL_EDGE.id, {
         edgeConfig: target.data as NsGraph.IEdgeConfig,
       });
       // 保存数据源关联关系
       await commandService.executeCommand(CustomCommands.DATASOURCE_RELATION.id, {});
       // 保存图数据
-      commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
+      commandService.executeCommand(
         XFlowGraphCommands.SAVE_GRAPH_DATA.id,
-        { saveGraphDataService: (meta, graphData) => GraphApi.saveGraphData!(meta, graphData) },
+        { saveGraphDataService: (meta: any, graphData: any) => GraphApi.saveGraphData!(meta, graphData) },
       );
       // 关闭设置关联关系弹窗
       const modalModel = await modelService!.awaitModel(
@@ -45,8 +43,8 @@ export namespace NsMenuItemConfig {
     id: XFlowNodeCommands.DEL_NODE.id,
     label: '删除节点',
     iconName: 'DeleteOutlined',
-    onClick: async ({ target, commandService }) => {
-      commandService.executeCommand<NsNodeCmd.DelNode.IArgs>(XFlowNodeCommands.DEL_NODE.id, {
+    onClick: async ({ target, commandService }: any) => {
+      commandService.executeCommand(XFlowNodeCommands.DEL_NODE.id, {
         nodeConfig: { id: target?.data?.id || '', targetData: target.data },
       });
     },
@@ -64,9 +62,9 @@ export namespace NsMenuItemConfig {
     label: '重命名',
     isVisible: true,
     iconName: 'EditOutlined',
-    onClick: async ({ target, commandService }) => {
+    onClick: async ({ target, commandService }: any) => {
       const nodeConfig = target.data as NsGraph.INodeConfig;
-      commandService.executeCommand<NsRenameNodeCmd.IArgs>(CustomCommands.SHOW_RENAME_MODAL.id, {
+      commandService.executeCommand(CustomCommands.SHOW_RENAME_MODAL.id, {
         nodeConfig,
         updateNodeNameService: GraphApi.renameNode,
       });
@@ -78,19 +76,19 @@ export namespace NsMenuItemConfig {
     label: '删除数据源',
     isVisible: true,
     iconName: 'EditOutlined',
-    onClick: async ({ target, commandService }) => {
+    onClick: async ({ target, commandService }: any) => {
       const nodeConfig = {
         ...target.data,
         modalProps: {
           title: '确认删除？',
         },
       } as NsGraph.INodeConfig;
-      await commandService.executeCommand<NsConfirmModalCmd.IArgs>(
+      await commandService.executeCommand(
         CustomCommands.SHOW_CONFIRM_MODAL.id,
         {
           nodeConfig,
           confirmModalCallBack: async () => {
-            await commandService.executeCommand<NsNodeCmd.DelNode.IArgs>(
+            await commandService.executeCommand(
               XFlowNodeCommands.DEL_NODE.id,
               {
                 nodeConfig: {
@@ -100,10 +98,10 @@ export namespace NsMenuItemConfig {
                 },
               },
             );
-            commandService.executeCommand<NsGraphCmd.SaveGraphData.IArgs>(
+            commandService.executeCommand(
               XFlowGraphCommands.SAVE_GRAPH_DATA.id,
               {
-                saveGraphDataService: (meta, graphData) => GraphApi.saveGraphData!(meta, graphData),
+                saveGraphDataService: (meta: any, graphData: any) => GraphApi.saveGraphData!(meta, graphData),
               },
             );
           },
@@ -117,8 +115,8 @@ export namespace NsMenuItemConfig {
     label: '查看维度',
     isVisible: true,
     iconName: 'EditOutlined',
-    onClick: async (args) => {
-      const { target, commandService, modelService } = args as any;
+    onClick: async (args: any) => {
+      const { target, commandService } = args as any;
       initDimensionGraphCmds({ commandService, target });
     },
   };
@@ -129,9 +127,9 @@ export namespace NsMenuItemConfig {
   };
 }
 
-export const useMenuConfig = createCtxMenuConfig((config) => {
-  config.setMenuModelService(async (target, model, modelService, toDispose) => {
-    const { type, cell } = target as any;
+export const useMenuConfig = createCtxMenuConfig((config: any) => {
+  config.setMenuModelService(async (target: any, model: any, modelService: any, toDispose: any) => {
+    const { type } = target as any;
     switch (type) {
       /** 节点菜单 */
       case 'node':

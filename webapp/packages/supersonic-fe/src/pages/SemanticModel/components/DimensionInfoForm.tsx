@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import type { Ref } from 'react';
 import { Button, Form, Input, Select, Row, Col, Space, Tooltip, Switch } from 'antd';
 import { SENSITIVE_LEVEL_OPTIONS, TAG_DEFINE_TYPE } from '../constant';
@@ -27,7 +27,7 @@ export type CreateFormProps = {
   modelId: number;
   domainId: number;
   dimensionItem?: ISemantic.IDimensionItem;
-  onCancel: () => void;
+  onCancel?: () => void;
   onSubmit?: (values?: any) => void;
 };
 
@@ -36,7 +36,7 @@ const { Option } = Select;
 
 const { TextArea } = Input;
 
-const DimensionInfoForm: React.FC<CreateFormProps> = forwardRef(
+const DimensionInfoForm: any = forwardRef<any, CreateFormProps>(
   (
     { modelId, domainId, dimensionItem, onSubmit: handleUpdate }: CreateFormProps,
     ref: Ref<any>,
@@ -125,7 +125,7 @@ const DimensionInfoForm: React.FC<CreateFormProps> = forwardRef(
           alias: alias && alias.trim() ? alias.split(',') : [],
         };
         setFieldsValue(dimensionData);
-        setFormData(dimensionData);
+        setFormData(dimensionData as any);
       }
     };
 
