@@ -47,21 +47,8 @@ public class ModelRelaServiceImpl extends ServiceImpl<ModelRelaDOMapper, ModelRe
     }
 
     private void check(ModelRela modelRela) {
-        ModelResp fromModel = modelService.getModel(modelRela.getFromModelId());
-        ModelResp toModel = modelService.getModel(modelRela.getToModelId());
         if (CollectionUtils.isEmpty(modelRela.getJoinConditions())) {
             throw new RuntimeException("关联关系不可为空");
-        }
-        for (JoinCondition joinCondition : modelRela.getJoinConditions()) {
-            IdentifyType identifyTypeLeft = fromModel.getIdentifyType(joinCondition.getLeftField());
-            IdentifyType identifyTypeRight = toModel.getIdentifyType(joinCondition.getRightField());
-            if (IdentifyType.foreign.equals(identifyTypeLeft)
-                    || IdentifyType.foreign.equals(identifyTypeRight)) {
-                if (!IdentifyType.primary.equals(identifyTypeLeft)
-                        && !IdentifyType.primary.equals(identifyTypeRight)) {
-                    throw new RuntimeException("外键必须跟主键关联");
-                }
-            }
         }
     }
 
