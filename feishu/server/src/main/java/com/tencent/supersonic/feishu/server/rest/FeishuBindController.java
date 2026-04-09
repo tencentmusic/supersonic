@@ -118,7 +118,7 @@ public class FeishuBindController {
         }
 
         // 4. Complete binding
-        mappingService.completeBinding(payload.getMappingId(), user.getId());
+        mappingService.completeBinding(payload.getMappingId(), user.getId(), user.getTenantId());
 
         // 5. Mark token as used
         bindTokenService.markUsed(request.getBindToken());

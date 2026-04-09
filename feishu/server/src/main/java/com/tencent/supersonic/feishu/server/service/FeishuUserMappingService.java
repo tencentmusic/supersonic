@@ -16,9 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,6 +29,7 @@ public class FeishuUserMappingService {
 
     public record ResolvedMapping(User user, Integer agentId) {}
 
+    private static final Long DEFAULT_TENANT_ID = 1L;
 
     private final FeishuUserMappingMapper userMappingMapper;
     private final FeishuQuerySessionMapper querySessionMapper;
@@ -66,7 +69,7 @@ public class FeishuUserMappingService {
 
         // 2. Try auto-match if enabled (uses current TenantContext for user lookup)
         if (feishuProperties.getUserMapping().isAutoMatchEnabled()) {
-            Long currentTenantId = TenantContext.getTenantIdOrDefault(1L);
+            Long currentTenantId = getWebhookTenantId();
             FeishuUserMappingDO autoMatched = tryAutoMatch(openId, currentTenantId);
             if (autoMatched != null) {
                 User user = buildUser(autoMatched.getS2UserId(), autoMatched.getTenantId());
@@ -93,6 +96,7 @@ public class FeishuUserMappingService {
         }
         FeishuUserMappingDO pending = new FeishuUserMappingDO();
         pending.setFeishuOpenId(openId);
+        pending.setTenantId(getWebhookTenantId());
         pending.setStatus(0);
         pending.setMatchType("PENDING");
         pending.setCreatedAt(new Date());
@@ -121,7 +125,7 @@ public class FeishuUserMappingService {
      * current TenantContext for user lookup.
      */
     public FeishuUserMappingDO tryAutoMatch(String openId) {
-        return tryAutoMatch(openId, TenantContext.getTenantIdOrDefault(1L));
+        return tryAutoMatch(openId, getWebhookTenantId());
     }
 
     /**
@@ -178,6 +182,10 @@ public class FeishuUserMappingService {
     public IPage<FeishuUserMappingDO> listMappings(int pageNum, int pageSize) {
         Page<FeishuUserMappingDO> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
+        }
         wrapper.orderByDesc(FeishuUserMappingDO::getUpdatedAt);
         return userMappingMapper.selectPage(page, wrapper);
     }
@@ -188,6 +196,9 @@ public class FeishuUserMappingService {
     public FeishuUserMappingDO createMapping(FeishuUserMappingDO mapping) {
         mapping.setCreatedAt(new Date());
         mapping.setUpdatedAt(new Date());
+        if (mapping.getTenantId() == null) {
+            mapping.setTenantId(getWebhookTenantId());
+        }
         if (mapping.getStatus() == null) {
             mapping.setStatus(1);
         }
@@ -203,6 +214,9 @@ public class FeishuUserMappingService {
      */
     public FeishuUserMappingDO updateMapping(FeishuUserMappingDO mapping) {
         mapping.setUpdatedAt(new Date());
+        if (mapping.getTenantId() == null) {
+            mapping.setTenantId(getWebhookTenantId());
+        }
         userMappingMapper.updateById(mapping);
         return mapping;
     }
@@ -258,7 +272,26 @@ public class FeishuUserMappingService {
     public IPage<FeishuQuerySessionDO> listSessions(int pageNum, int pageSize, String status,
             String startDate, String endDate) {
         Page<FeishuQuerySessionDO> page = new Page<>(pageNum, pageSize);
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId == null) {
+            page.setRecords(new ArrayList<>());
+            page.setTotal(0);
+            return page;
+        }
+
+        LambdaQueryWrapper<FeishuUserMappingDO> mappingWrapper = new LambdaQueryWrapper<>();
+        mappingWrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
+        List<String> openIds = userMappingMapper.selectList(mappingWrapper).stream()
+                .map(FeishuUserMappingDO::getFeishuOpenId).filter(StringUtils::isNotBlank)
+                .distinct().collect(Collectors.toList());
+        if (openIds.isEmpty()) {
+            page.setRecords(new ArrayList<>());
+            page.setTotal(0);
+            return page;
+        }
+
         LambdaQueryWrapper<FeishuQuerySessionDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(FeishuQuerySessionDO::getFeishuOpenId, openIds);
 
         if (StringUtils.isNotBlank(status)) {
             wrapper.eq(FeishuQuerySessionDO::getStatus, status);
@@ -298,12 +331,13 @@ public class FeishuUserMappingService {
      * Complete a self-service binding: update the PENDING mapping to active with the given
      * s2UserId.
      */
-    public void completeBinding(Long mappingId, Long s2UserId) {
+    public void completeBinding(Long mappingId, Long s2UserId, Long tenantId) {
         FeishuUserMappingDO mapping = userMappingMapper.selectById(mappingId);
         if (mapping == null) {
             throw new IllegalStateException("Mapping record not found: id=" + mappingId);
         }
         mapping.setS2UserId(s2UserId);
+        mapping.setTenantId(tenantId);
         mapping.setMatchType("OAUTH_BIND");
         mapping.setStatus(1);
         mapping.setUpdatedAt(new Date());
@@ -358,5 +392,20 @@ public class FeishuUserMappingService {
         }
         return users.stream().filter(u -> Objects.equals(value, getter.apply(u))).map(User::getId)
                 .findFirst().orElse(null);
+    }
+
+    /**
+     * Resolve tenantId for Feishu webhook context. Falls back to DEFAULT_TENANT_ID when
+     * TenantContext is not set (e.g. incoming Feishu event callbacks).
+     */
+    private Long getWebhookTenantId() {
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            return tenantId;
+        }
+        log.warn(
+                "TenantContext not set in Feishu webhook path, falling back to default tenantId={}",
+                DEFAULT_TENANT_ID);
+        return DEFAULT_TENANT_ID;
     }
 }

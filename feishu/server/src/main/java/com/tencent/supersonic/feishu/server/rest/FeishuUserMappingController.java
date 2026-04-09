@@ -2,6 +2,7 @@ package com.tencent.supersonic.feishu.server.rest;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuUserMappingDO;
 import com.tencent.supersonic.feishu.server.service.FeishuUserMappingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +45,10 @@ public class FeishuUserMappingController {
     @PostMapping
     public FeishuUserMappingDO create(@RequestBody FeishuUserMappingDO mapping,
             HttpServletRequest request, HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
+        if (user != null) {
+            mapping.setTenantId(user.getTenantId());
+        }
         return mappingService.createMapping(mapping);
     }
 
@@ -52,8 +56,11 @@ public class FeishuUserMappingController {
     public FeishuUserMappingDO update(@PathVariable Long id,
             @RequestBody FeishuUserMappingDO mapping, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
         mapping.setId(id);
+        if (user != null) {
+            mapping.setTenantId(user.getTenantId());
+        }
         return mappingService.updateMapping(mapping);
     }
 

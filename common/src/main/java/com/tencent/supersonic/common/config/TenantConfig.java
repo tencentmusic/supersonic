@@ -53,7 +53,9 @@ public class TenantConfig {
             // System-level tables
             "s2_tenant", "s2_subscription_plan",
             // RBAC association tables without tenant_id
-            "s2_permission", "s2_role_permission", "s2_user_role");
+            "s2_permission", "s2_role_permission", "s2_user_role",
+            // Feishu session table — tenant derived via feishu_open_id → s2_feishu_user_mapping
+            "s2_feishu_query_session");
 
     /**
      * URL patterns that should be excluded from tenant validation. These are endpoints that either
