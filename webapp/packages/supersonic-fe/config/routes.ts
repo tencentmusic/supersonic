@@ -44,6 +44,10 @@ const ENV_KEY = {
 };
 
 const ROUTES = [
+  // ──────────────────────────────────────────────────────────
+  // layout:false routes — bypass Pro Layout entirely.
+  // MUST be declared before any group parent nodes.
+  // ──────────────────────────────────────────────────────────
   {
     path: '/chat/mobile',
     name: 'chat',
@@ -60,173 +64,351 @@ const ROUTES = [
     layout: false,
     envEnableList: [ENV_KEY.CHAT],
   },
+
+  // ========== 分析中心 ==========
   {
-    path: '/chat',
-    name: 'chat',
-    component: './ChatPage',
-    envEnableList: [ENV_KEY.CHAT],
-    access: ROUTE_AUTH_CODES.MENU_CHAT,
-  },
-  // {
-  //   path: '/chatSetting/model/:domainId?/:modelId?/:menuKey?',
-  //   component: './SemanticModel/ChatSetting/ChatSetting',
-  //   name: 'chatSetting',
-  //   envEnableList: [ENV_KEY.CHAT],
-  // },
-  {
-    path: '/agent',
-    name: 'agent',
-    component: './Agent',
-    envEnableList: [ENV_KEY.CHAT],
-    access: ROUTE_AUTH_CODES.MENU_AGENT,
-  },
-  {
-    path: '/plugin',
-    name: 'plugin',
-    component: './ChatPlugin',
-    envEnableList: [ENV_KEY.CHAT],
-    access: ROUTE_AUTH_CODES.MENU_PLUGIN,
-  },
-  {
-    path: '/model/metric/edit/:metricId',
-    name: 'metricEdit',
-    hideInMenu: true,
-    component: './SemanticModel/Metric/Edit',
+    name: 'analysisCenter',
     envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
-    path: '/model/',
-    component: './SemanticModel/',
-    name: 'semanticModel',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    access: ROUTE_AUTH_CODES.MENU_MODEL,
     routes: [
+      {
+        path: '/operations-cockpit',
+        name: 'operationsCockpit',
+        component: './OperationsCockpit',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/business-topics',
+        name: 'businessTopics',
+        component: './BusinessTopics',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/business-topics/workspace/:topicId',
+        name: 'topicWorkspace',
+        component: './BusinessTopics/TopicWorkspace',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        hideInMenu: true,
+      },
+      {
+        path: '/reports',
+        name: 'reports',
+        component: './Reports',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/task-center',
+        name: 'taskCenter',
+        component: './TaskCenter',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/responsibility-ledger',
+        name: 'responsibilityLedger',
+        component: './ResponsibilityLedger',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/delivery-config',
+        name: 'deliveryConfig',
+        component: './DeliveryConfig',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/feishu-bot',
+        name: 'feishuBot',
+        component: './FeishuBot',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
+      {
+        path: '/report-schedule',
+        name: 'reportSchedule',
+        component: './ReportSchedule',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        hideInMenu: true,
+      },
+    ],
+  },
+
+  // ========== 智能问答 ==========
+  {
+    name: 'aiQuery',
+    envEnableList: [ENV_KEY.CHAT],
+    routes: [
+      {
+        path: '/chat',
+        name: 'chat',
+        component: './ChatPage',
+        envEnableList: [ENV_KEY.CHAT],
+        access: ROUTE_AUTH_CODES.MENU_CHAT,
+      },
+      {
+        path: '/agent',
+        name: 'agent',
+        component: './Agent',
+        envEnableList: [ENV_KEY.CHAT],
+        access: ROUTE_AUTH_CODES.MENU_AGENT,
+      },
+      {
+        path: '/plugin',
+        name: 'plugin',
+        component: './ChatPlugin',
+        envEnableList: [ENV_KEY.CHAT],
+        access: ROUTE_AUTH_CODES.MENU_PLUGIN,
+      },
+    ],
+  },
+
+  // ========== 数据建模 ==========
+  {
+    name: 'dataModeling',
+    envEnableList: [ENV_KEY.SEMANTIC],
+    routes: [
+      {
+        path: '/model/metric/edit/:metricId',
+        name: 'metricEdit',
+        hideInMenu: true,
+        component: './SemanticModel/Metric/Edit',
+        envEnableList: [ENV_KEY.SEMANTIC],
+      },
       {
         path: '/model/',
-        redirect: '/model/domain',
-      },
-      {
-        path: '/model/domain/',
-        component: './SemanticModel/OverviewContainer',
+        component: './SemanticModel/',
+        name: 'semanticModel',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.MENU_MODEL,
         routes: [
           {
-            path: '/model/domain/:domainId',
-            component: './SemanticModel/DomainManager',
+            path: '/model/',
+            redirect: '/model/domain',
+          },
+          {
+            path: '/model/domain/',
+            component: './SemanticModel/OverviewContainer',
             routes: [
               {
-                path: '/model/domain/:domainId/:menuKey',
+                path: '/model/domain/:domainId',
                 component: './SemanticModel/DomainManager',
+                routes: [
+                  {
+                    path: '/model/domain/:domainId/:menuKey',
+                    component: './SemanticModel/DomainManager',
+                  },
+                ],
+              },
+              {
+                path: '/model/domain/manager/:domainId/:modelId',
+                component: './SemanticModel/ModelManager',
+                routes: [
+                  {
+                    path: '/model/domain/manager/:domainId/:modelId/:menuKey',
+                    component: './SemanticModel/ModelManager',
+                  },
+                ],
               },
             ],
           },
           {
-            path: '/model/domain/manager/:domainId/:modelId',
-            component: './SemanticModel/ModelManager',
+            path: '/model/dataset/:domainId/:datasetId',
+            component: './SemanticModel/View/components/Detail',
+            envEnableList: [ENV_KEY.SEMANTIC],
             routes: [
               {
-                path: '/model/domain/manager/:domainId/:modelId/:menuKey',
-                component: './SemanticModel/ModelManager',
+                path: '/model/dataset/:domainId/:datasetId/:menuKey',
+                component: './SemanticModel/View/components/Detail',
               },
             ],
           },
-        ],
-      },
-      {
-        path: '/model/dataset/:domainId/:datasetId',
-        component: './SemanticModel/View/components/Detail',
-        envEnableList: [ENV_KEY.SEMANTIC],
-        routes: [
           {
-            path: '/model/dataset/:domainId/:datasetId/:menuKey',
-            component: './SemanticModel/View/components/Detail',
+            path: '/model/metric/:domainId/:modelId/:metricId',
+            component: './SemanticModel/Metric/Edit',
+            envEnableList: [ENV_KEY.SEMANTIC],
+          },
+          {
+            path: '/model/dimension/:domainId/:modelId/:dimensionId',
+            component: './SemanticModel/Dimension/Detail',
+            envEnableList: [ENV_KEY.SEMANTIC],
           },
         ],
       },
-      {
-        path: '/model/metric/:domainId/:modelId/:metricId',
-        component: './SemanticModel/Metric/Edit',
-        envEnableList: [ENV_KEY.SEMANTIC],
-        // routes: [
-        //   {
-        //     path: '/model/manager/:domainId/:modelId/:menuKey',
-        //     component: './SemanticModel/ModelManager',
-        //   },
-        // ],
-      },
-      {
-        path: '/model/dimension/:domainId/:modelId/:dimensionId',
-        component: './SemanticModel/Dimension/Detail',
-        envEnableList: [ENV_KEY.SEMANTIC],
-        // routes: [
-        //   {
-        //     path: '/model/manager/:domainId/:modelId/:menuKey',
-        //     component: './SemanticModel/ModelManager',
-        //   },
-        // ],
-      },
-    ],
-  },
-
-  {
-    path: '/metric',
-    name: 'metric',
-    component: './SemanticModel/Metric',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    access: ROUTE_AUTH_CODES.MENU_METRIC,
-    routes: [
       {
         path: '/metric',
-        redirect: '/metric/market',
-      },
-      {
-        path: '/metric/market',
-        component: './SemanticModel/Metric/Market',
-        hideInMenu: true,
+        name: 'metric',
+        component: './SemanticModel/Metric',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.MENU_METRIC,
+        routes: [
+          {
+            path: '/metric',
+            redirect: '/metric/market',
+          },
+          {
+            path: '/metric/market',
+            component: './SemanticModel/Metric/Market',
+            hideInMenu: true,
+            envEnableList: [ENV_KEY.SEMANTIC],
+          },
+          {
+            path: '/metric/detail/:metricId',
+            name: 'metricDetail',
+            hideInMenu: true,
+            component: './SemanticModel/Metric/Detail',
+            envEnableList: [ENV_KEY.SEMANTIC],
+          },
+          {
+            path: '/metric/detail/edit/:metricId',
+            name: 'metricDetail',
+            hideInMenu: true,
+            component: './SemanticModel/Metric/Edit',
+            envEnableList: [ENV_KEY.SEMANTIC],
+          },
+        ],
       },
-      {
-        path: '/metric/detail/:metricId',
-        name: 'metricDetail',
-        hideInMenu: true,
-        component: './SemanticModel/Metric/Detail',
-        envEnableList: [ENV_KEY.SEMANTIC],
-      },
-      {
-        path: '/metric/detail/edit/:metricId',
-        name: 'metricDetail',
-        hideInMenu: true,
-        component: './SemanticModel/Metric/Edit',
-        envEnableList: [ENV_KEY.SEMANTIC],
-      },
-    ],
-  },
-  {
-    path: '/tag',
-    name: 'tag',
-    component: './SemanticModel/Insights',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    hideInMenu: process.env.SHOW_TAG ? false : true,
-    routes: [
       {
         path: '/tag',
-        redirect: '/tag/market',
+        name: 'tag',
+        component: './SemanticModel/Insights',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        hideInMenu: process.env.SHOW_TAG ? false : true,
+        routes: [
+          {
+            path: '/tag',
+            redirect: '/tag/market',
+          },
+          {
+            path: '/tag/market',
+            component: './SemanticModel/Insights/Market',
+            hideInMenu: true,
+            envEnableList: [ENV_KEY.SEMANTIC],
+          },
+          {
+            path: '/tag/detail/:tagId',
+            name: 'tagDetail',
+            hideInMenu: true,
+            component: './SemanticModel/Insights/Detail',
+            envEnableList: [ENV_KEY.SEMANTIC],
+          },
+        ],
       },
       {
-        path: '/tag/market',
-        component: './SemanticModel/Insights/Market',
-        hideInMenu: true,
+        path: '/database',
+        name: 'database',
+        component: './SemanticModel/components/Database/DatabaseTable',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.MENU_DATABASE,
       },
       {
-        path: '/tag/detail/:tagId',
-        name: 'tagDetail',
-        hideInMenu: true,
-        component: './SemanticModel/Insights/Detail',
+        path: '/llm',
+        name: 'llm',
+        component: './SemanticModel/components/LLM/LlmTable',
         envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.MENU_LLM,
+      },
+      {
+        path: '/semantic-template',
+        name: 'semanticTemplate',
+        component: './SemanticTemplate',
+        envEnableList: [ENV_KEY.SEMANTIC],
+        access: ROUTE_AUTH_CODES.MENU_SEMANTIC_TEMPLATE,
       },
     ],
   },
 
+  // ========== 系统管理 ==========
+  {
+    name: 'systemAdmin',
+    routes: [
+      {
+        path: '/platform',
+        name: 'platform',
+        access: ROUTE_AUTH_CODES.PLATFORM_ADMIN,
+        routes: [
+          {
+            path: '/platform',
+            redirect: '/platform/tenants',
+          },
+          {
+            path: '/platform/tenants',
+            name: 'tenants',
+            component: './AdminTenant',
+            access: ROUTE_AUTH_CODES.PLATFORM_TENANT_MANAGE,
+          },
+          {
+            path: '/platform/subscriptions',
+            name: 'subscriptions',
+            component: './Platform/SubscriptionManagement',
+            access: ROUTE_AUTH_CODES.PLATFORM_SUBSCRIPTION,
+          },
+          {
+            path: '/platform/roles',
+            name: 'platformRoles',
+            component: './Platform/RoleManagement',
+            access: ROUTE_AUTH_CODES.PLATFORM_ROLE_MANAGE,
+          },
+          {
+            path: '/platform/permissions',
+            name: 'platformPermissions',
+            component: './Platform/PermissionManagement',
+            access: ROUTE_AUTH_CODES.PLATFORM_PERMISSION,
+          },
+          {
+            path: '/platform/settings',
+            name: 'platformSettings',
+            component: './System',
+            access: ROUTE_AUTH_CODES.PLATFORM_SETTINGS,
+          },
+        ],
+      },
+      {
+        path: '/tenant',
+        name: 'tenant',
+        access: ROUTE_AUTH_CODES.TENANT_ADMIN,
+        routes: [
+          {
+            path: '/tenant',
+            redirect: '/tenant/organization',
+          },
+          {
+            path: '/tenant/organization',
+            name: 'organization',
+            component: './System/OrganizationManagement',
+            access: ROUTE_AUTH_CODES.TENANT_ORG_MANAGE,
+          },
+          {
+            path: '/tenant/members',
+            name: 'members',
+            component: './Tenant/MemberManagement',
+            access: ROUTE_AUTH_CODES.TENANT_MEMBER_MANAGE,
+          },
+          {
+            path: '/tenant/roles',
+            name: 'tenantRoles',
+            component: './Tenant/RoleManagement',
+            access: ROUTE_AUTH_CODES.TENANT_ROLE_MANAGE,
+          },
+          {
+            path: '/tenant/permissions',
+            name: 'tenantPermissions',
+            component: './Tenant/PermissionManagement',
+            access: ROUTE_AUTH_CODES.TENANT_PERMISSION,
+          },
+          {
+            path: '/tenant/settings',
+            name: 'tenantSettings',
+            component: './TenantSettings',
+            access: ROUTE_AUTH_CODES.TENANT_SETTINGS,
+          },
+          {
+            path: '/tenant/usage',
+            name: 'usage',
+            component: './UsageDashboard',
+            access: ROUTE_AUTH_CODES.TENANT_USAGE_VIEW,
+          },
+        ],
+      },
+    ],
+  },
+
+  // ========== 系统路由（不出现在菜单中） ==========
   {
     path: '/login',
     name: 'login',
@@ -242,158 +424,8 @@ const ROUTES = [
     component: './Login/OAuthCallback',
   },
   {
-    path: '/database',
-    name: 'database',
-    component: './SemanticModel/components/Database/DatabaseTable',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    access: ROUTE_AUTH_CODES.MENU_DATABASE,
-  },
-  {
-    path: '/llm',
-    name: 'llm',
-    component: './SemanticModel/components/LLM/LlmTable',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    access: ROUTE_AUTH_CODES.MENU_LLM,
-  },
-  {
-    path: '/semantic-template',
-    name: 'semanticTemplate',
-    component: './SemanticTemplate',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    access: ROUTE_AUTH_CODES.MENU_SEMANTIC_TEMPLATE,
-  },
-  {
-    path: '/report-schedule',
-    name: 'reportSchedule',
-    component: './ReportSchedule',
-    envEnableList: [ENV_KEY.SEMANTIC],
-    hideInMenu: true,
-  },
-  {
-    path: '/business-topics',
-    name: 'businessTopics',
-    component: './BusinessTopics',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
-    path: '/reports',
-    name: 'reports',
-    component: './Reports',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
-    path: '/task-center',
-    name: 'taskCenter',
-    component: './TaskCenter',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
-    path: '/delivery-config',
-    name: 'deliveryConfig',
-    component: './DeliveryConfig',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  {
-    path: '/feishu-bot',
-    name: 'feishuBot',
-    component: './FeishuBot',
-    envEnableList: [ENV_KEY.SEMANTIC],
-  },
-  // Connection 功能已整合到数据库管理页面 (SemanticModel/Database)
-  // 后端 API /api/v1/connections 保留，前端入口改为数据库详情中的"同步配置"Tab
-  // ========== 平台管理 (Platform Admin) ==========
-  {
-    path: '/platform',
-    name: 'platform',
-    access: ROUTE_AUTH_CODES.PLATFORM_ADMIN,
-    routes: [
-      {
-        path: '/platform',
-        redirect: '/platform/tenants',
-      },
-      {
-        path: '/platform/tenants',
-        name: 'tenants',
-        component: './AdminTenant',
-        access: ROUTE_AUTH_CODES.PLATFORM_TENANT_MANAGE,
-      },
-      {
-        path: '/platform/subscriptions',
-        name: 'subscriptions',
-        component: './Platform/SubscriptionManagement',
-        access: ROUTE_AUTH_CODES.PLATFORM_SUBSCRIPTION,
-      },
-      {
-        path: '/platform/roles',
-        name: 'platformRoles',
-        component: './Platform/RoleManagement',
-        access: ROUTE_AUTH_CODES.PLATFORM_ROLE_MANAGE,
-      },
-      {
-        path: '/platform/permissions',
-        name: 'platformPermissions',
-        component: './Platform/PermissionManagement',
-        access: ROUTE_AUTH_CODES.PLATFORM_PERMISSION,
-      },
-      {
-        path: '/platform/settings',
-        name: 'platformSettings',
-        component: './System',
-        access: ROUTE_AUTH_CODES.PLATFORM_SETTINGS,
-      },
-    ],
-  },
-  // ========== 租户管理 (Tenant Admin) ==========
-  {
-    path: '/tenant',
-    name: 'tenant',
-    access: ROUTE_AUTH_CODES.TENANT_ADMIN,
-    routes: [
-      {
-        path: '/tenant',
-        redirect: '/tenant/organization',
-      },
-      {
-        path: '/tenant/organization',
-        name: 'organization',
-        component: './System/OrganizationManagement',
-        access: ROUTE_AUTH_CODES.TENANT_ORG_MANAGE,
-      },
-      {
-        path: '/tenant/members',
-        name: 'members',
-        component: './Tenant/MemberManagement',
-        access: ROUTE_AUTH_CODES.TENANT_MEMBER_MANAGE,
-      },
-      {
-        path: '/tenant/roles',
-        name: 'tenantRoles',
-        component: './Tenant/RoleManagement',
-        access: ROUTE_AUTH_CODES.TENANT_ROLE_MANAGE,
-      },
-      {
-        path: '/tenant/permissions',
-        name: 'tenantPermissions',
-        component: './Tenant/PermissionManagement',
-        access: ROUTE_AUTH_CODES.TENANT_PERMISSION,
-      },
-      {
-        path: '/tenant/settings',
-        name: 'tenantSettings',
-        component: './TenantSettings',
-        access: ROUTE_AUTH_CODES.TENANT_SETTINGS,
-      },
-      {
-        path: '/tenant/usage',
-        name: 'usage',
-        component: './UsageDashboard',
-        access: ROUTE_AUTH_CODES.TENANT_USAGE_VIEW,
-      },
-    ],
-  },
-  {
     path: '/',
-    redirect: '/model',
+    redirect: '/operations-cockpit',
   },
   {
     path: '/401',
