@@ -47,7 +47,7 @@ public interface ReportDeliveryService {
     // ========== Delivery Records ==========
 
     Page<ReportDeliveryRecordDO> getDeliveryRecords(Page<ReportDeliveryRecordDO> page,
-            Long scheduleId, Long executionId);
+            Long configId, Long scheduleId, Long executionId);
 
     /**
      * Retry a failed delivery.

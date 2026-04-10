@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -24,13 +25,10 @@ import java.util.Map;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class WeChatWorkDeliveryChannel implements ReportDeliveryChannel {
 
     private final RestTemplate restTemplate;
-
-    public WeChatWorkDeliveryChannel() {
-        this.restTemplate = new RestTemplate();
-    }
 
     @Override
     public DeliveryType getType() {

@@ -96,6 +96,9 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
 
     @Override
     public ExportTaskDO submitExportTask(ExportTaskDO task) {
+        if (task == null || StringUtils.isBlank(task.getQueryConfig())) {
+            throw new IllegalArgumentException("queryConfig is required");
+        }
         task.setStatus(ExportTaskStatus.PENDING.name());
         task.setCreatedAt(new Date());
         task.setExpireTime(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)));
@@ -211,26 +214,28 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
             throw new IllegalArgumentException("queryConfig is required");
         }
 
-        // Try QueryStructReq first, then QuerySqlReq
-        try {
-            QueryStructReq structReq = JsonUtil.toObject(queryConfig, QueryStructReq.class);
-            if (structReq != null && structReq.getDataSetId() != null) {
-                return structReq.convert(true);
-            }
-        } catch (Exception e) {
-            log.debug("Failed to parse as QueryStructReq, trying QuerySqlReq");
-        }
-
+        // Try QuerySqlReq first. Otherwise a SQL config carrying dataSetId can be deserialized
+        // into an "empty" QueryStructReq and lose the original SQL.
         try {
             QuerySqlReq sqlReq = JsonUtil.toObject(queryConfig, QuerySqlReq.class);
-            if (sqlReq != null) {
+            if (sqlReq != null && StringUtils.isNotBlank(sqlReq.getSql())) {
                 if (sqlReq.getDataSetId() == null) {
                     sqlReq.setDataSetId(task.getDatasetId());
                 }
                 return sqlReq;
             }
         } catch (Exception e) {
-            log.debug("Failed to parse as QuerySqlReq");
+            log.debug("Failed to parse as QuerySqlReq, trying QueryStructReq");
+        }
+
+        // Then try QueryStructReq
+        try {
+            QueryStructReq structReq = JsonUtil.toObject(queryConfig, QueryStructReq.class);
+            if (structReq != null && structReq.getDataSetId() != null) {
+                return structReq.convert(true);
+            }
+        } catch (Exception e) {
+            log.debug("Failed to parse as QueryStructReq");
         }
 
         throw new IllegalArgumentException("Unable to parse queryConfig");

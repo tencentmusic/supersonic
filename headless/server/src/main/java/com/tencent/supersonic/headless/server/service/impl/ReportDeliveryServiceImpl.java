@@ -3,6 +3,8 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.common.context.TenantContext;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -28,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -63,6 +66,9 @@ public class ReportDeliveryServiceImpl
     public ReportDeliveryConfigDO createConfig(ReportDeliveryConfigDO config) {
         validateConfig(config);
 
+        if (config.getTenantId() == null) {
+            config.setTenantId(TenantContext.getTenantId());
+        }
         config.setCreatedAt(new Date());
         config.setUpdatedAt(new Date());
         if (config.getEnabled() == null) {
@@ -80,6 +86,7 @@ public class ReportDeliveryServiceImpl
 
     @Override
     public ReportDeliveryConfigDO updateConfig(ReportDeliveryConfigDO config) {
+        assertTenantAccess(getConfigById(config.getId()));
         validateConfig(config);
         config.setUpdatedAt(new Date());
         // Reset consecutive failures when manually updating
@@ -92,17 +99,24 @@ public class ReportDeliveryServiceImpl
 
     @Override
     public void deleteConfig(Long id) {
+        getConfigById(id);
         baseMapper.deleteById(id);
     }
 
     @Override
     public ReportDeliveryConfigDO getConfigById(Long id) {
-        return baseMapper.selectById(id);
+        ReportDeliveryConfigDO config = baseMapper.selectById(id);
+        assertTenantAccess(config);
+        return config;
     }
 
     @Override
     public Page<ReportDeliveryConfigDO> getConfigList(Page<ReportDeliveryConfigDO> page) {
         QueryWrapper<ReportDeliveryConfigDO> wrapper = new QueryWrapper<>();
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.lambda().eq(ReportDeliveryConfigDO::getTenantId, tenantId);
+        }
         wrapper.lambda().orderByDesc(ReportDeliveryConfigDO::getCreatedAt);
         return baseMapper.selectPage(page, wrapper);
     }
@@ -112,7 +126,13 @@ public class ReportDeliveryServiceImpl
         if (ids == null || ids.isEmpty()) {
             return new ArrayList<>();
         }
-        return baseMapper.selectBatchIds(ids);
+        QueryWrapper<ReportDeliveryConfigDO> wrapper = new QueryWrapper<>();
+        wrapper.lambda().in(ReportDeliveryConfigDO::getId, ids);
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.lambda().eq(ReportDeliveryConfigDO::getTenantId, tenantId);
+        }
+        return baseMapper.selectList(wrapper);
     }
 
     // ========== Delivery Execution ==========
@@ -260,9 +280,6 @@ public class ReportDeliveryServiceImpl
     @Override
     public void testDelivery(Long configId) {
         ReportDeliveryConfigDO config = getConfigById(configId);
-        if (config == null) {
-            throw new IllegalArgumentException("Delivery config not found: " + configId);
-        }
 
         DeliveryContext testContext = DeliveryContext.builder().scheduleId(0L).executionId(0L)
                 .scheduleName("Test Schedule").reportName("Test Report").outputFormat("XLSX")
@@ -298,8 +315,15 @@ public class ReportDeliveryServiceImpl
 
     @Override
     public Page<ReportDeliveryRecordDO> getDeliveryRecords(Page<ReportDeliveryRecordDO> page,
-            Long scheduleId, Long executionId) {
+            Long configId, Long scheduleId, Long executionId) {
         QueryWrapper<ReportDeliveryRecordDO> wrapper = new QueryWrapper<>();
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.lambda().eq(ReportDeliveryRecordDO::getTenantId, tenantId);
+        }
+        if (configId != null) {
+            wrapper.lambda().eq(ReportDeliveryRecordDO::getConfigId, configId);
+        }
         if (scheduleId != null) {
             wrapper.lambda().eq(ReportDeliveryRecordDO::getScheduleId, scheduleId);
         }
@@ -316,6 +340,7 @@ public class ReportDeliveryServiceImpl
         if (record == null) {
             throw new IllegalArgumentException("Delivery record not found: " + recordId);
         }
+        assertTenantAccess(record);
 
         if (!DeliveryStatus.FAILED.name().equals(record.getStatus())) {
             throw new IllegalStateException("Can only retry failed deliveries");
@@ -378,6 +403,10 @@ public class ReportDeliveryServiceImpl
         Date startDate = getStartDate(queryDays);
 
         QueryWrapper<ReportDeliveryRecordDO> wrapper = new QueryWrapper<>();
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.lambda().eq(ReportDeliveryRecordDO::getTenantId, tenantId);
+        }
         wrapper.lambda().ge(ReportDeliveryRecordDO::getCreatedAt, startDate);
         List<ReportDeliveryRecordDO> records = recordMapper.selectList(wrapper);
 
@@ -425,6 +454,10 @@ public class ReportDeliveryServiceImpl
         Date startDate = getStartDate(queryDays);
 
         QueryWrapper<ReportDeliveryRecordDO> wrapper = new QueryWrapper<>();
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.lambda().eq(ReportDeliveryRecordDO::getTenantId, tenantId);
+        }
         wrapper.lambda().ge(ReportDeliveryRecordDO::getCreatedAt, startDate);
         List<ReportDeliveryRecordDO> records = recordMapper.selectList(wrapper);
 
@@ -493,7 +526,43 @@ public class ReportDeliveryServiceImpl
         QueryWrapper<ReportDeliveryRecordDO> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(ReportDeliveryRecordDO::getDeliveryKey, deliveryKey)
                 .eq(ReportDeliveryRecordDO::getStatus, DeliveryStatus.SUCCESS.name());
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.lambda().eq(ReportDeliveryRecordDO::getTenantId, tenantId);
+        }
         return recordMapper.selectCount(wrapper) > 0;
+    }
+
+    private void assertTenantAccess(ReportDeliveryConfigDO config) {
+        if (config == null) {
+            throw new InvalidPermissionException("推送配置不存在或无权访问");
+        }
+        Long currentTenantId = TenantContext.getTenantId();
+        if (currentTenantId == null) {
+            throw new InvalidPermissionException("租户上下文未建立");
+        }
+        if (config.getTenantId() == null) {
+            throw new InvalidPermissionException("推送配置未绑定租户，禁止访问");
+        }
+        if (!Objects.equals(currentTenantId, config.getTenantId())) {
+            throw new InvalidPermissionException("无权访问其他租户的推送配置");
+        }
+    }
+
+    private void assertTenantAccess(ReportDeliveryRecordDO record) {
+        if (record == null) {
+            throw new InvalidPermissionException("推送记录不存在或无权访问");
+        }
+        Long currentTenantId = TenantContext.getTenantId();
+        if (currentTenantId == null) {
+            throw new InvalidPermissionException("租户上下文未建立");
+        }
+        if (record.getTenantId() == null) {
+            throw new InvalidPermissionException("推送记录未绑定租户，禁止访问");
+        }
+        if (!Objects.equals(currentTenantId, record.getTenantId())) {
+            throw new InvalidPermissionException("无权访问其他租户的推送记录");
+        }
     }
 
     private String truncate(String s, int maxLen) {

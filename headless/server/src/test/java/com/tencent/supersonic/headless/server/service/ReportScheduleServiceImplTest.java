@@ -318,8 +318,8 @@ class ReportScheduleServiceImplTest {
         ArgumentCaptor<ReportScheduleDO> captor = ArgumentCaptor.forClass(ReportScheduleDO.class);
         verify(reportScheduleMapper).updateById(captor.capture());
         assertEquals("REPORT.report_1", captor.getValue().getQuartzJobKey());
-        // Should trigger with the correct key, not null
-        verify(quartzJobManager).triggerJob("REPORT.report_1");
+        // Should trigger with the correct key, not null (implementation passes manual flag map)
+        verify(quartzJobManager).triggerJob(eq("REPORT.report_1"), any(JobDataMap.class));
         // Should NOT recreate since job already exists
         verify(quartzJobManager, never()).recreateJob(anyString(), anyString(), anyLong(), any(),
                 anyString(), any(JobDataMap.class));
@@ -344,7 +344,7 @@ class ReportScheduleServiceImplTest {
         // recreateJob should be called to clean up orphan triggers and rebuild
         verify(quartzJobManager).recreateJob(eq("REPORT"), eq("report_"), eq(1L),
                 eq(ReportScheduleJob.class), eq("0 0 9 * * ?"), any(JobDataMap.class));
-        verify(quartzJobManager).triggerJob("REPORT.report_1");
+        verify(quartzJobManager).triggerJob(eq("REPORT.report_1"), any(JobDataMap.class));
     }
 
     @Test
@@ -486,6 +486,28 @@ class ReportScheduleServiceImplTest {
 
         service.createSchedule(schedule, owner);
         verify(reportScheduleMapper).insert(any(ReportScheduleDO.class));
+    }
+
+    @Test
+    void updateScheduleShouldRejectInvalidQueryConfigBeforePersist() {
+        ReportScheduleDO existing = new ReportScheduleDO();
+        existing.setId(1L);
+        existing.setOwnerId(7L);
+        existing.setQuartzJobKey("REPORT.report_1");
+        existing.setCronExpression("0 0 9 * * ?");
+        when(reportScheduleMapper.selectById(1L)).thenReturn(existing);
+
+        ReportScheduleDO update = new ReportScheduleDO();
+        update.setId(1L);
+        update.setQueryConfig("{\"queryType\":\"DETAIL\",\"limit\":500,"
+                + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
+                + "\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.updateSchedule(update, owner));
+        assertEquals("明细调度需要至少一个查询列", ex.getMessage());
+        verify(reportScheduleMapper, never()).updateById(any(ReportScheduleDO.class));
+        verify(quartzJobManager, never()).rescheduleJob(any(), any());
     }
 
     private ReportScheduleDO buildScheduleWithQueryConfig(String queryConfig) {

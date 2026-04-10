@@ -43,6 +43,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReportExecutionOrchestrator {
 
+    /** Aligned with {@code SemanticTemplateServiceImpl} STATUS_OFFLINE */
+    private static final int TEMPLATE_STATUS_OFFLINE = 2;
+
     private final ReportExecutionMapper executionMapper;
     private final SemanticLayerService semanticLayerService;
     private final SemanticTemplateService templateService;
@@ -261,6 +264,23 @@ public class ReportExecutionOrchestrator {
     private void validateTemplate(ReportExecutionContext ctx) {
         if (ctx.getDatasetId() == null) {
             throw new IllegalArgumentException("datasetId is required");
+        }
+        if (ctx.getTemplateId() == null) {
+            return;
+        }
+        User systemUser = new User();
+        systemUser.setId(0L);
+        systemUser.setName("system");
+        systemUser.setTenantId(ctx.getTenantId());
+        SemanticTemplate template =
+                templateService.getTemplateById(ctx.getTemplateId(), systemUser);
+        if (template == null) {
+            throw new IllegalStateException(
+                    "Template not found for id=" + ctx.getTemplateId() + ", cannot execute report");
+        }
+        if (Integer.valueOf(TEMPLATE_STATUS_OFFLINE).equals(template.getStatus())) {
+            throw new IllegalStateException(
+                    "Template is offline (id=" + ctx.getTemplateId() + "), execution skipped");
         }
     }
 

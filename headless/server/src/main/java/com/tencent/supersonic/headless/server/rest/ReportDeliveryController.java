@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.rest;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
@@ -31,6 +32,13 @@ public class ReportDeliveryController {
 
     private final ReportDeliveryService deliveryService;
 
+    private void assertAdmin(User user) {
+        if (user == null || (!user.isSuperAdmin()
+                && (user.getIsAdmin() == null || user.getIsAdmin() != 1))) {
+            throw new InvalidPermissionException("仅管理员可操作推送配置");
+        }
+    }
+
     // ========== Delivery Config CRUD ==========
 
     @GetMapping("/configs")
@@ -38,6 +46,8 @@ public class ReportDeliveryController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "20") Integer pageSize, HttpServletRequest request,
             HttpServletResponse response) {
+        UserHolder.findUser(request, response);
+        pageSize = Math.min(pageSize, 200);
         Page<ReportDeliveryConfigDO> page = new Page<>(pageNum, pageSize);
         return deliveryService.getConfigList(page);
     }
@@ -45,6 +55,7 @@ public class ReportDeliveryController {
     @GetMapping("/configs/{id}")
     public ReportDeliveryConfigDO getConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
+        UserHolder.findUser(request, response);
         return deliveryService.getConfigById(id);
     }
 
@@ -52,6 +63,7 @@ public class ReportDeliveryController {
     public ReportDeliveryConfigDO createConfig(@RequestBody ReportDeliveryConfigDO config,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         config.setCreatedBy(user.getName());
         config.setTenantId(user.getTenantId());
         return deliveryService.createConfig(config);
@@ -62,6 +74,7 @@ public class ReportDeliveryController {
             @RequestBody ReportDeliveryConfigDO config, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         config.setId(id);
         config.setTenantId(user.getTenantId());
         config.setUpdatedBy(user.getName());
@@ -71,6 +84,8 @@ public class ReportDeliveryController {
     @DeleteMapping("/configs/{id}")
     public void deleteConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         deliveryService.deleteConfig(id);
     }
 
@@ -79,6 +94,8 @@ public class ReportDeliveryController {
     @PostMapping("/configs/{id}:test")
     public void testConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
+        User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         deliveryService.testDelivery(id);
     }
 
@@ -88,16 +105,20 @@ public class ReportDeliveryController {
     public Page<ReportDeliveryRecordDO> listRecords(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false) Long configId,
             @RequestParam(required = false) Long scheduleId,
             @RequestParam(required = false) Long executionId, HttpServletRequest request,
             HttpServletResponse response) {
+        UserHolder.findUser(request, response);
+        pageSize = Math.min(pageSize, 200);
         Page<ReportDeliveryRecordDO> page = new Page<>(pageNum, pageSize);
-        return deliveryService.getDeliveryRecords(page, scheduleId, executionId);
+        return deliveryService.getDeliveryRecords(page, configId, scheduleId, executionId);
     }
 
     @PostMapping("/records/{id}:retry")
     public void retryDelivery(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
+        UserHolder.findUser(request, response);
         deliveryService.retryDelivery(id);
     }
 
@@ -107,6 +128,8 @@ public class ReportDeliveryController {
     public ReportDeliveryService.DeliveryStatistics getStatistics(
             @RequestParam(defaultValue = "7") Integer days, HttpServletRequest request,
             HttpServletResponse response) {
+        UserHolder.findUser(request, response);
+        days = Math.min(days, 365);
         return deliveryService.getStatistics(days);
     }
 
@@ -114,6 +137,8 @@ public class ReportDeliveryController {
     public java.util.List<ReportDeliveryService.DailyDeliveryStats> getDailyStats(
             @RequestParam(defaultValue = "7") Integer days, HttpServletRequest request,
             HttpServletResponse response) {
+        UserHolder.findUser(request, response);
+        days = Math.min(days, 365);
         return deliveryService.getDailyStats(days);
     }
 }

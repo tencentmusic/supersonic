@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -16,6 +17,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.HashMap;
@@ -26,13 +30,10 @@ import java.util.Map;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class WebhookDeliveryChannel implements ReportDeliveryChannel {
 
     private final RestTemplate restTemplate;
-
-    public WebhookDeliveryChannel() {
-        this.restTemplate = new RestTemplate();
-    }
 
     @Override
     public DeliveryType getType() {
@@ -42,6 +43,7 @@ public class WebhookDeliveryChannel implements ReportDeliveryChannel {
     @Override
     public void deliver(String configJson, DeliveryContext context) throws DeliveryException {
         WebhookConfig config = parseConfig(configJson);
+        validateWebhookUrl(config.getUrl());
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -107,6 +109,23 @@ public class WebhookDeliveryChannel implements ReportDeliveryChannel {
             throw new IllegalArgumentException("Webhook URL must start with http:// or https://");
         }
         return true;
+    }
+
+    private void validateWebhookUrl(String url) {
+        try {
+            URI uri = URI.create(url);
+            InetAddress address = InetAddress.getByName(uri.getHost());
+            if (address.isLoopbackAddress() || address.isSiteLocalAddress()
+                    || address.isLinkLocalAddress() || address.isAnyLocalAddress()) {
+                throw new DeliveryException(
+                        "Webhook URL targets a private/internal address: " + uri.getHost(), false);
+            }
+        } catch (UnknownHostException e) {
+            throw new DeliveryException("Cannot resolve webhook URL host: " + e.getMessage(),
+                    false);
+        } catch (IllegalArgumentException e) {
+            throw new DeliveryException("Invalid webhook URL: " + url, false);
+        }
     }
 
     private WebhookConfig parseConfig(String configJson) {
