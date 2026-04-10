@@ -26,6 +26,7 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -147,19 +148,29 @@ public class ChatManageServiceImpl implements ChatManageService {
         showCaseResp.setPageSize(pageQueryInfoReq.getPageSize());
         List<QueryResp> queryResps = chatQueryRepository.queryShowCase(pageQueryInfoReq, agentId);
         if (CollectionUtils.isEmpty(queryResps)) {
+            queryResps = chatQueryRepository.queryShowCaseFallback(pageQueryInfoReq, agentId);
+        }
+        if (CollectionUtils.isEmpty(queryResps)) {
             return showCaseResp;
         }
         queryResps.removeIf(queryResp -> {
-            if (queryResp.getQueryResult() == null) {
+            QueryResult qr = queryResp.getQueryResult();
+            if (qr == null) {
                 return true;
             }
-            if (queryResp.getQueryResult().getResponse() != null) {
+            if (qr.getResponse() != null) {
                 return false;
             }
-            if (CollectionUtils.isEmpty(queryResp.getQueryResult().getQueryResults())) {
+            if (StringUtils.isNotBlank(qr.getTextResult())) {
+                return false;
+            }
+            if (StringUtils.isNotBlank(qr.getTextSummary())) {
+                return false;
+            }
+            if (CollectionUtils.isEmpty(qr.getQueryResults())) {
                 return true;
             }
-            Map<String, Object> data = queryResp.getQueryResult().getQueryResults().getFirst();
+            Map<String, Object> data = qr.getQueryResults().getFirst();
             return CollectionUtils.isEmpty(data);
         });
         queryResps = new ArrayList<>(queryResps.stream()

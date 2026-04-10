@@ -108,6 +108,14 @@ public class ChatQueryRepositoryImpl implements ChatQueryRepository {
                 .stream().map(this::convertTo).collect(Collectors.toList());
     }
 
+    @Override
+    public List<QueryResp> queryShowCaseFallback(PageQueryInfoReq pageQueryInfoReq, int agentId) {
+        return showCaseCustomMapper
+                .queryShowCaseFallback(pageQueryInfoReq.getLimitStart(),
+                        pageQueryInfoReq.getPageSize(), agentId, pageQueryInfoReq.getUserName())
+                .stream().map(this::convertTo).collect(Collectors.toList());
+    }
+
     private QueryResp convertTo(ChatQueryDO chatQueryDO) {
         QueryResp queryResp = new QueryResp();
         BeanUtils.copyProperties(chatQueryDO, queryResp);

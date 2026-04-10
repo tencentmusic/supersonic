@@ -25,6 +25,8 @@ public interface ChatQueryRepository {
 
     List<QueryResp> queryShowCase(PageQueryInfoReq pageQueryInfoCommend, int agentId);
 
+    List<QueryResp> queryShowCaseFallback(PageQueryInfoReq pageQueryInfoCommend, int agentId);
+
     int updateChatQuery(ChatQueryDO chatQueryDO);
 
     void updateChatQuery(ChatQueryDO chatQueryDO, UpdateWrapper<ChatQueryDO> updateWrapper);
