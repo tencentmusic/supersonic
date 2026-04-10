@@ -4,6 +4,8 @@ import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.DateUtils;
@@ -11,12 +13,14 @@ import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ExportTaskDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ExportTaskMapper;
 import com.tencent.supersonic.headless.server.pojo.ExportTaskStatus;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import com.tencent.supersonic.headless.server.service.ExportTaskService;
 import com.tencent.supersonic.headless.server.service.RowCountEstimator;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +50,8 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
     private final ThreadPoolExecutor exportExecutor;
     private final SemanticLayerService semanticLayerService;
     private final RowCountEstimator rowCountEstimator;
+    private final UserService userService;
+    private final DataSetService dataSetService;
     @Autowired(required = false)
     private TemplateReportMetrics reportMetrics;
 
@@ -56,10 +62,13 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
     private long asyncThreshold;
 
     public ExportTaskServiceImpl(@Qualifier("exportExecutor") ThreadPoolExecutor exportExecutor,
-            SemanticLayerService semanticLayerService, RowCountEstimator rowCountEstimator) {
+            SemanticLayerService semanticLayerService, RowCountEstimator rowCountEstimator,
+            UserService userService, DataSetService dataSetService) {
         this.exportExecutor = exportExecutor;
         this.semanticLayerService = semanticLayerService;
         this.rowCountEstimator = rowCountEstimator;
+        this.userService = userService;
+        this.dataSetService = dataSetService;
     }
 
     /**
@@ -94,10 +103,48 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
         return isAsync;
     }
 
+    /**
+     * 默认任务名：优先带数据集中文名，无 id 时用「未知」；解析名称失败时回退为数据集 id。
+     */
+    private String buildDefaultTaskName(ExportTaskDO task) {
+        String dsPart;
+        if (task.getDatasetId() == null) {
+            dsPart = "未知";
+        } else {
+            try {
+                DataSetResp ds = dataSetService.getDataSet(task.getDatasetId());
+                if (ds != null && StringUtils.isNotBlank(ds.getName())) {
+                    dsPart = truncateForTaskName(ds.getName(), 48);
+                } else {
+                    dsPart = String.valueOf(task.getDatasetId());
+                }
+            } catch (Exception e) {
+                log.debug("Could not resolve dataset name for export task, datasetId={}",
+                        task.getDatasetId(), e);
+                dsPart = String.valueOf(task.getDatasetId());
+            }
+        }
+        return String.format("数据导出_%s_%s", dsPart, DateUtils.format(new Date(), "yyyyMMddHHmmss"));
+    }
+
+    private static String truncateForTaskName(String raw, int maxLen) {
+        if (raw == null) {
+            return "";
+        }
+        String s = raw.replace('\r', ' ').replace('\n', ' ').trim();
+        if (s.length() <= maxLen) {
+            return s;
+        }
+        return s.substring(0, maxLen);
+    }
+
     @Override
     public ExportTaskDO submitExportTask(ExportTaskDO task) {
         if (task == null || StringUtils.isBlank(task.getQueryConfig())) {
             throw new IllegalArgumentException("queryConfig is required");
+        }
+        if (StringUtils.isBlank(task.getTaskName())) {
+            task.setTaskName(buildDefaultTaskName(task));
         }
         task.setStatus(ExportTaskStatus.PENDING.name());
         task.setCreatedAt(new Date());
@@ -150,6 +197,7 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
         if (task == null) {
             return;
         }
+        TenantContext.setTenantId(task.getTenantId());
         task.setStatus(ExportTaskStatus.RUNNING.name());
         baseMapper.updateById(task);
 
@@ -192,6 +240,8 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
                 reportMetrics.recordExport("error", normalizeFormat(task.getOutputFormat()),
                         System.currentTimeMillis() - startTimeMs);
             }
+        } finally {
+            TenantContext.clear();
         }
     }
 
@@ -200,7 +250,15 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
     }
 
     private User buildUserContext(ExportTaskDO task) {
-        // Build user from task for permission injection
+        if (task.getUserId() != null && userService != null) {
+            User user = userService.getUserById(task.getUserId());
+            if (user != null) {
+                if (user.getTenantId() == null) {
+                    user.setTenantId(task.getTenantId());
+                }
+                return user;
+            }
+        }
         User user = new User();
         user.setId(task.getUserId() != null ? task.getUserId() : 0L);
         user.setName(task.getUserId() != null ? "user_" + task.getUserId() : "system");
