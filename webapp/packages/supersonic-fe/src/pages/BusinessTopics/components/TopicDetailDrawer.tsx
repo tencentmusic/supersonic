@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import type { BusinessTopic, TopicItem } from '@/services/businessTopic';
 import { getTopicDetail, removeTopicItem } from '@/services/businessTopic';
 import { MSG } from '@/common/messages';
+import { getFixedReportStatusInfo } from '@/utils/fixedReportStatus';
 
 const ITEM_TYPE_MAP: Record<string, { color: string; text: string }> = {
   FIXED_REPORT: { color: 'blue', text: '固定报表' },
@@ -79,7 +80,8 @@ const TopicDetailDrawer: React.FC<TopicDetailDrawerProps> = ({
       width: 140,
       render: (_: unknown, record: TopicItem) => {
         if (record.itemType === 'FIXED_REPORT' && record.consumptionStatus) {
-          return <Tag>{record.consumptionStatus}</Tag>;
+          const info = getFixedReportStatusInfo(record.consumptionStatus);
+          return <Tag color={info?.color}>{info?.text || record.consumptionStatus}</Tag>;
         }
         if (record.itemType === 'SCHEDULE' && record.scheduleEnabled !== undefined) {
           return record.scheduleEnabled ? <Tag color="green">启用</Tag> : <Tag>暂停</Tag>;

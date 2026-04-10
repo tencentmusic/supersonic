@@ -3,18 +3,10 @@ import { useParams, history } from '@umijs/max';
 import { Card, Tabs, Table, Tag, Descriptions, Button, Space, Spin, message, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { getTopicDetail, type BusinessTopic, type TopicItem } from '@/services/businessTopic';
+import { getFixedReportStatusInfo } from '@/utils/fixedReportStatus';
 import taskStyles from '@/pages/TaskCenter/style.less';
 
 const { Title, Text } = Typography;
-
-const STATUS_COLORS: Record<string, string> = {
-  AVAILABLE: 'green',
-  NO_RESULT: 'default',
-  EXPIRED: 'orange',
-  RECENTLY_FAILED: 'red',
-  NO_DELIVERY: 'volcano',
-  PARTIAL_CHANNEL_ERROR: 'orange',
-};
 
 const TopicWorkspacePage: React.FC = () => {
   const { topicId } = useParams<{ topicId: string }>();
@@ -85,8 +77,10 @@ const TopicWorkspacePage: React.FC = () => {
       title: '消费状态',
       dataIndex: 'consumptionStatus',
       width: 160,
-      render: (s: string | undefined) =>
-        s ? <Tag color={STATUS_COLORS[s] || 'default'}>{s}</Tag> : <Text type="secondary">-</Text>,
+      render: (s: string | undefined) => {
+        const info = getFixedReportStatusInfo(s);
+        return info ? <Tag color={info.color}>{info.text}</Tag> : <Text type="secondary">-</Text>;
+      },
     },
   ];
 

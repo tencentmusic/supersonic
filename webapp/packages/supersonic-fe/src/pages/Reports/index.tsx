@@ -15,16 +15,8 @@ import type { FixedReport } from '@/services/fixedReport';
 import { createSchedule } from '@/services/reportSchedule';
 import type { ReportSchedule } from '@/services/reportSchedule';
 import { DELIVERY_TYPE_MAP } from '@/services/deliveryConfig';
+import { FIXED_REPORT_STATUS_CONFIG } from '@/utils/fixedReportStatus';
 import styles from './style.less';
-
-const STATUS_CONFIG: Record<string, { color: string; text: string }> = {
-  AVAILABLE: { color: 'green', text: '可查看' },
-  NO_RESULT: { color: 'default', text: '暂无结果' },
-  EXPIRED: { color: 'orange', text: '结果过期' },
-  RECENTLY_FAILED: { color: 'red', text: '最近失败' },
-  NO_DELIVERY: { color: 'volcano', text: '未配置投递' },
-  PARTIAL_CHANNEL_ERROR: { color: 'orange', text: '部分渠道异常' },
-};
 
 const ReportsPage: React.FC = () => {
   const [data, setData] = useState<FixedReport[]>([]);
@@ -208,7 +200,7 @@ const ReportsPage: React.FC = () => {
       dataIndex: 'consumptionStatus',
       width: 120,
       render: (status: string) => {
-        const info = STATUS_CONFIG[status] || STATUS_CONFIG.NO_RESULT;
+        const info = FIXED_REPORT_STATUS_CONFIG[status] || FIXED_REPORT_STATUS_CONFIG.NO_RESULT;
         return <Tag color={info.color}>{info.text}</Tag>;
       },
     },

@@ -7,18 +7,10 @@ import {
   type OperationsCockpitData,
   type CockpitFixedReportSummary,
 } from '@/services/operationsCockpit';
+import { getFixedReportStatusInfo } from '@/utils/fixedReportStatus';
 import styles from './index.less';
 
 const { Title, Paragraph, Text } = Typography;
-
-const STATUS_COLORS: Record<string, string> = {
-  AVAILABLE: 'green',
-  NO_RESULT: 'default',
-  EXPIRED: 'orange',
-  RECENTLY_FAILED: 'red',
-  NO_DELIVERY: 'volcano',
-  PARTIAL_CHANNEL_ERROR: 'orange',
-};
 
 const OperationsCockpitPage: React.FC = () => {
   const [data, setData] = useState<OperationsCockpitData | null>(null);
@@ -78,12 +70,13 @@ const OperationsCockpitPage: React.FC = () => {
       title: '状态',
       dataIndex: 'consumptionStatus',
       width: 140,
-      render: (s: string) =>
-        s ? (
-          <Tag color={STATUS_COLORS[s] || 'default'}>{s}</Tag>
-        ) : (
-          <Text type="secondary">-</Text>
-        ),
+      render: (s: string) => {
+        if (!s) {
+          return <Text type="secondary">-</Text>;
+        }
+        const info = getFixedReportStatusInfo(s);
+        return <Tag color={info.color}>{info.text}</Tag>;
+      },
     },
     {
       title: '最近结果',
@@ -136,7 +129,7 @@ const OperationsCockpitPage: React.FC = () => {
           </Button>
         </Space>
         <Paragraph type="secondary" style={{ marginBottom: 0 }}>
-          今日优先主题、关键报表状态、待处置异常与可靠性风险摘要
+          今日优先主题、关键报表状态、待处置异常与待关注报表摘要
         </Paragraph>
       </div>
 
@@ -224,17 +217,17 @@ const OperationsCockpitPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
         <Col span={24}>
           <Card
-            title="可靠性风险"
+            title="待关注报表"
             bordered={false}
             className={styles.card}
             extra={
-              <Button type="link" onClick={() => history.push('/task-center?tab=schedule')}>
-                任务中心
+              <Button type="link" onClick={() => history.push('/reports')}>
+                固定报表
               </Button>
             }
           >
             {!data.reliabilityRisks?.length ? (
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="当前无突出风险报表" />
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="当前无待关注报表" />
             ) : (
               <Table
                 size="small"
