@@ -127,7 +127,13 @@ const ExportTaskTab: React.FC = () => {
             type="link"
             size="small"
             disabled={record.status !== 'SUCCESS'}
-            onClick={() => downloadExportFile(record.id)}
+            onClick={async () => {
+              try {
+                await downloadExportFile(record.id, `${record.taskName || `export_${record.id}`}.xlsx`);
+              } catch (error) {
+                message.error('下载失败，请重新登录后重试');
+              }
+            }}
           >
             下载
           </Button>

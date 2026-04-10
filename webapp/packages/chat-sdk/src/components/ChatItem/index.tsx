@@ -9,7 +9,7 @@ import {
   RangeValue,
   SimilarQuestionType,
 } from '../../common/type';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChartItemContext } from './ChartItemContext';
 import {
   chatExecute,
@@ -188,7 +188,7 @@ const ChatItem: React.FC<Props> = ({
         isRefresh
       );
       const queryId = parseInfoValue.queryId; // 伪流式 大模型输出
-      if (queryId != undefined && res.data.queryState != 'INVALID') {
+      if (queryId !== undefined && res.data.queryState !== 'INVALID') {
         const getSummary = async (data: any, queryId: number) => {
           const res2: any = await getExecuteSummary(queryId);
           if (res2.data.queryMode == null) {
@@ -458,6 +458,13 @@ const ChatItem: React.FC<Props> = ({
       message.warning('当前查询暂不支持服务端导出');
       return;
     }
+    const normalizeTaskNamePart = (raw: unknown, maxLen: number) => {
+      const s = `${raw ?? ''}`.replace(/\s+/g, ' ').trim();
+      if (!s) {
+        return '';
+      }
+      return s.length <= maxLen ? s : s.slice(0, maxLen);
+    };
     const buildExportQueryConfig = (context?: ChatContextType) => {
       if (!context?.dataSet?.id) {
         return undefined;
@@ -532,8 +539,25 @@ const ChatItem: React.FC<Props> = ({
       message.warning('当前查询暂不支持服务端导出');
       return;
     }
+    const datasetName =
+      data?.chatContext?.dataSet?.name || parseInfo?.dataSet?.name || '未知';
+    const questionText = actualQueryText || msg;
+    const nameDataset = normalizeTaskNamePart(datasetName, 24) || '未知';
+    const nameQuestion = normalizeTaskNamePart(questionText, 48);
+    const traceParts = [
+      conversationId ? `chat:${conversationId}` : undefined,
+      parseInfo?.queryId ? `query:${parseInfo.queryId}` : undefined,
+    ].filter(Boolean);
+    const taskName = `数据导出_${nameDataset}${nameQuestion ? `_${nameQuestion}` : ''}${
+      traceParts.length ? `_(${traceParts.join('|')})` : ''
+    }`;
     try {
-      const res = await submitExportTask({ datasetId, queryConfig, outputFormat: 'EXCEL' });
+      const res = await submitExportTask({
+        taskName,
+        datasetId,
+        queryConfig,
+        outputFormat: 'EXCEL',
+      });
       if (res?.code === 200) {
         message.success('导出任务已提交，请到「任务中心」查看进度');
       } else {

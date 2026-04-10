@@ -161,6 +161,7 @@ export function queryDimensionValues(
 }
 
 export function submitExportTask(data: {
+  taskName?: string;
   datasetId?: number;
   queryConfig?: string;
   outputFormat?: string;
