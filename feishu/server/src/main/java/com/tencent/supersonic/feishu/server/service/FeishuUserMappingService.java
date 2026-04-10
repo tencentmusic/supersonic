@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuQuerySessionDO;
 import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuUserMappingDO;
@@ -115,9 +116,13 @@ public class FeishuUserMappingService {
             log.debug("Could not fetch contact info for pending mapping: {}", e.getMessage());
         }
 
-        userMappingMapper.insert(pending);
-        log.info("Created pending mapping for openId={}, name={}", openId,
-                pending.getFeishuUserName());
+        try {
+            userMappingMapper.insert(pending);
+            log.info("Created pending mapping for openId={}, name={}", openId,
+                    pending.getFeishuUserName());
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            log.debug("Pending mapping already exists for openId={} (concurrent creation)", openId);
+        }
     }
 
     /**
@@ -173,7 +178,9 @@ public class FeishuUserMappingService {
      * Get a single mapping by ID.
      */
     public FeishuUserMappingDO getMappingById(Long id) {
-        return userMappingMapper.selectById(id);
+        FeishuUserMappingDO mapping = userMappingMapper.selectById(id);
+        assertTenantAccess(mapping);
+        return mapping;
     }
 
     /**
@@ -181,11 +188,14 @@ public class FeishuUserMappingService {
      */
     public IPage<FeishuUserMappingDO> listMappings(int pageNum, int pageSize) {
         Page<FeishuUserMappingDO> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
         Long tenantId = TenantContext.getTenantId();
-        if (tenantId != null) {
-            wrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
+        if (tenantId == null) {
+            page.setRecords(new ArrayList<>());
+            page.setTotal(0);
+            return page;
         }
+        LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
         wrapper.orderByDesc(FeishuUserMappingDO::getUpdatedAt);
         return userMappingMapper.selectPage(page, wrapper);
     }
@@ -213,6 +223,7 @@ public class FeishuUserMappingService {
      * Update an existing user mapping record.
      */
     public FeishuUserMappingDO updateMapping(FeishuUserMappingDO mapping) {
+        assertTenantAccess(getMappingById(mapping.getId()));
         mapping.setUpdatedAt(new Date());
         if (mapping.getTenantId() == null) {
             mapping.setTenantId(getWebhookTenantId());
@@ -244,6 +255,7 @@ public class FeishuUserMappingService {
      * Delete a user mapping by ID.
      */
     public void deleteMapping(Long id) {
+        getMappingById(id);
         userMappingMapper.deleteById(id);
     }
 
@@ -251,7 +263,7 @@ public class FeishuUserMappingService {
      * Toggle the status of a user mapping (enable/disable).
      */
     public void toggleStatus(Long id, int status) {
-        FeishuUserMappingDO mapping = userMappingMapper.selectById(id);
+        FeishuUserMappingDO mapping = getMappingById(id);
         if (mapping != null) {
             // When enabling a PENDING mapping, promote to MANUAL
             if (status == 1 && "PENDING".equals(mapping.getMatchType())) {
@@ -270,7 +282,7 @@ public class FeishuUserMappingService {
      * List query sessions with optional filters.
      */
     public IPage<FeishuQuerySessionDO> listSessions(int pageNum, int pageSize, String status,
-            String startDate, String endDate) {
+            String startDate, String endDate, String scope, User currentUser) {
         Page<FeishuQuerySessionDO> page = new Page<>(pageNum, pageSize);
         Long tenantId = TenantContext.getTenantId();
         if (tenantId == null) {
@@ -281,6 +293,15 @@ public class FeishuUserMappingService {
 
         LambdaQueryWrapper<FeishuUserMappingDO> mappingWrapper = new LambdaQueryWrapper<>();
         mappingWrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
+        if (shouldRestrictToCurrentUser(scope, currentUser)) {
+            if (currentUser == null || currentUser.getId() == null) {
+                page.setRecords(new ArrayList<>());
+                page.setTotal(0);
+                return page;
+            }
+            mappingWrapper.eq(FeishuUserMappingDO::getS2UserId, currentUser.getId())
+                    .eq(FeishuUserMappingDO::getStatus, 1);
+        }
         List<String> openIds = userMappingMapper.selectList(mappingWrapper).stream()
                 .map(FeishuUserMappingDO::getFeishuOpenId).filter(StringUtils::isNotBlank)
                 .distinct().collect(Collectors.toList());
@@ -307,6 +328,30 @@ public class FeishuUserMappingService {
         return querySessionMapper.selectPage(page, wrapper);
     }
 
+    private boolean shouldRestrictToCurrentUser(String scope, User currentUser) {
+        if (!"tenant".equalsIgnoreCase(StringUtils.defaultString(scope))) {
+            return true;
+        }
+        return currentUser == null || (!currentUser.isSuperAdmin()
+                && (currentUser.getIsAdmin() == null || currentUser.getIsAdmin() != 1));
+    }
+
+    private void assertTenantAccess(FeishuUserMappingDO mapping) {
+        if (mapping == null) {
+            throw new InvalidPermissionException("飞书映射记录不存在或无权访问");
+        }
+        Long currentTenantId = TenantContext.getTenantId();
+        if (currentTenantId == null) {
+            throw new InvalidPermissionException("租户上下文未建立");
+        }
+        if (mapping.getTenantId() == null) {
+            throw new InvalidPermissionException("飞书映射记录未绑定租户，禁止访问");
+        }
+        if (!Objects.equals(currentTenantId, mapping.getTenantId())) {
+            throw new InvalidPermissionException("无权访问其他租户的飞书映射记录");
+        }
+    }
+
     /**
      * Find a PENDING mapping record for a given openId.
      */
@@ -324,6 +369,10 @@ public class FeishuUserMappingService {
         LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FeishuUserMappingDO::getS2UserId, s2UserId).eq(FeishuUserMappingDO::getStatus,
                 1);
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
+        }
         return userMappingMapper.selectOne(wrapper);
     }
 

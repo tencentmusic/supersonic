@@ -3,6 +3,7 @@ package com.tencent.supersonic.feishu.server.rest;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuUserMappingDO;
 import com.tencent.supersonic.feishu.server.service.FeishuUserMappingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,18 +28,25 @@ public class FeishuUserMappingController {
 
     private final FeishuUserMappingService mappingService;
 
+    private void assertAdmin(User user) {
+        if (user == null || (!user.isSuperAdmin()
+                && (user.getIsAdmin() == null || user.getIsAdmin() != 1))) {
+            throw new InvalidPermissionException("仅管理员可管理飞书用户映射");
+        }
+    }
+
     @GetMapping
     public IPage<FeishuUserMappingDO> list(@RequestParam(defaultValue = "1") int current,
             @RequestParam(defaultValue = "20") int pageSize, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        assertAdmin(UserHolder.findUser(request, response));
         return mappingService.listMappings(current, pageSize);
     }
 
     @GetMapping("/{id}")
     public FeishuUserMappingDO getById(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        assertAdmin(UserHolder.findUser(request, response));
         return mappingService.getMappingById(id);
     }
 
@@ -46,9 +54,8 @@ public class FeishuUserMappingController {
     public FeishuUserMappingDO create(@RequestBody FeishuUserMappingDO mapping,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        if (user != null) {
-            mapping.setTenantId(user.getTenantId());
-        }
+        assertAdmin(user);
+        mapping.setTenantId(user.getTenantId());
         return mappingService.createMapping(mapping);
     }
 
@@ -57,31 +64,33 @@ public class FeishuUserMappingController {
             @RequestBody FeishuUserMappingDO mapping, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         mapping.setId(id);
-        if (user != null) {
-            mapping.setTenantId(user.getTenantId());
-        }
+        mapping.setTenantId(user.getTenantId());
         return mappingService.updateMapping(mapping);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         mappingService.deleteMapping(id);
     }
 
     @PostMapping("/{id}:enable")
     public void enable(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         mappingService.toggleStatus(id, 1);
     }
 
     @PostMapping("/{id}:disable")
     public void disable(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
+        User user = UserHolder.findUser(request, response);
+        assertAdmin(user);
         mappingService.toggleStatus(id, 0);
     }
 }

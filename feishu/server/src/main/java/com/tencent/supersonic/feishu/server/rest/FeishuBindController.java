@@ -153,6 +153,14 @@ public class FeishuBindController {
                 <body><div class="card"><p class="msg">%s</p></div></body>
                 </html>
                 """
-                .formatted(message);
+                .formatted(escapeHtml(message));
+    }
+
+    private static String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
     }
 }

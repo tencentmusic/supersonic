@@ -2,6 +2,7 @@ package com.tencent.supersonic.feishu.server.rest;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuQuerySessionDO;
 import com.tencent.supersonic.feishu.server.service.FeishuUserMappingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,9 +27,11 @@ public class FeishuQuerySessionController {
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String startDate,
+            @RequestParam(defaultValue = "self") String scope,
             @RequestParam(required = false) String endDate, HttpServletRequest request,
             HttpServletResponse response) {
-        UserHolder.findUser(request, response);
-        return mappingService.listSessions(current, pageSize, status, startDate, endDate);
+        User user = UserHolder.findUser(request, response);
+        return mappingService.listSessions(current, pageSize, status, startDate, endDate, scope,
+                user);
     }
 }
