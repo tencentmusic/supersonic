@@ -32,5 +32,9 @@ public class BusinessTopicVO {
         private Long itemId;
         private String itemType;
         private String itemName;
+        /** Populated for FIXED_REPORT: consumption status from fixed report aggregate */
+        private String consumptionStatus;
+        /** Populated for SCHEDULE */
+        private Boolean scheduleEnabled;
     }
 }

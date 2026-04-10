@@ -206,7 +206,7 @@ public class AlertRuleServiceImpl extends ServiceImpl<AlertRuleMapper, AlertRule
 
     @Override
     public Page<AlertEventDO> getEventList(Page<AlertEventDO> page, Long ruleId, String severity,
-            String deliveryStatus) {
+            String deliveryStatus, String resolutionStatus) {
         QueryWrapper<AlertEventDO> wrapper = new QueryWrapper<>();
         if (ruleId != null) {
             wrapper.lambda().eq(AlertEventDO::getRuleId, ruleId);
@@ -216,6 +216,9 @@ public class AlertRuleServiceImpl extends ServiceImpl<AlertRuleMapper, AlertRule
         }
         if (deliveryStatus != null) {
             wrapper.lambda().eq(AlertEventDO::getDeliveryStatus, deliveryStatus);
+        }
+        if (resolutionStatus != null) {
+            wrapper.lambda().eq(AlertEventDO::getResolutionStatus, resolutionStatus);
         }
         wrapper.lambda().orderByDesc(AlertEventDO::getCreatedAt);
         return alertEventMapper.selectPage(page, wrapper);

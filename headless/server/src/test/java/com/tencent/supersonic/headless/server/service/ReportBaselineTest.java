@@ -207,7 +207,8 @@ class ReportBaselineTest {
                 TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(totalTasks),
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
-        for (int i = 0; i < totalTasks; i++) {
+        // Submit 5 tasks that will hold semaphore permits
+        for (int i = 0; i < concurrencyLimit; i++) {
             schedulePool.submit(() -> {
                 if (tenantSemaphore.tryAcquire()) {
                     try {
@@ -220,17 +221,33 @@ class ReportBaselineTest {
                         tenantSemaphore.release();
                         runningCount.decrementAndGet();
                     }
-                } else {
-                    // Mirrors dispatcher behaviour: log.warn + skip (no blocking wait)
-                    skippedCount.incrementAndGet();
                 }
             });
         }
 
+        // Wait until all 5 slots are occupied before submitting the 6th task
         assertTrue(fiveRunningLatch.await(5, TimeUnit.SECONDS),
                 "First 5 tasks should start executing within 5 seconds");
         assertEquals(concurrencyLimit, runningCount.get(),
                 "Exactly 5 tasks should be running concurrently");
+
+        // Now submit the 6th task — all permits are taken, so it must be skipped
+        schedulePool.submit(() -> {
+            if (tenantSemaphore.tryAcquire()) {
+                try {
+                    taskHoldLatch.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    tenantSemaphore.release();
+                }
+            } else {
+                skippedCount.incrementAndGet();
+            }
+        });
+
+        // Brief wait for the 6th task to execute tryAcquire
+        Thread.sleep(200);
         assertTrue(skippedCount.get() >= 1,
                 "At least 1 task should be skipped when tenant limit is reached");
 
@@ -329,7 +346,7 @@ class ReportBaselineTest {
             // Create a test table and insert known number of rows
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("CREATE TABLE IF NOT EXISTS test_estimate "
-                        + "(id BIGINT PRIMARY KEY, value VARCHAR(50))");
+                        + "(id BIGINT PRIMARY KEY, val VARCHAR(50))");
                 for (int i = 1; i <= actualRowCount; i++) {
                     stmt.execute("INSERT INTO test_estimate VALUES (" + i + ", 'row_" + i + "')");
                 }

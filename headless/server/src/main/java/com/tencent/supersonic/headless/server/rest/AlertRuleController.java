@@ -119,11 +119,12 @@ public class AlertRuleController {
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) Long ruleId,
             @RequestParam(required = false) String severity,
-            @RequestParam(required = false) String deliveryStatus, HttpServletRequest request,
+            @RequestParam(required = false) String deliveryStatus,
+            @RequestParam(required = false) String resolutionStatus, HttpServletRequest request,
             HttpServletResponse response) {
         UserHolder.findUser(request, response);
         return alertRuleService.getEventList(new Page<>(current, pageSize), ruleId, severity,
-                deliveryStatus);
+                deliveryStatus, resolutionStatus);
     }
 
     @GetMapping("/events/pendingCounts")

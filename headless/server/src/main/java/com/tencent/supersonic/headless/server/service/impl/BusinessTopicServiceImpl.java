@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,16 +93,22 @@ public class BusinessTopicServiceImpl implements BusinessTopicService {
 
         // Fixed reports
         Set<Long> reportDatasetIds = idsByType.getOrDefault("FIXED_REPORT", Set.of());
+        List<FixedReportVO> allFixedReports =
+                fixedReportService.listFixedReports(user, null, null, null, null);
+        Map<Long, FixedReportVO> fixedByDataset = allFixedReports.stream().collect(
+                Collectors.toMap(FixedReportVO::getDatasetId, Function.identity(), (a, b) -> a));
         if (!reportDatasetIds.isEmpty()) {
-            List<FixedReportVO> reports =
-                    fixedReportService.listFixedReports(user, null, null, null, null);
-            Map<Long, String> reportNames = reports.stream().collect(Collectors
+            Map<Long, String> reportNames = allFixedReports.stream().collect(Collectors
                     .toMap(FixedReportVO::getDatasetId, FixedReportVO::getReportName, (a, b) -> a));
             reportDatasetIds.forEach(dsId -> {
                 BusinessTopicVO.TopicItem item = new BusinessTopicVO.TopicItem();
                 item.setItemType("FIXED_REPORT");
                 item.setItemId(dsId);
                 item.setItemName(reportNames.getOrDefault(dsId, "Report #" + dsId));
+                FixedReportVO fr = fixedByDataset.get(dsId);
+                if (fr != null) {
+                    item.setConsumptionStatus(fr.getConsumptionStatus());
+                }
                 items.add(item);
             });
         }
@@ -130,6 +137,7 @@ public class BusinessTopicServiceImpl implements BusinessTopicService {
                         item.setItemType("SCHEDULE");
                         item.setItemId(sched.getId());
                         item.setItemName(sched.getName());
+                        item.setScheduleEnabled(sched.getEnabled());
                         items.add(item);
                     });
         }

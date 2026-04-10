@@ -39,7 +39,7 @@ public interface AlertRuleService {
             String status);
 
     Page<AlertEventDO> getEventList(Page<AlertEventDO> page, Long ruleId, String severity,
-            String deliveryStatus);
+            String deliveryStatus, String resolutionStatus);
 
     AlertEventDO getEventById(Long eventId);
 
