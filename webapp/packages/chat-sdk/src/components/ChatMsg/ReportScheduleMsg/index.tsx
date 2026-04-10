@@ -12,6 +12,8 @@ import { MsgDataType, PluginResonseType, ScheduleSummaryType, ExecutionSummaryTy
 import { PREFIX_CLS } from '../../../common/constants';
 import './style.less';
 
+/** 对话侧创建/确认调度：需展示 intent、待确认调度摘要后再确认（对齐产品 §6.2 显式操作对象）。 */
+
 type Props = {
   data: MsgDataType;
   onSendMsg?: (msg: string) => void;
