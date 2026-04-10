@@ -1,12 +1,19 @@
 ---
-status: planned
+status: implemented
 module: report
 key-files:
   - docs/product/运营数据工作台产品设计说明书.md
+  - headless/server/src/main/java/com/tencent/supersonic/headless/server/rest/OperationsCockpitController.java
+  - headless/server/src/main/java/com/tencent/supersonic/headless/server/service/impl/OperationsCockpitServiceImpl.java
+  - webapp/packages/supersonic-fe/src/pages/OperationsCockpit/index.tsx
+  - webapp/packages/supersonic-fe/src/pages/BusinessTopics/TopicWorkspace.tsx
+  - webapp/packages/supersonic-fe/src/pages/ResponsibilityLedger/index.tsx
+  - webapp/packages/supersonic-fe/src/pages/TaskCenter/AlertEventsTab.tsx
   - webapp/packages/supersonic-fe/src/pages/Reports/index.tsx
   - webapp/packages/supersonic-fe/src/pages/TaskCenter/index.tsx
   - webapp/packages/supersonic-fe/src/pages/ReportSchedule/components/ScheduleForm.tsx
   - webapp/packages/chat-sdk/src/components/ChatMsg/ReportScheduleMsg/index.tsx
+  - feishu/server/src/main/java/com/tencent/supersonic/feishu/server/handler/CardActionHandler.java
 depends-on:
   - docs/details/report/04-scheduler-delivery.md
   - docs/details/report/05-governance.md
