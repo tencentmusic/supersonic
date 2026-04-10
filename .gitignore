@@ -65,6 +65,8 @@ pnpm-debug.log*
 **/.umi-production/
 .eslintcache
 .stylelintcache
+.pnpm-store/
+webapp/packages/supersonic-fe/.tmp-unit/
 
 # =============================================
 # Frontend Build Artifacts
