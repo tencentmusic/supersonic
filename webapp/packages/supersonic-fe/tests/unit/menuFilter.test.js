@@ -80,6 +80,11 @@ describe('filterEmptyGroups', () => {
   it('returns empty array for empty input', () => {
     expect(filterEmptyGroups([])).toEqual([]);
   });
+
+  it('removes access-filtered placeholder items without name or visible children', () => {
+    const input = [{ path: '/platform', hideInMenu: false }];
+    expect(filterEmptyGroups(input)).toEqual([]);
+  });
 });
 
 describe('buildGroupedMenu', () => {
@@ -123,5 +128,18 @@ describe('buildGroupedMenu', () => {
     const result = buildGroupedMenu(input);
 
     expect(result.map((item) => item.path)).toEqual(['/analysis-center', '/custom-page']);
+  });
+
+  it('keeps tenant group only when platform placeholder has been access-filtered out', () => {
+    const input = [
+      { path: '/platform', hideInMenu: false },
+      { name: 'tenant', path: '/tenant', hideInMenu: false },
+    ];
+
+    const result = buildGroupedMenu(input);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].path).toBe('/system-admin');
+    expect(result[0].children.map((item) => item.path)).toEqual(['/tenant']);
   });
 });

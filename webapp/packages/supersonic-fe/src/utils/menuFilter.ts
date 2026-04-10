@@ -58,11 +58,22 @@ export function filterEmptyGroups(items: MenuNode[]): MenuNode[] {
       ...item,
       children: item.children ? filterEmptyGroups(item.children) : undefined,
     }))
-    .filter(
-      (item) =>
-        !item.hideInMenu &&
-        (item.children === undefined || item.children === null || item.children.length > 0),
-    );
+    .filter((item) => {
+      const hasVisibleChildren =
+        item.children !== undefined && item.children !== null && item.children.length > 0;
+
+      if (item.hideInMenu) {
+        return false;
+      }
+
+      // Umi/Pro 会把无权限菜单节点变成“保留 path、移除 name”的占位项。
+      // 这里需要和其默认菜单过滤保持一致，避免把不可见父级重新拼回菜单树。
+      if (!item.name && !hasVisibleChildren) {
+        return false;
+      }
+
+      return item.children === undefined || item.children === null || hasVisibleChildren;
+    });
 }
 
 export function buildGroupedMenu(items: MenuNode[]): MenuNode[] {
