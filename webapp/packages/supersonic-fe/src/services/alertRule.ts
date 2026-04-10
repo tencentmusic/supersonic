@@ -115,7 +115,14 @@ export interface AlertEvent {
 }
 
 export function getEvents(
-  params?: { current?: number; pageSize?: number; ruleId?: number; severity?: string; deliveryStatus?: string },
+  params?: {
+    current?: number;
+    pageSize?: number;
+    ruleId?: number;
+    severity?: string;
+    deliveryStatus?: string;
+    resolutionStatus?: string;
+  },
 ): Promise<any> {
   return request(`${BASE}/events`, { method: 'GET', params });
 }

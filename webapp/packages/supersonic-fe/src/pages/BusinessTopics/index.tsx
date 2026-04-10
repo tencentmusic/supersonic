@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { history } from '@umijs/max';
 import { Table, Tag, Space, Button, Popconfirm, message, Empty } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -146,10 +147,17 @@ const BusinessTopicsPage: React.FC = () => {
     },
     {
       title: '操作',
-      width: 140,
+      width: 200,
       fixed: 'right' as const,
       render: (_: any, record: BusinessTopic) => (
         <Space size={4} wrap>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => history.push(`/business-topics/workspace/${record.id}`)}
+          >
+            工作台
+          </Button>
           <Button type="link" size="small" onClick={() => handleEdit(record)}>
             编辑
           </Button>

@@ -4,6 +4,10 @@ export interface TopicItem {
   itemId: number;
   itemType: 'FIXED_REPORT' | 'ALERT_RULE' | 'SCHEDULE';
   itemName: string;
+  /** 后端聚合：固定报表消费状态 */
+  consumptionStatus?: string;
+  /** 后端聚合：定时任务是否启用 */
+  scheduleEnabled?: boolean;
 }
 
 export interface BusinessTopic {

@@ -7,7 +7,7 @@ import defaultSettings, { BRAND_PRIMARY } from '../config/defaultSettings';
 import settings from '../config/themeSettings';
 import { queryCurrentUser } from './services/user';
 import { isMobile, getToken } from '@/utils/utils';
-import { filterEmptyGroups } from '@/utils/menuFilter';
+import { buildGroupedMenu } from '@/utils/menuFilter';
 import type { DefaultSetting } from '../config/defaultSettings';
 import { Copilot } from 'supersonic-chat-sdk';
 import { configProviderTheme } from '../config/themeSettings';
@@ -158,7 +158,7 @@ export const layout: RunTimeLayoutConfig = (params) => {
         </ConfigProvider>
       );
     },
-    menuDataRender: (menuData: any[]) => filterEmptyGroups(menuData),
+    menuDataRender: (menuData: any[]) => buildGroupedMenu(menuData),
     ...initialState?.settings,
   };
 };

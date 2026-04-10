@@ -75,6 +75,19 @@ const TopicDetailDrawer: React.FC<TopicDetailDrawerProps> = ({
       ellipsis: true,
     },
     {
+      title: '状态摘要',
+      width: 140,
+      render: (_: unknown, record: TopicItem) => {
+        if (record.itemType === 'FIXED_REPORT' && record.consumptionStatus) {
+          return <Tag>{record.consumptionStatus}</Tag>;
+        }
+        if (record.itemType === 'SCHEDULE' && record.scheduleEnabled !== undefined) {
+          return record.scheduleEnabled ? <Tag color="green">启用</Tag> : <Tag>暂停</Tag>;
+        }
+        return '—';
+      },
+    },
+    {
       title: '操作',
       width: 80,
       render: (_: any, record: TopicItem) => (

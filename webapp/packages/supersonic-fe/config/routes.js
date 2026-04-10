@@ -1,5 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ROUTE_AUTH_CODES = void 0;
 // 权限码常量，与后端 s2_permission 表的 code 字段对应
-export const ROUTE_AUTH_CODES = {
+const ROUTE_AUTH_CODES = (exports.ROUTE_AUTH_CODES = {
   // ========== 通用权限 ==========
   SYSTEM_ADMIN: 'SYSTEM_ADMIN', // 系统超级管理员
 
@@ -36,7 +39,7 @@ export const ROUTE_AUTH_CODES = {
   TENANT_PERMISSION: 'TENANT_PERMISSION',               // 租户权限管理
   TENANT_SETTINGS: 'TENANT_SETTINGS',                   // 租户设置
   TENANT_USAGE_VIEW: 'TENANT_USAGE_VIEW',               // 用量查看
-};
+});
 
 const ENV_KEY = {
   CHAT: 'chat',
@@ -439,4 +442,4 @@ const ROUTES = [
   },
 ];
 
-export default ROUTES;
+exports.default = ROUTES;

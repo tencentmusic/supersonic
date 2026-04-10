@@ -18,7 +18,7 @@ const Settings: DefaultSetting = {
   title: '',
   pwa: false,
   iconfontUrl: '//at.alicdn.com/t/c/font_4120566_x5c4www9bqm.js',
-  splitMenus: true,
+  splitMenus: false,
 };
 export const publicPath = '/webapp/';
 export const basePath = '/webapp/';

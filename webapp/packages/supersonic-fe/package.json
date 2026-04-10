@@ -36,10 +36,11 @@
     "start:no-ui": "cross-env UMI_UI=none max dev",
     "start:pre": "cross-env REACT_APP_ENV=pre max dev",
     "start:test": "cross-env REACT_APP_ENV=test MOCK=none max dev",
-    "pretest": "node ./tests/beforeTest",
-    "test": "max test",
+    "pretest": "node ./tests/beforeTest.js",
+    "test": "npm run test:unit",
     "test:all": "node ./tests/run-tests.js",
-    "test:component": "max test ./src/components",
+    "test:component": "node ./scripts/run-component-tests.cjs",
+    "test:unit": "node ./scripts/run-unit-tests.cjs",
     "tsc": "tsc --noEmit"
   },
   "lint-staged": {

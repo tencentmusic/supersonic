@@ -34,6 +34,7 @@ import QueryConfigFormSection, {
   type QueryMetricFilterFormItem,
 } from '@/components/QueryConfigFormSection';
 
+/** 产品 §6.2：分步表单显式展示任务名称/数据集、查询配置、Cron/输出/投递渠道（多选可见），避免隐式上下文。 */
 const { RangePicker } = DatePicker;
 const { Text, Paragraph } = Typography;
 const DEFAULT_DETAIL_LIMIT = 500;
