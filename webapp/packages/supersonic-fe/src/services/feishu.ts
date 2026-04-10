@@ -59,6 +59,7 @@ export async function getFeishuSessions(params: {
   status?: string;
   startDate?: string;
   endDate?: string;
+  scope?: 'self' | 'tenant';
 }) {
   return request(`${SESSION_URL}`, {
     method: 'GET',

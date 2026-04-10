@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Table, Tag, Space, Popconfirm, message, Switch, Tooltip, Tabs, Badge, Empty } from 'antd';
 import dayjs from 'dayjs';
+import { useModel } from '@umijs/max';
 import {
   PlusOutlined,
   DeleteOutlined,
@@ -21,6 +22,9 @@ import DeliveryDashboard from './components/DeliveryDashboard';
 import styles from './index.less';
 
 const DeliveryConfigPage: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  const currentUser = initialState?.currentUser as API.CurrentUser | undefined;
+  const canManageConfig = Boolean(currentUser?.superAdmin || currentUser?.isAdmin === 1);
   const [data, setData] = useState<DeliveryConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
@@ -165,6 +169,9 @@ const DeliveryConfigPage: React.FC = () => {
             </Tooltip>
           );
         }
+        if (!canManageConfig) {
+          return <Tag color={enabled ? 'success' : 'default'}>{enabled ? '已启用' : '已禁用'}</Tag>;
+        }
         return (
           <Switch
             size="small"
@@ -192,30 +199,36 @@ const DeliveryConfigPage: React.FC = () => {
       width: 220,
       render: (_: any, record: DeliveryConfig) => (
         <Space size="small">
-          <Button type="link" size="small" onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            loading={testingId === record.id}
-            onClick={() => handleTest(record.id)}
-          >
-            测试
-          </Button>
           <Button type="link" size="small" onClick={() => handleShowRecords(record)}>
             记录
           </Button>
-          <Popconfirm
-            title="确认删除此推送配置?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
+          {canManageConfig && (
+            <Button type="link" size="small" onClick={() => handleEdit(record)}>
+              编辑
             </Button>
-          </Popconfirm>
+          )}
+          {canManageConfig && (
+            <Button
+              type="link"
+              size="small"
+              loading={testingId === record.id}
+              onClick={() => handleTest(record.id)}
+            >
+              测试
+            </Button>
+          )}
+          {canManageConfig && (
+            <Popconfirm
+              title="确认删除此推送配置?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+                删除
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -239,11 +252,13 @@ const DeliveryConfigPage: React.FC = () => {
       ),
       children: (
         <>
-          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-              新建配置
-            </Button>
-          </div>
+          {canManageConfig && (
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                新建配置
+              </Button>
+            </div>
+          )}
 
           <Table
             rowKey="id"
@@ -255,9 +270,11 @@ const DeliveryConfigPage: React.FC = () => {
             locale={{
               emptyText: (
                 <Empty description="暂无推送配置">
-                  <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-                    新建配置
-                  </Button>
+                  {canManageConfig && (
+                    <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                      新建配置
+                    </Button>
+                  )}
                 </Empty>
               ),
             }}

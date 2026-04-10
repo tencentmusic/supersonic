@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Tag, Space, DatePicker, Select } from 'antd';
 import dayjs from 'dayjs';
 import { getFeishuSessions } from '@/services/feishu';
+import { useModel } from '@umijs/max';
 
 const { RangePicker } = DatePicker;
 
@@ -12,15 +13,28 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const QueryLogTab: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  const currentUser = initialState?.currentUser as any;
+  const canViewTenantLogs = Boolean(currentUser?.superAdmin || currentUser?.isAdmin === 1);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
-  const [filters, setFilters] = useState<{ status?: string; startDate?: string; endDate?: string }>({});
+  const [filters, setFilters] = useState<{
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    scope: 'self' | 'tenant';
+  }>({ scope: 'self' });
 
   const fetchData = async (page = 1, pageSize = 20) => {
     setLoading(true);
     try {
-      const res = await getFeishuSessions({ current: page, pageSize, ...filters });
+      const res = await getFeishuSessions({
+        current: page,
+        pageSize,
+        ...filters,
+        scope: canViewTenantLogs ? filters.scope : 'self',
+      });
       const body = res?.data ?? res;
       if (Array.isArray(body)) {
         setData(body);
@@ -67,6 +81,17 @@ const QueryLogTab: React.FC = () => {
   return (
     <>
       <Space style={{ marginBottom: 16 }}>
+        {canViewTenantLogs && (
+          <Select
+            value={filters.scope}
+            style={{ width: 140 }}
+            onChange={(val) => setFilters({ ...filters, scope: val })}
+            options={[
+              { label: '我的查询', value: 'self' },
+              { label: '全部查询', value: 'tenant' },
+            ]}
+          />
+        )}
         <Select
           placeholder="状态筛选"
           allowClear

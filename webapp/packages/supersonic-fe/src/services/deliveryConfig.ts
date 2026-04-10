@@ -146,6 +146,7 @@ export function getRecordList(params?: {
     params: {
       pageNum: params?.pageNum || 1,
       pageSize: params?.pageSize || 20,
+      configId: params?.configId,
       scheduleId: params?.scheduleId,
       executionId: params?.executionId,
     },

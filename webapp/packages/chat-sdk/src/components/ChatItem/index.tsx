@@ -458,8 +458,82 @@ const ChatItem: React.FC<Props> = ({
       message.warning('当前查询暂不支持服务端导出');
       return;
     }
+    const buildExportQueryConfig = (context?: ChatContextType) => {
+      if (!context?.dataSet?.id) {
+        return undefined;
+      }
+      const rawContext = context as any;
+      const sql =
+        rawContext?.sqlInfo?.correctedQuerySQL ||
+        rawContext?.sqlInfo?.querySQL ||
+        rawContext?.sqlInfo?.correctedS2SQL ||
+        rawContext?.sqlInfo?.parsedS2SQL;
+      if (sql) {
+        return JSON.stringify({
+          dataSetId: context.dataSet.id,
+          sql,
+        });
+      }
+      const metrics = Array.isArray(rawContext.metrics) ? rawContext.metrics : [];
+      const groups = Array.isArray(rawContext.dimensions)
+        ? rawContext.dimensions
+            .map((item: any) => item?.bizName)
+            .filter((item: string | undefined) => !!item)
+        : [];
+      const dimensionFilters = Array.isArray(rawContext.dimensionFilters)
+        ? rawContext.dimensionFilters
+            .filter((item: any) => item?.bizName)
+            .map((item: any) => ({
+              bizName: item.bizName,
+              operator: item.operator,
+              value: item.value,
+            }))
+        : [];
+      const metricFilters = Array.isArray(rawContext.metricFilters)
+        ? rawContext.metricFilters
+            .filter((item: any) => item?.bizName)
+            .map((item: any) => ({
+              bizName: item.bizName,
+              operator: item.operator,
+              value: item.value,
+            }))
+        : [];
+      const aggregators = metrics
+        .map((metric: any) => {
+          const aggType = rawContext.aggType;
+          const defaultAgg = metric?.defaultAgg;
+          const func =
+            !aggType || aggType === 'NONE' || defaultAgg === 'COUNT_DISTINCT'
+              ? defaultAgg || ''
+              : aggType;
+          if (!metric?.bizName || !func) {
+            return null;
+          }
+          return {
+            column: metric.bizName,
+            func,
+          };
+        })
+        .filter(Boolean);
+      return JSON.stringify({
+        dataSetId: context.dataSet.id,
+        queryType: rawContext.queryType,
+        groups,
+        aggregators,
+        orders: Array.isArray(rawContext.orders) ? rawContext.orders : [],
+        dimensionFilters,
+        metricFilters,
+        dateInfo: rawContext.dateInfo,
+        limit: rawContext.limit,
+      });
+    };
+    const queryConfig = buildExportQueryConfig(data?.chatContext || parseInfo);
+    if (!queryConfig) {
+      message.warning('当前查询暂不支持服务端导出');
+      return;
+    }
     try {
-      const res = await submitExportTask({ datasetId, outputFormat: 'EXCEL' });
+      const res = await submitExportTask({ datasetId, queryConfig, outputFormat: 'EXCEL' });
       if (res?.code === 200) {
         message.success('导出任务已提交，请到「任务中心」查看进度');
       } else {

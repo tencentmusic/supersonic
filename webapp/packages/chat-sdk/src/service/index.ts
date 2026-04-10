@@ -162,6 +162,7 @@ export function queryDimensionValues(
 
 export function submitExportTask(data: {
   datasetId?: number;
+  queryConfig?: string;
   outputFormat?: string;
 }): Promise<{ code: number; msg?: string; data?: { id: number } }> {
   return axios.post('/api/v1/exportTasks', data);
