@@ -33,23 +33,24 @@ import QueryConfigFormSection, {
   type QueryOrderFormItem,
   type QueryMetricFilterFormItem,
 } from '@/components/QueryConfigFormSection';
+import {
+  resolveScheduleDateField,
+  validateScheduleDateInfo,
+} from '@/pages/ReportSchedule/utils/scheduleFormValidation';
 
 /** 产品 §6.2：分步表单显式展示任务名称/数据集、查询配置、Cron/输出/投递渠道（多选可见），避免隐式上下文。 */
 const { RangePicker } = DatePicker;
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 const DEFAULT_DETAIL_LIMIT = 500;
 const STEP_ITEMS = [
   {
     title: '基本信息',
-    description: '先确定任务名称和数据集',
   },
   {
     title: '查询配置',
-    description: '设置时间范围、分组和筛选规则',
   },
   {
     title: '执行与推送',
-    description: '配置调度频率、输出和投递渠道',
   },
 ] as const;
 const STEP_FIELD_NAMES = [
@@ -110,7 +111,7 @@ interface ScheduleFormProps {
   onSubmit: (values: Partial<ReportSchedule>) => void;
 }
 
-type DateMode = 'BETWEEN' | 'RECENT';
+type DateMode = 'BETWEEN' | 'RECENT' | 'ALL';
 
 const ScheduleForm: React.FC<ScheduleFormProps> = ({
   visible,
@@ -290,18 +291,25 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
           : [];
         const dateFields = parseDateInfoFromQueryConfig(record.queryConfig);
         const parsedQC: any = parseQueryConfig(record.queryConfig);
-        const mode = (dateFields.dateMode === 'ALL' ? 'BETWEEN' : dateFields.dateMode) || 'BETWEEN';
         const currentQueryType: QueryType =
           parsedQC.queryType === 'AGGREGATE' ? 'AGGREGATE' : 'DETAIL';
+        let mode: DateMode = (dateFields.dateMode as DateMode) || 'BETWEEN';
+        // 旧库可能存在 DETAIL + ALL 的脏数据,全量 radio 仅对 AGGREGATE 显示。
+        // 直接呈现会让用户看到一个无选中项的 radio,这里把它降级为 BETWEEN 并提示重选。
+        if (mode === 'ALL' && currentQueryType === 'DETAIL') {
+          message.warning('原配置为全量模式,明细调度不再支持,请重新选择日期范围');
+          mode = 'BETWEEN';
+        }
         setDateMode(mode);
         setQueryType(currentQueryType);
         const ds = dataSets.find((d) => d.id === record.datasetId);
+        const dateField = dateFields.dateField || ds?.partitionDimension;
         setNoPartitionDim(!ds?.partitionDimension);
         form.setFieldsValue({
           ...record,
           deliveryConfigIds: configIds,
           dateMode: mode,
-          dateField: dateFields.dateField,
+          dateField,
           dateRange: dateFields.dateRange,
           recentUnit: dateFields.recentUnit ?? 7,
           recentPeriod: dateFields.recentPeriod ?? 'DAY',
@@ -347,6 +355,15 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     if (!visible || dataSets.length === 0) return;
     const datasetId = record?.datasetId ?? initialDatasetId;
     if (!datasetId) return;
+    if (record?.id) {
+      // 编辑态:表单值已被上一个 useEffect 从 record.queryConfig 载入,
+      // 不能再走 handleDatasetChange(那会把 groups/aggregators/filters/dateField 全部清掉)。
+      // 这里只同步 noPartitionDim 并异步拉取维度/指标以填充 QueryConfigFormSection 的下拉。
+      const ds = dataSets.find((d) => d.id === datasetId);
+      setNoPartitionDim(!ds?.partitionDimension);
+      void fetchDatasetDimensions(datasetId);
+      return;
+    }
     handleDatasetChange(datasetId);
   }, [visible, dataSets, record?.datasetId, initialDatasetId]);
 
@@ -365,6 +382,16 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     setCurrentStep((prev) => Math.min(prev + 1, STEP_ITEMS.length - 1));
   };
 
+  // 切到 DETAIL 时全量 radio 会被隐藏;如果当前 dateMode 还停留在 ALL,
+  // 用户会看到一个无选中项的 radio。这里同步把 dateMode 降级为 BETWEEN。
+  const handleQueryTypeChange = (next: QueryType) => {
+    if (next === 'DETAIL' && dateMode === 'ALL') {
+      setDateMode('BETWEEN');
+      form.setFieldsValue({ dateMode: 'BETWEEN' });
+    }
+    setQueryType(next);
+  };
+
   const handleStepChange = async (nextStep: number) => {
     if (nextStep === currentStep) {
       return;
@@ -377,16 +404,41 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
 
   const handleOk = async () => {
     const values = await form.validateFields();
+    // dateField 取值链:表单 → 数据集分区字段 → 原始 queryConfig。
+    // antd 在跨分步条件渲染 + hidden Form.Item 场景下,setFieldsValue 有时无法把值
+    // 保留到 validateFields 返回结果里;编辑态下若数据集又没有 partitionDimension,
+    // 兜底读原始 queryConfig 才是可靠的真源。
+    const selectedDataSet = dataSets.find((d) => d.id === values.datasetId);
+    const dateFieldFromRecord = record?.queryConfig
+      ? parseDateInfoFromQueryConfig(record.queryConfig).dateField
+      : undefined;
+    const resolvedDateField = resolveScheduleDateField({
+      formDateField: values.dateField,
+      partitionDimension: selectedDataSet?.partitionDimension,
+      recordDateField: dateFieldFromRecord,
+    });
 
     const dateInfoObj: Record<string, any> = {
       dateMode: values.dateMode || 'BETWEEN',
-      dateField: values.dateField,
+      dateField: resolvedDateField,
     };
-    if (values.dateMode === 'BETWEEN' && values.dateRange) {
+    const validation = validateScheduleDateInfo({
+      dateMode: dateInfoObj.dateMode,
+      dateField: resolvedDateField,
+      dateRange: values.dateRange,
+      recentUnit: values.recentUnit,
+      queryType: values.queryType,
+    });
+    if (!validation.ok) {
+      message.error(validation.error);
+      setCurrentStep(1);
+      return;
+    }
+    if (dateInfoObj.dateMode === 'BETWEEN') {
       dateInfoObj.startDate = dayjs(values.dateRange[0]).format('YYYY-MM-DD');
       dateInfoObj.endDate = dayjs(values.dateRange[1]).format('YYYY-MM-DD');
       dateInfoObj.period = 'DAY';
-    } else if (values.dateMode === 'RECENT') {
+    } else if (dateInfoObj.dateMode === 'RECENT') {
       dateInfoObj.unit = values.recentUnit ?? 7;
       dateInfoObj.period = values.recentPeriod ?? 'DAY';
     }
@@ -407,12 +459,12 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
       return;
     }
 
-    const groups =
-      Array.isArray(values.queryGroups) && values.queryGroups.length > 0
-        ? values.queryGroups
-        : values.queryType === 'AGGREGATE'
-        ? []
-        : normalizedDimensions.map((d: any) => d?.bizName || d?.name).filter(Boolean);
+    // groups 的语义:用户选了就按选中的字段投影+GROUP BY,没选就传空。
+    // 后端 SqlGenerateUtils 在 groups/aggregators 都为空时输出 "SELECT *" 并跳过 GROUP BY,
+    // 最终由 ontology 展开成该数据集有权限访问的全部字段(权限过滤由 S2DataPermissionAspect 负责)。
+    // 不再自动把全部 dimensions 填成 groups——那样会让 "未选字段" 变成 "按全部字段 GROUP BY",
+    // 语义上等价于去重,和 "全字段明细" 完全不同。
+    const groups = Array.isArray(values.queryGroups) ? values.queryGroups : [];
 
     const aggregators = Array.isArray(values.queryAggregators)
       ? values.queryAggregators
@@ -554,18 +606,17 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     );
   };
 
-  const renderStepHeading = (title: string, description: string) => (
+  const renderStepHeading = (title: string) => (
     <div style={sectionHeaderStyle}>
       <Text strong style={{ display: 'block', fontSize: 16, color: '#111827' }}>
         {title}
       </Text>
-      <Text type="secondary">{description}</Text>
     </div>
   );
 
   const renderBasicInfoStep = () => (
     <div style={sectionStyle}>
-      {renderStepHeading('任务基础信息', '先选择数据集，再进入查询配置。')}
+      {renderStepHeading('任务基础信息')}
       <div style={formRowStyle}>
         <Form.Item
           name="name"
@@ -592,16 +643,13 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
           />
         </Form.Item>
       </div>
-      <Paragraph type="secondary" style={{ marginTop: 16, marginBottom: 0 }}>
-        数据集决定可用的维度、指标和日期分区字段。切换数据集后，已填写的分组、聚合和筛选条件会自动清空。
-      </Paragraph>
     </div>
   );
 
   const renderQueryStep = () => (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div style={sectionStyle}>
-        {renderStepHeading('日期范围', '先确定这份调度任务每次查询的数据窗口。')}
+        {renderStepHeading('日期范围')}
 
         {noPartitionDim && (
           <Alert
@@ -635,6 +683,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
           >
             <Radio.Button value="BETWEEN">固定区间</Radio.Button>
             <Radio.Button value="RECENT">最近 N 天</Radio.Button>
+            {queryType === 'AGGREGATE' && <Radio.Button value="ALL">全量</Radio.Button>}
           </Radio.Group>
         </Form.Item>
 
@@ -673,14 +722,11 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
       </div>
 
       <div style={sectionStyle}>
-        {renderStepHeading(
-          '查询规则',
-          '按接近 Metabase 的顺序配置查询类型、分组、聚合、筛选和高级规则。',
-        )}
+        {renderStepHeading('查询规则')}
         <QueryConfigFormSection
           form={form}
           queryType={queryType}
-          setQueryType={setQueryType}
+          setQueryType={handleQueryTypeChange}
           currentDimensions={currentDimensions}
           currentMetrics={currentMetrics}
           queryTypeOptions={[
@@ -699,7 +745,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
   const renderExecutionStep = () => (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div style={sectionStyle}>
-        {renderStepHeading('执行策略', '设置任务何时运行、以什么格式导出，以及失败后的重试策略。')}
+        {renderStepHeading('执行策略')}
         <Form.Item
           name="cronExpression"
           label="调度频率"
@@ -735,7 +781,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
       </div>
 
       <div style={sectionStyle}>
-        {renderStepHeading('推送配置', '选择报表生成后的投递渠道，可留空，后续也可以补充。')}
+        {renderStepHeading('推送配置')}
         <Form.Item
           name="deliveryConfigIds"
           label="推送渠道"
@@ -774,15 +820,24 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     </Space>
   );
 
-  const renderStepContent = () => {
-    if (currentStep === 0) {
-      return renderBasicInfoStep();
-    }
-    if (currentStep === 1) {
-      return renderQueryStep();
-    }
-    return renderExecutionStep();
-  };
+  // 始终挂载全部 step 的 Form.Item,用 CSS 切换可见性。
+  // 原先用 `currentStep === N` 条件渲染会让非当前步骤的 Form.Item 卸载;
+  // 在 antd v5 的 hidden Form.Item + Modal 组合下实测会丢失 store 里的值
+  // (dateField / dateRange 都重现了),导致最终 handleOk 里 validateFields 返回空。
+  // 全部常驻挂载后由 antd 自己的字段状态驱动校验,避免任何跨步骤的值丢失。
+  const renderStepContent = () => (
+    <>
+      <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+        {renderBasicInfoStep()}
+      </div>
+      <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+        {renderQueryStep()}
+      </div>
+      <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+        {renderExecutionStep()}
+      </div>
+    </>
+  );
 
   const formValues = Form.useWatch([], form) || {};
   const currentDataSet = dataSets.find((item) => item.id === formValues.datasetId);
@@ -823,7 +878,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
 
   const renderSummary = () => (
     <div style={summaryStyle}>
-      {renderStepHeading('当前配置摘要', '不切回上一步，也能看到本次任务的关键配置。')}
+      {renderStepHeading('当前配置摘要')}
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
         {renderSummaryRow('任务名称', formValues.name || '未填写')}
         {renderSummaryRow('数据集', currentDataSet?.name || '未选择')}
@@ -937,7 +992,6 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
               <Text strong style={{ display: 'block', fontSize: 16, color: '#111827' }}>
                 {STEP_ITEMS[currentStep].title}
               </Text>
-              <Text type="secondary">{STEP_ITEMS[currentStep].description}</Text>
             </div>
           </Space>
           <Steps

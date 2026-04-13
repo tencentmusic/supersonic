@@ -94,6 +94,16 @@ const DeliveryConfigPage: React.FC = () => {
 
   const [testingId, setTestingId] = useState<number | null>(null);
 
+  const getErrorMessage = (error: any, fallback: string) => {
+    return (
+      error?.response?.data?.msg ||
+      error?.data?.msg ||
+      error?.msg ||
+      error?.message ||
+      fallback
+    );
+  };
+
   const handleTest = async (id: number) => {
     setTestingId(id);
     try {
@@ -104,9 +114,10 @@ const DeliveryConfigPage: React.FC = () => {
         message.success('测试推送已发送');
       }
     } catch (error) {
-      message.error('测试推送失败');
+      message.error(getErrorMessage(error, '测试推送失败'));
     } finally {
       setTestingId(null);
+      fetchData();
     }
   };
 

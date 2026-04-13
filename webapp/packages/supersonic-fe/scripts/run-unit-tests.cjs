@@ -14,6 +14,7 @@ function compileMenuFilter() {
     tscBin,
     path.join(projectRoot, 'src/utils/menuFilter.ts'),
     path.join(projectRoot, 'src/pages/RouteGroupRedirect/resolveRedirect.ts'),
+    path.join(projectRoot, 'src/pages/ReportSchedule/utils/scheduleFormValidation.ts'),
     '--module',
     'commonjs',
     '--target',
