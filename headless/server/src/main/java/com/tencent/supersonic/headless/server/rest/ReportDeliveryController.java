@@ -82,21 +82,22 @@ public class ReportDeliveryController {
     }
 
     @DeleteMapping("/configs/{id}")
-    public void deleteConfig(@PathVariable Long id, HttpServletRequest request,
+    public Boolean deleteConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
         deliveryService.deleteConfig(id);
+        return true;
     }
 
     // ========== Test Delivery ==========
 
     @PostMapping("/configs/{id}:test")
-    public void testConfig(@PathVariable Long id, HttpServletRequest request,
+    public ReportDeliveryRecordDO testConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
-        deliveryService.testDelivery(id);
+        return deliveryService.testDelivery(id);
     }
 
     // ========== Delivery Records ==========
@@ -116,10 +117,10 @@ public class ReportDeliveryController {
     }
 
     @PostMapping("/records/{id}:retry")
-    public void retryDelivery(@PathVariable Long id, HttpServletRequest request,
+    public ReportDeliveryRecordDO retryDelivery(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         UserHolder.findUser(request, response);
-        deliveryService.retryDelivery(id);
+        return deliveryService.retryDelivery(id);
     }
 
     // ========== Statistics ==========

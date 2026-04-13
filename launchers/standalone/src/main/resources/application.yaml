@@ -229,6 +229,9 @@ s2:
       max-rows: ${FEISHU_EXPORT_MAX_ROWS:100000}
     cache:
       type: ${FEISHU_CACHE_TYPE:redis}  # caffeine or redis
+  report-download:
+    signing-secret: ${REPORT_DOWNLOAD_SIGNING_SECRET:${S2_ENCRYPTION_KEY:}}
+    token-ttl-seconds: ${REPORT_DOWNLOAD_TOKEN_TTL_SECONDS:604800}
   # Export configuration
   export:
     worker-threads: 3

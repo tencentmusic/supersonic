@@ -31,6 +31,7 @@ public class TemplateResolver {
         }
 
         Map<String, String> variables = buildVariables(context, downloadUrl);
+        template = removeEmptyDownloadUrlLines(template, variables.get("downloadUrl"));
 
         StringBuffer result = new StringBuffer();
         Matcher matcher = VARIABLE_PATTERN.matcher(template);
@@ -64,5 +65,12 @@ public class TemplateResolver {
 
     private static String nullSafe(String value) {
         return value != null ? value : "";
+    }
+
+    private static String removeEmptyDownloadUrlLines(String template, String downloadUrl) {
+        if (StringUtils.isNotBlank(downloadUrl) || !template.contains("${downloadUrl}")) {
+            return template;
+        }
+        return template.replaceAll("(?m)^.*\\$\\{downloadUrl}.*(?:\\R|$)", "");
     }
 }

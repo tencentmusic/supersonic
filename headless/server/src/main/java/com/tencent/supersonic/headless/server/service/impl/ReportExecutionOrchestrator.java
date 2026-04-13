@@ -303,11 +303,11 @@ public class ReportExecutionOrchestrator {
                             ? ctx.getOutputConfig().getFormat().name()
                             : "XLSX";
 
+            String scheduleName = ctx.getScheduleName() != null ? ctx.getScheduleName()
+                    : "Schedule " + ctx.getScheduleId();
             DeliveryContext deliveryContext = DeliveryContext.builder()
                     .scheduleId(ctx.getScheduleId()).executionId(executionId)
-                    .scheduleName(ctx.getScheduleName() != null ? ctx.getScheduleName()
-                            : "Schedule " + ctx.getScheduleId())
-                    .reportName("Report " + ctx.getDatasetId()).fileLocation(fileLocation)
+                    .scheduleName(scheduleName).reportName(scheduleName).fileLocation(fileLocation)
                     .outputFormat(outputFormat).rowCount(rowCount).tenantId(ctx.getTenantId())
                     .executionTime(executionTime).build();
 

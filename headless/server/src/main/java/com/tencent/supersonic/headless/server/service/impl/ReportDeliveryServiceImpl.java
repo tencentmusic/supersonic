@@ -20,6 +20,7 @@ import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryCha
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -44,6 +45,9 @@ public class ReportDeliveryServiceImpl
         implements ReportDeliveryService {
 
     private static final int DEFAULT_MAX_CONSECUTIVE_FAILURES = 5;
+
+    /** Sentinel scheduleId used by {@link #testDelivery(Long)} to mark test rows. */
+    private static final long TEST_DELIVERY_SCHEDULE_ID = 0L;
 
     private final ReportDeliveryRecordMapper recordMapper;
     private final Map<DeliveryType, ReportDeliveryChannel> channelMap;
@@ -277,15 +281,58 @@ public class ReportDeliveryServiceImpl
         baseMapper.updateById(config);
     }
 
+    // noRollbackFor: the catch blocks persist FAILED state before rethrowing; without
+    // this, the default RuntimeException rollback would wipe those writes and leave
+    // the row stuck in SENDING.
     @Override
-    public void testDelivery(Long configId) {
+    @Transactional(noRollbackFor = RuntimeException.class)
+    public ReportDeliveryRecordDO testDelivery(Long configId) {
         ReportDeliveryConfigDO config = getConfigById(configId);
 
         DeliveryContext testContext = DeliveryContext.builder().scheduleId(0L).executionId(0L)
                 .scheduleName("Test Schedule").reportName("Test Report").outputFormat("XLSX")
                 .rowCount(100L).executionTime(new Date().toString()).build();
 
-        executeDelivery(config, testContext);
+        ReportDeliveryRecordDO record = new ReportDeliveryRecordDO();
+        record.setDeliveryKey("TEST_" + System.currentTimeMillis() + "_" + config.getId());
+        record.setScheduleId(testContext.getScheduleId());
+        record.setExecutionId(testContext.getExecutionId());
+        record.setConfigId(config.getId());
+        record.setDeliveryType(config.getDeliveryType());
+        record.setStatus(DeliveryStatus.PENDING.name());
+        record.setTenantId(config.getTenantId());
+        record.setCreatedAt(new Date());
+        record.setRetryCount(0);
+        recordMapper.insert(record);
+
+        long startTime = System.currentTimeMillis();
+        try {
+            record.setStatus(DeliveryStatus.SENDING.name());
+            record.setStartedAt(new Date());
+            recordMapper.updateById(record);
+
+            executeDelivery(config, testContext);
+
+            record.setStatus(DeliveryStatus.SUCCESS.name());
+            record.setCompletedAt(new Date());
+            record.setDeliveryTimeMs(System.currentTimeMillis() - startTime);
+            recordMapper.updateById(record);
+            return record;
+        } catch (DeliveryException e) {
+            record.setStatus(DeliveryStatus.FAILED.name());
+            record.setErrorMessage(truncate(e.getMessage(), 2000));
+            record.setCompletedAt(new Date());
+            record.setDeliveryTimeMs(System.currentTimeMillis() - startTime);
+            recordMapper.updateById(record);
+            throw e;
+        } catch (RuntimeException e) {
+            record.setStatus(DeliveryStatus.FAILED.name());
+            record.setErrorMessage(truncate(e.getMessage(), 2000));
+            record.setCompletedAt(new Date());
+            record.setDeliveryTimeMs(System.currentTimeMillis() - startTime);
+            recordMapper.updateById(record);
+            throw e;
+        }
     }
 
     private void executeDelivery(ReportDeliveryConfigDO config, DeliveryContext context) {
@@ -326,6 +373,9 @@ public class ReportDeliveryServiceImpl
         }
         if (scheduleId != null) {
             wrapper.lambda().eq(ReportDeliveryRecordDO::getScheduleId, scheduleId);
+        } else {
+            // Exclude test-delivery records (testDelivery uses scheduleId=0 as a sentinel)
+            wrapper.lambda().ne(ReportDeliveryRecordDO::getScheduleId, TEST_DELIVERY_SCHEDULE_ID);
         }
         if (executionId != null) {
             wrapper.lambda().eq(ReportDeliveryRecordDO::getExecutionId, executionId);
@@ -334,8 +384,10 @@ public class ReportDeliveryServiceImpl
         return recordMapper.selectPage(page, wrapper);
     }
 
+    // See testDelivery: the catch blocks persist FAILED state before rethrowing.
     @Override
-    public void retryDelivery(Long recordId) {
+    @Transactional(noRollbackFor = RuntimeException.class)
+    public ReportDeliveryRecordDO retryDelivery(Long recordId) {
         ReportDeliveryRecordDO record = recordMapper.selectById(recordId);
         if (record == null) {
             throw new IllegalArgumentException("Delivery record not found: " + recordId);
@@ -379,6 +431,7 @@ public class ReportDeliveryServiceImpl
                 reportMetrics.recordDeliveryRetry("success",
                         normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
             }
+            return record;
 
         } catch (DeliveryException e) {
             long deliveryTimeMs = System.currentTimeMillis() - startTime;
@@ -407,7 +460,8 @@ public class ReportDeliveryServiceImpl
         if (tenantId != null) {
             wrapper.lambda().eq(ReportDeliveryRecordDO::getTenantId, tenantId);
         }
-        wrapper.lambda().ge(ReportDeliveryRecordDO::getCreatedAt, startDate);
+        wrapper.lambda().ge(ReportDeliveryRecordDO::getCreatedAt, startDate)
+                .ne(ReportDeliveryRecordDO::getScheduleId, TEST_DELIVERY_SCHEDULE_ID);
         List<ReportDeliveryRecordDO> records = recordMapper.selectList(wrapper);
 
         long total = records.size();
@@ -458,7 +512,8 @@ public class ReportDeliveryServiceImpl
         if (tenantId != null) {
             wrapper.lambda().eq(ReportDeliveryRecordDO::getTenantId, tenantId);
         }
-        wrapper.lambda().ge(ReportDeliveryRecordDO::getCreatedAt, startDate);
+        wrapper.lambda().ge(ReportDeliveryRecordDO::getCreatedAt, startDate)
+                .ne(ReportDeliveryRecordDO::getScheduleId, TEST_DELIVERY_SCHEDULE_ID);
         List<ReportDeliveryRecordDO> records = recordMapper.selectList(wrapper);
 
         // Group by date

@@ -41,8 +41,9 @@ public interface ReportDeliveryService {
      * Test delivery configuration by sending a test message.
      *
      * @param configId config ID to test
+     * @return created test delivery record
      */
-    void testDelivery(Long configId);
+    ReportDeliveryRecordDO testDelivery(Long configId);
 
     // ========== Delivery Records ==========
 
@@ -53,8 +54,10 @@ public interface ReportDeliveryService {
      * Retry a failed delivery.
      *
      * @param recordId the delivery record ID to retry
+     * @return the updated delivery record (status SUCCESS on success; on failure the persisted
+     *         FAILED record is still written and a {@code DeliveryException} is rethrown)
      */
-    void retryDelivery(Long recordId);
+    ReportDeliveryRecordDO retryDelivery(Long recordId);
 
     // ========== Statistics ==========
 

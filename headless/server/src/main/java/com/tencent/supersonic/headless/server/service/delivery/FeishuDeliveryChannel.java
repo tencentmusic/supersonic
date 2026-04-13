@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -36,7 +39,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FeishuDeliveryChannel implements ReportDeliveryChannel {
 
+    /** Feishu custom bot webhook hard limit: request body must be ≤ 20 KB. */
+    private static final int MAX_PAYLOAD_BYTES = 20 * 1024;
+
     private final RestTemplate restTemplate;
+
+    @Value("${s2.feishu.api-base-url:}")
+    private String apiBaseUrl;
+
+    @Value("${s2.report-download.signing-secret:${s2.encryption.aes-key:}}")
+    private String downloadSigningSecret;
+
+    @Value("${s2.report-download.token-ttl-seconds:604800}")
+    private long downloadTokenTtlSeconds;
 
     @Override
     public DeliveryType getType() {
@@ -46,6 +61,9 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
     @Override
     public void deliver(String configJson, DeliveryContext context) throws DeliveryException {
         FeishuConfig config = parseConfig(configJson);
+        validateWebhookUrl(config.getWebhookUrl());
+        log.info("Feishu deliver entry: scheduleId={}, webhookHost={}", context.getScheduleId(),
+                URI.create(config.getWebhookUrl()).getHost());
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -61,10 +79,22 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
                 payload.put("sign", sign);
             }
 
+            int payloadBytes = JSON.toJSONString(payload).getBytes(StandardCharsets.UTF_8).length;
+            if (payloadBytes > MAX_PAYLOAD_BYTES) {
+                throw new DeliveryException("Feishu payload exceeds 20KB limit (" + payloadBytes
+                        + " bytes). Reduce report content or alert detail.", false);
+            }
+
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
 
+            log.info("Feishu sending request: scheduleId={}, payloadBytes={}",
+                    context.getScheduleId(), payloadBytes);
+            long t0 = System.currentTimeMillis();
             ResponseEntity<String> response =
                     restTemplate.postForEntity(config.getWebhookUrl(), request, String.class);
+            log.info("Feishu received response: scheduleId={}, status={}, elapsedMs={}",
+                    context.getScheduleId(), response.getStatusCode(),
+                    System.currentTimeMillis() - t0);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
                 throw new DeliveryException(
@@ -73,10 +103,7 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
 
             // Check Feishu response
             JSONObject respBody = JSON.parseObject(response.getBody());
-            if (respBody != null && respBody.getInteger("code") != null
-                    && respBody.getInteger("code") != 0) {
-                throw new DeliveryException("Feishu API error: " + respBody.getString("msg"));
-            }
+            validateFeishuResponse(respBody);
 
             log.info("Feishu delivery successful: scheduleId={}", context.getScheduleId());
 
@@ -102,6 +129,10 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
             // Interactive card message
             payload.put("msg_type", "interactive");
             payload.put("card", buildCard(config, context));
+        } else if ("text".equals(config.getMsgType())) {
+            // Plain text — cheapest format, useful for connectivity tests
+            payload.put("msg_type", "text");
+            payload.put("content", buildTextContent(config, context));
         } else {
             // Default: post message (rich text)
             payload.put("msg_type", "post");
@@ -210,16 +241,13 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
     private Map<String, Object> buildCard(FeishuConfig config, DeliveryContext context) {
         Map<String, Object> card = new HashMap<>();
 
-        String downloadUrl = StringUtils.isNotBlank(config.getDownloadUrl())
-                ? config.getDownloadUrl() + "?executionId=" + context.getExecutionId()
-                : "";
+        String downloadUrl = buildDownloadUrl(config, context);
 
         // Header
         Map<String, Object> header = new HashMap<>();
         Map<String, Object> title = new HashMap<>();
         title.put("tag", "plain_text");
-        title.put("content", StringUtils.isNotBlank(config.getTitle()) ? config.getTitle()
-                : "📊 " + context.getReportName());
+        title.put("content", buildTitle(config, context, downloadUrl));
         header.put("title", title);
         header.put("template", "blue");
         card.put("header", header);
@@ -272,12 +300,11 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         Map<String, Object> post = new HashMap<>();
         Map<String, Object> zhCn = new HashMap<>();
 
-        String downloadUrl = StringUtils.isNotBlank(config.getDownloadUrl())
-                ? config.getDownloadUrl() + "?executionId=" + context.getExecutionId()
-                : "";
+        String downloadUrl = buildDownloadUrl(config, context);
 
-        zhCn.put("title", StringUtils.isNotBlank(config.getTitle()) ? config.getTitle()
-                : "📊 " + context.getReportName());
+        String title = StringUtils.isNotBlank(config.getTitle()) ? config.getTitle()
+                : "📊 " + context.getReportName();
+        zhCn.put("title", TemplateResolver.resolve(title, context, downloadUrl));
 
         List<List<Object>> contentList = new ArrayList<>();
         List<Object> line1 = new ArrayList<>();
@@ -304,6 +331,54 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         return content;
     }
 
+    private String buildTitle(FeishuConfig config, DeliveryContext context, String downloadUrl) {
+        String title = StringUtils.isNotBlank(config.getTitle()) ? config.getTitle()
+                : "📊 " + context.getReportName();
+        return TemplateResolver.resolve(title, context, downloadUrl);
+    }
+
+    private Map<String, Object> buildTextContent(FeishuConfig config, DeliveryContext context) {
+        Map<String, Object> content = new HashMap<>();
+        String downloadUrl = buildDownloadUrl(config, context);
+        String text;
+        if (StringUtils.isNotBlank(config.getContent())) {
+            text = TemplateResolver.resolve(config.getContent(), context, downloadUrl);
+        } else {
+            text = String.format("📊 %s\n执行时间: %s\n数据量: %d 条%s", context.getReportName(),
+                    context.getExecutionTime(), context.getRowCount(),
+                    StringUtils.isNotBlank(downloadUrl) ? "\n下载: " + downloadUrl : "");
+        }
+        content.put("text", text);
+        return content;
+    }
+
+    private String buildDownloadUrl(FeishuConfig config, DeliveryContext context) {
+        if (StringUtils.isNotBlank(config.getDownloadUrl())) {
+            UriComponentsBuilder builder =
+                    UriComponentsBuilder.fromUriString(config.getDownloadUrl());
+            if (context.getExecutionId() != null) {
+                builder.queryParam("executionId", context.getExecutionId());
+            }
+            return builder.build().toUriString();
+        }
+        if (StringUtils.isAnyBlank(apiBaseUrl, context.getFileLocation())
+                || context.getScheduleId() == null || context.getExecutionId() == null) {
+            return "";
+        }
+        long expiresAt = ReportDownloadTokenUtils.expiresAtEpochSeconds(downloadTokenTtlSeconds);
+        String token = ReportDownloadTokenUtils.createToken(downloadSigningSecret,
+                context.getScheduleId(), context.getExecutionId(), expiresAt);
+        if (StringUtils.isBlank(token)) {
+            log.warn("Report download signing secret is not configured, skip download URL");
+            return "";
+        }
+        return UriComponentsBuilder
+                .fromUriString(StringUtils.stripEnd(apiBaseUrl, "/")
+                        + "/api/public/reportSchedules/" + context.getScheduleId() + "/executions/"
+                        + context.getExecutionId() + ":download")
+                .queryParam("expires", expiresAt).queryParam("token", token).build().toUriString();
+    }
+
     private String generateSign(long timestamp, String secret) throws Exception {
         String stringToSign = timestamp + "\n" + secret;
         Mac mac = Mac.getInstance("HmacSHA256");
@@ -312,18 +387,57 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         return Base64.getEncoder().encodeToString(signData);
     }
 
+    private void validateFeishuResponse(JSONObject respBody) {
+        if (respBody == null) {
+            return;
+        }
+        Integer code = respBody.getInteger("code");
+        String message = respBody.getString("msg");
+        if (code == null) {
+            code = respBody.getInteger("StatusCode");
+            message = respBody.getString("StatusMessage");
+        }
+        if (code != null && code != 0) {
+            throw new DeliveryException("Feishu API error: " + message);
+        }
+    }
+
     @Override
     public boolean validateConfig(String configJson) {
         FeishuConfig config = parseConfig(configJson);
         if (StringUtils.isBlank(config.getWebhookUrl())) {
             throw new IllegalArgumentException("Feishu webhook URL is required");
         }
-        if (!config.getWebhookUrl().contains("open.feishu.cn")
-                && !config.getWebhookUrl().contains("open.larksuite.com")) {
+        if (!isValidBotWebhookUrl(config.getWebhookUrl())) {
             throw new IllegalArgumentException(
-                    "Invalid Feishu webhook URL (must contain open.feishu.cn or open.larksuite.com)");
+                    "Invalid Feishu webhook URL. Use a custom bot webhook like "
+                            + "https://open.feishu.cn/open-apis/bot/v2/hook/xxx");
         }
         return true;
+    }
+
+    private void validateWebhookUrl(String webhookUrl) {
+        if (StringUtils.isBlank(webhookUrl)) {
+            throw new DeliveryException("Feishu webhook URL is required", false);
+        }
+        if (!isValidBotWebhookUrl(webhookUrl)) {
+            throw new DeliveryException("Invalid Feishu webhook URL. Use a custom bot webhook like "
+                    + "https://open.feishu.cn/open-apis/bot/v2/hook/xxx", false);
+        }
+    }
+
+    private boolean isValidBotWebhookUrl(String webhookUrl) {
+        try {
+            URI uri = URI.create(webhookUrl);
+            String host = uri.getHost();
+            String path = uri.getPath();
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && ("open.feishu.cn".equalsIgnoreCase(host)
+                            || "open.larksuite.com".equalsIgnoreCase(host))
+                    && path != null && path.startsWith("/open-apis/bot/v2/hook/");
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private FeishuConfig parseConfig(String configJson) {
@@ -341,7 +455,7 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
     public static class FeishuConfig {
         private String webhookUrl;
         private String secret;
-        private String msgType; // post, interactive
+        private String msgType; // text, post, interactive
         private String title;
         private String content; // User-defined message template with ${variable} placeholders
         private String downloadUrl; // Base URL for download links

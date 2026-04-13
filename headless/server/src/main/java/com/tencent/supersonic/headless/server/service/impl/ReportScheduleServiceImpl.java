@@ -194,17 +194,20 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         }
         switch (mode) {
             case BETWEEN:
-                if (StringUtils.isBlank(dateInfo.getDateField())
-                        || StringUtils.isBlank(dateInfo.getStartDate())
+                if (StringUtils.isBlank(dateInfo.getDateField())) {
+                    throw new IllegalArgumentException("请选择或填写日期字段");
+                }
+                if (StringUtils.isBlank(dateInfo.getStartDate())
                         || StringUtils.isBlank(dateInfo.getEndDate())) {
-                    throw new IllegalArgumentException(
-                            "BETWEEN 模式需要 dateField、startDate 和 endDate");
+                    throw new IllegalArgumentException("请选择日期范围");
                 }
                 break;
             case RECENT:
-                if (StringUtils.isBlank(dateInfo.getDateField()) || dateInfo.getUnit() == null
-                        || dateInfo.getUnit() <= 0) {
-                    throw new IllegalArgumentException("RECENT 模式需要 dateField 和 unit");
+                if (StringUtils.isBlank(dateInfo.getDateField())) {
+                    throw new IllegalArgumentException("请选择或填写日期字段");
+                }
+                if (dateInfo.getUnit() == null || dateInfo.getUnit() <= 0) {
+                    throw new IllegalArgumentException("请输入最近 N 天的天数");
                 }
                 break;
             case ALL:

@@ -388,7 +388,7 @@ class ReportScheduleServiceImplTest {
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> service.createSchedule(schedule, owner));
-        assertEquals("BETWEEN 模式需要 dateField、startDate 和 endDate", ex.getMessage());
+        assertEquals("请选择或填写日期字段", ex.getMessage());
     }
 
     @Test
@@ -400,7 +400,9 @@ class ReportScheduleServiceImplTest {
         ReportScheduleDO schedule = buildScheduleWithQueryConfig(
                 "{\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\",\"startDate\":null,\"endDate\":\"2025-03-10\"}}");
 
-        assertThrows(IllegalArgumentException.class, () -> service.createSchedule(schedule, owner));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createSchedule(schedule, owner));
+        assertEquals("请选择日期范围", ex.getMessage());
     }
 
     @Test
@@ -413,7 +415,7 @@ class ReportScheduleServiceImplTest {
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> service.createSchedule(schedule, owner));
-        assertEquals("RECENT 模式需要 dateField 和 unit", ex.getMessage());
+        assertEquals("请选择或填写日期字段", ex.getMessage());
     }
 
     @Test
