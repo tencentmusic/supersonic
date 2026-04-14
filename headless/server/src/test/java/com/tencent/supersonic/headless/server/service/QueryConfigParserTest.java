@@ -2,9 +2,13 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.DetailTypeDefaultConfig;
+import com.tencent.supersonic.headless.api.pojo.QueryConfig;
+import com.tencent.supersonic.headless.api.pojo.SqlTemplateConfig;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.core.utils.SqlTemplateEngine;
 import com.tencent.supersonic.headless.server.service.impl.QueryConfigParser;
 import org.junit.jupiter.api.Test;
@@ -19,12 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QueryConfigParserTest {
 
     @Mock
     private SqlTemplateEngine sqlTemplateEngine;
+    @Mock
+    private DataSetService dataSetService;
 
     @InjectMocks
     private QueryConfigParser queryConfigParser;
@@ -195,5 +202,27 @@ class QueryConfigParserTest {
         SemanticQueryReq result = queryConfigParser.parse(json, null, Map.of());
 
         assertNotNull(result);
+    }
+
+    @Test
+    void parseForAlert_sqlTemplate_usesDatasetDetailLimit() {
+        SqlTemplateConfig templateConfig = new SqlTemplateConfig();
+        templateConfig.setTemplateSql("SELECT * FROM t");
+        String json = JsonUtil.toString(templateConfig);
+        when(sqlTemplateEngine.render("SELECT * FROM t", Map.of())).thenReturn("SELECT * FROM t");
+
+        DetailTypeDefaultConfig detailConfig = new DetailTypeDefaultConfig();
+        detailConfig.setLimit(88);
+        QueryConfig queryConfig = new QueryConfig();
+        queryConfig.setDetailTypeDefaultConfig(detailConfig);
+        DataSetResp dataSet = new DataSetResp();
+        dataSet.setQueryConfig(queryConfig);
+        when(dataSetService.getDataSet(1L)).thenReturn(dataSet);
+
+        SemanticQueryReq result = queryConfigParser.parseForAlert(json, 1L);
+
+        assertInstanceOf(QuerySqlReq.class, result);
+        assertEquals("SELECT * FROM (SELECT * FROM t) AS _alert_query_limit LIMIT 88",
+                ((QuerySqlReq) result).getSql());
     }
 }

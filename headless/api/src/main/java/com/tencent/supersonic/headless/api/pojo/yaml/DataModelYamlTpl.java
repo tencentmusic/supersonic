@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.pojo.yaml;
+package com.tencent.supersonic.headless.api.pojo.yaml;
 
 import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.SqlVariable;

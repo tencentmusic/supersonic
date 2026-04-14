@@ -81,11 +81,12 @@ type QueryConfigFormSectionProps = {
   setQueryType: (value: QueryType) => void;
   currentDimensions: DataSetSchemaField[];
   currentMetrics: DataSetSchemaField[];
-  queryTypeOptions: Array<{ label: string; value: QueryType }>;
+  queryTypeOptions: { label: string; value: QueryType }[];
   groupsPlaceholder: string;
   metricsPlaceholder: string;
   limitMax: number;
   limitTooltip: string;
+  showGroupsInDetail?: boolean;
 };
 
 const QueryConfigFormSection: React.FC<QueryConfigFormSectionProps> = ({
@@ -99,6 +100,7 @@ const QueryConfigFormSection: React.FC<QueryConfigFormSectionProps> = ({
   metricsPlaceholder,
   limitMax,
   limitTooltip,
+  showGroupsInDetail = false,
 }) => {
   const allColumns = [
     ...currentDimensions.map((f) => ({ label: `${f.name} (${f.bizName})`, value: f.bizName })),
@@ -122,18 +124,20 @@ const QueryConfigFormSection: React.FC<QueryConfigFormSectionProps> = ({
           </Radio.Group>
         </Form.Item>
 
-        <Form.Item name="queryGroups" label="分组字段" style={{ marginBottom: 0 }}>
-          <Select
-            mode="multiple"
-            allowClear
-            optionFilterProp="label"
-            placeholder={currentDimensions.length > 0 ? groupsPlaceholder : '请先选择数据集'}
-            options={currentDimensions.map((field) => ({
-              label: `${field.name} (${field.bizName})`,
-              value: field.bizName,
-            }))}
-          />
-        </Form.Item>
+        {(queryType === 'AGGREGATE' || showGroupsInDetail) && (
+          <Form.Item name="queryGroups" label="分组字段" style={{ marginBottom: 0 }}>
+            <Select
+              mode="multiple"
+              allowClear
+              optionFilterProp="label"
+              placeholder={currentDimensions.length > 0 ? groupsPlaceholder : '请先选择数据集'}
+              options={currentDimensions.map((field) => ({
+                label: `${field.name} (${field.bizName})`,
+                value: field.bizName,
+              }))}
+            />
+          </Form.Item>
+        )}
 
         {queryType === 'AGGREGATE' && (
           <Form.List name="queryAggregators">

@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -141,7 +142,9 @@ public class DeliveryRetryTask {
         DeliveryContext context = DeliveryContext.builder().scheduleId(record.getScheduleId())
                 .executionId(record.getExecutionId()).fileLocation(record.getFileLocation())
                 .tenantId(record.getTenantId()).scheduleName(scheduleName).reportName(reportName)
-                .rowCount(rowCount).executionTime(record.getCreatedAt().toString()).build();
+                .rowCount(rowCount)
+                .executionTime(DateUtils.format(record.getCreatedAt(), "yyyy-MM-dd HH:mm:ss"))
+                .build();
 
         long startTime = System.currentTimeMillis();
         int retryCount = record.getRetryCount() != null ? record.getRetryCount() + 1 : 1;

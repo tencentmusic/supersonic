@@ -9,6 +9,8 @@ export interface ValidDataSetItem {
   name: string;
   domainId?: number;
   partitionDimension?: string;
+  detailLimit?: number;
+  aggregateLimit?: number;
 }
 
 export interface DataSetSchemaField {
@@ -47,6 +49,8 @@ export interface ReportSchedule {
   tenantId?: number;
 }
 
+export type DeliveryRollup = 'NONE' | 'DELIVERED' | 'PARTIAL' | 'FAILED' | 'IN_PROGRESS';
+
 export interface ReportExecution {
   id: number;
   scheduleId?: number;
@@ -64,6 +68,11 @@ export interface ReportExecution {
   templateName?: string;
   triggerType?: string;
   hasPreview?: boolean;
+  // Delivery rollup aggregated from s2_report_delivery_record
+  channelTypes?: string[];
+  deliveryRollup?: DeliveryRollup;
+  deliverySuccessCount?: number;
+  deliveryTotalCount?: number;
 }
 
 export function getScheduleList(params: {
@@ -114,6 +123,43 @@ export function getExecutionById(scheduleId: number, executionId: number) {
   return request(`${BASE}/${scheduleId}/executions/${executionId}`, { method: 'GET' });
 }
 
-export function downloadExecutionResult(scheduleId: number, executionId: number) {
-  window.open(`${BASE}/${scheduleId}/executions/${executionId}:download`, '_blank');
+function parseFilenameFromContentDisposition(
+  contentDisposition?: string | null,
+  fallback?: string,
+) {
+  if (!contentDisposition) {
+    return fallback || 'report.xlsx';
+  }
+  const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1]);
+  }
+  const basicMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+  if (basicMatch?.[1]) {
+    return basicMatch[1];
+  }
+  return fallback || 'report.xlsx';
+}
+
+export async function downloadExecutionResult(
+  scheduleId: number,
+  executionId: number,
+  fallbackName?: string,
+) {
+  const res = await request(`${BASE}/${scheduleId}/executions/${executionId}:download`, {
+    method: 'GET',
+    responseType: 'blob',
+    getResponse: true,
+  });
+  const blob = res?.data as Blob;
+  const contentDisposition = res?.response?.headers?.get?.('content-disposition');
+  const fileName = parseFilenameFromContentDisposition(contentDisposition, fallbackName);
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 }

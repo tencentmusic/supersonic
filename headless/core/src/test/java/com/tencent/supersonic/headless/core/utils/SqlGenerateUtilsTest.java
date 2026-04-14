@@ -4,6 +4,7 @@ import com.tencent.supersonic.common.pojo.Aggregator;
 import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.DatePeriodEnum;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.headless.core.config.ExecutorConfig;
@@ -254,6 +255,17 @@ class SqlGenerateUtilsTest {
         String result = sqlGenerateUtils.getGroupBy(query);
 
         assertEquals("group by city,product", result);
+    }
+
+    @Test
+    void getGroupBy_detailQueryWithGroups_returnsEmptyString() {
+        StructQuery query = new StructQuery();
+        query.setQueryType(QueryType.DETAIL);
+        query.setGroups(Arrays.asList("city", "product"));
+
+        String result = sqlGenerateUtils.getGroupBy(query);
+
+        assertEquals("", result);
     }
 
     @Test

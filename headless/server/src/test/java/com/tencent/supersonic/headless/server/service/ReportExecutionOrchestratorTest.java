@@ -1,9 +1,18 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
+import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
+import com.tencent.supersonic.common.config.SensitiveLevelConfig;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.exception.ParamValidationException;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
@@ -48,6 +57,12 @@ class ReportExecutionOrchestratorTest {
     private QueryConfigParser queryConfigParser;
     @Mock
     private UserService userService;
+    @Mock
+    private SchemaService schemaService;
+    @Mock
+    private DataSetAuthService dataSetAuthService;
+    @Mock
+    private SensitiveLevelConfig sensitiveLevelConfig;
 
     @InjectMocks
     private ReportExecutionOrchestrator orchestrator;
@@ -81,6 +96,51 @@ class ReportExecutionOrchestratorTest {
         verify(semanticLayerService).queryByReq(eq(queryReq), userCaptor.capture());
         assertEquals("alice", userCaptor.getValue().getName());
         assertEquals(1L, userCaptor.getValue().getTenantId());
+    }
+
+    @Test
+    void executeShouldFilterUnauthorizedMidFieldsWhenExpandingDetailGroups() throws Exception {
+        ReportExecutionContext ctx = ReportExecutionContext.builder().tenantId(1L).datasetId(10L)
+                .scheduleId(100L).operatorUserId(7L).source(ExecutionSource.SCHEDULE)
+                .queryConfig("{\"queryType\":\"DETAIL\",\"groups\":[]}")
+                .deliveryConfigIds(Collections.emptyList()).build();
+
+        User owner = new User();
+        owner.setId(7L);
+        owner.setName("alice");
+        owner.setTenantId(1L);
+        when(userService.getUserById(7L)).thenReturn(owner);
+
+        QueryStructReq queryReq = new QueryStructReq();
+        queryReq.setDataSetId(10L);
+        queryReq.setQueryType(QueryType.DETAIL);
+        queryReq.setGroups(Collections.emptyList());
+        when(queryConfigParser.parse(ctx.getQueryConfig(), 10L, null)).thenReturn(queryReq);
+
+        SemanticSchemaResp schema = new SemanticSchemaResp();
+        schema.setDimensions(List.of(dim("city", SensitiveLevelEnum.LOW.getCode()),
+                dim("phone", SensitiveLevelEnum.MID.getCode())));
+        schema.setMetrics(List.of(metric("gmv", SensitiveLevelEnum.HIGH.getCode())));
+        when(schemaService.fetchSemanticSchema(any())).thenReturn(schema);
+        when(dataSetAuthService.checkDataSetAdminPermission(10L, owner)).thenReturn(false);
+        when(sensitiveLevelConfig.isMidLevelRequireAuth()).thenReturn(true);
+
+        AuthorizedResourceResp authResp = new AuthorizedResourceResp();
+        authResp.setAuthResList(List.of(new AuthRes(1L, "gmv")));
+        when(dataSetAuthService.queryAuthorizedResources(10L, owner)).thenReturn(authResp);
+
+        SemanticQueryResp queryResp = new SemanticQueryResp();
+        queryResp.setColumns(Collections.emptyList());
+        queryResp.setResultList(Collections.emptyList());
+        queryResp.setSql("select city,gmv from t");
+        when(semanticLayerService.queryByReq(any(QueryStructReq.class), any(User.class)))
+                .thenReturn(queryResp);
+
+        orchestrator.execute(ctx);
+
+        ArgumentCaptor<QueryStructReq> reqCaptor = ArgumentCaptor.forClass(QueryStructReq.class);
+        verify(semanticLayerService).queryByReq(reqCaptor.capture(), any(User.class));
+        assertEquals(List.of("city", "gmv"), reqCaptor.getValue().getGroups());
     }
 
     @Test
@@ -239,5 +299,21 @@ class ReportExecutionOrchestratorTest {
         verify(executionMapper).updateById(failed.capture());
         assertEquals("FAILED", failed.getValue().getStatus());
         assertTrue(failed.getValue().getErrorMessage().toLowerCase().contains("timed"));
+    }
+
+    private DimSchemaResp dim(String bizName, Integer sensitiveLevel) {
+        DimSchemaResp dim = new DimSchemaResp();
+        dim.setName(bizName);
+        dim.setBizName(bizName);
+        dim.setSensitiveLevel(sensitiveLevel);
+        return dim;
+    }
+
+    private MetricSchemaResp metric(String bizName, Integer sensitiveLevel) {
+        MetricSchemaResp metric = new MetricSchemaResp();
+        metric.setName(bizName);
+        metric.setBizName(bizName);
+        metric.setSensitiveLevel(sensitiveLevel);
+        return metric;
     }
 }

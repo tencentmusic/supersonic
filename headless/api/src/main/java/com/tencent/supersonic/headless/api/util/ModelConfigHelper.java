@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.utils;
+package com.tencent.supersonic.headless.api.util;
 
 import com.tencent.supersonic.common.config.ChatModel;
 import com.tencent.supersonic.common.pojo.ChatApp;

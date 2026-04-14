@@ -21,4 +21,10 @@ public class ValidDataSetResp {
 
     /** Name of the partition dimension (e.g. "imp_date"), or null if the dataset has none. */
     private String partitionDimension;
+
+    /** Dataset-configured DETAIL query row limit. */
+    private Long detailLimit;
+
+    /** Dataset-configured AGGREGATE query row limit. */
+    private Long aggregateLimit;
 }

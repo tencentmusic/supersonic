@@ -32,6 +32,8 @@ const ReportSchedulePage: React.FC = () => {
   const [executionDrawer, setExecutionDrawer] = useState<{ visible: boolean; scheduleId?: number; name?: string }>({ visible: false });
   const [deliveryConfigMap, setDeliveryConfigMap] = useState<Record<number, DeliveryConfig>>({});
   const [datasetNameMap, setDatasetNameMap] = useState<Record<number, string>>({});
+  const triggeringScheduleIdsRef = useRef<Set<number>>(new Set());
+  const [triggeringScheduleIds, setTriggeringScheduleIds] = useState<Record<number, boolean>>({});
 
   const fetchData = async (current = 1, pageSize = 20) => {
     setLoading(true);
@@ -123,8 +125,22 @@ const ReportSchedulePage: React.FC = () => {
   };
 
   const handleTrigger = async (id: number) => {
-    await triggerSchedule(id);
-    message.success('已触发执行');
+    if (triggeringScheduleIdsRef.current.has(id)) {
+      return;
+    }
+    triggeringScheduleIdsRef.current.add(id);
+    setTriggeringScheduleIds((prev) => ({ ...prev, [id]: true }));
+    try {
+      await triggerSchedule(id);
+      message.success('已触发执行');
+    } finally {
+      triggeringScheduleIdsRef.current.delete(id);
+      setTriggeringScheduleIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
   };
 
   const columns = [
@@ -205,7 +221,13 @@ const ReportSchedulePage: React.FC = () => {
           <Button type="link" size="small" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button type="link" size="small" onClick={() => handleTrigger(record.id)}>
+          <Button
+            type="link"
+            size="small"
+            loading={!!triggeringScheduleIds[record.id]}
+            disabled={!!triggeringScheduleIds[record.id]}
+            onClick={() => handleTrigger(record.id)}
+          >
             立即执行
           </Button>
           <Button

@@ -9,6 +9,7 @@ import com.tencent.supersonic.feishu.server.handler.CardActionHandler;
 import com.tencent.supersonic.feishu.server.handler.FeishuMessageRouter;
 import com.tencent.supersonic.feishu.server.handler.MessageHandler;
 import com.tencent.supersonic.feishu.server.metrics.FeishuMeterBinder;
+import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuUserMappingDO;
 import com.tencent.supersonic.feishu.server.render.FeishuCardRenderer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +26,13 @@ import java.util.concurrent.RejectedExecutionException;
 public class FeishuBotService {
 
     private static final String RATE_LIMIT_PREFIX = "rateLimit:";
+
+    /**
+     * Fallback tenant used to satisfy {@code TenantSqlInterceptor} on async webhook threads that
+     * have no inherited ThreadLocal context. Must be overwritten with {@code user.getTenantId()}
+     * (or {@code pending.getTenantId()}) as soon as the real tenant is known.
+     */
+    private static final Long DEFAULT_TENANT_ID = 1L;
 
     private final FeishuMessageRouter router;
     private final FeishuUserMappingService userMappingService;
@@ -117,16 +125,26 @@ public class FeishuBotService {
             return;
         }
 
-        // Resolve user
-        FeishuUserMappingService.ResolvedMapping mapping =
-                userMappingService.resolveMapping(openId);
-        if (mapping == null || mapping.user() == null) {
-            log.warn("Cannot resolve Feishu user for open_id: {}", openId);
-            return;
-        }
+        try {
+            // Async thread has no inherited TenantContext; set a default so any downstream SQL has
+            // a consistent tenant filter during mapping lookup. Overwrite with the real tenant
+            // once the user has been resolved.
+            TenantContext.setTenantId(DEFAULT_TENANT_ID);
 
-        // Send confirmation to operator's open_id (sendCard uses receive_id_type=open_id)
-        cardActionHandler.handle(actionValue, mapping.user(), openId);
+            FeishuUserMappingService.ResolvedMapping mapping =
+                    userMappingService.resolveMapping(openId);
+            if (mapping == null || mapping.user() == null) {
+                log.warn("Cannot resolve Feishu user for open_id: {}", openId);
+                sendUnmappedActionPrompt(openId);
+                return;
+            }
+
+            TenantContext.setTenantId(mapping.user().getTenantId());
+            // Send confirmation to operator's open_id (sendCard uses receive_id_type=open_id)
+            cardActionHandler.handle(actionValue, mapping.user(), openId);
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     /**
@@ -162,7 +180,7 @@ public class FeishuBotService {
 
         try {
             // Set default tenant for user mapping lookup (async thread has no tenant context)
-            TenantContext.setTenantId(1L);
+            TenantContext.setTenantId(DEFAULT_TENANT_ID);
 
             // Resolve user and mapping
             FeishuUserMappingService.ResolvedMapping resolved =
@@ -207,22 +225,76 @@ public class FeishuBotService {
     }
 
     private void replyUnmappedUser(FeishuMessage msg) {
-        if (properties.getOauth().isEnabled()) {
-            var pending = userMappingService.findPendingByOpenId(msg.getOpenId());
-            if (pending != null) {
-                String bindToken = bindTokenService.generateToken(msg.getOpenId(), pending.getId(),
-                        pending.getFeishuUserName(), TenantContext.getTenantIdOrDefault(1L));
-                String bindUrl =
-                        properties.getApiBaseUrl() + "/api/feishu/bindPage?token=" + bindToken;
-                Map<String, Object> card = cardRenderer.renderBindGuideCard(
-                        pending.getFeishuUserName() != null ? pending.getFeishuUserName() : "用户",
-                        bindUrl);
+        FeishuUserMappingDO pending = findBindablePending(msg.getOpenId(), /* crossTenant */ false);
+        if (pending != null) {
+            Map<String, Object> card = buildBindGuideCard(msg.getOpenId(), pending);
+            if (card != null) {
                 messageSender.replyCard(msg.getMessageId(), card);
                 return;
             }
         }
         messageSender.replyText(msg.getMessageId(),
                 "未找到您的账号映射，已自动提交映射申请，请联系管理员在用户映射页面审核并关联您的平台账号。");
+    }
+
+    private void sendUnmappedActionPrompt(String openId) {
+        // Card callback runs on an async thread with only an openId — we do not know which tenant
+        // the user belongs to until we find their pending mapping. Use the cross-tenant lookup so
+        // that a tenant-2 user whose callback was set up before tenant resolution will still get
+        // the correct bind link signed with THEIR tenantId.
+        FeishuUserMappingDO pending = findBindablePending(openId, /* crossTenant */ true);
+        if (pending != null) {
+            Map<String, Object> card = buildBindGuideCard(openId, pending);
+            if (card != null) {
+                try {
+                    messageSender.sendCard(openId, card);
+                } catch (Exception e) {
+                    log.warn("Failed to send bind guide card to {}: {}", openId, e.getMessage());
+                }
+                return;
+            }
+        }
+        try {
+            messageSender.sendText(openId, "未找到您的账号映射，暂不能下载报表。请先在飞书机器人对话中发送任意消息完成账号绑定。");
+        } catch (Exception e) {
+            log.warn("Failed to send unmapped prompt to {}: {}", openId, e.getMessage());
+        }
+    }
+
+    /**
+     * Find a PENDING mapping row usable for signing a self-service bind token. Returns null when
+     * OAuth self-service binding is disabled.
+     *
+     * @param crossTenant when true, bypass the current TenantContext and look across all tenants
+     *        (card-action callbacks know only an openId, so this is required to recover the owning
+     *        tenant before signing the bind token)
+     */
+    private FeishuUserMappingDO findBindablePending(String openId, boolean crossTenant) {
+        if (!properties.getOauth().isEnabled()) {
+            return null;
+        }
+        return crossTenant ? userMappingService.findLatestPendingAcrossTenants(openId)
+                : userMappingService.findPendingByOpenId(openId);
+    }
+
+    /**
+     * Build a bind-guide card for the given pending mapping. Switches TenantContext to the pending
+     * mapping's tenant so that both {@code bindTokenService.generateToken} and any downstream SQL
+     * observe the correct tenant; the caller is responsible for restoring or clearing TenantContext
+     * afterwards (e.g. via a {@code finally} in {@code handleCardAction}).
+     */
+    private Map<String, Object> buildBindGuideCard(String openId, FeishuUserMappingDO pending) {
+        if (pending.getTenantId() == null) {
+            log.warn("Pending mapping id={} has null tenantId, refusing to sign bind token",
+                    pending.getId());
+            return null;
+        }
+        TenantContext.setTenantId(pending.getTenantId());
+        String bindToken = bindTokenService.generateToken(openId, pending.getId(),
+                pending.getFeishuUserName(), pending.getTenantId());
+        String bindUrl = properties.getApiBaseUrl() + "/api/feishu/bindPage?token=" + bindToken;
+        return cardRenderer.renderBindGuideCard(
+                pending.getFeishuUserName() != null ? pending.getFeishuUserName() : "用户", bindUrl);
     }
 
     private boolean isRateLimited(String openId) {

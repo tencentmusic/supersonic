@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.service;
+package com.tencent.supersonic.headless.api.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;

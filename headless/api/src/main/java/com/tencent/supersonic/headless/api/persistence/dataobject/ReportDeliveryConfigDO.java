@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.persistence.dataobject;
+package com.tencent.supersonic.headless.api.persistence.dataobject;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

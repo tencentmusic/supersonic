@@ -1,11 +1,15 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.tencent.supersonic.common.pojo.Constants;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SqlTemplateConfig;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.core.utils.SqlTemplateEngine;
+import com.tencent.supersonic.headless.server.service.DataSetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,9 @@ public class QueryConfigParser {
 
     @Autowired(required = false)
     private SqlTemplateEngine sqlTemplateEngine;
+
+    @Autowired(required = false)
+    private DataSetService dataSetService;
 
     /**
      * Parse a queryConfig string for use in report schedules. Allows all three config types:
@@ -112,8 +119,8 @@ public class QueryConfigParser {
      * {@link QueryStructReq} or {@link SqlTemplateConfig} instead.
      *
      * <p>
-     * AG-08: When the config resolves to a {@link QueryStructReq}, the limit is capped at 1000 rows
-     * to prevent runaway result sets during alert evaluation.
+     * AG-08: When the config resolves to a {@link QueryStructReq}, the limit is capped using the
+     * dataset's query configuration to prevent runaway result sets during alert evaluation.
      *
      * @param queryConfig serialized JSON of the query config
      * @param datasetId dataset ID to inject when the config does not carry one
@@ -136,8 +143,10 @@ public class QueryConfigParser {
                 // Render with empty params — alert rules have no runtime param context
                 String renderedSql =
                         sqlTemplateEngine.render(templateConfig.getTemplateSql(), Map.of());
-                // AG-08: enforce 1000-row cap by wrapping in a subquery if no LIMIT is present
-                String limitedSql = injectAlertLimit(renderedSql);
+                // AG-08: enforce the dataset's detail limit by wrapping in a subquery if no LIMIT
+                // is present
+                String limitedSql =
+                        injectAlertLimit(renderedSql, getAlertLimit(datasetId, QueryType.DETAIL));
                 QuerySqlReq sqlReq = new QuerySqlReq();
                 sqlReq.setSql(limitedSql);
                 sqlReq.setDataSetId(datasetId);
@@ -158,12 +167,14 @@ public class QueryConfigParser {
                     structReq.setDataSetId(datasetId);
                 }
                 if (structReq.getDataSetId() != null) {
-                    // AG-08: cap limit at 1000 rows
+                    // AG-08: cap limit using the dataset's query configuration
                     long currentLimit = structReq.getLimit();
-                    if (currentLimit <= 0 || currentLimit > 1000) {
-                        log.info("AG-08: Capping alert query limit from {} to 1000 for dataset={}",
-                                currentLimit, structReq.getDataSetId());
-                        structReq.setLimit(1000L);
+                    long alertLimit =
+                            getAlertLimit(structReq.getDataSetId(), structReq.getQueryType());
+                    if (currentLimit <= 0 || currentLimit > alertLimit) {
+                        log.info("AG-08: Capping alert query limit from {} to {} for dataset={}",
+                                currentLimit, alertLimit, structReq.getDataSetId());
+                        structReq.setLimit(alertLimit);
                     }
                     return structReq.convert(true);
                 }
@@ -190,17 +201,47 @@ public class QueryConfigParser {
     }
 
     /**
-     * AG-08: Wrap the rendered SQL in a {@code SELECT * FROM (...) LIMIT 1000} subquery if it does
-     * not already contain a {@code LIMIT} clause. This prevents runaway result sets during alert
-     * evaluation for SqlTemplateConfig-based rules.
+     * AG-08: Wrap the rendered SQL in a limited subquery if it does not already contain a
+     * {@code LIMIT} clause. This prevents runaway result sets during alert evaluation for
+     * SqlTemplateConfig-based rules.
      */
-    private String injectAlertLimit(String sql) {
+    private String injectAlertLimit(String sql, long alertLimit) {
         // Simple heuristic: look for a standalone LIMIT keyword (case-insensitive)
         if (sql.toUpperCase().matches("(?s).*\\bLIMIT\\s+\\d+.*")) {
             log.debug("AG-08: SQL already contains LIMIT clause, skipping injection");
             return sql;
         }
-        log.info("AG-08: Injecting LIMIT 1000 subquery wrapper for alert SQL");
-        return "SELECT * FROM (" + sql + ") AS _alert_query_limit LIMIT 1000";
+        log.info("AG-08: Injecting LIMIT {} subquery wrapper for alert SQL", alertLimit);
+        return "SELECT * FROM (" + sql + ") AS _alert_query_limit LIMIT " + alertLimit;
+    }
+
+    private long getAlertLimit(Long datasetId, QueryType queryType) {
+        if (dataSetService == null || datasetId == null) {
+            return getDefaultLimit(queryType);
+        }
+        try {
+            DataSetResp dataSet = dataSetService.getDataSet(datasetId);
+            if (dataSet == null || dataSet.getQueryConfig() == null) {
+                return getDefaultLimit(queryType);
+            }
+            if (QueryType.AGGREGATE.equals(queryType)
+                    && dataSet.getQueryConfig().getAggregateTypeDefaultConfig() != null) {
+                long limit = dataSet.getQueryConfig().getAggregateTypeDefaultConfig().getLimit();
+                return limit > 0 ? limit : Constants.DEFAULT_METRIC_LIMIT;
+            }
+            if (dataSet.getQueryConfig().getDetailTypeDefaultConfig() != null) {
+                long limit = dataSet.getQueryConfig().getDetailTypeDefaultConfig().getLimit();
+                return limit > 0 ? limit : Constants.DEFAULT_DETAIL_LIMIT;
+            }
+        } catch (Exception e) {
+            log.warn("AG-08: Failed to load dataset query limit for dataset={}: {}", datasetId,
+                    e.getMessage());
+        }
+        return getDefaultLimit(queryType);
+    }
+
+    private long getDefaultLimit(QueryType queryType) {
+        return QueryType.AGGREGATE.equals(queryType) ? Constants.DEFAULT_METRIC_LIMIT
+                : Constants.DEFAULT_DETAIL_LIMIT;
     }
 }

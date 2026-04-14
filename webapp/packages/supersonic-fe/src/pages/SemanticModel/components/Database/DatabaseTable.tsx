@@ -1,7 +1,7 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { message, Button, Space, Popconfirm, Tag, Tooltip } from 'antd';
-import { SyncOutlined, WarningOutlined, PlayCircleOutlined, PauseCircleOutlined, EditOutlined } from '@ant-design/icons';
+import { SyncOutlined, WarningOutlined, PlayCircleOutlined, PauseCircleOutlined, EditOutlined, LoadingOutlined } from '@ant-design/icons';
 import React, { useRef, useState, useEffect } from 'react';
 import DatabaseSettingModal from './DatabaseSettingModal';
 import SyncConfigWizard from './SyncConfigWizard';
@@ -12,7 +12,7 @@ import type { ConnectionDO } from '@/services/connection';
 
 import dayjs from 'dayjs';
 
-type Props = {};
+type Props = Record<string, never>;
 
 const CONNECTION_STATUS_MAP: Record<string, { color: string; text: string }> = {
   ACTIVE: { color: 'green', text: '同步中' },
@@ -28,6 +28,8 @@ const DatabaseTable: React.FC<Props> = ({}) => {
   const [connections, setConnections] = useState<ConnectionDO[]>([]);
   const [syncWizardVisible, setSyncWizardVisible] = useState<boolean>(false);
   const [syncSourceDatabase, setSyncSourceDatabase] = useState<ISemantic.IDatabaseItem | null>(null);
+  const triggeringConnectionIdsRef = useRef<Set<number>>(new Set());
+  const [triggeringConnectionIds, setTriggeringConnectionIds] = useState<Record<number, boolean>>({});
 
   const actionRef = useRef<ActionType>();
 
@@ -92,11 +94,23 @@ const DatabaseTable: React.FC<Props> = ({}) => {
 
   // Handle sync operations
   const handleTriggerSync = async (connectionId: number) => {
+    if (triggeringConnectionIdsRef.current.has(connectionId)) {
+      return;
+    }
+    triggeringConnectionIdsRef.current.add(connectionId);
+    setTriggeringConnectionIds((prev) => ({ ...prev, [connectionId]: true }));
     try {
       await triggerSync(connectionId);
       message.success('同步任务已触发');
     } catch (e: any) {
       message.error(e?.message || '触发同步失败');
+    } finally {
+      triggeringConnectionIdsRef.current.delete(connectionId);
+      setTriggeringConnectionIds((prev) => {
+        const next = { ...prev };
+        delete next[connectionId];
+        return next;
+      });
     }
   };
 
@@ -218,9 +232,24 @@ const DatabaseTable: React.FC<Props> = ({}) => {
                 <Tooltip title="立即执行一次同步">
                   <a
                     key="triggerSyncBtn"
-                    onClick={() => handleTriggerSync(connection.id!)}
+                    onClick={() => {
+                      if (triggeringConnectionIds[connection.id!]) {
+                        return;
+                      }
+                      handleTriggerSync(connection.id!);
+                    }}
+                    style={
+                      triggeringConnectionIds[connection.id!]
+                        ? { pointerEvents: 'none', opacity: 0.5 }
+                        : undefined
+                    }
                   >
-                    <PlayCircleOutlined /> 同步
+                    {triggeringConnectionIds[connection.id!] ? (
+                      <LoadingOutlined />
+                    ) : (
+                      <PlayCircleOutlined />
+                    )}{' '}
+                    同步
                   </a>
                 </Tooltip>
                 {isActive && (

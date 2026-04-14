@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Drawer, Table, Tag, Button, Space, Tooltip, Popconfirm, message } from 'antd';
 import { ReloadOutlined, RedoOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -31,6 +31,8 @@ const RecordList: React.FC<RecordListProps> = ({
   const [data, setData] = useState<DeliveryRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
+  const retryingRecordIdsRef = useRef<Set<number>>(new Set());
+  const [retryingRecordIds, setRetryingRecordIds] = useState<Record<number, boolean>>({});
 
   const fetchData = async (page = pagination.current, size = pagination.pageSize) => {
     if (!visible || (!configId && !scheduleId)) return;
@@ -63,12 +65,24 @@ const RecordList: React.FC<RecordListProps> = ({
   }, [visible, configId, scheduleId]);
 
   const handleRetry = async (id: number) => {
+    if (retryingRecordIdsRef.current.has(id)) {
+      return;
+    }
+    retryingRecordIdsRef.current.add(id);
+    setRetryingRecordIds((prev) => ({ ...prev, [id]: true }));
     try {
       await retryRecord(id);
       message.success('已发起重试');
       fetchData();
     } catch (error) {
       message.error('重试失败');
+    } finally {
+      retryingRecordIdsRef.current.delete(id);
+      setRetryingRecordIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
@@ -150,7 +164,13 @@ const RecordList: React.FC<RecordListProps> = ({
               cancelText="取消"
             >
               <Tooltip title="重试">
-                <Button type="link" size="small" icon={<RedoOutlined />} />
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<RedoOutlined />}
+                  loading={!!retryingRecordIds[record.id]}
+                  disabled={!!retryingRecordIds[record.id]}
+                />
               </Tooltip>
             </Popconfirm>
           )}

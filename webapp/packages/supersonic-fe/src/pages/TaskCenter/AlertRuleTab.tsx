@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { Button, Table, Switch, Space, Popconfirm, message, Tooltip, Empty, Tag } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
@@ -38,6 +38,8 @@ const AlertRuleTab: React.FC = () => {
   }>({ visible: false });
   const [pendingCounts, setPendingCounts] = useState<Record<number, number>>({});
   const [datasetNameMap, setDatasetNameMap] = useState<Record<number, string>>({});
+  const triggeringRuleIdsRef = useRef<Set<number>>(new Set());
+  const [triggeringRuleIds, setTriggeringRuleIds] = useState<Record<number, boolean>>({});
 
   const fetchData = async (current = 1, pageSize = 20) => {
     setLoading(true);
@@ -133,11 +135,23 @@ const AlertRuleTab: React.FC = () => {
   };
 
   const handleTrigger = async (id: number) => {
+    if (triggeringRuleIdsRef.current.has(id)) {
+      return;
+    }
+    triggeringRuleIdsRef.current.add(id);
+    setTriggeringRuleIds((prev) => ({ ...prev, [id]: true }));
     try {
       await triggerRule(id);
       message.success('已触发检查');
     } catch (error) {
       message.error('触发失败');
+    } finally {
+      triggeringRuleIdsRef.current.delete(id);
+      setTriggeringRuleIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
@@ -196,7 +210,13 @@ const AlertRuleTab: React.FC = () => {
           <Button type="link" size="small" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button type="link" size="small" onClick={() => handleTrigger(record.id!)}>
+          <Button
+            type="link"
+            size="small"
+            loading={!!triggeringRuleIds[record.id!]}
+            disabled={!!triggeringRuleIds[record.id!]}
+            onClick={() => handleTrigger(record.id!)}
+          >
             立即触发
           </Button>
           <Button

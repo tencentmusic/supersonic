@@ -11,10 +11,13 @@ import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryRecordMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleMapper;
+import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
 import com.tencent.supersonic.headless.server.pojo.ExecutionSnapshotData;
 import com.tencent.supersonic.headless.server.pojo.ReportExecutionContext;
 import com.tencent.supersonic.headless.server.pojo.ReportExecutionVO;
@@ -28,8 +31,15 @@ import org.quartz.JobDataMap;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -45,17 +55,20 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     private final ReportExecutionOrchestrator orchestrator;
     private final UserService userService;
     private final DataSetAuthService dataSetAuthService;
+    private final ReportDeliveryRecordMapper deliveryRecordMapper;
 
     public ReportScheduleServiceImpl(QuartzJobManager quartzJobManager,
             ReportExecutionMapper executionMapper, ReportExecutionContextBuilder contextBuilder,
             ReportExecutionOrchestrator orchestrator, UserService userService,
-            DataSetAuthService dataSetAuthService) {
+            DataSetAuthService dataSetAuthService,
+            ReportDeliveryRecordMapper deliveryRecordMapper) {
         this.quartzJobManager = quartzJobManager;
         this.executionMapper = executionMapper;
         this.contextBuilder = contextBuilder;
         this.orchestrator = orchestrator;
         this.userService = userService;
         this.dataSetAuthService = dataSetAuthService;
+        this.deliveryRecordMapper = deliveryRecordMapper;
     }
 
     @PostConstruct
@@ -444,11 +457,28 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         Page<ReportExecutionDO> doPage = getExecutionList(page, scheduleId, status, user);
         Page<ReportExecutionVO> voPage =
                 new Page<>(doPage.getCurrent(), doPage.getSize(), doPage.getTotal());
-        voPage.setRecords(doPage.getRecords().stream().map(this::toVO).toList());
+
+        List<ReportExecutionDO> records = doPage.getRecords();
+        Map<Long, List<ReportDeliveryRecordDO>> rollupByExec = loadDeliveryRecordsByExecutionIds(
+                records.stream().map(ReportExecutionDO::getId).toList());
+
+        voPage.setRecords(records.stream().map(e -> toVO(e, rollupByExec.get(e.getId()))).toList());
         return voPage;
     }
 
-    private ReportExecutionVO toVO(ReportExecutionDO execution) {
+    private Map<Long, List<ReportDeliveryRecordDO>> loadDeliveryRecordsByExecutionIds(
+            List<Long> executionIds) {
+        if (CollectionUtils.isEmpty(executionIds)) {
+            return Collections.emptyMap();
+        }
+        QueryWrapper<ReportDeliveryRecordDO> wrapper = new QueryWrapper<>();
+        wrapper.lambda().in(ReportDeliveryRecordDO::getExecutionId, executionIds);
+        List<ReportDeliveryRecordDO> all = deliveryRecordMapper.selectList(wrapper);
+        return all.stream().collect(Collectors.groupingBy(ReportDeliveryRecordDO::getExecutionId));
+    }
+
+    private ReportExecutionVO toVO(ReportExecutionDO execution,
+            List<ReportDeliveryRecordDO> deliveryRecords) {
         ReportExecutionVO vo = new ReportExecutionVO();
         vo.setId(execution.getId());
         vo.setScheduleId(execution.getScheduleId());
@@ -478,6 +508,79 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
                         execution.getId(), e.getMessage());
             }
         }
+
+        applyDeliveryRollup(vo, deliveryRecords);
         return vo;
+    }
+
+    /**
+     * Rollup 规则（多渠道场景下执行.status 只反映查询执行成败，投递在这里单独聚合）：
+     *
+     * <ul>
+     * <li>无记录 → NONE, channelTypes 空
+     * <li>任一 PENDING/SENDING → IN_PROGRESS
+     * <li>全 SUCCESS → DELIVERED
+     * <li>全 FAILED → FAILED
+     * <li>SUCCESS + FAILED 混合 → PARTIAL
+     * </ul>
+     *
+     * channelTypes 按 deliveryType 去重，保留首次出现顺序（同一渠道重试可能产生多条记录）。
+     */
+    private void applyDeliveryRollup(ReportExecutionVO vo,
+            List<ReportDeliveryRecordDO> deliveryRecords) {
+        if (CollectionUtils.isEmpty(deliveryRecords)) {
+            vo.setChannelTypes(new ArrayList<>());
+            vo.setDeliveryRollup("NONE");
+            vo.setDeliverySuccessCount(0);
+            vo.setDeliveryTotalCount(0);
+            return;
+        }
+
+        // 每个 configId 只保留最新一次结果，避免被重试产生的历史记录拉偏 rollup。
+        Map<Long, ReportDeliveryRecordDO> latestByConfig = new LinkedHashMap<>();
+        for (ReportDeliveryRecordDO r : deliveryRecords) {
+            latestByConfig.merge(r.getConfigId(), r, (a, b) -> {
+                Date ta = b.getCompletedAt() != null ? b.getCompletedAt() : b.getCreatedAt();
+                Date tb = a.getCompletedAt() != null ? a.getCompletedAt() : a.getCreatedAt();
+                if (ta == null || tb == null) {
+                    return b;
+                }
+                return ta.after(tb) ? b : a;
+            });
+        }
+
+        Set<String> channels = new LinkedHashSet<>();
+        int successCount = 0;
+        int failedCount = 0;
+        int inProgressCount = 0;
+        for (ReportDeliveryRecordDO r : latestByConfig.values()) {
+            if (StringUtils.isNotBlank(r.getDeliveryType())) {
+                channels.add(r.getDeliveryType());
+            }
+            if (DeliveryStatus.SUCCESS.name().equals(r.getStatus())) {
+                successCount++;
+            } else if (DeliveryStatus.FAILED.name().equals(r.getStatus())) {
+                failedCount++;
+            } else {
+                inProgressCount++;
+            }
+        }
+
+        int total = latestByConfig.size();
+        String rollup;
+        if (inProgressCount > 0) {
+            rollup = "IN_PROGRESS";
+        } else if (failedCount == 0) {
+            rollup = "DELIVERED";
+        } else if (successCount == 0) {
+            rollup = "FAILED";
+        } else {
+            rollup = "PARTIAL";
+        }
+
+        vo.setChannelTypes(new ArrayList<>(channels));
+        vo.setDeliveryRollup(rollup);
+        vo.setDeliverySuccessCount(successCount);
+        vo.setDeliveryTotalCount(total);
     }
 }

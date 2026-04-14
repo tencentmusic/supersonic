@@ -2,13 +2,23 @@ package com.tencent.supersonic.headless.server.service.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
+import com.tencent.supersonic.auth.api.authorization.pojo.AuthRes;
+import com.tencent.supersonic.auth.api.authorization.response.AuthorizedResourceResp;
+import com.tencent.supersonic.common.config.SensitiveLevelConfig;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
+import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.common.pojo.exception.ParamValidationException;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
+import com.tencent.supersonic.headless.api.pojo.response.DimSchemaResp;
+import com.tencent.supersonic.headless.api.pojo.response.MetricSchemaResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
+import com.tencent.supersonic.headless.api.pojo.response.SemanticSchemaResp;
 import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
@@ -18,7 +28,9 @@ import com.tencent.supersonic.headless.server.pojo.OutputFormat;
 import com.tencent.supersonic.headless.server.pojo.ReportExecutionContext;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplate;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig;
+import com.tencent.supersonic.headless.server.service.DataSetAuthService;
 import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
+import com.tencent.supersonic.headless.server.service.SchemaService;
 import com.tencent.supersonic.headless.server.service.SemanticTemplateService;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryContext;
 import io.micrometer.core.instrument.Timer;
@@ -35,8 +47,10 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HexFormat;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +65,9 @@ public class ReportExecutionOrchestrator {
     private final SemanticTemplateService templateService;
     private final QueryConfigParser queryConfigParser;
     private final UserService userService;
+    private final SchemaService schemaService;
+    private final DataSetAuthService dataSetAuthService;
+    private final SensitiveLevelConfig sensitiveLevelConfig;
 
     @Autowired(required = false)
     private ReportDeliveryService deliveryService;
@@ -63,12 +80,17 @@ public class ReportExecutionOrchestrator {
 
     public ReportExecutionOrchestrator(ReportExecutionMapper executionMapper,
             SemanticLayerService semanticLayerService, SemanticTemplateService templateService,
-            QueryConfigParser queryConfigParser, UserService userService) {
+            QueryConfigParser queryConfigParser, UserService userService,
+            SchemaService schemaService, DataSetAuthService dataSetAuthService,
+            SensitiveLevelConfig sensitiveLevelConfig) {
         this.executionMapper = executionMapper;
         this.semanticLayerService = semanticLayerService;
         this.templateService = templateService;
         this.queryConfigParser = queryConfigParser;
         this.userService = userService;
+        this.schemaService = schemaService;
+        this.dataSetAuthService = dataSetAuthService;
+        this.sensitiveLevelConfig = sensitiveLevelConfig;
     }
 
     public void execute(ReportExecutionContext ctx) {
@@ -99,6 +121,7 @@ public class ReportExecutionOrchestrator {
             // Step 5: Parse query config and execute
             long queryStart = System.currentTimeMillis();
             SemanticQueryReq queryReq = parseQueryConfig(ctx);
+            expandDetailFields(queryReq, user);
             SemanticQueryResp queryResp = semanticLayerService.queryByReq(queryReq, user);
             long executionTimeMs = System.currentTimeMillis() - queryStart;
 
@@ -172,6 +195,118 @@ public class ReportExecutionOrchestrator {
     private SemanticQueryReq parseQueryConfig(ReportExecutionContext ctx) {
         return queryConfigParser.parse(ctx.getQueryConfig(), ctx.getDatasetId(),
                 ctx.getResolvedParams());
+    }
+
+    /**
+     * 明细模式下若用户未显式选择投影列，按 owner 的字段权限展开成"全部可见维度+指标"。
+     *
+     * <p>
+     * 必要性：{@code SqlGenerateUtils.getSelect()} 在 groups/aggregators 都为空时输出字面量 {@code "*"}，但
+     * {@code S2DataPermissionAspect.checkColPermission()} 通过
+     * {@code QueryStructUtils.getBizNameFromStruct()} 判断查询里的字段，该方法只看
+     * groups/aggregators/orders/filters 抽出的字段名 —— 它感知不到 {@code SELECT *}，因此高敏感字段 会被绕过列级权限检查。
+     *
+     * <p>
+     * 这里在请求送入 semanticLayerService 前，把 owner 在该 dataset 上可见的维度+指标 bizName 列表显式填进 groups。
+     * {@code SqlGenerateUtils.getGroupBy()} 会因 queryType=DETAIL 跳过 GROUP BY，所以等价于带权限过滤的"全字段明细"。
+     */
+    private void expandDetailFields(SemanticQueryReq queryReq, User user) {
+        if (!(queryReq instanceof QueryStructReq req)) {
+            return;
+        }
+        if (!QueryType.DETAIL.equals(req.getQueryType())) {
+            return;
+        }
+        if (req.getGroups() != null && !req.getGroups().isEmpty()) {
+            return;
+        }
+        // 失败必须 fail-closed：dataSetId/schema 缺失时若静默放行，下游会发出
+        // 字面量 SELECT *，而 S2DataPermissionAspect 仅扫描 groups/aggregators/orders/filters，
+        // 看不到 SELECT *，HIGH 字段会被绕过授权检查。
+        if (req.getDataSetId() == null) {
+            throw new IllegalStateException("明细模式缺少 dataSetId，拒绝执行明细导出");
+        }
+
+        SchemaFilterReq filter = new SchemaFilterReq();
+        filter.setDataSetId(req.getDataSetId());
+        SemanticSchemaResp schema = schemaService.fetchSemanticSchema(filter);
+        if (schema == null) {
+            throw new IllegalStateException("无法获取数据集 schema, 拒绝执行明细导出: " + req.getDataSetId());
+        }
+
+        boolean isAdmin = user.isSuperAdmin()
+                || dataSetAuthService.checkDataSetAdminPermission(req.getDataSetId(), user);
+        Set<String> authedNames = isAdmin ? null : fetchAuthedColumns(req.getDataSetId(), user);
+        boolean includeMid =
+                sensitiveLevelConfig != null && sensitiveLevelConfig.isMidLevelRequireAuth();
+
+        Set<String> visible = new LinkedHashSet<>();
+        if (schema.getDimensions() != null) {
+            for (DimSchemaResp dim : schema.getDimensions()) {
+                if (StringUtils.isBlank(dim.getBizName())) {
+                    continue;
+                }
+                if (isFieldVisible(dim.getSensitiveLevel(), dim.getBizName(), authedNames,
+                        includeMid)) {
+                    visible.add(dim.getBizName());
+                }
+            }
+        }
+        if (schema.getMetrics() != null) {
+            for (MetricSchemaResp metric : schema.getMetrics()) {
+                if (StringUtils.isBlank(metric.getBizName())) {
+                    continue;
+                }
+                if (isFieldVisible(metric.getSensitiveLevel(), metric.getBizName(), authedNames,
+                        includeMid)) {
+                    visible.add(metric.getBizName());
+                }
+            }
+        }
+
+        if (visible.isEmpty()) {
+            throw new IllegalStateException("当前用户在该数据集下无可见字段，无法导出明细：" + req.getDataSetId());
+        }
+
+        log.info("Expanded DETAIL query for dataset={} owner={} into {} fields", req.getDataSetId(),
+                user.getName(), visible.size());
+        req.setGroups(new ArrayList<>(visible));
+    }
+
+    private Set<String> fetchAuthedColumns(Long dataSetId, User user) {
+        try {
+            AuthorizedResourceResp authResp =
+                    dataSetAuthService.queryAuthorizedResources(dataSetId, user);
+            if (authResp == null || authResp.getAuthResList() == null) {
+                return Set.of();
+            }
+            return authResp.getAuthResList().stream().map(AuthRes::getName)
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.warn("Failed to query column permissions for dataset={}, user={}: {}", dataSetId,
+                    user.getName(), e.getMessage());
+            return Set.of();
+        }
+    }
+
+    /**
+     * 与 {@code S2DataPermissionAspect.isRestrictedSensitiveLevel} 保持一致：HIGH 始终需要授权， MID 根据
+     * {@code sensitiveLevelConfig.midLevelRequireAuth} 决定是否需要授权。
+     */
+    private boolean isFieldVisible(Integer sensitiveLevel, String bizName, Set<String> authedNames,
+            boolean includeMid) {
+        if (authedNames == null) {
+            return true;
+        }
+        if (sensitiveLevel == null) {
+            return true;
+        }
+        boolean restricted = SensitiveLevelEnum.HIGH.getCode().equals(sensitiveLevel)
+                || (includeMid && SensitiveLevelEnum.MID.getCode().equals(sensitiveLevel));
+        if (!restricted) {
+            return true;
+        }
+        return authedNames.contains(bizName);
     }
 
     private String generateOutputFile(ReportExecutionContext ctx, SemanticQueryResp queryResp)

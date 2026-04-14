@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -162,9 +162,11 @@ public class ReportDeliveryServiceImpl
                 continue;
             }
 
-            // Build idempotency key
-            String deliveryKey = buildDeliveryKey(context.getScheduleId(),
-                    context.getExecutionTime(), config.getId());
+            // Build idempotency key. Uses executionId (unique PK from s2_report_execution)
+            // rather than executionTime — concurrent manual executions can otherwise format
+            // to the same second and collide on idx_delivery_key.
+            String deliveryKey = buildDeliveryKey(context.getScheduleId(), context.getExecutionId(),
+                    config.getId());
 
             // Check if already delivered
             if (isAlreadyDelivered(deliveryKey)) {
@@ -291,7 +293,8 @@ public class ReportDeliveryServiceImpl
 
         DeliveryContext testContext = DeliveryContext.builder().scheduleId(0L).executionId(0L)
                 .scheduleName("Test Schedule").reportName("Test Report").outputFormat("XLSX")
-                .rowCount(100L).executionTime(new Date().toString()).build();
+                .rowCount(100L).executionTime(DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"))
+                .build();
 
         ReportDeliveryRecordDO record = new ReportDeliveryRecordDO();
         record.setDeliveryKey("TEST_" + System.currentTimeMillis() + "_" + config.getId());
@@ -407,7 +410,8 @@ public class ReportDeliveryServiceImpl
         DeliveryContext context = DeliveryContext.builder().scheduleId(record.getScheduleId())
                 .executionId(record.getExecutionId()).fileLocation(record.getFileLocation())
                 .tenantId(record.getTenantId()).scheduleName("Retry").reportName("Retry")
-                .executionTime(record.getCreatedAt().toString()).build();
+                .executionTime(DateUtils.format(record.getCreatedAt(), "yyyy-MM-dd HH:mm:ss"))
+                .build();
 
         long startTime = System.currentTimeMillis();
         try {
@@ -573,8 +577,8 @@ public class ReportDeliveryServiceImpl
         }
     }
 
-    private String buildDeliveryKey(Long scheduleId, String executionTime, Long configId) {
-        return scheduleId + "_" + executionTime + "_" + configId;
+    private String buildDeliveryKey(Long scheduleId, Long executionId, Long configId) {
+        return scheduleId + "_" + executionId + "_" + configId;
     }
 
     private boolean isAlreadyDelivered(String deliveryKey) {

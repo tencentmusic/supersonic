@@ -459,12 +459,12 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
       return;
     }
 
-    // groups 的语义:用户选了就按选中的字段投影+GROUP BY,没选就传空。
-    // 后端 SqlGenerateUtils 在 groups/aggregators 都为空时输出 "SELECT *" 并跳过 GROUP BY,
-    // 最终由 ontology 展开成该数据集有权限访问的全部字段(权限过滤由 S2DataPermissionAspect 负责)。
-    // 不再自动把全部 dimensions 填成 groups——那样会让 "未选字段" 变成 "按全部字段 GROUP BY",
-    // 语义上等价于去重,和 "全字段明细" 完全不同。
-    const groups = Array.isArray(values.queryGroups) ? values.queryGroups : [];
+    // groups 仅用于 AGGREGATE 模式的 GROUP BY；DETAIL 模式由后端
+    // ReportExecutionOrchestrator 根据 owner 的字段权限展开成全字段投影。
+    const groups =
+      values.queryType === 'AGGREGATE' && Array.isArray(values.queryGroups)
+        ? values.queryGroups
+        : [];
 
     const aggregators = Array.isArray(values.queryAggregators)
       ? values.queryAggregators

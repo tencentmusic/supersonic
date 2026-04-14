@@ -6,10 +6,14 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
+import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryRecordMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleMapper;
+import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
+import com.tencent.supersonic.headless.server.pojo.ReportExecutionVO;
 import com.tencent.supersonic.headless.server.service.impl.ReportExecutionContextBuilder;
 import com.tencent.supersonic.headless.server.service.impl.ReportExecutionOrchestrator;
 import com.tencent.supersonic.headless.server.service.impl.ReportScheduleServiceImpl;
@@ -23,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +58,8 @@ class ReportScheduleServiceImplTest {
     private DataSetAuthService dataSetAuthService;
     @Mock
     private ReportScheduleMapper reportScheduleMapper;
+    @Mock
+    private ReportDeliveryRecordMapper deliveryRecordMapper;
 
     private ReportScheduleServiceImpl service;
     private User owner;
@@ -61,7 +68,7 @@ class ReportScheduleServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new ReportScheduleServiceImpl(quartzJobManager, executionMapper, contextBuilder,
-                orchestrator, userService, dataSetAuthService);
+                orchestrator, userService, dataSetAuthService, deliveryRecordMapper);
         ReflectionTestUtils.setField(service, "baseMapper", reportScheduleMapper);
 
         owner = new User();
@@ -439,7 +446,7 @@ class ReportScheduleServiceImplTest {
         ReportScheduleDO schedule = buildScheduleWithQueryConfig(
                 "{\"queryType\":\"DETAIL\",\"dimensions\":[{\"name\":\"workday\",\"bizName\":\"workday\"},"
                         + "{\"name\":\"order_id\",\"bizName\":\"order_id\"}],"
-                        + "\"groups\":[\"workday\",\"order_id\"],\"limit\":500,"
+                        + "\"groups\":[],\"limit\":500,"
                         + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
                         + "\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
 
@@ -520,5 +527,149 @@ class ReportScheduleServiceImplTest {
         schedule.setTenantId(1L);
         schedule.setQueryConfig(queryConfig);
         return schedule;
+    }
+
+    @Test
+    void getExecutionVOListShouldRollupDeliveryAcrossChannels() {
+        User admin = new User();
+        admin.setId(1L);
+        admin.setName("admin");
+        admin.setTenantId(1L);
+        admin.setIsAdmin(1);
+
+        ReportScheduleDO schedule = new ReportScheduleDO();
+        schedule.setId(50L);
+        schedule.setOwnerId(1L);
+        when(reportScheduleMapper.selectById(50L)).thenReturn(schedule);
+
+        ReportExecutionDO e1 = execution(101L, 50L);
+        ReportExecutionDO e2 = execution(102L, 50L);
+        ReportExecutionDO e3 = execution(103L, 50L);
+        ReportExecutionDO e4 = execution(104L, 50L);
+
+        Page<ReportExecutionDO> doPage = new Page<>(1, 20);
+        doPage.setRecords(List.of(e1, e2, e3, e4));
+        doPage.setTotal(4);
+        when(executionMapper.selectPage(any(Page.class), any())).thenReturn(doPage);
+
+        List<ReportDeliveryRecordDO> allRecords = List.of(
+                // e1: 两个渠道都成功
+                record(101L, 1L, "EMAIL", DeliveryStatus.SUCCESS),
+                record(101L, 2L, "FEISHU", DeliveryStatus.SUCCESS),
+                // e2: 邮件成功 + 飞书失败 → PARTIAL
+                record(102L, 1L, "EMAIL", DeliveryStatus.SUCCESS),
+                record(102L, 2L, "FEISHU", DeliveryStatus.FAILED),
+                // e3: 两个渠道都失败 → FAILED
+                record(103L, 1L, "EMAIL", DeliveryStatus.FAILED),
+                record(103L, 2L, "FEISHU", DeliveryStatus.FAILED),
+                // e4: 一个 PENDING + 一个 SUCCESS → IN_PROGRESS
+                record(104L, 1L, "EMAIL", DeliveryStatus.SUCCESS),
+                record(104L, 2L, "FEISHU", DeliveryStatus.PENDING));
+        when(deliveryRecordMapper.selectList(any(QueryWrapper.class))).thenReturn(allRecords);
+
+        Page<ReportExecutionVO> result =
+                service.getExecutionVOList(new Page<>(1, 20), 50L, null, admin);
+
+        List<ReportExecutionVO> rows = result.getRecords();
+        assertEquals(4, rows.size());
+        assertRollup(rows.get(0), List.of("EMAIL", "FEISHU"), "DELIVERED", 2, 2);
+        assertRollup(rows.get(1), List.of("EMAIL", "FEISHU"), "PARTIAL", 1, 2);
+        assertRollup(rows.get(2), List.of("EMAIL", "FEISHU"), "FAILED", 0, 2);
+        assertRollup(rows.get(3), List.of("EMAIL", "FEISHU"), "IN_PROGRESS", 1, 2);
+    }
+
+    @Test
+    void getExecutionVOListShouldReturnNoneRollupWhenNoDeliveryRecords() {
+        User admin = new User();
+        admin.setId(1L);
+        admin.setName("admin");
+        admin.setTenantId(1L);
+        admin.setIsAdmin(1);
+
+        ReportScheduleDO schedule = new ReportScheduleDO();
+        schedule.setId(50L);
+        schedule.setOwnerId(1L);
+        when(reportScheduleMapper.selectById(50L)).thenReturn(schedule);
+
+        ReportExecutionDO e1 = execution(200L, 50L);
+        Page<ReportExecutionDO> doPage = new Page<>(1, 20);
+        doPage.setRecords(List.of(e1));
+        doPage.setTotal(1);
+        when(executionMapper.selectPage(any(Page.class), any())).thenReturn(doPage);
+        when(deliveryRecordMapper.selectList(any(QueryWrapper.class))).thenReturn(List.of());
+
+        Page<ReportExecutionVO> result =
+                service.getExecutionVOList(new Page<>(1, 20), 50L, null, admin);
+
+        ReportExecutionVO vo = result.getRecords().get(0);
+        assertEquals("NONE", vo.getDeliveryRollup());
+        assertEquals(0, vo.getDeliveryTotalCount());
+        assertEquals(0, vo.getDeliverySuccessCount());
+        assertEquals(List.of(), vo.getChannelTypes());
+    }
+
+    @Test
+    void getExecutionVOListShouldKeepLatestPerConfigIgnoringRetryHistory() {
+        User admin = new User();
+        admin.setId(1L);
+        admin.setName("admin");
+        admin.setTenantId(1L);
+        admin.setIsAdmin(1);
+
+        ReportScheduleDO schedule = new ReportScheduleDO();
+        schedule.setId(50L);
+        schedule.setOwnerId(1L);
+        when(reportScheduleMapper.selectById(50L)).thenReturn(schedule);
+
+        ReportExecutionDO e1 = execution(300L, 50L);
+        Page<ReportExecutionDO> doPage = new Page<>(1, 20);
+        doPage.setRecords(List.of(e1));
+        doPage.setTotal(1);
+        when(executionMapper.selectPage(any(Page.class), any())).thenReturn(doPage);
+
+        // 同一 configId=1 先失败再重试成功——rollup 只看最新那条（SUCCESS），不能按记录数 2/2 算。
+        ReportDeliveryRecordDO oldFailed = record(300L, 1L, "EMAIL", DeliveryStatus.FAILED);
+        oldFailed.setCompletedAt(new Date(1_000L));
+        ReportDeliveryRecordDO retrySuccess = record(300L, 1L, "EMAIL", DeliveryStatus.SUCCESS);
+        retrySuccess.setCompletedAt(new Date(2_000L));
+        when(deliveryRecordMapper.selectList(any(QueryWrapper.class)))
+                .thenReturn(List.of(oldFailed, retrySuccess));
+
+        Page<ReportExecutionVO> result =
+                service.getExecutionVOList(new Page<>(1, 20), 50L, null, admin);
+        ReportExecutionVO vo = result.getRecords().get(0);
+        assertEquals("DELIVERED", vo.getDeliveryRollup());
+        assertEquals(1, vo.getDeliveryTotalCount());
+        assertEquals(1, vo.getDeliverySuccessCount());
+    }
+
+    private ReportExecutionDO execution(long id, long scheduleId) {
+        ReportExecutionDO execution = new ReportExecutionDO();
+        execution.setId(id);
+        execution.setScheduleId(scheduleId);
+        execution.setStatus("SUCCESS");
+        return execution;
+    }
+
+    private ReportDeliveryRecordDO record(long executionId, long configId, String type,
+            DeliveryStatus status) {
+        ReportDeliveryRecordDO record = new ReportDeliveryRecordDO();
+        record.setExecutionId(executionId);
+        record.setConfigId(configId);
+        record.setDeliveryType(type);
+        record.setStatus(status.name());
+        record.setCreatedAt(new Date());
+        return record;
+    }
+
+    private void assertRollup(ReportExecutionVO vo, List<String> expectedChannels,
+            String expectedRollup, int expectedSuccess, int expectedTotal) {
+        assertEquals(expectedRollup, vo.getDeliveryRollup());
+        assertEquals(expectedTotal, vo.getDeliveryTotalCount());
+        assertEquals(expectedSuccess, vo.getDeliverySuccessCount());
+        // channelTypes 顺序按 LinkedHashSet 保留首次出现顺序
+        assertEquals(expectedChannels.size(), vo.getChannelTypes().size());
+        assertEquals(new java.util.HashSet<>(expectedChannels),
+                new java.util.HashSet<>(vo.getChannelTypes()));
     }
 }

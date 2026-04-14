@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Alert,
   Button,
@@ -49,6 +49,8 @@ const SchemaChangeAlert: React.FC<SchemaChangeAlertProps> = ({ connection, onRef
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [applying, setApplying] = useState(false);
+  const refreshingRef = useRef(false);
+  const applyingRef = useRef(false);
 
   const status = connection.schemaChangeStatus;
   const isBreaking = status === 'BREAKING';
@@ -72,6 +74,10 @@ const SchemaChangeAlert: React.FC<SchemaChangeAlertProps> = ({ connection, onRef
   };
 
   const handleRefreshSchema = async () => {
+    if (refreshingRef.current) {
+      return;
+    }
+    refreshingRef.current = true;
     setRefreshing(true);
     try {
       await discoverSchema(connection.id!);
@@ -82,16 +88,21 @@ const SchemaChangeAlert: React.FC<SchemaChangeAlertProps> = ({ connection, onRef
     } catch (e: any) {
       message.error(e.message || 'Schema 刷新失败');
     } finally {
+      refreshingRef.current = false;
       setRefreshing(false);
     }
   };
 
   const handleApplyChanges = async () => {
+    if (applyingRef.current) {
+      return;
+    }
     if (!connection.discoveredCatalog) {
       message.error('请先刷新 Schema');
       return;
     }
 
+    applyingRef.current = true;
     Modal.confirm({
       title: '确认应用 Schema 变更',
       content: isBreaking
@@ -99,6 +110,9 @@ const SchemaChangeAlert: React.FC<SchemaChangeAlertProps> = ({ connection, onRef
         : '确定要将新发现的 Schema 应用到当前配置吗？',
       icon: <ExclamationCircleOutlined />,
       okType: isBreaking ? 'danger' : 'primary',
+      onCancel: () => {
+        applyingRef.current = false;
+      },
       onOk: async () => {
         setApplying(true);
         try {
@@ -118,6 +132,7 @@ const SchemaChangeAlert: React.FC<SchemaChangeAlertProps> = ({ connection, onRef
         } catch (e: any) {
           message.error(e.message || '应用 Schema 变更失败');
         } finally {
+          applyingRef.current = false;
           setApplying(false);
         }
       },

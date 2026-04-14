@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Table,
@@ -63,6 +63,8 @@ const ConnectionsPage: React.FC = () => {
   const [resetModal, setResetModal] = useState<{ visible: boolean; connection?: ConnectionDO }>({
     visible: false,
   });
+  const triggeringConnectionIdsRef = useRef<Set<number>>(new Set());
+  const [triggeringConnectionIds, setTriggeringConnectionIds] = useState<Record<number, boolean>>({});
 
   // Filters
   const [filterSourceDb, setFilterSourceDb] = useState<number | undefined>();
@@ -139,8 +141,22 @@ const ConnectionsPage: React.FC = () => {
   };
 
   const handleTrigger = async (id: number) => {
-    await triggerSync(id);
-    message.success('已触发同步');
+    if (triggeringConnectionIdsRef.current.has(id)) {
+      return;
+    }
+    triggeringConnectionIdsRef.current.add(id);
+    setTriggeringConnectionIds((prev) => ({ ...prev, [id]: true }));
+    try {
+      await triggerSync(id);
+      message.success('已触发同步');
+    } finally {
+      triggeringConnectionIdsRef.current.delete(id);
+      setTriggeringConnectionIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
   };
 
   const getDatabaseName = (id: number) => {
@@ -242,6 +258,8 @@ const ConnectionsPage: React.FC = () => {
                 type="link"
                 size="small"
                 icon={<PlayCircleOutlined />}
+                loading={!!triggeringConnectionIds[record.id!]}
+                disabled={!!triggeringConnectionIds[record.id!]}
                 onClick={() => handleTrigger(record.id!)}
               >
                 同步

@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.event;
+package com.tencent.supersonic.headless.api.event;
 
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.server.pojo.SemanticDeployResult;

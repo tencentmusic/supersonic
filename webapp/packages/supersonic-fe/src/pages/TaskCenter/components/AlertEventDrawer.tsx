@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Drawer,
   Table,
@@ -74,6 +74,7 @@ const AlertEventDrawer: React.FC<AlertEventDrawerProps> = ({
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
   const [drafts, setDrafts] = useState<Record<number, TransitionDraft>>({});
   const [transitioning, setTransitioning] = useState<number | null>(null);
+  const transitioningEventIdsRef = useRef<Set<number>>(new Set());
 
   const getDraft = (eventId: number): TransitionDraft => drafts[eventId] || { notes: '' };
 
@@ -121,11 +122,16 @@ const AlertEventDrawer: React.FC<AlertEventDrawerProps> = ({
     if (!visible) {
       setDrafts({});
       setTransitioning(null);
+      transitioningEventIdsRef.current.clear();
     }
   }, [visible]);
 
   const handleTransition = async (eventId: number, target: ResolutionStatus) => {
+    if (transitioningEventIdsRef.current.has(eventId)) {
+      return;
+    }
     const draft = getDraft(eventId);
+    transitioningEventIdsRef.current.add(eventId);
     setTransitioning(eventId);
     try {
       await transitionEvent(eventId, {
@@ -139,6 +145,7 @@ const AlertEventDrawer: React.FC<AlertEventDrawerProps> = ({
     } catch (e: any) {
       message.error(e?.data?.msg || '操作失败');
     } finally {
+      transitioningEventIdsRef.current.delete(eventId);
       setTransitioning(null);
     }
   };
@@ -241,6 +248,7 @@ const AlertEventDrawer: React.FC<AlertEventDrawerProps> = ({
                   size="small"
                   danger={action.danger}
                   loading={transitioning === record.id}
+                  disabled={transitioning === record.id}
                 >
                   {action.label}
                 </Button>

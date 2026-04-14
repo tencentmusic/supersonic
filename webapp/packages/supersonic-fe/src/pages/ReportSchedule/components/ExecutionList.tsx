@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Drawer, Table, Tag, Button, Space, Typography, Tooltip, Spin, Empty, message } from 'antd';
 import dayjs from 'dayjs';
-import type { ReportExecution } from '@/services/reportSchedule';
+import type { DeliveryRollup, ReportExecution } from '@/services/reportSchedule';
 import { getExecutionList, downloadExecutionResult } from '@/services/reportSchedule';
+import { DELIVERY_TYPE_MAP, DeliveryType } from '@/services/deliveryConfig';
 import ExecutionSnapshotDrawer from './ExecutionSnapshotDrawer';
 import { getExecutionSnapshot } from './ExecutionSnapshotDrawer/service';
 import type { ExecutionSnapshot } from './ExecutionSnapshotDrawer/service';
@@ -30,6 +31,14 @@ const TRIGGER_TYPE_MAP: Record<string, { text: string; color: string }> = {
   WEB: { text: '页面', color: 'cyan' },
   AGENT: { text: 'Agent', color: 'purple' },
   API: { text: 'API', color: 'orange' },
+};
+
+const DELIVERY_ROLLUP_MAP: Record<DeliveryRollup, { color: string; text: (s: number, t: number) => string }> = {
+  NONE: { color: 'default', text: () => '未推送' },
+  DELIVERED: { color: 'green', text: () => '已送达' },
+  PARTIAL: { color: 'orange', text: (s, t) => `部分失败 ${s}/${t}` },
+  FAILED: { color: 'red', text: () => '失败' },
+  IN_PROGRESS: { color: 'blue', text: (s, t) => `进行中 ${s}/${t}` },
 };
 
 const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, scheduleName, onClose }) => {
@@ -141,6 +150,39 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
       render: (val: number) => val ?? '-',
     },
     {
+      title: '渠道',
+      dataIndex: 'channelTypes',
+      width: 140,
+      render: (types?: string[]) => {
+        if (!types || types.length === 0) return '-';
+        return (
+          <Space size={4} wrap>
+            {types.map((t) => {
+              const info = DELIVERY_TYPE_MAP[t as DeliveryType];
+              return (
+                <Tag key={t} color={info?.color}>
+                  {info?.text || t}
+                </Tag>
+              );
+            })}
+          </Space>
+        );
+      },
+    },
+    {
+      title: '投递',
+      dataIndex: 'deliveryRollup',
+      width: 120,
+      render: (rollup: DeliveryRollup | undefined, record: ReportExecution) => {
+        if (!rollup) return '-';
+        const info = DELIVERY_ROLLUP_MAP[rollup];
+        if (!info) return <Tag>{rollup}</Tag>;
+        const success = record.deliverySuccessCount ?? 0;
+        const total = record.deliveryTotalCount ?? 0;
+        return <Tag color={info.color}>{info.text(success, total)}</Tag>;
+      },
+    },
+    {
       title: '操作',
       width: 160,
       render: (_: any, record: ReportExecution) => (
@@ -161,7 +203,17 @@ const ExecutionList: React.FC<ExecutionListProps> = ({ visible, scheduleId, sche
             <Button
               type="link"
               size="small"
-              onClick={() => downloadExecutionResult(scheduleId!, record.id)}
+              onClick={async () => {
+                try {
+                  await downloadExecutionResult(
+                    scheduleId!,
+                    record.id,
+                    scheduleName ? `${scheduleName}_${record.id}.xlsx` : undefined,
+                  );
+                } catch (e: any) {
+                  message.error(e?.data?.msg || e?.message || '下载失败');
+                }
+              }}
             >
               下载
             </Button>

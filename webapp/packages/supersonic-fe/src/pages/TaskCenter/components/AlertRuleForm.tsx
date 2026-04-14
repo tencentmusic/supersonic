@@ -33,7 +33,8 @@ import QueryConfigFormSection, {
   type QueryMetricFilterFormItem,
 } from '@/components/QueryConfigFormSection';
 
-const DEFAULT_ALERT_LIMIT = 1000;
+const DEFAULT_DETAIL_LIMIT = 500;
+const DEFAULT_AGGREGATE_LIMIT = 200;
 
 interface AlertRuleFormProps {
   visible: boolean;
@@ -50,8 +51,25 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
   const [dataSets, setDataSets] = useState<ValidDataSetItem[]>([]);
   const [loadingDataSets, setLoadingDataSets] = useState(false);
   const [queryType, setQueryType] = useState<QueryType>('AGGREGATE');
+  const [selectedDataSetId, setSelectedDataSetId] = useState<number>();
   const [currentDimensions, setCurrentDimensions] = useState<DataSetSchemaField[]>([]);
   const [currentMetrics, setCurrentMetrics] = useState<DataSetSchemaField[]>([]);
+
+  const selectedDataSet = dataSets.find((item) => item.id === selectedDataSetId);
+  const getAlertLimit = (dataSet: ValidDataSetItem | undefined, type: QueryType) => {
+    const limit = type === 'AGGREGATE' ? dataSet?.aggregateLimit : dataSet?.detailLimit;
+    if (typeof limit === 'number' && limit > 0) {
+      return limit;
+    }
+    return type === 'AGGREGATE' ? DEFAULT_AGGREGATE_LIMIT : DEFAULT_DETAIL_LIMIT;
+  };
+  const currentLimitMax = getAlertLimit(selectedDataSet, queryType);
+  const limitTooltip = `按当前数据集${queryType === 'AGGREGATE' ? '聚合查询' : '明细查询'}限制，最多返回 ${currentLimitMax} 行。`;
+
+  const handleQueryTypeChange = (value: QueryType) => {
+    setQueryType(value);
+    form.setFieldValue('queryLimit', getAlertLimit(selectedDataSet, value));
+  };
 
   useEffect(() => {
     if (visible) {
@@ -165,6 +183,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
         const currentQueryType: QueryType =
           parsedQC.queryType === 'DETAIL' ? 'DETAIL' : 'AGGREGATE';
         setQueryType(currentQueryType);
+        setSelectedDataSetId(record.datasetId);
         form.setFieldsValue({
           ...record,
           enabled: record.enabled === 1,
@@ -174,7 +193,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
           queryLimit:
             typeof parsedQC.limit === 'number' && parsedQC.limit > 0
               ? parsedQC.limit
-              : DEFAULT_ALERT_LIMIT,
+              : getAlertLimit(selectedDataSet, currentQueryType),
           queryAggregators: parseAggregators(record.queryConfig),
           queryDimensionFilters: parseDimensionFilters(record.queryConfig),
           queryOrders: parseOrders(record.queryConfig),
@@ -185,6 +204,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
         }
       } else {
         setQueryType('AGGREGATE');
+        setSelectedDataSetId(undefined);
         setCurrentDimensions([]);
         setCurrentMetrics([]);
         form.resetFields();
@@ -195,7 +215,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
           enabled: true,
           deliveryConfigIds: [],
           queryType: 'AGGREGATE',
-          queryLimit: DEFAULT_ALERT_LIMIT,
+          queryLimit: getAlertLimit(undefined, 'AGGREGATE'),
           queryAggregators: [],
           queryDimensionFilters: [],
           queryGroups: [],
@@ -284,7 +304,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
       limit:
         typeof values.queryLimit === 'number' && values.queryLimit > 0
           ? values.queryLimit
-          : DEFAULT_ALERT_LIMIT,
+          : getAlertLimit(selectedDataSet, values.queryType || 'AGGREGATE'),
       dimensionFilters: Array.isArray(values.queryDimensionFilters)
         ? values.queryDimensionFilters
             .filter((item: QueryDimensionFilterFormItem) => {
@@ -378,14 +398,22 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
             optionFilterProp="label"
             loading={loadingDataSets}
             onChange={(value) => {
+              const nextDataSet = dataSets.find((item) => item.id === value);
+              setSelectedDataSetId(value);
               form.setFieldsValue({
                 queryGroups: [],
                 queryAggregators: [],
                 queryDimensionFilters: [],
                 queryOrders: [],
                 queryMetricFilters: [],
+                queryLimit: getAlertLimit(nextDataSet, queryType),
               });
-              fetchDatasetSchema(value);
+              if (value) {
+                fetchDatasetSchema(value);
+              } else {
+                setCurrentDimensions([]);
+                setCurrentMetrics([]);
+              }
             }}
             options={dataSets.map((d) => ({ label: `${d.name} (ID: ${d.id})`, value: d.id }))}
           />
@@ -399,7 +427,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
         <QueryConfigFormSection
           form={form}
           queryType={queryType}
-          setQueryType={setQueryType}
+          setQueryType={handleQueryTypeChange}
           currentDimensions={currentDimensions}
           currentMetrics={currentMetrics}
           queryTypeOptions={[
@@ -408,8 +436,9 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ visible, record, onCancel
           ]}
           groupsPlaceholder="选择分组字段，明细告警默认使用全部维度"
           metricsPlaceholder="选择指标"
-          limitMax={1000}
-          limitTooltip="告警查询会在后端限制最大 1000 行，建议在这里明确控制查询规模。"
+          limitMax={currentLimitMax}
+          limitTooltip={limitTooltip}
+          showGroupsInDetail
         />
         <Form.Item name="cronExpression" label="检查频率">
           <CronInput />

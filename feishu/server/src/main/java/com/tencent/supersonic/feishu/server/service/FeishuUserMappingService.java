@@ -353,13 +353,49 @@ public class FeishuUserMappingService {
     }
 
     /**
-     * Find a PENDING mapping record for a given openId.
+     * Find a PENDING mapping record for a given openId within the current tenant.
+     *
+     * <p>
+     * 显式加 tenant_id 过滤（不只依赖 TenantSqlInterceptor），避免调用方在未设置 TenantContext 的异步线程里意外跨租户查询。 跨租户
+     * open_id 共享的场景请用 {@link #findLatestPendingAcrossTenants(String)}。
      */
     public FeishuUserMappingDO findPendingByOpenId(String openId) {
         LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FeishuUserMappingDO::getFeishuOpenId, openId).eq(FeishuUserMappingDO::getStatus,
                 0);
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            wrapper.eq(FeishuUserMappingDO::getTenantId, tenantId);
+        }
+        wrapper.orderByDesc(FeishuUserMappingDO::getId).last("limit 1");
         return userMappingMapper.selectOne(wrapper);
+    }
+
+    /**
+     * Find the most recent PENDING mapping for an openId across ALL tenants. Used on the async
+     * card-action callback path where we have only an openId and need to recover the owning tenant
+     * before signing a bind token.
+     *
+     * <p>
+     * 临时清空 {@link TenantContext} 绕过 {@code TenantSqlInterceptor} 的自动注入；若同一 openId 在多个租户都有 pending
+     * 记录，按 id 降序取最近一条（best-effort —— 跨租户同 openId 本身存在语义歧义，应尽量避免）。
+     */
+    public FeishuUserMappingDO findLatestPendingAcrossTenants(String openId) {
+        Long previous = TenantContext.getTenantId();
+        try {
+            TenantContext.clear();
+            LambdaQueryWrapper<FeishuUserMappingDO> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(FeishuUserMappingDO::getFeishuOpenId, openId)
+                    .eq(FeishuUserMappingDO::getStatus, 0).orderByDesc(FeishuUserMappingDO::getId)
+                    .last("limit 1");
+            return userMappingMapper.selectOne(wrapper);
+        } finally {
+            if (previous != null) {
+                TenantContext.setTenantId(previous);
+            } else {
+                TenantContext.clear();
+            }
+        }
     }
 
     /**

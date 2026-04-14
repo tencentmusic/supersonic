@@ -163,8 +163,26 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
                         e.getMessage());
             }
             return ValidDataSetResp.builder().id(resp.getId()).name(resp.getName())
-                    .domainId(resp.getDomainId()).partitionDimension(partitionDimName).build();
+                    .domainId(resp.getDomainId()).partitionDimension(partitionDimName)
+                    .detailLimit(getDetailLimit(resp)).aggregateLimit(getAggregateLimit(resp))
+                    .build();
         }).collect(Collectors.toList());
+    }
+
+    private Long getDetailLimit(DataSetResp resp) {
+        if (resp.getQueryConfig() == null
+                || resp.getQueryConfig().getDetailTypeDefaultConfig() == null) {
+            return null;
+        }
+        return resp.getQueryConfig().getDetailTypeDefaultConfig().getLimit();
+    }
+
+    private Long getAggregateLimit(DataSetResp resp) {
+        if (resp.getQueryConfig() == null
+                || resp.getQueryConfig().getAggregateTypeDefaultConfig() == null) {
+            return null;
+        }
+        return resp.getQueryConfig().getAggregateTypeDefaultConfig().getLimit();
     }
 
     @Override

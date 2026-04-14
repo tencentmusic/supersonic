@@ -61,6 +61,8 @@ const DeployModal: React.FC<DeployModalProps> = ({
   const [deployStatus, setDeployStatus] = useState<string>('');
   const [allowRedeploy, setAllowRedeploy] = useState(false);
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const previewInFlightRef = useRef(false);
+  const deployInFlightRef = useRef(false);
 
   useEffect(() => {
     if (visible) {
@@ -96,6 +98,12 @@ const DeployModal: React.FC<DeployModalProps> = ({
     }
   };
 
+  const stopDeploying = () => {
+    deployInFlightRef.current = false;
+    setDeployLoading(false);
+    setDeployStatus('');
+  };
+
   const loadDatabases = async () => {
     setLoading(true);
     try {
@@ -109,6 +117,10 @@ const DeployModal: React.FC<DeployModalProps> = ({
   };
 
   const handlePreview = async () => {
+    if (previewInFlightRef.current) {
+      return;
+    }
+    previewInFlightRef.current = true;
     try {
       const values = await form.validateFields();
       setPreviewLoading(true);
@@ -130,11 +142,16 @@ const DeployModal: React.FC<DeployModalProps> = ({
       }
       message.error('预览部署失败');
     } finally {
+      previewInFlightRef.current = false;
       setPreviewLoading(false);
     }
   };
 
   const handleDeploy = async () => {
+    if (deployInFlightRef.current) {
+      return;
+    }
+    deployInFlightRef.current = true;
     try {
       const values = await form.validateFields();
       setDeployLoading(true);
@@ -152,17 +169,16 @@ const DeployModal: React.FC<DeployModalProps> = ({
         startPolling(deploymentId);
       } else {
         message.error(res?.msg || '提交部署失败');
-        setDeployLoading(false);
-        setDeployStatus('');
+        stopDeploying();
       }
     } catch (error: any) {
       if (error.errorFields) {
         // Form validation error
+        deployInFlightRef.current = false;
         return;
       }
       message.error('提交部署失败');
-      setDeployLoading(false);
-      setDeployStatus('');
+      stopDeploying();
     }
   };
 
@@ -174,8 +190,7 @@ const DeployModal: React.FC<DeployModalProps> = ({
 
       if (pollCount > MAX_POLL_COUNT) {
         stopPolling();
-        setDeployLoading(false);
-        setDeployStatus('');
+        stopDeploying();
         message.warning('部署超时，请在部署历史中查看最终状态');
         return;
       }
@@ -187,19 +202,16 @@ const DeployModal: React.FC<DeployModalProps> = ({
 
         if (deployment.status === 'SUCCESS') {
           stopPolling();
-          setDeployLoading(false);
-          setDeployStatus('');
+          stopDeploying();
           message.success('部署成功');
           onSuccess();
         } else if (deployment.status === 'FAILED') {
           stopPolling();
-          setDeployLoading(false);
-          setDeployStatus('');
+          stopDeploying();
           message.error(deployment.errorMessage || '部署失败');
         } else if (deployment.status === 'CANCELLED') {
           stopPolling();
-          setDeployLoading(false);
-          setDeployStatus('');
+          stopDeploying();
           message.warning('部署已取消');
         } else if (deployment.status === 'RUNNING') {
           const stepText = deployment.currentStep

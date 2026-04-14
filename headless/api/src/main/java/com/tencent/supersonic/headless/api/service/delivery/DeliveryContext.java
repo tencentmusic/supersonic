@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.service.delivery;
+package com.tencent.supersonic.headless.api.service.delivery;
 
 import lombok.Builder;
 import lombok.Data;

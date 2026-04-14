@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button, Table, Tag, Space, Popconfirm, message, Switch, Tooltip, Tabs, Badge, Empty } from 'antd';
 import dayjs from 'dayjs';
 import { useModel } from '@umijs/max';
@@ -93,6 +93,7 @@ const DeliveryConfigPage: React.FC = () => {
   };
 
   const [testingId, setTestingId] = useState<number | null>(null);
+  const testingIdsRef = useRef<Set<number>>(new Set());
 
   const getErrorMessage = (error: any, fallback: string) => {
     return (
@@ -105,6 +106,10 @@ const DeliveryConfigPage: React.FC = () => {
   };
 
   const handleTest = async (id: number) => {
+    if (testingIdsRef.current.has(id)) {
+      return;
+    }
+    testingIdsRef.current.add(id);
     setTestingId(id);
     try {
       const res = await testConfig(id);
@@ -116,6 +121,7 @@ const DeliveryConfigPage: React.FC = () => {
     } catch (error) {
       message.error(getErrorMessage(error, '测试推送失败'));
     } finally {
+      testingIdsRef.current.delete(id);
       setTestingId(null);
       fetchData();
     }

@@ -1,8 +1,9 @@
-package com.tencent.supersonic.headless.server.pojo;
+package com.tencent.supersonic.headless.api.pojo;
 
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class ReportExecutionVO {
@@ -22,4 +23,12 @@ public class ReportExecutionVO {
     private String templateName;
     private String triggerType;
     private boolean hasPreview;
+
+    // Rollup from s2_report_delivery_record, grouped by execution_id. Decoupled from `status`
+    // (which
+    // reflects query execution only) because a successful query may still have one channel fail.
+    private List<String> channelTypes;
+    private String deliveryRollup; // NONE / DELIVERED / PARTIAL / FAILED / IN_PROGRESS
+    private Integer deliverySuccessCount;
+    private Integer deliveryTotalCount;
 }

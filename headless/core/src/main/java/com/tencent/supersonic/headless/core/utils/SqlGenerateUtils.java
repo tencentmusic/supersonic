@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.DateConf;
 import com.tencent.supersonic.common.pojo.ItemDateResp;
 import com.tencent.supersonic.common.pojo.enums.AggOperatorEnum;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
+import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.common.util.StringUtil;
@@ -124,6 +125,10 @@ public class SqlGenerateUtils {
 
     public String getGroupBy(StructQuery structQuery) {
         if (CollectionUtils.isEmpty(structQuery.getGroups())) {
+            return "";
+        }
+        // DETAIL 查询使用 groups 仅作为投影列，不参与 GROUP BY，避免明细行被去重。
+        if (QueryType.DETAIL.equals(structQuery.getQueryType())) {
             return "";
         }
         return "group by " + String.join(",", structQuery.getGroups());
