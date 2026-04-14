@@ -2,11 +2,11 @@ package com.tencent.supersonic.headless.server.facade.rest;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.headless.api.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.api.pojo.request.BatchDownloadReq;
 import com.tencent.supersonic.headless.api.pojo.request.DownloadMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMetricReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.server.service.DownloadService;
 import com.tencent.supersonic.headless.server.service.MetricService;
 import jakarta.servlet.http.HttpServletRequest;

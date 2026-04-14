@@ -11,12 +11,12 @@ import com.tencent.supersonic.chat.server.util.ResultFormatter;
 import com.tencent.supersonic.common.pojo.Text2SQLExemplar;
 import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
+import com.tencent.supersonic.headless.api.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import com.tencent.supersonic.headless.chat.query.llm.s2sql.LLMSqlQuery;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 

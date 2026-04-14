@@ -15,7 +15,7 @@ import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
-import com.tencent.supersonic.headless.server.service.SchemaService;
+import com.tencent.supersonic.headless.api.service.SchemaService;
 import com.tencent.supersonic.util.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

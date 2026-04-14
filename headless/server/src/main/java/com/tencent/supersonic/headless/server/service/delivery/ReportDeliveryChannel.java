@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.delivery;
 
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 
 /**

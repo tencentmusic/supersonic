@@ -2,7 +2,7 @@ package com.tencent.supersonic.headless.server.manager;
 
 import com.tencent.supersonic.headless.api.pojo.enums.IdentifyType;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.yaml.DimensionYamlTpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;

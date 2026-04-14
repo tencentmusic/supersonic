@@ -2,8 +2,8 @@ package com.tencent.supersonic.headless.server.facade.rest;
 
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.headless.api.facade.service.ChatLayerService;
 import com.tencent.supersonic.headless.api.pojo.request.QueryMapReq;
-import com.tencent.supersonic.headless.server.facade.service.ChatLayerService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

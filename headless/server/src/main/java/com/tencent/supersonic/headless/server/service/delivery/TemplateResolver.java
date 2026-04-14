@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.delivery;
 
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;

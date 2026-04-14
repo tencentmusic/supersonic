@@ -3,9 +3,9 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.headless.api.service.ReportScheduleConfirmationService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleConfirmationDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleConfirmationMapper;
-import com.tencent.supersonic.headless.server.service.ReportScheduleConfirmationService;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

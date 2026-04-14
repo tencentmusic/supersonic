@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service.delivery;
 
 import com.alibaba.fastjson.JSON;
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import jakarta.mail.internet.MimeMessage;
 import lombok.Data;

@@ -2,9 +2,10 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.headless.api.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
-import com.tencent.supersonic.headless.server.facade.service.SemanticLayerService;
+import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ExportTaskDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ExportTaskMapper;
 import com.tencent.supersonic.headless.server.pojo.ExportTaskStatus;

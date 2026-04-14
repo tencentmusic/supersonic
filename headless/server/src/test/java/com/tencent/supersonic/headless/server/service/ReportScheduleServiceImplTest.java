@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.headless.api.pojo.ReportExecutionVO;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
@@ -13,7 +14,6 @@ import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryR
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecutionMapper;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleMapper;
 import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
-import com.tencent.supersonic.headless.server.pojo.ReportExecutionVO;
 import com.tencent.supersonic.headless.server.service.impl.ReportExecutionContextBuilder;
 import com.tencent.supersonic.headless.server.service.impl.ReportExecutionOrchestrator;
 import com.tencent.supersonic.headless.server.service.impl.ReportScheduleServiceImpl;

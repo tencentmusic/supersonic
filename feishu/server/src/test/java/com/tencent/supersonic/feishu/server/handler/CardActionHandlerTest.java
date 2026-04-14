@@ -6,7 +6,7 @@ import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.server.service.FeishuMessageSender;
 import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
-import com.tencent.supersonic.headless.server.service.ReportScheduleService;
+import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

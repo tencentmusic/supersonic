@@ -9,6 +9,7 @@ import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
 import com.tencent.supersonic.headless.api.pojo.request.SemanticQueryReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.core.utils.SqlTemplateEngine;
 import com.tencent.supersonic.headless.server.service.impl.QueryConfigParser;
 import org.junit.jupiter.api.Test;

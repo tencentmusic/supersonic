@@ -7,7 +7,7 @@ import com.tencent.supersonic.feishu.server.render.FeishuCardTemplate;
 import com.tencent.supersonic.feishu.server.service.FeishuMessageSender;
 import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
-import com.tencent.supersonic.headless.server.service.ReportScheduleService;
+import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

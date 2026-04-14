@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.service.delivery;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

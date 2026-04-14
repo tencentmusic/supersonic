@@ -2,6 +2,7 @@ package com.tencent.supersonic.headless.server.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -13,7 +14,6 @@ import com.tencent.supersonic.headless.server.persistence.mapper.ReportExecution
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleMapper;
 import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
-import com.tencent.supersonic.headless.server.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryException;
 import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryChannel;
 import lombok.extern.slf4j.Slf4j;

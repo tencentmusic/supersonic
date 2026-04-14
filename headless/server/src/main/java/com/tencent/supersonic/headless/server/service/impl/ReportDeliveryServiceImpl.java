@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -13,8 +15,6 @@ import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryC
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryRecordMapper;
 import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
-import com.tencent.supersonic.headless.server.service.ReportDeliveryService;
-import com.tencent.supersonic.headless.server.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryException;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryRateLimiter;
 import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryChannel;
@@ -455,7 +455,7 @@ public class ReportDeliveryServiceImpl
     // ========== Statistics ==========
 
     @Override
-    public DeliveryStatistics getStatistics(Integer days) {
+    public ReportDeliveryService.DeliveryStatistics getStatistics(Integer days) {
         int queryDays = days != null && days > 0 ? days : 7;
         Date startDate = getStartDate(queryDays);
 

@@ -1,5 +1,7 @@
 package com.tencent.supersonic.headless.server.pojo;
 
+import com.tencent.supersonic.headless.api.pojo.SemanticDeployResult;
+import com.tencent.supersonic.headless.api.pojo.SemanticTemplateConfig;
 import lombok.Data;
 
 import java.util.Date;

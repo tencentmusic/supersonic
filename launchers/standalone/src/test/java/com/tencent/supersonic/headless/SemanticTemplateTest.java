@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidArgumentException;
 import com.tencent.supersonic.headless.server.pojo.SemanticDeployParam;
 import com.tencent.supersonic.headless.server.pojo.SemanticDeployment;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplate;
-import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig;
+import com.tencent.supersonic.headless.api.pojo.SemanticTemplateConfig;
 import com.tencent.supersonic.headless.server.pojo.SemanticTemplateListResp;
 import com.tencent.supersonic.headless.server.service.SemanticTemplateService;
 import org.junit.jupiter.api.Assertions;

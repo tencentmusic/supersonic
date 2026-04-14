@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.delivery;
 
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpEntity;
