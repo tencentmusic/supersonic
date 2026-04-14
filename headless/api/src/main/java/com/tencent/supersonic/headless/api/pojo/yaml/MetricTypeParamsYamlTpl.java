@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.server.pojo.yaml;
+package com.tencent.supersonic.headless.api.pojo.yaml;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
