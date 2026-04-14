@@ -1,14 +1,5 @@
 package com.tencent.supersonic.headless.api.service;
 
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleConfirmationDO;
-
+// STUB — fully rewritten in Phase B (Task B5)
 public interface ReportScheduleConfirmationService {
-
-    ReportScheduleConfirmationDO createPending(ReportScheduleConfirmationDO confirmation);
-
-    ReportScheduleConfirmationDO getLatestPending(Long userId, Integer chatId);
-
-    boolean hasPending(Long userId, Integer chatId);
-
-    void updateStatus(Long id, String status);
 }

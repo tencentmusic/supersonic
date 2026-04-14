@@ -1,8 +1,8 @@
 package com.tencent.supersonic.headless.api.event;
 
 import com.tencent.supersonic.common.pojo.User;
-import com.tencent.supersonic.headless.server.pojo.SemanticDeployResult;
-import com.tencent.supersonic.headless.server.pojo.SemanticTemplateConfig;
+import com.tencent.supersonic.headless.api.pojo.SemanticDeployResult;
+import com.tencent.supersonic.headless.api.pojo.SemanticTemplateConfig;
 import org.springframework.context.ApplicationEvent;
 
 public class TemplateDeployedEvent extends ApplicationEvent {

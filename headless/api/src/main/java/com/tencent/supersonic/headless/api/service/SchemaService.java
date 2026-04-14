@@ -10,9 +10,9 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.*;
-import com.tencent.supersonic.headless.server.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.server.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.yaml.DataModelYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.yaml.DimensionYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.yaml.MetricYamlTpl;
 
 import java.util.List;
 import java.util.Map;
