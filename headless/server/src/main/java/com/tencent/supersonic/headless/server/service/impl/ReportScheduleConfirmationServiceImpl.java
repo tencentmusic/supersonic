@@ -3,9 +3,12 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleConfirmationReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleConfirmationResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleConfirmationService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleConfirmationDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportScheduleConfirmationMapper;
+import com.tencent.supersonic.headless.server.service.mapper.ReportDtoMappers;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -22,7 +25,8 @@ public class ReportScheduleConfirmationServiceImpl
     public static final String STATUS_CANCELLED = "CANCELLED";
 
     @Override
-    public ReportScheduleConfirmationDO createPending(ReportScheduleConfirmationDO confirmation) {
+    public ReportScheduleConfirmationResp createPending(ReportScheduleConfirmationReq req) {
+        ReportScheduleConfirmationDO confirmation = ReportDtoMappers.toDO(req);
         Date now = new Date();
         if (confirmation.getConfirmToken() == null || confirmation.getConfirmToken().isBlank()) {
             confirmation.setConfirmToken(UUID.randomUUID().toString().replace("-", ""));
@@ -40,11 +44,15 @@ public class ReportScheduleConfirmationServiceImpl
                 .set(ReportScheduleConfirmationDO::getStatus, STATUS_CANCELLED);
         baseMapper.update(null, cancelWrapper);
         baseMapper.insert(confirmation);
-        return confirmation;
+        return ReportDtoMappers.toResp(confirmation);
     }
 
     @Override
-    public ReportScheduleConfirmationDO getLatestPending(Long userId, Integer chatId) {
+    public ReportScheduleConfirmationResp getLatestPending(Long userId, Integer chatId) {
+        return ReportDtoMappers.toResp(getLatestPendingInternal(userId, chatId));
+    }
+
+    private ReportScheduleConfirmationDO getLatestPendingInternal(Long userId, Integer chatId) {
         if (userId == null || chatId == null) {
             return null;
         }
@@ -67,7 +75,7 @@ public class ReportScheduleConfirmationServiceImpl
 
     @Override
     public boolean hasPending(Long userId, Integer chatId) {
-        return getLatestPending(userId, chatId) != null;
+        return getLatestPendingInternal(userId, chatId) != null;
     }
 
     @Override
