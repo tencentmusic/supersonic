@@ -65,7 +65,7 @@ public class ReportDeliveryController {
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
-        return deliveryService.createConfig(config);
+        return deliveryService.createConfig(config, user);
     }
 
     @PutMapping("/configs/{id}")
@@ -75,7 +75,7 @@ public class ReportDeliveryController {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
         config.setId(id);
-        return deliveryService.updateConfig(config);
+        return deliveryService.updateConfig(config, user);
     }
 
     @DeleteMapping("/configs/{id}")

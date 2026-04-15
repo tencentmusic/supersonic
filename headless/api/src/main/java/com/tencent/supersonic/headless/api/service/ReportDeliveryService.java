@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
 import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
 import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
@@ -15,9 +16,9 @@ public interface ReportDeliveryService {
 
     // ========== Config CRUD ==========
 
-    ReportDeliveryConfigResp createConfig(ReportDeliveryConfigReq req);
+    ReportDeliveryConfigResp createConfig(ReportDeliveryConfigReq req, User user);
 
-    ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req);
+    ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req, User user);
 
     void deleteConfig(Long id);
 

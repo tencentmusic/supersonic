@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.common.context.TenantContext;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
@@ -72,8 +73,14 @@ public class ReportDeliveryServiceImpl
     // ========== Config CRUD ==========
 
     @Override
-    public ReportDeliveryConfigResp createConfig(ReportDeliveryConfigReq req) {
+    public ReportDeliveryConfigResp createConfig(ReportDeliveryConfigReq req, User user) {
         ReportDeliveryConfigDO config = ReportDtoMappers.toDO(req);
+        if (user != null) {
+            config.setCreatedBy(user.getName());
+            if (config.getTenantId() == null) {
+                config.setTenantId(user.getTenantId());
+            }
+        }
         validateConfig(config);
 
         if (config.getTenantId() == null) {
@@ -95,11 +102,14 @@ public class ReportDeliveryServiceImpl
     }
 
     @Override
-    public ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req) {
+    public ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req, User user) {
         ReportDeliveryConfigDO existing = getConfigByIdInternal(req.getId());
         BeanUtils.copyProperties(req, existing, "id", "tenantId", "createdAt", "createdBy",
                 "updatedBy", "consecutiveFailures", "disabledReason");
         validateConfig(existing);
+        if (user != null) {
+            existing.setUpdatedBy(user.getName());
+        }
         existing.setUpdatedAt(new Date());
         // Reset consecutive failures when manually updating
         if (existing.getEnabled() != null && existing.getEnabled()) {
