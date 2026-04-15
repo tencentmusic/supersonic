@@ -12,20 +12,21 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.QueryType;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleConfirmationReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleConfirmationResp;
 import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleConfirmationService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleConfirmationDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.BeanUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -126,7 +127,7 @@ class ReportScheduleQueryTest {
         when(chatManageService.getChatQueries(anyInt()))
                 .thenReturn(List.of(buildPreviousQuery(5001L, buildSchedulableParseInfo(1))));
 
-        Page<ReportDeliveryConfigDO> emptyPage = new Page<>(1, 100);
+        Page<ReportDeliveryConfigResp> emptyPage = new Page<>(1, 100);
         emptyPage.setRecords(List.of());
         when(deliveryService.getConfigList(any())).thenReturn(emptyPage);
 
@@ -146,12 +147,12 @@ class ReportScheduleQueryTest {
         when(chatManageService.getChatQueries(anyInt()))
                 .thenReturn(List.of(buildPreviousQuery(5001L, buildSchedulableParseInfo(1))));
 
-        ReportDeliveryConfigDO config = new ReportDeliveryConfigDO();
+        ReportDeliveryConfigResp config = new ReportDeliveryConfigResp();
         config.setId(9L);
         config.setName("飞书群");
         config.setEnabled(true);
         config.setTenantId(10L);
-        Page<ReportDeliveryConfigDO> configPage = new Page<>(1, 100);
+        Page<ReportDeliveryConfigResp> configPage = new Page<>(1, 100);
         configPage.setRecords(List.of(config));
         when(deliveryService.getConfigList(any())).thenReturn(configPage);
         when(deliveryService.getConfigById(9L)).thenReturn(config);
@@ -161,9 +162,11 @@ class ReportScheduleQueryTest {
         ds.setName("订单明细");
         when(dataSetService.getDataSet(1L)).thenReturn(ds);
 
-        ReportScheduleConfirmationDO[] stored = {null};
+        ReportScheduleConfirmationResp[] stored = {null};
         doAnswer(inv -> {
-            ReportScheduleConfirmationDO c = inv.getArgument(0);
+            ReportScheduleConfirmationReq captured = inv.getArgument(0);
+            ReportScheduleConfirmationResp c = new ReportScheduleConfirmationResp();
+            BeanUtils.copyProperties(captured, c);
             c.setId(1L);
             c.setStatus("PENDING");
             stored[0] = c;
@@ -184,7 +187,8 @@ class ReportScheduleQueryTest {
         when(confirmationService.getLatestPending(1001L, 88)).thenReturn(stored[0]);
         when(userService.getUserById(1001L)).thenReturn(buildUser(1001L, "tester", 10L));
 
-        ReportScheduleDO created = new ReportScheduleDO();
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp created =
+                new com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp();
         created.setId(123L);
         when(scheduleService.createSchedule(any(), any())).thenReturn(created);
 
@@ -205,12 +209,12 @@ class ReportScheduleQueryTest {
         when(chatManageService.getChatQueries(anyInt()))
                 .thenReturn(List.of(buildPreviousQuery(5001L, buildSchedulableParseInfo(1))));
 
-        ReportDeliveryConfigDO config = new ReportDeliveryConfigDO();
+        ReportDeliveryConfigResp config = new ReportDeliveryConfigResp();
         config.setId(9L);
         config.setName("飞书群");
         config.setEnabled(true);
         config.setTenantId(10L);
-        Page<ReportDeliveryConfigDO> configPage = new Page<>(1, 100);
+        Page<ReportDeliveryConfigResp> configPage = new Page<>(1, 100);
         configPage.setRecords(List.of(config));
         when(deliveryService.getConfigList(any())).thenReturn(configPage);
         when(deliveryService.getConfigById(9L)).thenReturn(config);
@@ -220,9 +224,11 @@ class ReportScheduleQueryTest {
         ds.setName("订单");
         when(dataSetService.getDataSet(1L)).thenReturn(ds);
 
-        ReportScheduleConfirmationDO[] stored = {null};
+        ReportScheduleConfirmationResp[] stored = {null};
         doAnswer(inv -> {
-            ReportScheduleConfirmationDO c = inv.getArgument(0);
+            ReportScheduleConfirmationReq captured = inv.getArgument(0);
+            ReportScheduleConfirmationResp c = new ReportScheduleConfirmationResp();
+            BeanUtils.copyProperties(captured, c);
             c.setId(2L);
             c.setStatus("PENDING");
             stored[0] = c;
@@ -239,7 +245,8 @@ class ReportScheduleQueryTest {
 
         when(confirmationService.getLatestPending(1001L, 88)).thenReturn(stored[0]);
         when(userService.getUserById(1001L)).thenReturn(buildUser(1001L, "tester", 10L));
-        ReportScheduleDO created = new ReportScheduleDO();
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp created =
+                new com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp();
         created.setId(124L);
         when(scheduleService.createSchedule(any(), any())).thenReturn(created);
 
@@ -270,7 +277,8 @@ class ReportScheduleQueryTest {
     @Test
     @DisplayName("LIST with no schedules → LIST_EMPTY message")
     void list_empty() {
-        Page<ReportScheduleDO> emptyPage = new Page<>(1, 20);
+        Page<com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp> emptyPage =
+                new Page<>(1, 20);
         emptyPage.setRecords(List.of());
         when(scheduleService.getScheduleList(any(), isNull(), isNull(), any()))
                 .thenReturn(emptyPage);

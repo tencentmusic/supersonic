@@ -14,17 +14,18 @@ import com.tencent.supersonic.common.util.ContextUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleConfirmationReq;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleReq;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportExecutionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleConfirmationResp;
 import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleConfirmationService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import com.tencent.supersonic.headless.chat.utils.QueryReqBuilder;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleConfirmationDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -188,7 +189,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             Map<String, Object> params, Long userId, Long tenantId,
             ReportSubscriptionSource source) {
         long now = System.currentTimeMillis();
-        ReportScheduleConfirmationDO confirmation = new ReportScheduleConfirmationDO();
+        ReportScheduleConfirmationReq confirmation = new ReportScheduleConfirmationReq();
         confirmation.setUserId(userId);
         confirmation.setChatId(chatId);
         confirmation.setActionType(intent.name());
@@ -254,7 +255,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
     }
 
     private ReportScheduleResp handleConfirm(Integer chatId, Long userId) {
-        ReportScheduleConfirmationDO pending = confirmationService.getLatestPending(userId, chatId);
+        ReportScheduleConfirmationResp pending =
+                confirmationService.getLatestPending(userId, chatId);
         if (pending == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
                     .message(ERROR_NO_PENDING).build();
@@ -285,7 +287,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         String scheduleName = (String) params.get("scheduleName");
         User currentUser = requireCurrentUser(currentUserId);
 
-        ReportScheduleDO schedule = new ReportScheduleDO();
+        ReportScheduleReq schedule = new ReportScheduleReq();
         schedule.setName(scheduleName);
         schedule.setDatasetId(datasetId);
         schedule.setCronExpression(cronExpression);
@@ -295,7 +297,8 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         schedule.setEnabled(true);
         schedule.setRetryCount(DEFAULT_RETRY_COUNT);
 
-        ReportScheduleDO created = scheduleService.createSchedule(schedule, currentUser);
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp created =
+                scheduleService.createSchedule(schedule, currentUser);
         String cronDesc = describeCron(cronExpression);
         String channelName = resolveChannelName(deliveryConfigIds);
 
@@ -417,12 +420,15 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
     private ReportScheduleResp handleList() {
         // Pass null to list ALL schedules for the current tenant (TenantSqlInterceptor filters by
         // tenant)
-        Page<ReportScheduleDO> page = new Page<>(1, 20);
-        Page<ReportScheduleDO> result = scheduleService.getScheduleList(page, null, null,
-                requireCurrentUser(parseCurrentUserId()));
+        Page<com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp> page =
+                new Page<>(1, 20);
+        Page<com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp> result =
+                scheduleService.getScheduleList(page, null, null,
+                        requireCurrentUser(parseCurrentUserId()));
 
         List<ReportScheduleResp.ScheduleSummary> summaries = new ArrayList<>();
-        for (ReportScheduleDO schedule : result.getRecords()) {
+        for (com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule : result
+                .getRecords()) {
             summaries.add(ReportScheduleResp.ScheduleSummary.builder().id(schedule.getId())
                     .name(schedule.getName()).datasetId(schedule.getDatasetId())
                     .cronExpression(schedule.getCronExpression())
@@ -455,7 +461,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_CANCEL_ID).build();
         }
 
-        ReportScheduleDO schedule =
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
 
         if (schedule == null) {
@@ -483,7 +489,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_PAUSE_ID).build();
         }
 
-        ReportScheduleDO schedule =
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(false)
@@ -509,7 +515,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_RESUME_ID).build();
         }
 
-        ReportScheduleDO schedule =
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(false)
@@ -534,7 +540,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_TRIGGER_ID).build();
         }
 
-        ReportScheduleDO schedule =
+        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
             return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(false)
@@ -560,12 +566,12 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                     .message(ERROR_SPECIFY_STATUS_ID).build();
         }
 
-        Page<ReportExecutionDO> page = new Page<>(1, 10);
-        Page<ReportExecutionDO> result = scheduleService.getExecutionList(page, scheduleId, null,
+        Page<ReportExecutionResp> page = new Page<>(1, 10);
+        Page<ReportExecutionResp> result = scheduleService.getExecutionList(page, scheduleId, null,
                 requireCurrentUser(parseCurrentUserId()));
 
         List<ReportScheduleResp.ExecutionSummary> summaries = new ArrayList<>();
-        for (ReportExecutionDO exec : result.getRecords()) {
+        for (ReportExecutionResp exec : result.getRecords()) {
             summaries.add(ReportScheduleResp.ExecutionSummary.builder().id(exec.getId())
                     .startTime(formatDate(exec.getStartTime()))
                     .endTime(formatDate(exec.getEndTime())).status(exec.getStatus())
@@ -829,7 +835,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         if (pluginParseResult == null || pluginParseResult.getTenantId() == null) {
             return null;
         }
-        List<ReportDeliveryConfigDO> configs = deliveryService.getConfigList(new Page<>(1, 100))
+        List<ReportDeliveryConfigResp> configs = deliveryService.getConfigList(new Page<>(1, 100))
                 .getRecords().stream().filter(config -> Boolean.TRUE.equals(config.getEnabled()))
                 .filter(config -> pluginParseResult.getTenantId().equals(config.getTenantId()))
                 .toList();
@@ -871,7 +877,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         }
         try {
             long configId = Long.parseLong(deliveryConfigIds.split(",")[0].trim());
-            ReportDeliveryConfigDO config = deliveryService.getConfigById(configId);
+            ReportDeliveryConfigResp config = deliveryService.getConfigById(configId);
             return config != null && config.getName() != null ? config.getName()
                     : deliveryConfigIds;
         } catch (Exception e) {
