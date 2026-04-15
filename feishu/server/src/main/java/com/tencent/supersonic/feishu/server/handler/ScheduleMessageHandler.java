@@ -8,8 +8,9 @@ import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuQuerySe
 import com.tencent.supersonic.feishu.server.persistence.mapper.FeishuQuerySessionMapper;
 import com.tencent.supersonic.feishu.server.render.FeishuCardRenderer;
 import com.tencent.supersonic.feishu.server.service.FeishuMessageSender;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -78,7 +79,7 @@ public class ScheduleMessageHandler implements MessageHandler {
 
     private void handleList(FeishuMessage msg, User user) {
         try {
-            Page<ReportScheduleDO> page =
+            Page<ReportScheduleResp> page =
                     reportScheduleService.getScheduleList(new Page<>(1, 20), null, null, user);
             Map<String, Object> card = cardRenderer.renderScheduleListCard(page.getRecords());
             messageSender.replyCard(msg.getMessageId(), card);
@@ -118,8 +119,9 @@ public class ScheduleMessageHandler implements MessageHandler {
                 return;
             }
 
-            // 4. Create schedule
-            ReportScheduleDO schedule = new ReportScheduleDO();
+            // 4. Create schedule — ownerId / tenantId / createdBy are owned by the impl
+            // (see ReportScheduleServiceImpl.createSchedule, which reads them from `user`)
+            ReportScheduleReq schedule = new ReportScheduleReq();
             schedule.setName("定时报表-" + session.getQueryText());
             schedule.setDatasetId(session.getDatasetId());
             schedule.setCronExpression(cron);
@@ -127,11 +129,8 @@ public class ScheduleMessageHandler implements MessageHandler {
             schedule.setDeliveryConfigIds(deliveryConfigIds);
             schedule.setEnabled(true);
             schedule.setRetryCount(3);
-            schedule.setOwnerId(user.getId());
-            schedule.setTenantId(user.getTenantId());
-            schedule.setCreatedBy(user.getName());
 
-            ReportScheduleDO created = reportScheduleService.createSchedule(schedule, user);
+            ReportScheduleResp created = reportScheduleService.createSchedule(schedule, user);
 
             Map<String, Object> card =
                     cardRenderer.renderScheduleCreatedCard(created, describeCron(cron));
@@ -242,7 +241,7 @@ public class ScheduleMessageHandler implements MessageHandler {
 
     private String findDefaultDeliveryConfigId() {
         try {
-            List<ReportDeliveryConfigDO> configs =
+            List<ReportDeliveryConfigResp> configs =
                     reportDeliveryService.getConfigList(new Page<>(1, 100)).getRecords().stream()
                             .filter(c -> Boolean.TRUE.equals(c.getEnabled())).toList();
             return configs.isEmpty() ? null : String.valueOf(configs.get(0).getId());

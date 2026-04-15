@@ -5,7 +5,7 @@ import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.server.service.FeishuMessageSender;
 import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +63,7 @@ class CardActionHandlerTest {
                 "https://s2.example.com/api/public/reportSchedules/8/executions/9:download?expires=1&token=abc");
         actionValue.put("scheduleId", 8L);
         actionValue.put("executionId", 9L);
-        when(reportScheduleService.getScheduleById(8L, owner)).thenReturn(new ReportScheduleDO());
+        when(reportScheduleService.getScheduleById(8L, owner)).thenReturn(new ReportScheduleResp());
 
         handler.handle(actionValue, owner, "ou_alice");
 

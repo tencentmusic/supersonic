@@ -8,7 +8,7 @@ import com.tencent.supersonic.headless.api.pojo.FollowUpHintGenerator;
 import com.tencent.supersonic.headless.api.pojo.SemanticParseInfo;
 import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -371,7 +371,7 @@ public class FeishuCardRenderer {
     /**
      * Schedule created confirmation card.
      */
-    public Map<String, Object> renderScheduleCreatedCard(ReportScheduleDO schedule,
+    public Map<String, Object> renderScheduleCreatedCard(ReportScheduleResp schedule,
             String cronDesc) {
         String content = String.format(
                 "**定时任务已创建** (ID: %d)\n\n" + "- **数据集**: %s\n" + "- **频率**: %s\n"
@@ -388,13 +388,13 @@ public class FeishuCardRenderer {
     /**
      * Schedule list card showing all schedules for the user.
      */
-    public Map<String, Object> renderScheduleListCard(List<ReportScheduleDO> schedules) {
+    public Map<String, Object> renderScheduleListCard(List<ReportScheduleResp> schedules) {
         StringBuilder content = new StringBuilder();
         if (schedules == null || schedules.isEmpty()) {
             content.append("暂无定时任务。\n\n发送查询后，使用 `/schedule 每天9点` 创建定时任务");
         } else {
             content.append(String.format("**定时报表列表** (共 %d 个)\n\n", schedules.size()));
-            for (ReportScheduleDO s : schedules) {
+            for (ReportScheduleResp s : schedules) {
                 String status = Boolean.TRUE.equals(s.getEnabled()) ? "[运行]" : "[暂停]";
                 content.append(String.format("%s **#%d %s** | %s\n", status, s.getId(), s.getName(),
                         s.getCronExpression()));

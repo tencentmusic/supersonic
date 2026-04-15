@@ -6,7 +6,7 @@ import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.server.render.FeishuCardTemplate;
 import com.tencent.supersonic.feishu.server.service.FeishuMessageSender;
 import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -134,7 +134,7 @@ public class CardActionHandler {
         // ReportScheduleService.getScheduleById 已经内置 checkReadPermission(schedule, user)，
         // 非 owner 且非 super admin 会抛 InvalidPermissionException —— 捕获后给操作者发一张拒绝卡片。
         try {
-            ReportScheduleDO schedule = reportScheduleService.getScheduleById(scheduleId, user);
+            ReportScheduleResp schedule = reportScheduleService.getScheduleById(scheduleId, user);
             if (schedule == null) {
                 card.put("header", FeishuCardTemplate.buildHeader("调度已删除", "orange"));
                 card.put("elements",
