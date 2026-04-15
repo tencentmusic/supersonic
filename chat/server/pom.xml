@@ -31,6 +31,15 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- headless-core: metric/dimension config POJOs used by DimValueDO and
+             MetricRatioCalcProcessor. Previously arrived transitively via
+             headless-server; now declared directly after that dep was dropped. -->
+        <dependency>
+            <groupId>com.tencent.supersonic</groupId>
+            <artifactId>headless-core</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
