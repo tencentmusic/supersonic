@@ -1,52 +1,84 @@
 package com.tencent.supersonic.headless.api.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
+import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 
-import java.util.Map;
+import java.util.List;
 
-// STUB — fully rewritten in Phase B (Task B4)
+/**
+ * Service for managing report delivery configurations and executing deliveries.
+ */
 public interface ReportDeliveryService {
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
+    // ========== Config CRUD ==========
+
+    ReportDeliveryConfigResp createConfig(ReportDeliveryConfigReq req);
+
+    ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req);
+
+    void deleteConfig(Long id);
+
+    ReportDeliveryConfigResp getConfigById(Long id);
+
+    Page<ReportDeliveryConfigResp> getConfigList(Page<ReportDeliveryConfigResp> page);
+
+    List<ReportDeliveryConfigResp> getConfigsByIds(List<Long> ids);
+
+    // ========== Delivery Execution ==========
+
+    /**
+     * Deliver a report to multiple channels.
+     */
+    List<ReportDeliveryRecordResp> deliver(List<Long> configIds, DeliveryContext context);
+
+    /**
+     * Test delivery configuration by sending a test message.
+     */
+    ReportDeliveryRecordResp testDelivery(Long configId);
+
+    // ========== Delivery Records ==========
+
+    Page<ReportDeliveryRecordResp> getDeliveryRecords(Page<ReportDeliveryRecordResp> page,
+            Long configId, Long scheduleId, Long executionId);
+
+    /**
+     * Retry a failed delivery.
+     */
+    ReportDeliveryRecordResp retryDelivery(Long recordId);
+
+    // ========== Statistics ==========
+
+    DeliveryStatistics getStatistics(Integer days);
+
+    List<DailyDeliveryStats> getDailyStats(Integer days);
+
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
     class DeliveryStatistics {
-
-        private Long totalDeliveries;
-
-        private Long successCount;
-
-        private Long failedCount;
-
-        private Long pendingCount;
-
-        private Double successRate;
-
-        private Map<String, Long> countByType;
-
-        private Map<String, Double> successRateByType;
-
+        private long totalDeliveries;
+        private long successCount;
+        private long failedCount;
+        private long pendingCount;
+        private double successRate;
+        private java.util.Map<String, Long> countByType;
+        private java.util.Map<String, Double> successRateByType;
         private Double avgDeliveryTimeMs;
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
     class DailyDeliveryStats {
-
         private String date;
-
-        private Long total;
-
-        private Long success;
-
-        private Long failed;
-
-        private Double successRate;
+        private long total;
+        private long success;
+        private long failed;
+        private double successRate;
     }
 }
