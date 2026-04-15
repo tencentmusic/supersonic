@@ -27,12 +27,12 @@ import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.DimensionResp;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
 import com.tencent.supersonic.headless.api.pojo.response.MetricResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.pojo.response.ValidDataSetResp;
 import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import com.tencent.supersonic.headless.api.service.SchemaService;
 import com.tencent.supersonic.headless.server.persistence.dataobject.DataSetDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.DataSetDOMapper;
 import com.tencent.supersonic.headless.server.service.*;
 import lombok.RequiredArgsConstructor;
@@ -194,7 +194,7 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         if (reportScheduleService != null) {
             User systemReader = User.builder().id(user.getId()).name(user.getName())
                     .tenantId(user.getTenantId()).isAdmin(1).build();
-            Page<ReportScheduleDO> activePage =
+            Page<ReportScheduleResp> activePage =
                     reportScheduleService.getScheduleList(new Page<>(1, 1), id, true, systemReader);
             if (activePage.getTotal() > 0) {
                 throw new InvalidArgumentException(

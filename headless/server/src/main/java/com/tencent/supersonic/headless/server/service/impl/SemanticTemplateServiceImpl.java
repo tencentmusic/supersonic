@@ -12,9 +12,9 @@ import com.tencent.supersonic.headless.api.event.TemplateDeployedEvent;
 import com.tencent.supersonic.headless.api.pojo.SemanticDeployResult;
 import com.tencent.supersonic.headless.api.pojo.SemanticTemplateConfig;
 import com.tencent.supersonic.headless.api.pojo.response.DomainResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import com.tencent.supersonic.headless.server.executor.SemanticDeployExecutor;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.SemanticDeploymentDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.SemanticTemplateDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.SemanticDeploymentMapper;
@@ -532,7 +532,7 @@ public class SemanticTemplateServiceImpl extends
             if (result != null && result.getDataSetId() != null) {
                 User systemReader = User.builder().id(user.getId()).name(user.getName())
                         .tenantId(user.getTenantId()).isAdmin(1).build();
-                Page<ReportScheduleDO> activePage = reportScheduleService.getScheduleList(
+                Page<ReportScheduleResp> activePage = reportScheduleService.getScheduleList(
                         new Page<>(1, 1), result.getDataSetId(), true, systemReader);
                 if (activePage.getTotal() > 0) {
                     throw new InvalidArgumentException(

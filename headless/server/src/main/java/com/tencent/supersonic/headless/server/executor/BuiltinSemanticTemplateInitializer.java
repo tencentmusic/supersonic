@@ -10,6 +10,8 @@ import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import com.tencent.supersonic.headless.api.pojo.MetaFilter;
+import com.tencent.supersonic.headless.api.pojo.SemanticDeployResult;
+import com.tencent.supersonic.headless.api.pojo.SemanticTemplateConfig;
 import com.tencent.supersonic.headless.api.pojo.SemanticTemplateConfig.*;
 import com.tencent.supersonic.headless.api.pojo.request.DictItemReq;
 import com.tencent.supersonic.headless.api.pojo.request.DictSingleTaskReq;

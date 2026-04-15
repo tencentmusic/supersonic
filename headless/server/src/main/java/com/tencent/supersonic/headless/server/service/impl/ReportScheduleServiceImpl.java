@@ -11,6 +11,9 @@ import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.pojo.ReportExecutionVO;
 import com.tencent.supersonic.headless.api.pojo.request.QueryStructReq;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportExecutionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -23,11 +26,13 @@ import com.tencent.supersonic.headless.server.pojo.DeliveryStatus;
 import com.tencent.supersonic.headless.server.pojo.ExecutionSnapshotData;
 import com.tencent.supersonic.headless.server.pojo.ReportExecutionContext;
 import com.tencent.supersonic.headless.server.service.DataSetAuthService;
+import com.tencent.supersonic.headless.server.service.mapper.ReportDtoMappers;
 import com.tencent.supersonic.headless.server.task.ReportScheduleJob;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -108,7 +113,7 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     }
 
     @Override
-    public ReportScheduleDO createSchedule(ReportScheduleDO schedule, User user) {
+    public ReportScheduleResp createSchedule(ReportScheduleReq req, User user) {
         if (user == null || user.getId() == null) {
             throw new IllegalArgumentException("current user is required to create a schedule");
         }
@@ -116,11 +121,12 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         if (owner == null) {
             throw new IllegalArgumentException("Owner user not found for id=" + user.getId());
         }
-        if (schedule.getDatasetId() != null
-                && !dataSetAuthService.checkDataSetViewPermission(schedule.getDatasetId(), owner)) {
+        if (req.getDatasetId() != null
+                && !dataSetAuthService.checkDataSetViewPermission(req.getDatasetId(), owner)) {
             throw new InvalidPermissionException("您没有该数据集的权限，请联系管理员申请");
         }
 
+        ReportScheduleDO schedule = ReportDtoMappers.toDO(req);
         schedule.setOwnerId(owner.getId());
         schedule.setTenantId(owner.getTenantId());
         schedule.setCreatedBy(owner.getName());
@@ -147,37 +153,42 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
 
         schedule.setQuartzJobKey(quartzJobKey);
         baseMapper.updateById(schedule);
-        return schedule;
+        return ReportDtoMappers.toResp(schedule);
     }
 
     @Override
-    public ReportScheduleDO updateSchedule(ReportScheduleDO schedule, User user) {
+    public ReportScheduleResp updateSchedule(ReportScheduleReq req, User user) {
         // Load existing once — reused for both permission check and Quartz reschedule
-        ReportScheduleDO existing = baseMapper.selectById(schedule.getId());
+        ReportScheduleDO existing = baseMapper.selectById(req.getId());
         if (existing == null) {
-            throw new IllegalArgumentException("Schedule not found: " + schedule.getId());
+            throw new IllegalArgumentException("Schedule not found: " + req.getId());
         }
         checkOwnership(existing, user);
 
         // Pre-flight: if datasetId is being changed, verify the requesting user has view permission
-        if (schedule.getDatasetId() != null) {
-            if (!dataSetAuthService.checkDataSetViewPermission(schedule.getDatasetId(), user)) {
+        if (req.getDatasetId() != null) {
+            if (!dataSetAuthService.checkDataSetViewPermission(req.getDatasetId(), user)) {
                 throw new InvalidPermissionException("您没有该数据集的权限，请联系管理员申请");
             }
         }
 
-        validateQueryConfig(schedule.getQueryConfig());
-        schedule.setUpdatedAt(new Date());
-        baseMapper.updateById(schedule);
+        validateQueryConfig(req.getQueryConfig());
+        String originalCron = existing.getCronExpression();
+        String originalQuartzKey = existing.getQuartzJobKey();
+        // Copy caller-provided fields into the loaded DO; preserve server-owned fields.
+        BeanUtils.copyProperties(req, existing, "id", "ownerId", "tenantId", "createdBy",
+                "createdAt", "quartzJobKey", "lastExecutionTime", "nextExecutionTime");
+        existing.setUpdatedAt(new Date());
+        baseMapper.updateById(existing);
 
         // Reschedule Quartz using quartzJobKey from DB (not from request body — frontend never
         // sends it)
         // Only reschedule when cron actually changed to avoid unnecessary Quartz operations
-        if (schedule.getCronExpression() != null && existing.getQuartzJobKey() != null
-                && !schedule.getCronExpression().equals(existing.getCronExpression())) {
-            reschedule(schedule.getId(), schedule.getCronExpression());
+        if (existing.getCronExpression() != null && originalQuartzKey != null
+                && !existing.getCronExpression().equals(originalCron)) {
+            reschedule(existing.getId(), existing.getCronExpression());
         }
-        return schedule;
+        return ReportDtoMappers.toResp(existing);
     }
 
     /**
@@ -254,17 +265,17 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     }
 
     @Override
-    public ReportScheduleDO getScheduleById(Long id, User user) {
+    public ReportScheduleResp getScheduleById(Long id, User user) {
         ReportScheduleDO schedule = baseMapper.selectById(id);
         if (schedule == null) {
             return null;
         }
         checkReadPermission(schedule, user);
-        return schedule;
+        return ReportDtoMappers.toResp(schedule);
     }
 
     @Override
-    public Page<ReportScheduleDO> getScheduleList(Page<ReportScheduleDO> page, Long datasetId,
+    public Page<ReportScheduleResp> getScheduleList(Page<ReportScheduleResp> page, Long datasetId,
             Boolean enabled, User user) {
         QueryWrapper<ReportScheduleDO> wrapper = new QueryWrapper<>();
         if (datasetId != null) {
@@ -277,7 +288,9 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
             wrapper.lambda().eq(ReportScheduleDO::getOwnerId, user.getId());
         }
         wrapper.lambda().orderByDesc(ReportScheduleDO::getCreatedAt);
-        return baseMapper.selectPage(page, wrapper);
+        Page<ReportScheduleDO> doPage = new Page<>(page.getCurrent(), page.getSize());
+        Page<ReportScheduleDO> result = baseMapper.selectPage(doPage, wrapper);
+        return ReportDtoMappers.toRespPage(result);
     }
 
     @Override
@@ -334,13 +347,21 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     }
 
     @Override
-    public Page<ReportExecutionDO> getExecutionList(Page<ReportExecutionDO> page, Long scheduleId,
-            String status, User user) {
+    public Page<ReportExecutionResp> getExecutionList(Page<ReportExecutionResp> page,
+            Long scheduleId, String status, User user) {
+        Page<ReportExecutionDO> doPage = new Page<>(page.getCurrent(), page.getSize());
+        Page<ReportExecutionDO> result =
+                queryExecutionListInternal(doPage, scheduleId, status, user);
+        return ReportDtoMappers.toExecutionRespPage(result);
+    }
+
+    private Page<ReportExecutionDO> queryExecutionListInternal(Page<ReportExecutionDO> doPage,
+            Long scheduleId, String status, User user) {
         List<Long> allowedScheduleIds = getReadableScheduleIds(user, scheduleId);
         if (CollectionUtils.isEmpty(allowedScheduleIds)) {
-            page.setRecords(List.of());
-            page.setTotal(0L);
-            return page;
+            doPage.setRecords(List.of());
+            doPage.setTotal(0L);
+            return doPage;
         }
         QueryWrapper<ReportExecutionDO> wrapper = new QueryWrapper<>();
         wrapper.lambda().in(ReportExecutionDO::getScheduleId, allowedScheduleIds);
@@ -348,11 +369,11 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
             wrapper.lambda().eq(ReportExecutionDO::getStatus, status);
         }
         wrapper.lambda().orderByDesc(ReportExecutionDO::getStartTime);
-        return executionMapper.selectPage(page, wrapper);
+        return executionMapper.selectPage(doPage, wrapper);
     }
 
     @Override
-    public ReportExecutionDO getExecutionById(Long scheduleId, Long id, User user) {
+    public ReportExecutionResp getExecutionById(Long scheduleId, Long id, User user) {
         ReportExecutionDO execution = executionMapper.selectById(id);
         if (execution == null) {
             return null;
@@ -365,7 +386,7 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
             return null;
         }
         checkReadPermission(schedule, user);
-        return execution;
+        return ReportDtoMappers.toResp(execution);
     }
 
     /**
@@ -452,9 +473,11 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     }
 
     @Override
-    public Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionDO> page, Long scheduleId,
-            String status, User user) {
-        Page<ReportExecutionDO> doPage = getExecutionList(page, scheduleId, status, user);
+    public Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionResp> page,
+            Long scheduleId, String status, User user) {
+        Page<ReportExecutionDO> initial = new Page<>(page.getCurrent(), page.getSize());
+        Page<ReportExecutionDO> doPage =
+                queryExecutionListInternal(initial, scheduleId, status, user);
         Page<ReportExecutionVO> voPage =
                 new Page<>(doPage.getCurrent(), doPage.getSize(), doPage.getTotal());
 

@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.headless.api.pojo.ReportExecutionVO;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportExecutionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportScheduleDO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +38,14 @@ public class ReportScheduleController {
     private final ReportScheduleService reportScheduleService;
 
     @PostMapping
-    public ReportScheduleDO createSchedule(@RequestBody ReportScheduleDO schedule,
+    public ReportScheduleResp createSchedule(@RequestBody ReportScheduleReq schedule,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return reportScheduleService.createSchedule(schedule, user);
     }
 
     @GetMapping
-    public Page<ReportScheduleDO> getScheduleList(@RequestParam(defaultValue = "1") int current,
+    public Page<ReportScheduleResp> getScheduleList(@RequestParam(defaultValue = "1") int current,
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(required = false) Long datasetId,
             @RequestParam(required = false) Boolean enabled, HttpServletRequest request,
@@ -55,23 +56,18 @@ public class ReportScheduleController {
     }
 
     @GetMapping("/{id}")
-    public ReportScheduleDO getScheduleById(@PathVariable Long id, HttpServletRequest request,
+    public ReportScheduleResp getScheduleById(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         return reportScheduleService.getScheduleById(id, user);
     }
 
     @PatchMapping("/{id}")
-    public ReportScheduleDO updateSchedule(@PathVariable Long id,
-            @RequestBody ReportScheduleDO schedule, HttpServletRequest request,
+    public ReportScheduleResp updateSchedule(@PathVariable Long id,
+            @RequestBody ReportScheduleReq schedule, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         schedule.setId(id);
-        // Strip immutable fields — these must never be overwritten by the client
-        schedule.setOwnerId(null);
-        schedule.setCreatedBy(null);
-        schedule.setTenantId(null);
-        schedule.setCreatedAt(null);
         return reportScheduleService.updateSchedule(schedule, user);
     }
 
@@ -122,7 +118,7 @@ public class ReportScheduleController {
     }
 
     @GetMapping("/{scheduleId}/executions/{executionId}")
-    public ReportExecutionDO getExecutionById(@PathVariable Long scheduleId,
+    public ReportExecutionResp getExecutionById(@PathVariable Long scheduleId,
             @PathVariable Long executionId, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
@@ -134,7 +130,7 @@ public class ReportScheduleController {
             @PathVariable Long executionId, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
-        ReportExecutionDO execution =
+        ReportExecutionResp execution =
                 reportScheduleService.getExecutionById(scheduleId, executionId, user);
         if (execution == null || execution.getResultLocation() == null) {
             return ResponseEntity.notFound().build();

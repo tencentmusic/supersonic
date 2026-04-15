@@ -6,6 +6,9 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.ReportExecutionVO;
+import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportExecutionResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.server.manager.QuartzJobManager;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportExecutionDO;
@@ -93,14 +96,16 @@ class ReportScheduleServiceImplTest {
 
         when(dataSetAuthService.checkDataSetViewPermission(10L, owner)).thenReturn(true);
 
-        ReportScheduleDO update = new ReportScheduleDO();
+        ReportScheduleReq update = new ReportScheduleReq();
         update.setId(1L);
         update.setDatasetId(10L);
         update.setCronExpression("0 30 9 * * ?");
 
         service.updateSchedule(update, owner);
 
-        verify(reportScheduleMapper).updateById(eq(update));
+        // Two updateById calls: one from updateSchedule (after BeanUtils.copyProperties onto
+        // existing) and one from reschedule() (which reloads and mutates the same row).
+        verify(reportScheduleMapper, org.mockito.Mockito.times(2)).updateById(eq(existing));
         verify(quartzJobManager).rescheduleJob("REPORT.report_1", "0 30 9 * * ?");
     }
 
@@ -115,7 +120,7 @@ class ReportScheduleServiceImplTest {
 
         when(dataSetAuthService.checkDataSetViewPermission(10L, owner)).thenReturn(false);
 
-        ReportScheduleDO update = new ReportScheduleDO();
+        ReportScheduleReq update = new ReportScheduleReq();
         update.setId(1L);
         update.setDatasetId(10L);
 
@@ -133,13 +138,13 @@ class ReportScheduleServiceImplTest {
         existing.setCronExpression("0 0 9 * * ?");
         when(reportScheduleMapper.selectById(1L)).thenReturn(existing);
 
-        ReportScheduleDO update = new ReportScheduleDO();
+        ReportScheduleReq update = new ReportScheduleReq();
         update.setId(1L);
         update.setCronExpression("0 0 9 * * ?"); // same cron
 
         service.updateSchedule(update, owner);
 
-        verify(reportScheduleMapper).updateById(eq(update));
+        verify(reportScheduleMapper).updateById(eq(existing));
         verify(quartzJobManager, never()).rescheduleJob(any(), any());
     }
 
@@ -150,7 +155,7 @@ class ReportScheduleServiceImplTest {
         existing.setOwnerId(7L);
         when(reportScheduleMapper.selectById(1L)).thenReturn(existing);
 
-        ReportScheduleDO update = new ReportScheduleDO();
+        ReportScheduleReq update = new ReportScheduleReq();
         update.setId(1L);
         update.setCronExpression("0 30 9 * * ?");
 
@@ -162,7 +167,7 @@ class ReportScheduleServiceImplTest {
 
     @Test
     void createScheduleShouldThrowWhenOwnerIdIsNull() {
-        ReportScheduleDO schedule = new ReportScheduleDO();
+        ReportScheduleReq schedule = new ReportScheduleReq();
         schedule.setDatasetId(10L);
         User user = new User();
 
@@ -172,7 +177,7 @@ class ReportScheduleServiceImplTest {
 
     @Test
     void createScheduleShouldThrowWhenOwnerUserNotFound() {
-        ReportScheduleDO schedule = new ReportScheduleDO();
+        ReportScheduleReq schedule = new ReportScheduleReq();
         schedule.setDatasetId(10L);
         User user = new User();
         user.setId(99L);
@@ -184,7 +189,7 @@ class ReportScheduleServiceImplTest {
 
     @Test
     void createScheduleShouldThrowWhenOwnerLacksDatasetPermission() {
-        ReportScheduleDO schedule = new ReportScheduleDO();
+        ReportScheduleReq schedule = new ReportScheduleReq();
         schedule.setDatasetId(10L);
 
         User owner = new User();
@@ -390,7 +395,7 @@ class ReportScheduleServiceImplTest {
         when(userService.getUserById(7L)).thenReturn(owner);
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(
                 "{\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -404,7 +409,7 @@ class ReportScheduleServiceImplTest {
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
         // DateConf.startDate has a default value, so we must explicitly null it
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(
                 "{\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\",\"startDate\":null,\"endDate\":\"2025-03-10\"}}");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -417,7 +422,7 @@ class ReportScheduleServiceImplTest {
         when(userService.getUserById(7L)).thenReturn(owner);
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(
                 "{\"dateInfo\":{\"dateMode\":\"RECENT\",\"unit\":7,\"period\":\"DAY\"}}");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -430,7 +435,7 @@ class ReportScheduleServiceImplTest {
         when(userService.getUserById(7L)).thenReturn(owner);
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(
                 "{\"dateInfo\":{\"dateMode\":\"ALL\",\"dateField\":\"workday\"},\"queryType\":\"DETAIL\"}");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -443,7 +448,7 @@ class ReportScheduleServiceImplTest {
         when(userService.getUserById(7L)).thenReturn(owner);
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(
                 "{\"queryType\":\"DETAIL\",\"dimensions\":[{\"name\":\"workday\",\"bizName\":\"workday\"},"
                         + "{\"name\":\"order_id\",\"bizName\":\"order_id\"}],"
                         + "\"groups\":[],\"limit\":500,"
@@ -459,7 +464,7 @@ class ReportScheduleServiceImplTest {
         when(userService.getUserById(7L)).thenReturn(owner);
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
-        ReportScheduleDO schedule =
+        ReportScheduleReq schedule =
                 buildScheduleWithQueryConfig("{\"queryType\":\"DETAIL\",\"limit\":500,"
                         + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
                         + "\"startDate\":\"2025-03-04\",\"endDate\":\"2025-03-10\"}}");
@@ -475,7 +480,7 @@ class ReportScheduleServiceImplTest {
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
         // limit=0 should be rejected; omitting limit defaults to 500 which is valid
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(
                 "{\"queryType\":\"DETAIL\",\"dimensions\":[{\"name\":\"workday\",\"bizName\":\"workday\"}],"
                         + "\"groups\":[\"workday\"],\"limit\":0,"
                         + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
@@ -491,7 +496,7 @@ class ReportScheduleServiceImplTest {
         when(userService.getUserById(7L)).thenReturn(owner);
         when(dataSetAuthService.checkDataSetViewPermission(anyLong(), any())).thenReturn(true);
 
-        ReportScheduleDO schedule = buildScheduleWithQueryConfig(null);
+        ReportScheduleReq schedule = buildScheduleWithQueryConfig(null);
 
         service.createSchedule(schedule, owner);
         verify(reportScheduleMapper).insert(any(ReportScheduleDO.class));
@@ -506,7 +511,7 @@ class ReportScheduleServiceImplTest {
         existing.setCronExpression("0 0 9 * * ?");
         when(reportScheduleMapper.selectById(1L)).thenReturn(existing);
 
-        ReportScheduleDO update = new ReportScheduleDO();
+        ReportScheduleReq update = new ReportScheduleReq();
         update.setId(1L);
         update.setQueryConfig("{\"queryType\":\"DETAIL\",\"limit\":500,"
                 + "\"dateInfo\":{\"dateMode\":\"BETWEEN\",\"dateField\":\"workday\","
@@ -519,12 +524,11 @@ class ReportScheduleServiceImplTest {
         verify(quartzJobManager, never()).rescheduleJob(any(), any());
     }
 
-    private ReportScheduleDO buildScheduleWithQueryConfig(String queryConfig) {
-        ReportScheduleDO schedule = new ReportScheduleDO();
+    private ReportScheduleReq buildScheduleWithQueryConfig(String queryConfig) {
+        ReportScheduleReq schedule = new ReportScheduleReq();
         schedule.setOwnerId(7L);
         schedule.setDatasetId(8L);
         schedule.setCronExpression("0 30 14 * * ?");
-        schedule.setTenantId(1L);
         schedule.setQueryConfig(queryConfig);
         return schedule;
     }
