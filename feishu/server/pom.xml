@@ -46,13 +46,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- headless-server: ReportScheduleService, ReportDeliveryService, DO classes -->
-        <dependency>
-            <groupId>com.tencent.supersonic</groupId>
-            <artifactId>headless-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- auth-api: InternalTokenGenerator, @AuthenticationIgnore, User -->
         <dependency>
             <groupId>com.tencent.supersonic</groupId>
