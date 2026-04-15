@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.common.util.DateUtils;
+import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import com.tencent.supersonic.headless.server.metrics.TemplateReportMetrics;
@@ -18,7 +21,9 @@ import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryException;
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryRateLimiter;
 import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryChannel;
+import com.tencent.supersonic.headless.server.service.mapper.ReportDtoMappers;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +72,8 @@ public class ReportDeliveryServiceImpl
     // ========== Config CRUD ==========
 
     @Override
-    public ReportDeliveryConfigDO createConfig(ReportDeliveryConfigDO config) {
+    public ReportDeliveryConfigResp createConfig(ReportDeliveryConfigReq req) {
+        ReportDeliveryConfigDO config = ReportDtoMappers.toDO(req);
         validateConfig(config);
 
         if (config.getTenantId() == null) {
@@ -85,48 +91,60 @@ public class ReportDeliveryServiceImpl
             config.setMaxConsecutiveFailures(DEFAULT_MAX_CONSECUTIVE_FAILURES);
         }
         baseMapper.insert(config);
-        return config;
+        return ReportDtoMappers.toResp(config);
     }
 
     @Override
-    public ReportDeliveryConfigDO updateConfig(ReportDeliveryConfigDO config) {
-        assertTenantAccess(getConfigById(config.getId()));
-        validateConfig(config);
-        config.setUpdatedAt(new Date());
+    public ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req) {
+        ReportDeliveryConfigDO existing = getConfigByIdInternal(req.getId());
+        BeanUtils.copyProperties(req, existing, "id", "tenantId", "createdAt", "createdBy",
+                "updatedBy", "consecutiveFailures", "disabledReason");
+        validateConfig(existing);
+        existing.setUpdatedAt(new Date());
         // Reset consecutive failures when manually updating
-        if (config.getEnabled() != null && config.getEnabled()) {
-            config.setConsecutiveFailures(0);
+        if (existing.getEnabled() != null && existing.getEnabled()) {
+            existing.setConsecutiveFailures(0);
         }
-        baseMapper.updateById(config);
-        return config;
+        baseMapper.updateById(existing);
+        return ReportDtoMappers.toResp(existing);
     }
 
     @Override
     public void deleteConfig(Long id) {
-        getConfigById(id);
+        getConfigByIdInternal(id);
         baseMapper.deleteById(id);
     }
 
     @Override
-    public ReportDeliveryConfigDO getConfigById(Long id) {
+    public ReportDeliveryConfigResp getConfigById(Long id) {
+        return ReportDtoMappers.toResp(getConfigByIdInternal(id));
+    }
+
+    private ReportDeliveryConfigDO getConfigByIdInternal(Long id) {
         ReportDeliveryConfigDO config = baseMapper.selectById(id);
         assertTenantAccess(config);
         return config;
     }
 
     @Override
-    public Page<ReportDeliveryConfigDO> getConfigList(Page<ReportDeliveryConfigDO> page) {
+    public Page<ReportDeliveryConfigResp> getConfigList(Page<ReportDeliveryConfigResp> page) {
+        Page<ReportDeliveryConfigDO> doPage = new Page<>(page.getCurrent(), page.getSize());
         QueryWrapper<ReportDeliveryConfigDO> wrapper = new QueryWrapper<>();
         Long tenantId = TenantContext.getTenantId();
         if (tenantId != null) {
             wrapper.lambda().eq(ReportDeliveryConfigDO::getTenantId, tenantId);
         }
         wrapper.lambda().orderByDesc(ReportDeliveryConfigDO::getCreatedAt);
-        return baseMapper.selectPage(page, wrapper);
+        Page<ReportDeliveryConfigDO> result = baseMapper.selectPage(doPage, wrapper);
+        return ReportDtoMappers.toConfigRespPage(result);
     }
 
     @Override
-    public List<ReportDeliveryConfigDO> getConfigsByIds(List<Long> ids) {
+    public List<ReportDeliveryConfigResp> getConfigsByIds(List<Long> ids) {
+        return ReportDtoMappers.toConfigResps(getConfigsByIdsInternal(ids));
+    }
+
+    private List<ReportDeliveryConfigDO> getConfigsByIdsInternal(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -142,18 +160,18 @@ public class ReportDeliveryServiceImpl
     // ========== Delivery Execution ==========
 
     @Override
-    public List<ReportDeliveryRecordDO> deliver(List<Long> configIds, DeliveryContext context) {
+    public List<ReportDeliveryRecordResp> deliver(List<Long> configIds, DeliveryContext context) {
         List<ReportDeliveryRecordDO> records = new ArrayList<>();
 
         if (configIds == null || configIds.isEmpty()) {
             log.debug("No delivery configs specified, skipping delivery");
-            return records;
+            return ReportDtoMappers.toRecordResps(records);
         }
 
-        List<ReportDeliveryConfigDO> configs = getConfigsByIds(configIds);
+        List<ReportDeliveryConfigDO> configs = getConfigsByIdsInternal(configIds);
         if (configs.isEmpty()) {
             log.warn("No delivery configs found for ids: {}", configIds);
-            return records;
+            return ReportDtoMappers.toRecordResps(records);
         }
 
         for (ReportDeliveryConfigDO config : configs) {
@@ -242,7 +260,7 @@ public class ReportDeliveryServiceImpl
             records.add(record);
         }
 
-        return records;
+        return ReportDtoMappers.toRecordResps(records);
     }
 
     /**
@@ -288,8 +306,8 @@ public class ReportDeliveryServiceImpl
     // the row stuck in SENDING.
     @Override
     @Transactional(noRollbackFor = RuntimeException.class)
-    public ReportDeliveryRecordDO testDelivery(Long configId) {
-        ReportDeliveryConfigDO config = getConfigById(configId);
+    public ReportDeliveryRecordResp testDelivery(Long configId) {
+        ReportDeliveryConfigDO config = getConfigByIdInternal(configId);
 
         DeliveryContext testContext = DeliveryContext.builder().scheduleId(0L).executionId(0L)
                 .scheduleName("Test Schedule").reportName("Test Report").outputFormat("XLSX")
@@ -320,7 +338,7 @@ public class ReportDeliveryServiceImpl
             record.setCompletedAt(new Date());
             record.setDeliveryTimeMs(System.currentTimeMillis() - startTime);
             recordMapper.updateById(record);
-            return record;
+            return ReportDtoMappers.toResp(record);
         } catch (DeliveryException e) {
             record.setStatus(DeliveryStatus.FAILED.name());
             record.setErrorMessage(truncate(e.getMessage(), 2000));
@@ -364,8 +382,9 @@ public class ReportDeliveryServiceImpl
     // ========== Delivery Records ==========
 
     @Override
-    public Page<ReportDeliveryRecordDO> getDeliveryRecords(Page<ReportDeliveryRecordDO> page,
+    public Page<ReportDeliveryRecordResp> getDeliveryRecords(Page<ReportDeliveryRecordResp> page,
             Long configId, Long scheduleId, Long executionId) {
+        Page<ReportDeliveryRecordDO> doPage = new Page<>(page.getCurrent(), page.getSize());
         QueryWrapper<ReportDeliveryRecordDO> wrapper = new QueryWrapper<>();
         Long tenantId = TenantContext.getTenantId();
         if (tenantId != null) {
@@ -384,13 +403,14 @@ public class ReportDeliveryServiceImpl
             wrapper.lambda().eq(ReportDeliveryRecordDO::getExecutionId, executionId);
         }
         wrapper.lambda().orderByDesc(ReportDeliveryRecordDO::getCreatedAt);
-        return recordMapper.selectPage(page, wrapper);
+        Page<ReportDeliveryRecordDO> result = recordMapper.selectPage(doPage, wrapper);
+        return ReportDtoMappers.toRecordRespPage(result);
     }
 
     // See testDelivery: the catch blocks persist FAILED state before rethrowing.
     @Override
     @Transactional(noRollbackFor = RuntimeException.class)
-    public ReportDeliveryRecordDO retryDelivery(Long recordId) {
+    public ReportDeliveryRecordResp retryDelivery(Long recordId) {
         ReportDeliveryRecordDO record = recordMapper.selectById(recordId);
         if (record == null) {
             throw new IllegalArgumentException("Delivery record not found: " + recordId);
@@ -401,7 +421,7 @@ public class ReportDeliveryServiceImpl
             throw new IllegalStateException("Can only retry failed deliveries");
         }
 
-        ReportDeliveryConfigDO config = getConfigById(record.getConfigId());
+        ReportDeliveryConfigDO config = getConfigByIdInternal(record.getConfigId());
         if (config == null) {
             throw new IllegalStateException(
                     "Delivery config no longer exists: " + record.getConfigId());
@@ -435,7 +455,7 @@ public class ReportDeliveryServiceImpl
                 reportMetrics.recordDeliveryRetry("success",
                         normalizeDeliveryType(config.getDeliveryType()), deliveryTimeMs);
             }
-            return record;
+            return ReportDtoMappers.toResp(record);
 
         } catch (DeliveryException e) {
             long deliveryTimeMs = System.currentTimeMillis() - startTime;

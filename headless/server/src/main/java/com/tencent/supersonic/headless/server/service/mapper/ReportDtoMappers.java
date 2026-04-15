@@ -48,6 +48,9 @@ public final class ReportDtoMappers {
     }
 
     public static Page<ReportScheduleResp> toRespPage(Page<ReportScheduleDO> src) {
+        if (src == null) {
+            return new Page<>();
+        }
         Page<ReportScheduleResp> dst = new Page<>(src.getCurrent(), src.getSize(), src.getTotal());
         dst.setRecords(src.getRecords().stream().map(ReportDtoMappers::toResp)
                 .collect(Collectors.toList()));
@@ -78,6 +81,9 @@ public final class ReportDtoMappers {
 
     public static Page<ReportDeliveryConfigResp> toConfigRespPage(
             Page<ReportDeliveryConfigDO> src) {
+        if (src == null) {
+            return new Page<>();
+        }
         Page<ReportDeliveryConfigResp> dst =
                 new Page<>(src.getCurrent(), src.getSize(), src.getTotal());
         dst.setRecords(toConfigResps(src.getRecords()));
@@ -100,6 +106,9 @@ public final class ReportDtoMappers {
 
     public static Page<ReportDeliveryRecordResp> toRecordRespPage(
             Page<ReportDeliveryRecordDO> src) {
+        if (src == null) {
+            return new Page<>();
+        }
         Page<ReportDeliveryRecordResp> dst =
                 new Page<>(src.getCurrent(), src.getSize(), src.getTotal());
         dst.setRecords(toRecordResps(src.getRecords()));
@@ -117,6 +126,9 @@ public final class ReportDtoMappers {
     }
 
     public static Page<ReportExecutionResp> toExecutionRespPage(Page<ReportExecutionDO> src) {
+        if (src == null) {
+            return new Page<>();
+        }
         Page<ReportExecutionResp> dst = new Page<>(src.getCurrent(), src.getSize(), src.getTotal());
         dst.setRecords(src.getRecords().stream().map(ReportDtoMappers::toResp)
                 .collect(Collectors.toList()));

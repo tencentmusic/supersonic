@@ -6,8 +6,8 @@ import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +72,7 @@ class ReportDeliveryControllerTest {
 
     @Test
     void testConfigEndpointShouldRouteAndReturnNonEmptyBody() throws Exception {
-        ReportDeliveryRecordDO record = new ReportDeliveryRecordDO();
+        ReportDeliveryRecordResp record = new ReportDeliveryRecordResp();
         record.setId(123L);
         when(deliveryService.testDelivery(2L)).thenReturn(record);
 

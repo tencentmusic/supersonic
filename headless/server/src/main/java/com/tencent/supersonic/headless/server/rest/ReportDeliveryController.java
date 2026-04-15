@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
-import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,42 +43,38 @@ public class ReportDeliveryController {
     // ========== Delivery Config CRUD ==========
 
     @GetMapping("/configs")
-    public Page<ReportDeliveryConfigDO> listConfigs(
+    public Page<ReportDeliveryConfigResp> listConfigs(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "20") Integer pageSize, HttpServletRequest request,
             HttpServletResponse response) {
         UserHolder.findUser(request, response);
         pageSize = Math.min(pageSize, 200);
-        Page<ReportDeliveryConfigDO> page = new Page<>(pageNum, pageSize);
+        Page<ReportDeliveryConfigResp> page = new Page<>(pageNum, pageSize);
         return deliveryService.getConfigList(page);
     }
 
     @GetMapping("/configs/{id}")
-    public ReportDeliveryConfigDO getConfig(@PathVariable Long id, HttpServletRequest request,
+    public ReportDeliveryConfigResp getConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         UserHolder.findUser(request, response);
         return deliveryService.getConfigById(id);
     }
 
     @PostMapping("/configs")
-    public ReportDeliveryConfigDO createConfig(@RequestBody ReportDeliveryConfigDO config,
+    public ReportDeliveryConfigResp createConfig(@RequestBody ReportDeliveryConfigReq config,
             HttpServletRequest request, HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
-        config.setCreatedBy(user.getName());
-        config.setTenantId(user.getTenantId());
         return deliveryService.createConfig(config);
     }
 
     @PutMapping("/configs/{id}")
-    public ReportDeliveryConfigDO updateConfig(@PathVariable Long id,
-            @RequestBody ReportDeliveryConfigDO config, HttpServletRequest request,
+    public ReportDeliveryConfigResp updateConfig(@PathVariable Long id,
+            @RequestBody ReportDeliveryConfigReq config, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
         config.setId(id);
-        config.setTenantId(user.getTenantId());
-        config.setUpdatedBy(user.getName());
         return deliveryService.updateConfig(config);
     }
 
@@ -93,7 +90,7 @@ public class ReportDeliveryController {
     // ========== Test Delivery ==========
 
     @PostMapping("/configs/{id}:test")
-    public ReportDeliveryRecordDO testConfig(@PathVariable Long id, HttpServletRequest request,
+    public ReportDeliveryRecordResp testConfig(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         User user = UserHolder.findUser(request, response);
         assertAdmin(user);
@@ -103,7 +100,7 @@ public class ReportDeliveryController {
     // ========== Delivery Records ==========
 
     @GetMapping("/records")
-    public Page<ReportDeliveryRecordDO> listRecords(
+    public Page<ReportDeliveryRecordResp> listRecords(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "20") Integer pageSize,
             @RequestParam(required = false) Long configId,
@@ -112,12 +109,12 @@ public class ReportDeliveryController {
             HttpServletResponse response) {
         UserHolder.findUser(request, response);
         pageSize = Math.min(pageSize, 200);
-        Page<ReportDeliveryRecordDO> page = new Page<>(pageNum, pageSize);
+        Page<ReportDeliveryRecordResp> page = new Page<>(pageNum, pageSize);
         return deliveryService.getDeliveryRecords(page, configId, scheduleId, executionId);
     }
 
     @PostMapping("/records/{id}:retry")
-    public ReportDeliveryRecordDO retryDelivery(@PathVariable Long id, HttpServletRequest request,
+    public ReportDeliveryRecordResp retryDelivery(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         UserHolder.findUser(request, response);
         return deliveryService.retryDelivery(id);

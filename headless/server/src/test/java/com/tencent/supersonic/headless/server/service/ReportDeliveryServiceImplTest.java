@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.server.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
 import com.tencent.supersonic.headless.server.persistence.mapper.ReportDeliveryConfigMapper;
@@ -142,7 +143,7 @@ class ReportDeliveryServiceImplTest {
                 List.<ReportDeliveryChannel>of(feishuChannel), rateLimiter);
         ReflectionTestUtils.setField(feishuService, "baseMapper", configMapper);
 
-        ReportDeliveryRecordDO returned = feishuService.testDelivery(2L);
+        ReportDeliveryRecordResp returned = feishuService.testDelivery(2L);
 
         verify(restTemplate, times(1)).postForEntity(
                 eq("https://open.feishu.cn/open-apis/bot/v2/hook/abc"), any(), eq(String.class));
@@ -191,7 +192,7 @@ class ReportDeliveryServiceImplTest {
                 List.<ReportDeliveryChannel>of(feishuChannel), rateLimiter);
         ReflectionTestUtils.setField(feishuService, "baseMapper", configMapper);
 
-        ReportDeliveryRecordDO returned = feishuService.testDelivery(2L);
+        ReportDeliveryRecordResp returned = feishuService.testDelivery(2L);
 
         assertNotNull(returned);
         assertEquals(DeliveryStatus.SUCCESS.name(), returned.getStatus());
