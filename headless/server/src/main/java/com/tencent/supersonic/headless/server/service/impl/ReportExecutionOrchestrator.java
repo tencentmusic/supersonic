@@ -440,6 +440,12 @@ public class ReportExecutionOrchestrator {
 
             String scheduleName = ctx.getScheduleName() != null ? ctx.getScheduleName()
                     : "Schedule " + ctx.getScheduleId();
+            if (fileLocation == null) {
+                log.warn(
+                        "No output file generated for schedule={} — Feishu/email download button will be suppressed. "
+                                + "Ensure outputFormat is configured in the schedule.",
+                        ctx.getScheduleId());
+            }
             DeliveryContext deliveryContext = DeliveryContext.builder()
                     .scheduleId(ctx.getScheduleId()).executionId(executionId)
                     .scheduleName(scheduleName).reportName(scheduleName).fileLocation(fileLocation)
