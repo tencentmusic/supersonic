@@ -1,0 +1,57 @@
+{
+  "date": "2026-04-11",
+  "window": "7d",
+  "metrics": {
+    "commits": 37,
+    "contributors": 2,
+    "prs_merged": 0,
+    "insertions": 27979,
+    "deletions": 11769,
+    "net_loc": 16210,
+    "test_loc_approx": 1400,
+    "test_ratio_approx": 0.05,
+    "active_days": 5,
+    "sessions": 7,
+    "deep_sessions": 0,
+    "medium_sessions": 2,
+    "micro_sessions": 5,
+    "avg_session_minutes": 8,
+    "feat_pct": 0.54,
+    "fix_pct": 0.19,
+    "chore_pct": 0.13,
+    "docs_pct": 0.08,
+    "refactor_pct": 0.05,
+    "peak_hour": 10,
+    "ai_assisted_commits": 20,
+    "ai_assist_ratio": 0.56
+  },
+  "authors": {
+    "Xudong": {
+      "commits": 36,
+      "insertions": 27978,
+      "deletions": 11769,
+      "test_ratio_approx": 0.05,
+      "top_area": "webapp/"
+    },
+    "jerryjzhang": {
+      "commits": 1,
+      "insertions": 1,
+      "deletions": 0,
+      "top_area": "headless/"
+    }
+  },
+  "test_health": {
+    "total_test_files": 77,
+    "tests_changed_this_period": 21
+  },
+  "streak_days": 4,
+  "personal_streak_days": 3,
+  "tweetable": "Week of Apr 4: 37 commits (2 contributors), 16.2k net LOC, 56% AI-assisted | Ship: Operation OS module | Streak: 4d",
+  "skill_usage": {
+    "investigate": 5,
+    "ship": 3,
+    "plan-design-review": 3,
+    "plan-eng-review": 1,
+    "retro": 1
+  }
+}
