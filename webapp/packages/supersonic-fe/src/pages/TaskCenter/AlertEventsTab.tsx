@@ -9,13 +9,26 @@ import {
 } from '@/services/alertRule';
 import styles from './style.less';
 
+const RESOLUTION_STATUS_MAP: Record<string, { color: string; text: string }> = {
+  OPEN: { color: 'red', text: '待确认' },
+  CONFIRMED: { color: 'orange', text: '已确认' },
+  ASSIGNED: { color: 'blue', text: '已接手' },
+  RESOLVED: { color: 'green', text: '已恢复' },
+  CLOSED: { color: 'default', text: '已关闭' },
+};
+
+const SEVERITY_MAP: Record<string, { color: string; text: string }> = {
+  CRITICAL: { color: 'red', text: '严重' },
+  WARNING: { color: 'orange', text: '警告' },
+};
+
 const RES_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: '全部' },
-  { value: 'OPEN', label: 'OPEN（待确认）' },
-  { value: 'CONFIRMED', label: 'CONFIRMED' },
-  { value: 'ASSIGNED', label: 'ASSIGNED' },
-  { value: 'RESOLVED', label: 'RESOLVED' },
-  { value: 'CLOSED', label: 'CLOSED' },
+  { value: 'OPEN', label: '待确认' },
+  { value: 'CONFIRMED', label: '已确认' },
+  { value: 'ASSIGNED', label: '已接手' },
+  { value: 'RESOLVED', label: '已恢复' },
+  { value: 'CLOSED', label: '已关闭' },
 ];
 
 const AlertEventsTab: React.FC<{ initialResolutionStatus?: string }> = ({
@@ -92,13 +105,19 @@ const AlertEventsTab: React.FC<{ initialResolutionStatus?: string }> = ({
       title: '严重级别',
       dataIndex: 'severity',
       width: 90,
-      render: (s: string) => <Tag>{s}</Tag>,
+      render: (s: string) => {
+        const info = SEVERITY_MAP[s] || { color: 'default', text: s };
+        return <Tag color={info.color}>{info.text}</Tag>;
+      },
     },
     {
       title: '处置状态',
       dataIndex: 'resolutionStatus',
       width: 120,
-      render: (s: string) => <Tag color="blue">{s}</Tag>,
+      render: (s: string) => {
+        const info = RESOLUTION_STATUS_MAP[s] || { color: 'blue', text: s };
+        return <Tag color={info.color}>{info.text}</Tag>;
+      },
     },
     {
       title: '摘要',

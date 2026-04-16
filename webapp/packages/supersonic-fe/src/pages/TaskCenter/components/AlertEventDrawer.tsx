@@ -33,6 +33,13 @@ const SEVERITY_MAP: Record<string, { color: string; text: string }> = {
   WARNING: { color: 'orange', text: '警告' },
 };
 
+const DELIVERY_STATUS_MAP: Record<string, { color: string; text: string }> = {
+  PENDING: { color: 'default', text: '待投递' },
+  SENDING: { color: 'processing', text: '投递中' },
+  SUCCESS: { color: 'success', text: '已投递' },
+  FAILED: { color: 'error', text: '投递失败' },
+};
+
 const ALLOWED_TRANSITIONS: Record<string, { label: string; target: ResolutionStatus; danger?: boolean }[]> = {
   OPEN: [
     { label: '确认已知', target: 'CONFIRMED' },
@@ -269,7 +276,12 @@ const AlertEventDrawer: React.FC<AlertEventDrawerProps> = ({
       <Descriptions.Item label="偏差率">
         {record.deviationPct != null ? `${record.deviationPct.toFixed(1)}%` : '-'}
       </Descriptions.Item>
-      <Descriptions.Item label="投递状态">{record.deliveryStatus}</Descriptions.Item>
+      <Descriptions.Item label="投递状态">
+        {(() => {
+          const info = DELIVERY_STATUS_MAP[record.deliveryStatus] || { color: 'default', text: record.deliveryStatus || '-' };
+          return <Tag color={info.color}>{info.text}</Tag>;
+        })()}
+      </Descriptions.Item>
       <Descriptions.Item label="确认时间">
         {record.acknowledgedAt ? dayjs(record.acknowledgedAt).format('YYYY-MM-DD HH:mm:ss') : '-'}
       </Descriptions.Item>
