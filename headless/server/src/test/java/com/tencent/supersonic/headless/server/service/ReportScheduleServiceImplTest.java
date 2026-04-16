@@ -503,6 +503,68 @@ class ReportScheduleServiceImplTest {
     }
 
     @Test
+    void updateScheduleShouldPreserveServerOwnedFieldsOnPartialUpdate() {
+        // The boundary invariant moved from the controller into the impl: server-owned fields
+        // (tenantId, createdBy, createdAt, quartzJobKey, lastExecutionTime, nextExecutionTime)
+        // and omitted business fields must survive a partial caller-supplied Req.
+        ReportScheduleDO existing = new ReportScheduleDO();
+        existing.setId(1L);
+        existing.setName("original-name");
+        existing.setOwnerId(7L);
+        existing.setTenantId(42L);
+        existing.setCreatedBy("original-creator");
+        Date originalCreatedAt = new Date(1_000L);
+        existing.setCreatedAt(originalCreatedAt);
+        existing.setQuartzJobKey("REPORT.report_1");
+        Date originalLastExec = new Date(2_000L);
+        Date originalNextExec = new Date(3_000L);
+        existing.setLastExecutionTime(originalLastExec);
+        existing.setNextExecutionTime(originalNextExec);
+        existing.setCronExpression("0 0 9 * * ?");
+        existing.setDatasetId(8L);
+        existing.setQueryConfig("{\"dataSetId\":8,\"queryType\":\"AGGREGATE\"}");
+        existing.setOutputFormat("CSV");
+        existing.setEnabled(true);
+        existing.setRetryCount(3);
+        existing.setRetryInterval(30);
+        existing.setTemplateVersion(4L);
+        existing.setDeliveryConfigIds("1,2");
+        when(reportScheduleMapper.selectById(1L)).thenReturn(existing);
+
+        ReportScheduleReq update = new ReportScheduleReq();
+        update.setId(1L);
+        update.setName("updated-name");
+        update.setCronExpression("0 0 9 * * ?"); // unchanged to skip Quartz reschedule
+
+        service.updateSchedule(update, owner);
+
+        ArgumentCaptor<ReportScheduleDO> captor = ArgumentCaptor.forClass(ReportScheduleDO.class);
+        verify(reportScheduleMapper).updateById(captor.capture());
+        ReportScheduleDO persisted = captor.getValue();
+
+        // Business fields updated
+        assertEquals("updated-name", persisted.getName());
+        // Server-owned fields preserved
+        assertEquals(Long.valueOf(42L), persisted.getTenantId());
+        assertEquals("original-creator", persisted.getCreatedBy());
+        assertEquals(originalCreatedAt, persisted.getCreatedAt());
+        assertEquals("REPORT.report_1", persisted.getQuartzJobKey());
+        assertEquals(originalLastExec, persisted.getLastExecutionTime());
+        assertEquals(originalNextExec, persisted.getNextExecutionTime());
+        // Ownership preserved — caller cannot reassign by sending a different ownerId
+        assertEquals(Long.valueOf(7L), persisted.getOwnerId());
+        // Business fields omitted from a PATCH are also preserved.
+        assertEquals(Long.valueOf(8L), persisted.getDatasetId());
+        assertEquals("{\"dataSetId\":8,\"queryType\":\"AGGREGATE\"}", persisted.getQueryConfig());
+        assertEquals("CSV", persisted.getOutputFormat());
+        assertEquals(Boolean.TRUE, persisted.getEnabled());
+        assertEquals(Integer.valueOf(3), persisted.getRetryCount());
+        assertEquals(Integer.valueOf(30), persisted.getRetryInterval());
+        assertEquals(Long.valueOf(4L), persisted.getTemplateVersion());
+        assertEquals("1,2", persisted.getDeliveryConfigIds());
+    }
+
+    @Test
     void updateScheduleShouldRejectInvalidQueryConfigBeforePersist() {
         ReportScheduleDO existing = new ReportScheduleDO();
         existing.setId(1L);
@@ -526,7 +588,6 @@ class ReportScheduleServiceImplTest {
 
     private ReportScheduleReq buildScheduleWithQueryConfig(String queryConfig) {
         ReportScheduleReq schedule = new ReportScheduleReq();
-        schedule.setOwnerId(7L);
         schedule.setDatasetId(8L);
         schedule.setCronExpression("0 30 14 * * ?");
         schedule.setQueryConfig(queryConfig);

@@ -12,11 +12,11 @@ import com.tencent.supersonic.headless.server.pojo.ExportTaskStatus;
 import com.tencent.supersonic.headless.server.service.impl.ExportTaskServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentMatchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -104,6 +104,14 @@ class ExportTaskServiceImplTest {
                 mock(RowCountEstimator.class), userService, dataSetService);
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
         ReflectionTestUtils.setField(service, "exportDir", exportDir.toString());
+        List<ExportTaskDO> updateSnapshots = new ArrayList<>();
+        org.mockito.Mockito.doAnswer(invocation -> {
+            ExportTaskDO updated = invocation.getArgument(0);
+            ExportTaskDO snapshot = new ExportTaskDO();
+            org.springframework.beans.BeanUtils.copyProperties(updated, snapshot);
+            updateSnapshots.add(snapshot);
+            return 1;
+        }).when(mapper).updateById(any(ExportTaskDO.class));
 
         ExportTaskDO task = new ExportTaskDO();
         task.setId(7L);
@@ -121,11 +129,10 @@ class ExportTaskServiceImplTest {
         executor.shutdown();
         assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
 
-        // Captor 会持有同一 DO 引用，后续 mutate 会让历史捕获“看起来全是最终态”，故用 argThat 分步校验
-        verify(mapper).updateById(ArgumentMatchers
-                .<ExportTaskDO>argThat(t -> ExportTaskStatus.RUNNING.name().equals(t.getStatus())));
-        verify(mapper).updateById(ArgumentMatchers
-                .<ExportTaskDO>argThat(t -> ExportTaskStatus.FAILED.name().equals(t.getStatus())
+        assertTrue(updateSnapshots.stream()
+                .anyMatch(t -> ExportTaskStatus.RUNNING.name().equals(t.getStatus())));
+        assertTrue(updateSnapshots.stream()
+                .anyMatch(t -> ExportTaskStatus.FAILED.name().equals(t.getStatus())
                         && t.getErrorMessage() != null
                         && t.getErrorMessage().contains("模拟数据源不可用")));
     }
@@ -146,6 +153,14 @@ class ExportTaskServiceImplTest {
                 mock(RowCountEstimator.class), mock(UserService.class), mock(DataSetService.class));
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
         ReflectionTestUtils.setField(service, "exportDir", exportDir.toString());
+        List<ExportTaskDO> updateSnapshots = new ArrayList<>();
+        org.mockito.Mockito.doAnswer(invocation -> {
+            ExportTaskDO updated = invocation.getArgument(0);
+            ExportTaskDO snapshot = new ExportTaskDO();
+            org.springframework.beans.BeanUtils.copyProperties(updated, snapshot);
+            updateSnapshots.add(snapshot);
+            return 1;
+        }).when(mapper).updateById(any(ExportTaskDO.class));
 
         ExportTaskDO task = new ExportTaskDO();
         task.setId(11L);
@@ -164,10 +179,10 @@ class ExportTaskServiceImplTest {
         executor.shutdown();
         assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
 
-        verify(mapper).updateById(ArgumentMatchers
-                .<ExportTaskDO>argThat(t -> ExportTaskStatus.RUNNING.name().equals(t.getStatus())));
-        verify(mapper).updateById(ArgumentMatchers
-                .<ExportTaskDO>argThat(t -> ExportTaskStatus.SUCCESS.name().equals(t.getStatus())
+        assertTrue(updateSnapshots.stream()
+                .anyMatch(t -> ExportTaskStatus.RUNNING.name().equals(t.getStatus())));
+        assertTrue(updateSnapshots.stream()
+                .anyMatch(t -> ExportTaskStatus.SUCCESS.name().equals(t.getStatus())
                         && t.getRowCount() != null && t.getRowCount() == 0L
                         && t.getFileLocation() != null
                         && java.nio.file.Files.exists(java.nio.file.Path.of(t.getFileLocation()))));

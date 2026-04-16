@@ -15,6 +15,4 @@ public class ReportScheduleConfirmationReq {
     private Long sourceDataSetId;
     private String payloadJson;
     private Date expireAt;
-    private Date createdAt;
-    private Long tenantId;
 }

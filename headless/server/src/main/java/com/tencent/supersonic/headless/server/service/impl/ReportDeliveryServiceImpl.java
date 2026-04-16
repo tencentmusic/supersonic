@@ -104,8 +104,9 @@ public class ReportDeliveryServiceImpl
     @Override
     public ReportDeliveryConfigResp updateConfig(ReportDeliveryConfigReq req, User user) {
         ReportDeliveryConfigDO existing = getConfigByIdInternal(req.getId());
-        BeanUtils.copyProperties(req, existing, "id", "tenantId", "createdAt", "createdBy",
-                "updatedBy", "consecutiveFailures", "disabledReason");
+        // Null fields in the Req mean "leave alone" — a partial PATCH must not wipe fields the
+        // caller didn't touch, and must not trip validateConfig on a cleared deliveryType.
+        copyNonNull(req, existing);
         validateConfig(existing);
         if (user != null) {
             existing.setUpdatedBy(user.getName());
@@ -117,6 +118,32 @@ public class ReportDeliveryServiceImpl
         }
         baseMapper.updateById(existing);
         return ReportDtoMappers.toResp(existing);
+    }
+
+    /**
+     * Copy only non-null, non-immutable fields from the update Req onto the loaded DO. Server-
+     * owned fields (tenantId, createdAt, createdBy, updatedBy, consecutiveFailures, disabledReason)
+     * are preserved unconditionally.
+     */
+    private static void copyNonNull(ReportDeliveryConfigReq src, ReportDeliveryConfigDO dst) {
+        if (src.getName() != null) {
+            dst.setName(src.getName());
+        }
+        if (src.getDeliveryType() != null) {
+            dst.setDeliveryType(src.getDeliveryType());
+        }
+        if (src.getDeliveryConfig() != null) {
+            dst.setDeliveryConfig(src.getDeliveryConfig());
+        }
+        if (src.getEnabled() != null) {
+            dst.setEnabled(src.getEnabled());
+        }
+        if (src.getDescription() != null) {
+            dst.setDescription(src.getDescription());
+        }
+        if (src.getMaxConsecutiveFailures() != null) {
+            dst.setMaxConsecutiveFailures(src.getMaxConsecutiveFailures());
+        }
     }
 
     @Override

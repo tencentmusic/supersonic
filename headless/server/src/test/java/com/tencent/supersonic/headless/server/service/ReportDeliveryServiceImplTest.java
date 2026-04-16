@@ -2,7 +2,9 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tencent.supersonic.common.context.TenantContext;
+import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
+import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
 import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryConfigDO;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ReportDeliveryRecordDO;
@@ -25,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -267,6 +270,92 @@ class ReportDeliveryServiceImplTest {
         assertEquals(DeliveryStatus.FAILED.name(), last.getStatus());
         assertTrue(
                 last.getErrorMessage() != null && last.getErrorMessage().contains("webhook boom"));
+    }
+
+    @Test
+    void updateConfigShouldAcceptPartialPatchWithoutTrippingValidation() {
+        // A partial PATCH that only flips `enabled` must not trip validateConfig's
+        // "Delivery type is required" check. The copy-on-write must leave deliveryType intact.
+        TenantContext.setTenantId(1L);
+
+        ReportDeliveryConfigDO existing = new ReportDeliveryConfigDO();
+        existing.setId(5L);
+        existing.setTenantId(1L);
+        existing.setName("original-name");
+        existing.setDeliveryType(DeliveryType.FEISHU.name());
+        existing.setDeliveryConfig("{\"webhookUrl\":\"https://a.example/hook\"}");
+        existing.setEnabled(false);
+        when(configMapper.selectById(5L)).thenReturn(existing);
+
+        // PATCH: only set enabled, leave everything else null.
+        ReportDeliveryConfigReq req = new ReportDeliveryConfigReq();
+        req.setId(5L);
+        req.setEnabled(true);
+
+        User caller = new User();
+        caller.setName("bob");
+        service.updateConfig(req, caller);
+
+        ArgumentCaptor<ReportDeliveryConfigDO> captor =
+                ArgumentCaptor.forClass(ReportDeliveryConfigDO.class);
+        verify(configMapper).updateById(captor.capture());
+        ReportDeliveryConfigDO persisted = captor.getValue();
+
+        assertEquals("original-name", persisted.getName());
+        assertEquals(DeliveryType.FEISHU.name(), persisted.getDeliveryType());
+        assertEquals("{\"webhookUrl\":\"https://a.example/hook\"}", persisted.getDeliveryConfig());
+        assertTrue(persisted.getEnabled());
+    }
+
+    @Test
+    void updateConfigShouldPreserveServerOwnedFieldsOnPartialUpdate() {
+        // Boundary invariant: tenantId, createdBy, createdAt, consecutiveFailures, disabledReason
+        // must survive a caller-supplied Req. The controller no longer strips these — the impl
+        // owns the invariant now.
+        TenantContext.setTenantId(1L);
+
+        ReportDeliveryConfigDO existing = new ReportDeliveryConfigDO();
+        existing.setId(5L);
+        existing.setTenantId(1L);
+        existing.setName("original-name");
+        existing.setDeliveryType(DeliveryType.FEISHU.name());
+        existing.setDeliveryConfig("{\"webhookUrl\":\"https://a.example/hook\"}");
+        existing.setEnabled(true);
+        existing.setCreatedBy("original-creator");
+        Date originalCreatedAt = new Date(1_000L);
+        existing.setCreatedAt(originalCreatedAt);
+        existing.setConsecutiveFailures(3);
+        existing.setDisabledReason("prior failure");
+        when(configMapper.selectById(5L)).thenReturn(existing);
+
+        ReportDeliveryConfigReq req = new ReportDeliveryConfigReq();
+        req.setId(5L);
+        req.setName("updated-name");
+        req.setDeliveryType(DeliveryType.FEISHU.name());
+        req.setDeliveryConfig("{\"webhookUrl\":\"https://b.example/hook\"}");
+        req.setEnabled(true);
+
+        User caller = new User();
+        caller.setName("bob");
+        service.updateConfig(req, caller);
+
+        ArgumentCaptor<ReportDeliveryConfigDO> captor =
+                ArgumentCaptor.forClass(ReportDeliveryConfigDO.class);
+        verify(configMapper).updateById(captor.capture());
+        ReportDeliveryConfigDO persisted = captor.getValue();
+
+        // Business fields updated
+        assertEquals("updated-name", persisted.getName());
+        assertEquals("{\"webhookUrl\":\"https://b.example/hook\"}", persisted.getDeliveryConfig());
+        // Server-owned fields preserved
+        assertEquals(Long.valueOf(1L), persisted.getTenantId());
+        assertEquals("original-creator", persisted.getCreatedBy());
+        assertEquals(originalCreatedAt, persisted.getCreatedAt());
+        assertEquals("prior failure", persisted.getDisabledReason());
+        // updatedBy reflects the caller performing the edit
+        assertEquals("bob", persisted.getUpdatedBy());
+        // consecutiveFailures is reset to 0 because the update re-enables the config
+        assertEquals(Integer.valueOf(0), persisted.getConsecutiveFailures());
     }
 
     @Test

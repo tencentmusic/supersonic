@@ -32,7 +32,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -175,9 +174,7 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         validateQueryConfig(req.getQueryConfig());
         String originalCron = existing.getCronExpression();
         String originalQuartzKey = existing.getQuartzJobKey();
-        // Copy caller-provided fields into the loaded DO; preserve server-owned fields.
-        BeanUtils.copyProperties(req, existing, "id", "ownerId", "tenantId", "createdBy",
-                "createdAt", "quartzJobKey", "lastExecutionTime", "nextExecutionTime");
+        copyNonNull(req, existing);
         existing.setUpdatedAt(new Date());
         baseMapper.updateById(existing);
 
@@ -189,6 +186,39 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
             reschedule(existing.getId(), existing.getCronExpression());
         }
         return ReportDtoMappers.toResp(existing);
+    }
+
+    private static void copyNonNull(ReportScheduleReq src, ReportScheduleDO dst) {
+        if (src.getName() != null) {
+            dst.setName(src.getName());
+        }
+        if (src.getDatasetId() != null) {
+            dst.setDatasetId(src.getDatasetId());
+        }
+        if (src.getQueryConfig() != null) {
+            dst.setQueryConfig(src.getQueryConfig());
+        }
+        if (src.getOutputFormat() != null) {
+            dst.setOutputFormat(src.getOutputFormat());
+        }
+        if (src.getCronExpression() != null) {
+            dst.setCronExpression(src.getCronExpression());
+        }
+        if (src.getEnabled() != null) {
+            dst.setEnabled(src.getEnabled());
+        }
+        if (src.getRetryCount() != null) {
+            dst.setRetryCount(src.getRetryCount());
+        }
+        if (src.getRetryInterval() != null) {
+            dst.setRetryInterval(src.getRetryInterval());
+        }
+        if (src.getTemplateVersion() != null) {
+            dst.setTemplateVersion(src.getTemplateVersion());
+        }
+        if (src.getDeliveryConfigIds() != null) {
+            dst.setDeliveryConfigIds(src.getDeliveryConfigIds());
+        }
     }
 
     /**
@@ -333,8 +363,7 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
         quartzJobManager.triggerJob(schedule.getQuartzJobKey(), triggerData);
     }
 
-    @Override
-    public void reschedule(Long id, String newCron) {
+    private void reschedule(Long id, String newCron) {
         ReportScheduleDO schedule = baseMapper.selectById(id);
         if (schedule == null) {
             throw new IllegalArgumentException("Schedule not found: " + id);
@@ -473,8 +502,8 @@ public class ReportScheduleServiceImpl extends ServiceImpl<ReportScheduleMapper,
     }
 
     @Override
-    public Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionResp> page,
-            Long scheduleId, String status, User user) {
+    public Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionVO> page, Long scheduleId,
+            String status, User user) {
         Page<ReportExecutionDO> initial = new Page<>(page.getCurrent(), page.getSize());
         Page<ReportExecutionDO> doPage =
                 queryExecutionListInternal(initial, scheduleId, status, user);

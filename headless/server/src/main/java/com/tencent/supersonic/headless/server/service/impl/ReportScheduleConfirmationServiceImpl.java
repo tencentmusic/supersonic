@@ -3,6 +3,8 @@ package com.tencent.supersonic.headless.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tencent.supersonic.common.context.TenantContext;
+import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.headless.api.pojo.request.ReportScheduleConfirmationReq;
 import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleConfirmationResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleConfirmationService;
@@ -27,12 +29,17 @@ public class ReportScheduleConfirmationServiceImpl
     @Override
     public ReportScheduleConfirmationResp createPending(ReportScheduleConfirmationReq req) {
         ReportScheduleConfirmationDO confirmation = ReportDtoMappers.toDO(req);
+        // Server-owned fields: tenantId comes from the ambient TenantContext and createdAt is
+        // always "now". Callers cannot override either — the Req DTO no longer carries them.
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId == null) {
+            throw new InvalidPermissionException("租户上下文未建立，无法创建确认单");
+        }
+        confirmation.setTenantId(tenantId);
         Date now = new Date();
+        confirmation.setCreatedAt(now);
         if (confirmation.getConfirmToken() == null || confirmation.getConfirmToken().isBlank()) {
             confirmation.setConfirmToken(UUID.randomUUID().toString().replace("-", ""));
-        }
-        if (confirmation.getCreatedAt() == null) {
-            confirmation.setCreatedAt(now);
         }
         if (confirmation.getStatus() == null || confirmation.getStatus().isBlank()) {
             confirmation.setStatus(STATUS_PENDING);

@@ -11,7 +11,6 @@ public class ReportScheduleReq {
     private String outputFormat;
     private String cronExpression;
     private Boolean enabled;
-    private Long ownerId;
     private Integer retryCount;
     private Integer retryInterval;
     private Long templateVersion;

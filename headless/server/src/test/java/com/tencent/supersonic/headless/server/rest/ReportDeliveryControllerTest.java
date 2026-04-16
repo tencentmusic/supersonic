@@ -6,6 +6,8 @@ import com.tencent.supersonic.common.config.SystemConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.service.SystemConfigService;
 import com.tencent.supersonic.common.util.ContextUtils;
+import com.tencent.supersonic.headless.api.pojo.request.ReportDeliveryConfigReq;
+import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
 import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryRecordResp;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,10 +24,12 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,5 +99,20 @@ class ReportDeliveryControllerTest {
         mockMvc.perform(post("/api/semantic/delivery/configs/99:test")).andExpect(status().isOk());
 
         verify(deliveryService, times(1)).testDelivery(99L);
+    }
+
+    @Test
+    void updateConfigEndpointShouldUsePatchAndSetPathId() throws Exception {
+        ReportDeliveryConfigResp updated = new ReportDeliveryConfigResp();
+        updated.setId(77L);
+        when(deliveryService.updateConfig(any(ReportDeliveryConfigReq.class), any(User.class)))
+                .thenReturn(updated);
+
+        mockMvc.perform(patch("/api/semantic/delivery/configs/{id}", 77L)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"enabled\":true}"))
+                .andExpect(status().isOk());
+
+        verify(deliveryService).updateConfig(argThat(req -> Long.valueOf(77L).equals(req.getId())
+                && Boolean.TRUE.equals(req.getEnabled())), any(User.class));
     }
 }

@@ -26,12 +26,10 @@ public interface ReportScheduleService {
 
     void triggerNow(Long id, User user);
 
-    void reschedule(Long id, String newCron);
-
     Page<ReportExecutionResp> getExecutionList(Page<ReportExecutionResp> page, Long scheduleId,
             String status, User user);
 
-    Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionResp> page, Long scheduleId,
+    Page<ReportExecutionVO> getExecutionVOList(Page<ReportExecutionVO> page, Long scheduleId,
             String status, User user);
 
     ReportExecutionResp getExecutionById(Long scheduleId, Long id, User user);
