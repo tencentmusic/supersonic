@@ -124,6 +124,8 @@ docker/redis_data/
 # AI / Code Assistant
 # =============================================
 .claude/
+# Local session / retro exports (Cursor, etc.) — not part of product source
+.context/
 
 # =============================================
 # Code Quality Tools
