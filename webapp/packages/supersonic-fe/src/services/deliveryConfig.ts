@@ -113,7 +113,7 @@ export function createConfig(data: Partial<DeliveryConfig>) {
 
 export function updateConfig(id: number, data: Partial<DeliveryConfig>) {
   return request(`${BASE}/configs/${id}`, {
-    method: 'PUT',
+    method: 'PATCH',
     data,
   });
 }
