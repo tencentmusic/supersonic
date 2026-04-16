@@ -4,10 +4,12 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class TermReq extends RecordInfo {
 
     private Long id;

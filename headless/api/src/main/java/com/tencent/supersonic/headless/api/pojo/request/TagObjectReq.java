@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class TagObjectReq extends SchemaItem {
 
     @NotNull

@@ -7,8 +7,10 @@ import com.tencent.supersonic.headless.api.pojo.MetricDefineByMetricParams;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricDefineType;
 import com.tencent.supersonic.headless.api.pojo.enums.MetricType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class MetricReq extends MetricBaseReq {
 
     private MetricDefineType metricDefineType = MetricDefineType.MEASURE;

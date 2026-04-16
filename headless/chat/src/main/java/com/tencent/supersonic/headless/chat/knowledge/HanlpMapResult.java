@@ -3,11 +3,13 @@ package com.tencent.supersonic.headless.chat.knowledge;
 import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.Constants;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class HanlpMapResult extends MapResult {
     private List<String> natures;

@@ -2,8 +2,10 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class CanvasReq extends RecordInfo {
 
     private Long id;

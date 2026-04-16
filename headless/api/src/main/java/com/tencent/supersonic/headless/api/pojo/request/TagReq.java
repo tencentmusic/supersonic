@@ -4,8 +4,10 @@ import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.headless.api.pojo.enums.TagDefineType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class TagReq extends RecordInfo {
 
     private Long id;

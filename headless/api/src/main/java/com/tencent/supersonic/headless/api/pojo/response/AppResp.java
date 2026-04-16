@@ -6,6 +6,7 @@ import com.tencent.supersonic.headless.api.pojo.AppConfig;
 import com.tencent.supersonic.headless.api.pojo.Item;
 import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class AppResp extends RecordInfo {
 
     private Integer id;

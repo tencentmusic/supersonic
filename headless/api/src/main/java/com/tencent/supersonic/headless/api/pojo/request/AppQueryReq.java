@@ -4,12 +4,14 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.PageBaseReq;
 import com.tencent.supersonic.headless.api.pojo.enums.AppStatus;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class AppQueryReq extends PageBaseReq {
 
     private String name;

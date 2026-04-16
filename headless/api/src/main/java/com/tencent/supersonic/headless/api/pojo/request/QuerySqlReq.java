@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.collections.CollectionUtils;
@@ -10,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 @Builder
 @AllArgsConstructor

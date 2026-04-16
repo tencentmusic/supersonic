@@ -1,11 +1,13 @@
 package com.tencent.supersonic.headless.api.pojo.request;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class QuerySqlsReq extends SemanticQueryReq {
     private List<String> sqls;

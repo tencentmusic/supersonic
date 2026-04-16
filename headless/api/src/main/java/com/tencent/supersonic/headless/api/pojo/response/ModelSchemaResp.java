@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.tencent.supersonic.common.pojo.ModelRela;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ModelSchemaResp extends ModelResp {

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
 public class SchemaItem extends RecordInfo {
 
