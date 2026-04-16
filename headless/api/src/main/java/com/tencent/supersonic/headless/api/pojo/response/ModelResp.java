@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor

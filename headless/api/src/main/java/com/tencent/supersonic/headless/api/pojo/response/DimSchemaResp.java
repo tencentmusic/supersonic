@@ -2,11 +2,13 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.google.common.collect.Sets;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
 public class DimSchemaResp extends DimensionResp {
 

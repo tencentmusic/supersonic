@@ -2,11 +2,13 @@ package com.tencent.supersonic.headless.api.pojo.request;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class DomainReq extends SchemaItem {
 
     private Long parentId = 0L;

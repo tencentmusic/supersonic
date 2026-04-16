@@ -2,10 +2,12 @@ package com.tencent.supersonic.common.pojo;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ModelRela extends RecordInfo {
 
     private Long id;

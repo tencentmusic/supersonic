@@ -2,12 +2,14 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class DomainResp extends SchemaItem {
 

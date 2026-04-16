@@ -1,11 +1,13 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class DictTaskResp extends DictItemResp {
 

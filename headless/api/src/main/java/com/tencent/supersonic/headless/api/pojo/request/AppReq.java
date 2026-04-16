@@ -3,12 +3,14 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import com.tencent.supersonic.headless.api.pojo.AppConfig;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class AppReq extends RecordInfo {
 
     private Long id;

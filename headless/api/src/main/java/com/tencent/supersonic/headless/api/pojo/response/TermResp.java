@@ -4,11 +4,13 @@ import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 public class TermResp extends RecordInfo {

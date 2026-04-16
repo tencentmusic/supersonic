@@ -2,12 +2,14 @@ package com.tencent.supersonic.headless.api.pojo.response;
 
 import com.tencent.supersonic.common.pojo.RecordInfo;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
 public class TagResp extends RecordInfo {
 

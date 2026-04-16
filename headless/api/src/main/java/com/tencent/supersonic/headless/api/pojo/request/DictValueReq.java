@@ -3,9 +3,11 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.tencent.supersonic.common.pojo.PageBaseReq;
 import com.tencent.supersonic.common.pojo.enums.TypeEnums;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class DictValueReq extends PageBaseReq {
     private Long modelId;
