@@ -15,7 +15,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportScheduleResp {
+public class ReportSchedulePluginResult {
 
     private ScheduleIntent intent;
     private String message;

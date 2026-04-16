@@ -8,6 +8,7 @@ import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.plugin.support.PluginSemanticQuery;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.util.ContextUtils;
@@ -21,6 +22,7 @@ import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.ReportDeliveryConfigResp;
 import com.tencent.supersonic.headless.api.pojo.response.ReportExecutionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleConfirmationResp;
+import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleConfirmationService;
@@ -39,6 +41,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 
 import static com.tencent.supersonic.chat.server.plugin.support.reportschedule.ScheduleKeywords.AFTERNOON;
@@ -145,9 +148,9 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
 
         ScheduleIntent intent = extractIntent(queryText);
 
-        ReportScheduleResp response;
+        ReportSchedulePluginResult response;
         try {
-            response = switch (intent) {
+            response = withTenantContext(pluginParseResult.getTenantId(), () -> switch (intent) {
                 case CONFIRM -> handleConfirm(chatId, currentUserId);
                 case CREATE -> handleCreate(queryText, chatId, pluginParseResult, currentUserId);
                 case LIST -> handleList();
@@ -157,17 +160,34 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 case TRIGGER -> handleTrigger(queryText, currentUserId);
                 case STATUS -> handleStatus(queryText);
                 default -> buildUnknownResponse();
-            };
+            });
             queryResult.setQueryState(QueryState.SUCCESS);
         } catch (Exception e) {
             log.error("Error handling report schedule request", e);
-            response = ReportScheduleResp.builder().intent(intent).success(false)
+            response = ReportSchedulePluginResult.builder().intent(intent).success(false)
                     .message(String.format(ERROR_OPERATION_FAILED, e.getMessage())).build();
             queryResult.setQueryState(QueryState.SEARCH_EXCEPTION);
         }
 
         queryResult.setResponse(response);
         return queryResult;
+    }
+
+    private ReportSchedulePluginResult withTenantContext(Long tenantId,
+            Supplier<ReportSchedulePluginResult> action) {
+        Long previousTenantId = TenantContext.getTenantId();
+        if (tenantId != null) {
+            TenantContext.setTenantId(tenantId);
+        }
+        try {
+            return action.get();
+        } finally {
+            if (previousTenantId != null) {
+                TenantContext.setTenantId(previousTenantId);
+            } else {
+                TenantContext.clear();
+            }
+        }
     }
 
     /**
@@ -186,16 +206,13 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
     }
 
     private void savePendingConfirmation(Integer chatId, ScheduleIntent intent,
-            Map<String, Object> params, Long userId, Long tenantId,
-            ReportSubscriptionSource source) {
+            Map<String, Object> params, Long userId, ReportSubscriptionSource source) {
         long now = System.currentTimeMillis();
         ReportScheduleConfirmationReq confirmation = new ReportScheduleConfirmationReq();
         confirmation.setUserId(userId);
         confirmation.setChatId(chatId);
         confirmation.setActionType(intent.name());
-        confirmation.setTenantId(tenantId);
         confirmation.setPayloadJson(JsonUtil.toString(params));
-        confirmation.setCreatedAt(new Date(now));
         confirmation.setExpireAt(new Date(now + confirmationExpireMs));
         if (source != null) {
             confirmation.setSourceQueryId(source.getSourceQueryId());
@@ -254,12 +271,12 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return ScheduleIntent.UNKNOWN;
     }
 
-    private ReportScheduleResp handleConfirm(Integer chatId, Long userId) {
+    private ReportSchedulePluginResult handleConfirm(Integer chatId, Long userId) {
         ReportScheduleConfirmationResp pending =
                 confirmationService.getLatestPending(userId, chatId);
         if (pending == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
-                    .message(ERROR_NO_PENDING).build();
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CONFIRM)
+                    .success(false).message(ERROR_NO_PENDING).build();
         }
         confirmationService.updateStatus(pending.getId(), "CONFIRMED");
         Map<String, Object> params = JsonUtil.toObject(pending.getPayloadJson(), Map.class);
@@ -268,15 +285,16 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return switch (intent) {
             case CREATE -> executeCreate(params, userId);
             case CANCEL -> executeCancel(params, userId);
-            default -> ReportScheduleResp.builder().intent(ScheduleIntent.CONFIRM).success(false)
-                    .message(ERROR_UNSUPPORTED_CONFIRM).build();
+            default -> ReportSchedulePluginResult.builder().intent(ScheduleIntent.CONFIRM)
+                    .success(false).message(ERROR_UNSUPPORTED_CONFIRM).build();
         };
     }
 
-    private ReportScheduleResp executeCreate(Map<String, Object> params, Long currentUserId) {
+    private ReportSchedulePluginResult executeCreate(Map<String, Object> params,
+            Long currentUserId) {
         Object rawDatasetId = params.get("datasetId");
         if (!(rawDatasetId instanceof Number)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(String.format(ERROR_OPERATION_FAILED, "datasetId missing")).build();
         }
         Long datasetId = ((Number) rawDatasetId).longValue();
@@ -297,8 +315,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         schedule.setEnabled(true);
         schedule.setRetryCount(DEFAULT_RETRY_COUNT);
 
-        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp created =
-                scheduleService.createSchedule(schedule, currentUser);
+        ReportScheduleResp created = scheduleService.createSchedule(schedule, currentUser);
         String cronDesc = describeCron(cronExpression);
         String channelName = resolveChannelName(deliveryConfigIds);
 
@@ -313,44 +330,45 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 : String.format(SUCCESS_CREATED, created.getId(), cronDesc, channelName,
                         created.getId());
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(true)
                 .message(successMsg).scheduleId(created.getId()).cronExpression(cronExpression)
                 .cronDescription(cronDesc).build();
     }
 
-    private ReportScheduleResp executeCancel(Map<String, Object> params, Long currentUserId) {
+    private ReportSchedulePluginResult executeCancel(Map<String, Object> params,
+            Long currentUserId) {
         Object rawScheduleId = params.get("scheduleId");
         if (!(rawScheduleId instanceof Number)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CANCEL).success(false)
                     .message(String.format(ERROR_OPERATION_FAILED, "scheduleId missing")).build();
         }
         Long scheduleId = ((Number) rawScheduleId).longValue();
 
         scheduleService.deleteSchedule(scheduleId, requireCurrentUser(currentUserId));
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CANCEL).success(true)
                 .message(String.format(SUCCESS_CANCELLED, scheduleId)).scheduleId(scheduleId)
                 .build();
     }
 
-    private ReportScheduleResp handleCreate(String queryText, Integer chatId,
+    private ReportSchedulePluginResult handleCreate(String queryText, Integer chatId,
             PluginParseResult pluginParseResult, Long currentUserId) {
         String cronExpression = parseCronExpression(queryText);
         if (cronExpression == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_SPECIFY_FREQUENCY).needConfirm(false).build();
         }
 
         ReportSubscriptionSource source = resolveSubscriptionSource(pluginParseResult);
         // Validate source before resolving delivery configs (avoid unnecessary DB call)
-        ReportScheduleResp sourceError = validateSource(source, null);
+        ReportSchedulePluginResult sourceError = validateSource(source, null);
         if (sourceError != null) {
             return sourceError;
         }
 
         String deliveryConfigIds = resolveDeliveryConfigIds(pluginParseResult);
         if (StringUtils.isBlank(deliveryConfigIds)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_NO_DELIVERY_CONFIG).needConfirm(false).build();
         }
 
@@ -363,8 +381,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 source.getQueryConfigSnapshot(), parseOutputFormat(queryText), deliveryConfigIds,
                 scheduleName, pluginParseResult, source, triggerNow);
 
-        savePendingConfirmation(chatId, ScheduleIntent.CREATE, params, currentUserId,
-                pluginParseResult.getTenantId(), source);
+        savePendingConfirmation(chatId, ScheduleIntent.CREATE, params, currentUserId, source);
 
         String displayName = StringUtils.isNotBlank(source.getSummaryText())
                 ? source.getSummaryText()
@@ -373,10 +390,10 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
                 ? String.format(CONFIRM_CREATE_WITH_TRIGGER, displayName, cronDescription)
                 : String.format(CONFIRM_CREATE, displayName, cronDescription);
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(true)
                 .message(confirmMsg).needConfirm(true)
-                .confirmAction(ReportScheduleResp.ConfirmAction.builder().action("CREATE_SCHEDULE")
-                        .params(params).build())
+                .confirmAction(ReportSchedulePluginResult.ConfirmAction.builder()
+                        .action("CREATE_SCHEDULE").params(params).build())
                 .cronExpression(cronExpression).cronDescription(cronDescription).build();
     }
 
@@ -384,14 +401,14 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
      * Validates the subscription source. Returns an error response if validation fails, or null if
      * all checks pass. The {@code deliveryConfigIds} param is unused (retained for extensibility).
      */
-    private ReportScheduleResp validateSource(ReportSubscriptionSource source,
+    private ReportSchedulePluginResult validateSource(ReportSubscriptionSource source,
             String deliveryConfigIds) {
         if (source == null || source.getSourceDataSetId() == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_SPECIFY_REPORT_CONTENT).needConfirm(false).build();
         }
         if (StringUtils.isBlank(source.getQueryConfigSnapshot())) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CREATE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CREATE).success(false)
                     .message(ERROR_UNSUPPORTED_REPORT_CONTEXT).needConfirm(false).build();
         }
         return null;
@@ -417,19 +434,16 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         return params;
     }
 
-    private ReportScheduleResp handleList() {
+    private ReportSchedulePluginResult handleList() {
         // Pass null to list ALL schedules for the current tenant (TenantSqlInterceptor filters by
         // tenant)
-        Page<com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp> page =
-                new Page<>(1, 20);
-        Page<com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp> result =
-                scheduleService.getScheduleList(page, null, null,
-                        requireCurrentUser(parseCurrentUserId()));
+        Page<ReportScheduleResp> page = new Page<>(1, 20);
+        Page<ReportScheduleResp> result = scheduleService.getScheduleList(page, null, null,
+                requireCurrentUser(parseCurrentUserId()));
 
-        List<ReportScheduleResp.ScheduleSummary> summaries = new ArrayList<>();
-        for (com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule : result
-                .getRecords()) {
-            summaries.add(ReportScheduleResp.ScheduleSummary.builder().id(schedule.getId())
+        List<ReportSchedulePluginResult.ScheduleSummary> summaries = new ArrayList<>();
+        for (ReportScheduleResp schedule : result.getRecords()) {
+            summaries.add(ReportSchedulePluginResult.ScheduleSummary.builder().id(schedule.getId())
                     .name(schedule.getName()).datasetId(schedule.getDatasetId())
                     .cronExpression(schedule.getCronExpression())
                     .cronDescription(describeCron(schedule.getCronExpression()))
@@ -441,7 +455,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             message = LIST_EMPTY;
         } else {
             StringBuilder sb = new StringBuilder(String.format(LIST_HEADER, summaries.size()));
-            for (ReportScheduleResp.ScheduleSummary s : summaries) {
+            for (ReportSchedulePluginResult.ScheduleSummary s : summaries) {
                 String status =
                         Boolean.TRUE.equals(s.getEnabled()) ? STATUS_RUNNING : STATUS_PAUSED;
                 sb.append(String.format(LIST_ITEM, s.getId(), s.getName(), s.getCronDescription(),
@@ -450,119 +464,120 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             message = sb.toString();
         }
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.LIST).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.LIST).success(true)
                 .message(message).schedules(summaries).build();
     }
 
-    private ReportScheduleResp handleCancel(String queryText, Integer chatId, Long currentUserId) {
+    private ReportSchedulePluginResult handleCancel(String queryText, Integer chatId,
+            Long currentUserId) {
         Long scheduleId = extractScheduleId(queryText);
         if (scheduleId == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CANCEL).success(false)
                     .message(ERROR_SPECIFY_CANCEL_ID).build();
         }
 
-        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
+        ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
 
         if (schedule == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CANCEL).success(false)
                     .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
         }
 
         Map<String, Object> params = new HashMap<>();
         params.put("scheduleId", scheduleId);
-        savePendingConfirmation(chatId, ScheduleIntent.CANCEL, params, currentUserId,
-                schedule.getTenantId(), null);
+        savePendingConfirmation(chatId, ScheduleIntent.CANCEL, params, currentUserId, null);
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.CANCEL).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.CANCEL).success(true)
                 .message(String.format(CONFIRM_CANCEL, schedule.getName(), scheduleId))
                 .needConfirm(true)
-                .confirmAction(ReportScheduleResp.ConfirmAction.builder().action("CANCEL_SCHEDULE")
-                        .params(params).build())
+                .confirmAction(ReportSchedulePluginResult.ConfirmAction.builder()
+                        .action("CANCEL_SCHEDULE").params(params).build())
                 .scheduleId(scheduleId).scheduleName(schedule.getName()).build();
     }
 
-    private ReportScheduleResp handlePause(String queryText, Long currentUserId) {
+    private ReportSchedulePluginResult handlePause(String queryText, Long currentUserId) {
         Long scheduleId = extractScheduleId(queryText);
         if (scheduleId == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.PAUSE).success(false)
                     .message(ERROR_SPECIFY_PAUSE_ID).build();
         }
 
-        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
+        ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.PAUSE).success(false)
                     .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
         }
         if (schedule.getOwnerId() != null && currentUserId != null
                 && !schedule.getOwnerId().equals(currentUserId)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.PAUSE).success(false)
                     .message(ERROR_NO_PERMISSION).build();
         }
 
         scheduleService.pauseSchedule(scheduleId, requireCurrentUser(currentUserId));
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.PAUSE).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.PAUSE).success(true)
                 .message(String.format(SUCCESS_PAUSED, scheduleId, scheduleId))
                 .scheduleId(scheduleId).build();
     }
 
-    private ReportScheduleResp handleResume(String queryText, Long currentUserId) {
+    private ReportSchedulePluginResult handleResume(String queryText, Long currentUserId) {
         Long scheduleId = extractScheduleId(queryText);
         if (scheduleId == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.RESUME).success(false)
                     .message(ERROR_SPECIFY_RESUME_ID).build();
         }
 
-        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
+        ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.RESUME).success(false)
                     .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
         }
         if (schedule.getOwnerId() != null && currentUserId != null
                 && !schedule.getOwnerId().equals(currentUserId)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.RESUME).success(false)
                     .message(ERROR_NO_PERMISSION).build();
         }
 
         scheduleService.resumeSchedule(scheduleId, requireCurrentUser(currentUserId));
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.RESUME).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.RESUME).success(true)
                 .message(String.format(SUCCESS_RESUMED, scheduleId)).scheduleId(scheduleId).build();
     }
 
-    private ReportScheduleResp handleTrigger(String queryText, Long currentUserId) {
+    private ReportSchedulePluginResult handleTrigger(String queryText, Long currentUserId) {
         Long scheduleId = extractScheduleId(queryText);
         if (scheduleId == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(false)
-                    .message(ERROR_SPECIFY_TRIGGER_ID).build();
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.TRIGGER)
+                    .success(false).message(ERROR_SPECIFY_TRIGGER_ID).build();
         }
 
-        com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp schedule =
+        ReportScheduleResp schedule =
                 scheduleService.getScheduleById(scheduleId, requireCurrentUser(currentUserId));
         if (schedule == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(false)
-                    .message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId)).build();
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.TRIGGER)
+                    .success(false).message(String.format(ERROR_SCHEDULE_NOT_FOUND, scheduleId))
+                    .build();
         }
         if (schedule.getOwnerId() != null && currentUserId != null
                 && !schedule.getOwnerId().equals(currentUserId)) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(false)
-                    .message(ERROR_NO_PERMISSION).build();
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.TRIGGER)
+                    .success(false).message(ERROR_NO_PERMISSION).build();
         }
 
         scheduleService.triggerNow(scheduleId, requireCurrentUser(currentUserId));
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.TRIGGER).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.TRIGGER).success(true)
                 .message(String.format(SUCCESS_TRIGGERED, scheduleId)).scheduleId(scheduleId)
                 .build();
     }
 
-    private ReportScheduleResp handleStatus(String queryText) {
+    private ReportSchedulePluginResult handleStatus(String queryText) {
         Long scheduleId = extractScheduleId(queryText);
         if (scheduleId == null) {
-            return ReportScheduleResp.builder().intent(ScheduleIntent.STATUS).success(false)
+            return ReportSchedulePluginResult.builder().intent(ScheduleIntent.STATUS).success(false)
                     .message(ERROR_SPECIFY_STATUS_ID).build();
         }
 
@@ -570,9 +585,9 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
         Page<ReportExecutionResp> result = scheduleService.getExecutionList(page, scheduleId, null,
                 requireCurrentUser(parseCurrentUserId()));
 
-        List<ReportScheduleResp.ExecutionSummary> summaries = new ArrayList<>();
+        List<ReportSchedulePluginResult.ExecutionSummary> summaries = new ArrayList<>();
         for (ReportExecutionResp exec : result.getRecords()) {
-            summaries.add(ReportScheduleResp.ExecutionSummary.builder().id(exec.getId())
+            summaries.add(ReportSchedulePluginResult.ExecutionSummary.builder().id(exec.getId())
                     .startTime(formatDate(exec.getStartTime()))
                     .endTime(formatDate(exec.getEndTime())).status(exec.getStatus())
                     .errorMessage(exec.getErrorMessage()).build());
@@ -583,7 +598,7 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             message = String.format(EXECUTION_EMPTY, scheduleId);
         } else {
             StringBuilder sb = new StringBuilder(String.format(EXECUTION_HEADER, scheduleId));
-            for (ReportScheduleResp.ExecutionSummary e : summaries) {
+            for (ReportSchedulePluginResult.ExecutionSummary e : summaries) {
                 String statusIcon = "SUCCESS".equals(e.getStatus()) ? "✓" : "✗";
                 sb.append("\n").append(statusIcon).append(" ").append(e.getStartTime());
                 if (e.getErrorMessage() != null) {
@@ -593,12 +608,12 @@ public class ReportScheduleQuery extends PluginSemanticQuery {
             message = sb.toString();
         }
 
-        return ReportScheduleResp.builder().intent(ScheduleIntent.STATUS).success(true)
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.STATUS).success(true)
                 .message(message).scheduleId(scheduleId).executions(summaries).build();
     }
 
-    private ReportScheduleResp buildUnknownResponse() {
-        return ReportScheduleResp.builder().intent(ScheduleIntent.UNKNOWN).success(false)
+    private ReportSchedulePluginResult buildUnknownResponse() {
+        return ReportSchedulePluginResult.builder().intent(ScheduleIntent.UNKNOWN).success(false)
                 .message(UNKNOWN_INTENT).build();
     }
 

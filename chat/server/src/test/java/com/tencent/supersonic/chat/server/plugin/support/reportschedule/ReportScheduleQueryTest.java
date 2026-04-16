@@ -6,6 +6,7 @@ import com.tencent.supersonic.chat.api.plugin.PluginParseResult;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResp;
 import com.tencent.supersonic.chat.api.pojo.response.QueryResult;
 import com.tencent.supersonic.chat.server.service.ChatManageService;
+import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AggregateTypeEnum;
@@ -74,7 +75,7 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("取消报表 #999", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertFalse(resp.isSuccess());
         assertTrue(resp.getMessage().contains("#999"));
@@ -87,7 +88,7 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("暂停报表 #42", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertFalse(resp.isSuccess());
         assertTrue(resp.getMessage().contains("#42"));
@@ -100,7 +101,7 @@ class ReportScheduleQueryTest {
     void createWithoutFrequency_returnsError() {
         query.setParseInfo(buildParseInfo("基于刚才那个报表，推给我", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertFalse(resp.isSuccess());
         assertEquals(ScheduleMessages.ERROR_SPECIFY_FREQUENCY, resp.getMessage());
@@ -114,7 +115,7 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("每天9点发给我", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertFalse(resp.isSuccess());
         assertEquals(ScheduleMessages.ERROR_SPECIFY_REPORT_CONTENT, resp.getMessage());
@@ -133,7 +134,7 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("每天9点发给我", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertFalse(resp.isSuccess());
         assertEquals(ScheduleMessages.ERROR_NO_DELIVERY_CONFIG, resp.getMessage());
@@ -164,6 +165,7 @@ class ReportScheduleQueryTest {
 
         ReportScheduleConfirmationResp[] stored = {null};
         doAnswer(inv -> {
+            assertEquals(Long.valueOf(10L), TenantContext.getTenantId());
             ReportScheduleConfirmationReq captured = inv.getArgument(0);
             ReportScheduleConfirmationResp c = new ReportScheduleConfirmationResp();
             BeanUtils.copyProperties(captured, c);
@@ -176,11 +178,13 @@ class ReportScheduleQueryTest {
         // Act: CREATE
         query.setParseInfo(buildParseInfo("基于刚才那个报表，每天10:30推送给我", 88, 6001L, 1001L, "tester", 10L));
         QueryResult createResult = query.build();
-        ReportScheduleResp createResp = (ReportScheduleResp) createResult.getResponse();
+        ReportSchedulePluginResult createResp =
+                (ReportSchedulePluginResult) createResult.getResponse();
 
         assertTrue(createResp.isSuccess());
         assertTrue(createResp.isNeedConfirm());
         assertEquals("0 30 10 * * ?", createResp.getCronExpression());
+        assertNull(TenantContext.getTenantId());
         verify(confirmationService).createPending(any());
 
         // Arrange: confirmation lookup
@@ -195,7 +199,8 @@ class ReportScheduleQueryTest {
         // Act: CONFIRM
         query.setParseInfo(buildParseInfo("确认", 88, 6002L, 1001L, "tester", 10L));
         QueryResult confirmResult = query.build();
-        ReportScheduleResp confirmResp = (ReportScheduleResp) confirmResult.getResponse();
+        ReportSchedulePluginResult confirmResp =
+                (ReportSchedulePluginResult) confirmResult.getResponse();
 
         assertTrue(confirmResp.isSuccess());
         assertEquals(123L, confirmResp.getScheduleId());
@@ -226,6 +231,7 @@ class ReportScheduleQueryTest {
 
         ReportScheduleConfirmationResp[] stored = {null};
         doAnswer(inv -> {
+            assertEquals(Long.valueOf(10L), TenantContext.getTenantId());
             ReportScheduleConfirmationReq captured = inv.getArgument(0);
             ReportScheduleConfirmationResp c = new ReportScheduleConfirmationResp();
             BeanUtils.copyProperties(captured, c);
@@ -238,10 +244,12 @@ class ReportScheduleQueryTest {
         query.setParseInfo(
                 buildParseInfo("基于刚才那个报表，每天10:30推送，现在先发一次", 88, 6001L, 1001L, "tester", 10L));
         QueryResult createResult = query.build();
-        ReportScheduleResp createResp = (ReportScheduleResp) createResult.getResponse();
+        ReportSchedulePluginResult createResp =
+                (ReportSchedulePluginResult) createResult.getResponse();
 
         assertTrue(
                 Boolean.TRUE.equals(createResp.getConfirmAction().getParams().get("triggerNow")));
+        assertNull(TenantContext.getTenantId());
 
         when(confirmationService.getLatestPending(1001L, 88)).thenReturn(stored[0]);
         when(userService.getUserById(1001L)).thenReturn(buildUser(1001L, "tester", 10L));
@@ -252,7 +260,8 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("确认", 88, 6002L, 1001L, "tester", 10L));
         QueryResult confirmResult = query.build();
-        ReportScheduleResp confirmResp = (ReportScheduleResp) confirmResult.getResponse();
+        ReportSchedulePluginResult confirmResp =
+                (ReportSchedulePluginResult) confirmResult.getResponse();
 
         assertTrue(confirmResp.isSuccess());
         verify(scheduleService).triggerNow(eq(124L), any());
@@ -266,7 +275,7 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("确认", 1, 200L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertFalse(resp.isSuccess());
         assertEquals(ScheduleMessages.ERROR_NO_PENDING, resp.getMessage());
@@ -285,7 +294,7 @@ class ReportScheduleQueryTest {
 
         query.setParseInfo(buildParseInfo("我的定时报表有哪些", 1, 100L, 1L, "u", 10L));
         QueryResult result = query.build();
-        ReportScheduleResp resp = (ReportScheduleResp) result.getResponse();
+        ReportSchedulePluginResult resp = (ReportSchedulePluginResult) result.getResponse();
 
         assertTrue(resp.isSuccess());
         assertEquals(ScheduleMessages.LIST_EMPTY, resp.getMessage());
