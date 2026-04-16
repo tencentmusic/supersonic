@@ -4,9 +4,11 @@ import com.google.common.base.Objects;
 import com.tencent.supersonic.common.pojo.Constants;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class DatabaseMapResult extends MapResult {
 

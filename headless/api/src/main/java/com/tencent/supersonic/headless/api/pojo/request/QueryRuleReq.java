@@ -6,12 +6,14 @@ import com.tencent.supersonic.headless.api.pojo.SchemaItem;
 import com.tencent.supersonic.headless.api.pojo.enums.QueryRuleType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class QueryRuleReq extends SchemaItem {
 

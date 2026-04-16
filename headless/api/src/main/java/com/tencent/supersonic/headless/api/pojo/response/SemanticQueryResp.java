@@ -7,6 +7,7 @@ import com.tencent.supersonic.common.util.StringUtil;
 import com.tencent.supersonic.headless.api.pojo.QueryResult;
 import com.tencent.supersonic.headless.api.pojo.enums.SemanticType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class SemanticQueryResp extends QueryResult<Map<String, Object>> {
 

@@ -8,6 +8,7 @@ import com.tencent.supersonic.headless.core.pojo.Ontology;
 import com.tencent.supersonic.headless.core.translator.parser.RuntimeOptions;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaVersion;
 import org.apache.calcite.schema.impl.AbstractSchema;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class S2CalciteSchema extends AbstractSchema {
 

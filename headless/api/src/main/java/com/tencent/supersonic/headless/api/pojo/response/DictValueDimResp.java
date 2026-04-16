@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.api.pojo.response;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
  * @date: 2024/9/29
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class DictValueDimResp extends DictValueResp {
     /** dimension value */

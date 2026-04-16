@@ -3,6 +3,7 @@ package com.tencent.supersonic.headless.api.pojo.request;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.supersonic.headless.api.pojo.Cache;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.CollectionUtils;
@@ -10,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class QueryMultiStructReq extends SemanticQueryReq {
 

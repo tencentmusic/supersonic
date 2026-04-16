@@ -15,6 +15,7 @@ import com.tencent.supersonic.common.util.DateModeUtils;
 import com.tencent.supersonic.common.util.SqlFilterUtils;
 import com.tencent.supersonic.headless.api.pojo.SchemaElement;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -44,6 +45,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Slf4j
 public class QueryStructReq extends SemanticQueryReq {
 
