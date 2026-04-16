@@ -14,7 +14,7 @@ public class FeishuProperties {
     /** Connection mode: "webhook" (HTTP callback) or "ws" (WebSocket long connection) */
     private String connectionMode = "webhook";
     /** Base URL of the SuperSonic API for internal HTTP calls */
-    private String apiBaseUrl = "http://localhost:9080";
+    private String apiBaseUrl = "";
     private String appId;
     private String appSecret;
     private String verificationToken;

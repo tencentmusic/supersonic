@@ -1,6 +1,7 @@
 package com.tencent.supersonic.headless.server.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
@@ -16,6 +17,7 @@ import com.tencent.supersonic.headless.server.service.delivery.DeliveryException
 import com.tencent.supersonic.headless.server.service.delivery.DeliveryRateLimiter;
 import com.tencent.supersonic.headless.server.service.delivery.FeishuDeliveryChannel;
 import com.tencent.supersonic.headless.server.service.delivery.ReportDeliveryChannel;
+import com.tencent.supersonic.headless.server.service.delivery.ReportDownloadProperties;
 import com.tencent.supersonic.headless.server.service.impl.ReportDeliveryServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,7 +140,8 @@ class ReportDeliveryServiceImplTest {
         when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
                 .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
 
-        FeishuDeliveryChannel feishuChannel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel feishuChannel =
+                new FeishuDeliveryChannel(restTemplate, tenantConfig(), downloadProps());
         DeliveryRateLimiter rateLimiter = mock(DeliveryRateLimiter.class);
         when(rateLimiter.acquire(any())).thenReturn(0D);
 
@@ -187,7 +190,8 @@ class ReportDeliveryServiceImplTest {
                 .thenReturn(new ResponseEntity<>("{\"StatusCode\":0,\"StatusMessage\":\"success\"}",
                         HttpStatus.OK));
 
-        FeishuDeliveryChannel feishuChannel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel feishuChannel =
+                new FeishuDeliveryChannel(restTemplate, tenantConfig(), downloadProps());
         DeliveryRateLimiter rateLimiter = mock(DeliveryRateLimiter.class);
         when(rateLimiter.acquire(any())).thenReturn(0D);
 
@@ -219,7 +223,8 @@ class ReportDeliveryServiceImplTest {
                         "{\"StatusCode\":19024,\"StatusMessage\":\"Key Words Not Found\"}",
                         HttpStatus.OK));
 
-        FeishuDeliveryChannel feishuChannel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel feishuChannel =
+                new FeishuDeliveryChannel(restTemplate, tenantConfig(), downloadProps());
         DeliveryRateLimiter rateLimiter = mock(DeliveryRateLimiter.class);
         when(rateLimiter.acquire(any())).thenReturn(0D);
 
@@ -374,5 +379,18 @@ class ReportDeliveryServiceImplTest {
         DeliveryException ex =
                 assertThrows(DeliveryException.class, () -> service.testDelivery(2L));
         assertEquals("No channel implementation for type: FEISHU", ex.getMessage());
+    }
+
+    private TenantConfig tenantConfig() {
+        TenantConfig tenantConfig = new TenantConfig();
+        tenantConfig.setDefaultTenantId(1L);
+        return tenantConfig;
+    }
+
+    private ReportDownloadProperties downloadProps() {
+        ReportDownloadProperties p = new ReportDownloadProperties();
+        ReflectionTestUtils.setField(p, "signingSecret", "test-secret");
+        ReflectionTestUtils.setField(p, "tokenTtlSeconds", 604800L);
+        return p;
     }
 }

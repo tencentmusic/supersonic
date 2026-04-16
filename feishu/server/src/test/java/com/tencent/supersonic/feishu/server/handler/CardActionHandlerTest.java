@@ -1,10 +1,12 @@
 package com.tencent.supersonic.feishu.server.handler;
 
+import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.exception.InvalidPermissionException;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.server.service.FeishuMessageSender;
 import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
+import com.tencent.supersonic.headless.api.pojo.response.ReportExecutionResp;
 import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +49,12 @@ class CardActionHandlerTest {
     void setUp() {
         feishuProperties = new FeishuProperties();
         feishuProperties.setApiBaseUrl("https://s2.example.com");
+        TenantConfig tenantConfig = new TenantConfig();
+        tenantConfig.setDefaultTenantId(1L);
         handler = new CardActionHandler(apiClient, messageSender, reportScheduleService,
-                feishuProperties);
+                feishuProperties, tenantConfig);
+        ReflectionTestUtils.setField(handler, "downloadSigningSecret", "test-secret");
+        ReflectionTestUtils.setField(handler, "downloadTokenTtlSeconds", 3600L);
 
         owner = new User();
         owner.setId(7L);
@@ -59,11 +66,11 @@ class CardActionHandlerTest {
     void reportDownloadShouldSendDownloadCardWhenUserHasPermission() {
         Map<String, Object> actionValue = new HashMap<>();
         actionValue.put("action", "report_download");
-        actionValue.put("downloadUrl",
-                "https://s2.example.com/api/public/reportSchedules/8/executions/9:download?expires=1&token=abc");
         actionValue.put("scheduleId", 8L);
         actionValue.put("executionId", 9L);
+        actionValue.put("tenantId", 1L);
         when(reportScheduleService.getScheduleById(8L, owner)).thenReturn(new ReportScheduleResp());
+        when(reportScheduleService.getExecutionById(8L, 9L, owner)).thenReturn(execution());
 
         handler.handle(actionValue, owner, "ou_alice");
 
@@ -75,14 +82,32 @@ class CardActionHandlerTest {
         Map<String, Object> header = (Map<String, Object>) card.get("header");
         Map<String, Object> title = (Map<String, Object>) header.get("title");
         assertEquals("报表下载", title.get("content"));
+        assertTrue(card.toString().contains("tenantId=1"));
+        assertTrue(card.toString().contains("token="));
+    }
+
+    @Test
+    void reportDownloadShouldRefuseWhenUserIsUnbound() {
+        Map<String, Object> actionValue = new HashMap<>();
+        actionValue.put("action", "report_download");
+        actionValue.put("scheduleId", 8L);
+        actionValue.put("executionId", 9L);
+
+        handler.handle(actionValue, null, "ou_stranger");
+
+        ArgumentCaptor<Map<String, Object>> cardCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(messageSender).sendCard(anyString(), cardCaptor.capture());
+        verify(reportScheduleService, never()).getScheduleById(any(), any());
+
+        Map<String, Object> header = (Map<String, Object>) cardCaptor.getValue().get("header");
+        Map<String, Object> title = (Map<String, Object>) header.get("title");
+        assertEquals("请先绑定账号", title.get("content"));
     }
 
     @Test
     void reportDownloadShouldRefuseWhenUserLacksPermission() {
         Map<String, Object> actionValue = new HashMap<>();
         actionValue.put("action", "report_download");
-        actionValue.put("downloadUrl",
-                "https://s2.example.com/api/public/reportSchedules/8/executions/9:download?expires=1&token=abc");
         actionValue.put("scheduleId", 8L);
         actionValue.put("executionId", 9L);
         when(reportScheduleService.getScheduleById(8L, owner))
@@ -107,15 +132,59 @@ class CardActionHandlerTest {
     void reportDownloadShouldRejectNonWhitelistedUrl() {
         Map<String, Object> actionValue = new HashMap<>();
         actionValue.put("action", "report_download");
-        actionValue.put("downloadUrl", "https://evil.example.org/steal");
+        actionValue.put("customDownloadUrl", "https://evil.example.org/steal");
         actionValue.put("scheduleId", 8L);
         actionValue.put("executionId", 9L);
+        when(reportScheduleService.getScheduleById(8L, owner)).thenReturn(new ReportScheduleResp());
+        when(reportScheduleService.getExecutionById(8L, 9L, owner)).thenReturn(execution());
 
         handler.handle(actionValue, owner, "ou_alice");
 
         ArgumentCaptor<Map<String, Object>> cardCaptor = ArgumentCaptor.forClass(Map.class);
         verify(messageSender).sendCard(anyString(), cardCaptor.capture());
-        verify(reportScheduleService, never()).getScheduleById(any(), any());
+        verify(reportScheduleService).getScheduleById(8L, owner);
+
+        Map<String, Object> header = (Map<String, Object>) cardCaptor.getValue().get("header");
+        Map<String, Object> title = (Map<String, Object>) header.get("title");
+        assertEquals("下载地址无效", title.get("content"));
+    }
+
+    @Test
+    void reportDownloadShouldRejectPayloadTenantMismatch() {
+        Map<String, Object> actionValue = new HashMap<>();
+        actionValue.put("action", "report_download");
+        actionValue.put("scheduleId", 8L);
+        actionValue.put("executionId", 9L);
+        actionValue.put("tenantId", 2L);
+        when(reportScheduleService.getScheduleById(8L, owner)).thenReturn(new ReportScheduleResp());
+        when(reportScheduleService.getExecutionById(8L, 9L, owner)).thenReturn(execution());
+
+        handler.handle(actionValue, owner, "ou_alice");
+
+        ArgumentCaptor<Map<String, Object>> cardCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(messageSender).sendCard(anyString(), cardCaptor.capture());
+
+        Map<String, Object> header = (Map<String, Object>) cardCaptor.getValue().get("header");
+        Map<String, Object> title = (Map<String, Object>) header.get("title");
+        assertEquals("下载地址无效", title.get("content"));
+        assertFalse(cardCaptor.getValue().toString().contains("token="));
+    }
+
+    @Test
+    void reportDownloadShouldRejectAbsoluteCustomUrlWhenApiBaseUrlMissing() {
+        feishuProperties.setApiBaseUrl("");
+        Map<String, Object> actionValue = new HashMap<>();
+        actionValue.put("action", "report_download");
+        actionValue.put("customDownloadUrl", "https://evil.example.org/steal");
+        actionValue.put("scheduleId", 8L);
+        actionValue.put("executionId", 9L);
+        when(reportScheduleService.getScheduleById(8L, owner)).thenReturn(new ReportScheduleResp());
+        when(reportScheduleService.getExecutionById(8L, 9L, owner)).thenReturn(execution());
+
+        handler.handle(actionValue, owner, "ou_alice");
+
+        ArgumentCaptor<Map<String, Object>> cardCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(messageSender).sendCard(anyString(), cardCaptor.capture());
 
         Map<String, Object> header = (Map<String, Object>) cardCaptor.getValue().get("header");
         Map<String, Object> title = (Map<String, Object>) header.get("title");
@@ -126,8 +195,6 @@ class CardActionHandlerTest {
     void reportDownloadShouldRefuseWhenScheduleIdMissing() {
         Map<String, Object> actionValue = new HashMap<>();
         actionValue.put("action", "report_download");
-        actionValue.put("downloadUrl",
-                "https://s2.example.com/api/public/reportSchedules/8/executions/9:download");
 
         handler.handle(actionValue, owner, "ou_alice");
 
@@ -153,5 +220,13 @@ class CardActionHandlerTest {
                 any());
         verify(reportScheduleService, never()).getScheduleById(any(), any());
         verify(messageSender).sendCard(anyString(), any());
+    }
+
+    private ReportExecutionResp execution() {
+        ReportExecutionResp execution = new ReportExecutionResp();
+        execution.setId(9L);
+        execution.setScheduleId(8L);
+        execution.setResultLocation("/tmp/report.xlsx");
+        return execution;
     }
 }

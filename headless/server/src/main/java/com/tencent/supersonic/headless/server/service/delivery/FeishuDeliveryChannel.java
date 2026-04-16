@@ -5,7 +5,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
+import com.tencent.supersonic.headless.api.util.ReportDownloadTokenUtils;
 import com.tencent.supersonic.headless.server.pojo.DeliveryType;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -44,15 +46,11 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
     private static final int MAX_PAYLOAD_BYTES = 20 * 1024;
 
     private final RestTemplate restTemplate;
+    private final TenantConfig tenantConfig;
+    private final ReportDownloadProperties downloadProperties;
 
     @Value("${s2.feishu.api-base-url:}")
     private String apiBaseUrl;
-
-    @Value("${s2.report-download.signing-secret:${s2.encryption.aes-key:}}")
-    private String downloadSigningSecret;
-
-    @Value("${s2.report-download.token-ttl-seconds:604800}")
-    private long downloadTokenTtlSeconds;
 
     @Override
     public DeliveryType getType() {
@@ -145,7 +143,7 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
 
     private Map<String, Object> buildAlertCard(FeishuConfig config, DeliveryContext context) {
         Map<String, Object> card = new HashMap<>();
-        String downloadUrl = buildInteractiveDownloadUrl(config, context);
+        String downloadUrl = buildDownloadUrl(config, context);
 
         // Header
         Map<String, Object> header = new HashMap<>();
@@ -250,7 +248,12 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
     private Map<String, Object> buildCard(FeishuConfig config, DeliveryContext context) {
         Map<String, Object> card = new HashMap<>();
 
-        String downloadUrl = buildInteractiveDownloadUrl(config, context);
+        // Show the callback button if: (a) a custom downloadUrl is configured and IDs are present,
+        // OR (b) the auto-sign path would produce a valid URL (pre-flight check via
+        // buildDownloadUrl).
+        boolean renderDownloadButton = (StringUtils.isNotBlank(config.getDownloadUrl())
+                && context.getScheduleId() != null && context.getExecutionId() != null)
+                || StringUtils.isNotBlank(buildDownloadUrl(config, context));
 
         // Header
         Map<String, Object> header = new HashMap<>();
@@ -283,11 +286,11 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         elements.add(infoDiv);
 
         // Download link if available
-        if (StringUtils.isNotBlank(downloadUrl)) {
+        if (renderDownloadButton) {
             Map<String, Object> actionDiv = new HashMap<>();
             actionDiv.put("tag", "action");
             List<Object> actions = new ArrayList<>();
-            actions.add(buildDownloadButton(context, downloadUrl, "primary"));
+            actions.add(buildCallbackDownloadButton(context, config.getDownloadUrl(), "primary"));
             actionDiv.put("actions", actions);
             elements.add(actionDiv);
         }
@@ -296,31 +299,39 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         return card;
     }
 
-    private Map<String, Object> buildDownloadButton(DeliveryContext context, String downloadUrl,
-            String type) {
+    /**
+     * Callback button for report cards. Feishu echoes the value payload back to the bot's event
+     * webhook on click, allowing CardActionHandler to verify the clicker's Feishu-S2 binding and
+     * read permission before revealing the download link.
+     */
+    private Map<String, Object> buildCallbackDownloadButton(DeliveryContext context,
+            String customDownloadUrl, String type) {
         Map<String, Object> button = new HashMap<>();
         button.put("tag", "button");
         button.put("type", type);
         button.put("text", Map.of("tag", "plain_text", "content", "下载报表"));
-        // value payload is echoed back by Feishu on click. Besides the URL we also stash
-        // scheduleId / executionId so that CardActionHandler can re-verify the clicker's read
-        // permission before revealing the download link.
         Map<String, Object> value = new HashMap<>();
         value.put("action", "report_download");
-        value.put("downloadUrl", downloadUrl);
+        if (StringUtils.isNotBlank(customDownloadUrl)) {
+            value.put("customDownloadUrl", customDownloadUrl);
+        }
         if (context.getScheduleId() != null) {
             value.put("scheduleId", context.getScheduleId());
         }
         if (context.getExecutionId() != null) {
             value.put("executionId", context.getExecutionId());
         }
+        if (context.getTenantId() != null) {
+            value.put("tenantId", context.getTenantId());
+        }
         button.put("value", value);
         return button;
     }
 
     /**
-     * URL button variant used on alert cards —— 直接跳转到 config.downloadUrl，不走 callback。 Alert 没有
-     * report owner 概念，对 callback 做权限校验是多余的。
+     * URL button variant used by alert cards and fallback cases. The signed URL is already
+     * bearer-protected. Alert cards use this because alerts have no specific schedule owner to
+     * verify permissions against.
      */
     private Map<String, Object> buildUrlDownloadButton(String downloadUrl, String type) {
         Map<String, Object> button = new HashMap<>();
@@ -336,7 +347,7 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
         Map<String, Object> post = new HashMap<>();
         Map<String, Object> zhCn = new HashMap<>();
 
-        String downloadUrl = buildDownloadUrl(config, context);
+        String downloadUrl = buildTemplateDownloadUrl(config, context);
 
         String title = StringUtils.isNotBlank(config.getTitle()) ? config.getTitle()
                 : "📊 " + context.getReportName();
@@ -375,7 +386,7 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
 
     private Map<String, Object> buildTextContent(FeishuConfig config, DeliveryContext context) {
         Map<String, Object> content = new HashMap<>();
-        String downloadUrl = buildDownloadUrl(config, context);
+        String downloadUrl = buildTemplateDownloadUrl(config, context);
         String text;
         if (StringUtils.isNotBlank(config.getContent())) {
             text = TemplateResolver.resolve(config.getContent(), context, downloadUrl);
@@ -397,33 +408,57 @@ public class FeishuDeliveryChannel implements ReportDeliveryChannel {
             }
             return builder.build().toUriString();
         }
-        if (StringUtils.isAnyBlank(apiBaseUrl, context.getFileLocation())
-                || context.getScheduleId() == null || context.getExecutionId() == null) {
+        if (StringUtils.isBlank(apiBaseUrl)) {
+            log.warn(
+                    "s2.feishu.api-base-url is not configured — Feishu download button suppressed. "
+                            + "Set s2.feishu.api-base-url to the public base URL of this SuperSonic instance "
+                            + "to enable signed download links (scheduleId={}).",
+                    context.getScheduleId());
             return "";
         }
-        long expiresAt = ReportDownloadTokenUtils.expiresAtEpochSeconds(downloadTokenTtlSeconds);
-        String token = ReportDownloadTokenUtils.createToken(downloadSigningSecret,
-                context.getScheduleId(), context.getExecutionId(), expiresAt);
+        if (StringUtils.isBlank(context.getFileLocation()) || context.getScheduleId() == null
+                || context.getExecutionId() == null) {
+            log.warn("Output file not generated for scheduleId={} executionId={} — "
+                    + "Feishu download button suppressed. Ensure outputFormat is set in the schedule.",
+                    context.getScheduleId(), context.getExecutionId());
+            return "";
+        }
+        // Resolve effective tenantId using TenantConfig as the single source of truth.
+        // In single-tenant mode (tenant.enabled=false) context.getTenantId() is always null;
+        // fall back to TenantConfig.defaultTenantId (default 1L).
+        // In multi-tenant mode a null tenantId means upstream didn't populate the context —
+        // log an error but still use the default rather than silently emitting a 0-tenant URL.
+        Long effectiveTenantId = context.getTenantId() != null ? context.getTenantId()
+                : tenantConfig.getDefaultTenantId();
+        if (tenantConfig.isEnabled() && context.getTenantId() == null) {
+            log.error("tenantId is null for scheduleId={} in multi-tenant mode — "
+                    + "falling back to defaultTenantId={}. Check ReportExecutionContext population.",
+                    context.getScheduleId(), effectiveTenantId);
+        }
+        long expiresAt = ReportDownloadTokenUtils
+                .expiresAtEpochSeconds(downloadProperties.getTokenTtlSeconds());
+        String token = ReportDownloadTokenUtils.createToken(downloadProperties.getSigningSecret(),
+                context.getScheduleId(), context.getExecutionId(), expiresAt, effectiveTenantId);
         if (StringUtils.isBlank(token)) {
             // 早期实现会退到 /api/v1/ 认证端点，但飞书客户端/浏览器点按钮时不携带 S2 登录态 → 401。
             // 与其在卡片里渲染一个点了必挂的按钮，不如直接不出按钮，让 signingSecret 未配置的部署显式暴露问题。
             log.warn(
                     "Report download signing secret is not configured, skipping Feishu download button. "
-                            + "Set s2.report.download.signing-secret to enable one-time signed URLs.");
+                            + "Set s2.report-download.signing-secret to enable signed URLs.");
             return "";
         }
         return UriComponentsBuilder
                 .fromUriString(StringUtils.stripEnd(apiBaseUrl, "/")
                         + "/api/public/reportSchedules/" + context.getScheduleId() + "/executions/"
                         + context.getExecutionId() + ":download")
-                .queryParam("expires", expiresAt).queryParam("token", token).build().toUriString();
+                .queryParam("tenantId", effectiveTenantId).queryParam("expires", expiresAt)
+                .queryParam("token", token).build().toUriString();
     }
 
-    private String buildInteractiveDownloadUrl(FeishuConfig config, DeliveryContext context) {
-        // 交互卡片按钮的 URL 与文本 URL 走同一条构造路径：
-        // - 若 FeishuConfig 自带 downloadUrl（自定义服务端），直接使用
-        // - 否则必须依赖 signingSecret 生成一次性签名 URL（/api/public/...:download）
-        // signingSecret 未配置时返回空字符串，caller 会因此跳过按钮渲染。
+    private String buildTemplateDownloadUrl(FeishuConfig config, DeliveryContext context) {
+        if (StringUtils.isBlank(config.getDownloadUrl())) {
+            return "";
+        }
         return buildDownloadUrl(config, context);
     }
 

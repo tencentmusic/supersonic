@@ -1,5 +1,6 @@
 package com.tencent.supersonic.feishu.server.service;
 
+import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.feishu.api.cache.FeishuCacheService;
@@ -27,13 +28,6 @@ public class FeishuBotService {
 
     private static final String RATE_LIMIT_PREFIX = "rateLimit:";
 
-    /**
-     * Fallback tenant used to satisfy {@code TenantSqlInterceptor} on async webhook threads that
-     * have no inherited ThreadLocal context. Must be overwritten with {@code user.getTenantId()}
-     * (or {@code pending.getTenantId()}) as soon as the real tenant is known.
-     */
-    private static final Long DEFAULT_TENANT_ID = 1L;
-
     private final FeishuMessageRouter router;
     private final FeishuUserMappingService userMappingService;
     private final FeishuMessageSender messageSender;
@@ -44,13 +38,14 @@ public class FeishuBotService {
     private final FeishuMeterBinder meterBinder;
     private final FeishuBindTokenService bindTokenService;
     private final CardActionHandler cardActionHandler;
+    private final TenantConfig tenantConfig;
 
     public FeishuBotService(FeishuMessageRouter router, FeishuUserMappingService userMappingService,
             FeishuMessageSender messageSender, FeishuCardRenderer cardRenderer,
             FeishuProperties properties, FeishuCacheService cacheService,
             @Qualifier("feishuExecutor") ThreadPoolTaskExecutor feishuExecutor,
             FeishuMeterBinder meterBinder, FeishuBindTokenService bindTokenService,
-            CardActionHandler cardActionHandler) {
+            CardActionHandler cardActionHandler, TenantConfig tenantConfig) {
         this.router = router;
         this.userMappingService = userMappingService;
         this.messageSender = messageSender;
@@ -61,6 +56,7 @@ public class FeishuBotService {
         this.meterBinder = meterBinder;
         this.bindTokenService = bindTokenService;
         this.cardActionHandler = cardActionHandler;
+        this.tenantConfig = tenantConfig;
     }
 
     public void handleEventAsync(String eventType, Map<String, Object> event) {
@@ -129,7 +125,7 @@ public class FeishuBotService {
             // Async thread has no inherited TenantContext; set a default so any downstream SQL has
             // a consistent tenant filter during mapping lookup. Overwrite with the real tenant
             // once the user has been resolved.
-            TenantContext.setTenantId(DEFAULT_TENANT_ID);
+            TenantContext.setTenantId(getDefaultTenantId());
 
             FeishuUserMappingService.ResolvedMapping mapping =
                     userMappingService.resolveMapping(openId);
@@ -180,7 +176,7 @@ public class FeishuBotService {
 
         try {
             // Set default tenant for user mapping lookup (async thread has no tenant context)
-            TenantContext.setTenantId(DEFAULT_TENANT_ID);
+            TenantContext.setTenantId(getDefaultTenantId());
 
             // Resolve user and mapping
             FeishuUserMappingService.ResolvedMapping resolved =
@@ -304,6 +300,12 @@ public class FeishuBotService {
         }
         long count = cacheService.incrementCounter(RATE_LIMIT_PREFIX + openId);
         return count > config.getMaxRequests();
+    }
+
+    private Long getDefaultTenantId() {
+        return tenantConfig != null && tenantConfig.getDefaultTenantId() != null
+                ? tenantConfig.getDefaultTenantId()
+                : 1L;
     }
 
     @SuppressWarnings("unchecked")

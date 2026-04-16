@@ -100,6 +100,18 @@ public class FeishuEventController {
             return;
         }
 
+        // Guard: if no verification mechanism is configured at all, reject unverifiable events.
+        // This prevents arbitrary callers from injecting fake Feishu events when the administrator
+        // has not yet configured either encryptKey or verificationToken.
+        if (StringUtils.isBlank(encryptKey)
+                && StringUtils.isBlank(properties.getVerificationToken())) {
+            log.warn("[Webhook] No verification mechanism configured (encryptKey and "
+                    + "verificationToken are both blank). Rejecting event to prevent forgery. "
+                    + "Set feishu.encrypt-key or feishu.verification-token in application.yaml.");
+            writeJson(response, "{\"code\":0}");
+            return;
+        }
+
         // 3. v2.0 HMAC signature verification
         // When encryptKey is configured, signature headers are MANDATORY — reject if missing.
         // This prevents attackers from bypassing verification by omitting the headers.

@@ -1,5 +1,6 @@
 package com.tencent.supersonic.headless.server.service.delivery;
 
+import com.tencent.supersonic.common.config.TenantConfig;
 import com.tencent.supersonic.headless.api.service.delivery.DeliveryContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -31,10 +32,9 @@ class FeishuDeliveryChannelTest {
         when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
                 .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
 
-        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate, tenantConfig(),
+                downloadProps("test-secret", 3600L));
         ReflectionTestUtils.setField(channel, "apiBaseUrl", "https://s2.example.com/");
-        ReflectionTestUtils.setField(channel, "downloadSigningSecret", "test-secret");
-        ReflectionTestUtils.setField(channel, "downloadTokenTtlSeconds", 604800L);
 
         DeliveryContext context = DeliveryContext.builder().scheduleId(8L).executionId(9L)
                 .reportName("Report 8").scheduleName("Daily Report").rowCount(1L)
@@ -73,13 +73,8 @@ class FeishuDeliveryChannelTest {
         assertEquals("report_download", value.get("action"));
         assertEquals(8L, ((Number) value.get("scheduleId")).longValue());
         assertEquals(9L, ((Number) value.get("executionId")).longValue());
-        String downloadUrl = (String) value.get("downloadUrl");
-        // signing secret 配置下必须生成签名 URL（/api/public/...?expires=...&token=...）
-        assertTrue(downloadUrl.startsWith(
-                "https://s2.example.com/api/public/reportSchedules/8/executions/9:download"),
-                "expected signed /api/public URL, got: " + downloadUrl);
-        assertTrue(downloadUrl.contains("expires="));
-        assertTrue(downloadUrl.contains("token="));
+        assertNull(value.get("downloadUrl"));
+        assertNull(button.get("url"));
     }
 
     @Test
@@ -89,10 +84,9 @@ class FeishuDeliveryChannelTest {
         when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
                 .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
 
-        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate, tenantConfig(),
+                downloadProps("test-secret", 604800L));
         ReflectionTestUtils.setField(channel, "apiBaseUrl", "https://s2.example.com/");
-        ReflectionTestUtils.setField(channel, "downloadSigningSecret", "test-secret");
-        ReflectionTestUtils.setField(channel, "downloadTokenTtlSeconds", 604800L);
 
         DeliveryContext context = DeliveryContext.builder().scheduleId(0L).executionId(0L)
                 .reportName("Test Report").rowCount(100L).executionTime("2025-03-11 10:00:00")
@@ -121,6 +115,74 @@ class FeishuDeliveryChannelTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void textMessageShouldNotExposeAutoSignedDownloadUrl() {
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
+                .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
+
+        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate, tenantConfig(),
+                downloadProps("test-secret", 604800L));
+        ReflectionTestUtils.setField(channel, "apiBaseUrl", "https://s2.example.com/");
+
+        DeliveryContext context = DeliveryContext.builder().scheduleId(8L).executionId(9L)
+                .reportName("Report 8").rowCount(1L).executionTime("2025-03-11 10:00:00")
+                .fileLocation("/tmp/report.xlsx").outputFormat("XLSX").build();
+        String configJson = "{\"webhookUrl\":\"https://open.feishu.cn/open-apis/bot/v2/hook/abc\","
+                + "\"msgType\":\"text\","
+                + "\"content\":\"报表已生成，共 ${rowCount} 条数据。\\n下载: ${downloadUrl}\"}";
+
+        channel.deliver(configJson, context);
+
+        ArgumentCaptor<HttpEntity<Map<String, Object>>> requestCaptor =
+                ArgumentCaptor.forClass(HttpEntity.class);
+        verify(restTemplate).postForEntity(eq("https://open.feishu.cn/open-apis/bot/v2/hook/abc"),
+                requestCaptor.capture(), eq(String.class));
+
+        Map<String, Object> payload = requestCaptor.getValue().getBody();
+        Map<String, Object> content = (Map<String, Object>) payload.get("content");
+        String text = (String) content.get("text");
+        assertTrue(text.contains("共 1 条数据"));
+        assertFalse(text.contains("${downloadUrl}"));
+        assertFalse(text.contains("/api/public/reportSchedules/8/executions/9:download"));
+        assertFalse(text.contains("下载:"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void postMessageShouldKeepOnlyExplicitDownloadUrl() {
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
+                .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
+
+        FeishuDeliveryChannel channel =
+                new FeishuDeliveryChannel(restTemplate, tenantConfig(), downloadProps("", 604800L));
+
+        DeliveryContext context = DeliveryContext.builder().scheduleId(8L).executionId(9L)
+                .reportName("Report 8").rowCount(1L).executionTime("2025-03-11 10:00:00")
+                .fileLocation("/tmp/report.xlsx").outputFormat("XLSX").build();
+        String configJson = "{\"webhookUrl\":\"https://open.feishu.cn/open-apis/bot/v2/hook/abc\","
+                + "\"downloadUrl\":\"https://s2.example.com/custom-download\","
+                + "\"content\":\"报表已生成，共 ${rowCount} 条数据。\\n下载: ${downloadUrl}\"}";
+
+        channel.deliver(configJson, context);
+
+        ArgumentCaptor<HttpEntity<Map<String, Object>>> requestCaptor =
+                ArgumentCaptor.forClass(HttpEntity.class);
+        verify(restTemplate).postForEntity(eq("https://open.feishu.cn/open-apis/bot/v2/hook/abc"),
+                requestCaptor.capture(), eq(String.class));
+
+        Map<String, Object> payload = requestCaptor.getValue().getBody();
+        Map<String, Object> content = (Map<String, Object>) payload.get("content");
+        Map<String, Object> post = (Map<String, Object>) content.get("post");
+        Map<String, Object> zhCn = (Map<String, Object>) post.get("zh_cn");
+        List<List<Object>> contentList = (List<List<Object>>) zhCn.get("content");
+        Map<String, Object> textNode = (Map<String, Object>) contentList.get(0).get(0);
+        String text = (String) textNode.get("text");
+        assertTrue(text.contains("下载: https://s2.example.com/custom-download?executionId=9"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void interactiveMessageShouldOmitDownloadButtonWhenSigningSecretMissing() {
         // signing secret 未配置 → 无法生成可用的下载 URL（既没有 /api/public/ 签名参数，
         // 也不能退到 /api/v1/ 这种需要 S2 登录态的端点——飞书客户端打开会 401）。
@@ -129,9 +191,9 @@ class FeishuDeliveryChannelTest {
         when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
                 .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
 
-        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel channel =
+                new FeishuDeliveryChannel(restTemplate, tenantConfig(), downloadProps("", 3600L));
         ReflectionTestUtils.setField(channel, "apiBaseUrl", "https://s2.example.com/");
-        ReflectionTestUtils.setField(channel, "downloadSigningSecret", "");
 
         DeliveryContext context = DeliveryContext.builder().scheduleId(8L).executionId(9L)
                 .reportName("Report 8").scheduleName("Daily Report").rowCount(1L)
@@ -150,7 +212,7 @@ class FeishuDeliveryChannelTest {
         Map<String, Object> payload = requestCaptor.getValue().getBody();
         Map<String, Object> card = (Map<String, Object>) payload.get("card");
         List<Object> elements = (List<Object>) card.get("elements");
-        // 整张卡片里不应该出现任何 "tag":"action" 节点，也没有 buildDownloadButton 生成的字段
+        // 整张卡片里不应该出现任何 "tag":"action" 节点。
         for (Object el : elements) {
             Map<String, Object> elementMap = (Map<String, Object>) el;
             assertFalse("action".equals(elementMap.get("tag")),
@@ -167,7 +229,8 @@ class FeishuDeliveryChannelTest {
         when(restTemplate.postForEntity(any(String.class), any(), eq(String.class)))
                 .thenReturn(new ResponseEntity<>("{\"code\":0,\"msg\":\"ok\"}", HttpStatus.OK));
 
-        FeishuDeliveryChannel channel = new FeishuDeliveryChannel(restTemplate);
+        FeishuDeliveryChannel channel =
+                new FeishuDeliveryChannel(restTemplate, tenantConfig(), downloadProps("", 604800L));
         DeliveryContext context = DeliveryContext.builder().executionId(12L).alertRuleId(3L)
                 .alertRuleName("订单异常告警").alertContent("订单量低于阈值").alertSeverity("WARNING")
                 .alertedCount(1).totalChecked(20).executionTime("2025-03-11T10:00:00")
@@ -193,5 +256,19 @@ class FeishuDeliveryChannelTest {
         // URL button → button.url is set, value is absent (不走 callback)
         assertEquals("https://s2.example.com/alerts?executionId=12", downloadButton.get("url"));
         assertNull(downloadButton.get("value"));
+    }
+
+    private TenantConfig tenantConfig() {
+        TenantConfig tenantConfig = new TenantConfig();
+        tenantConfig.setDefaultTenantId(1L);
+        return tenantConfig;
+    }
+
+    private ReportDownloadProperties downloadProps(String secret, long ttlSeconds) {
+        ReportDownloadProperties p = new ReportDownloadProperties();
+        org.springframework.test.util.ReflectionTestUtils.setField(p, "signingSecret", secret);
+        org.springframework.test.util.ReflectionTestUtils.setField(p, "tokenTtlSeconds",
+                ttlSeconds);
+        return p;
     }
 }

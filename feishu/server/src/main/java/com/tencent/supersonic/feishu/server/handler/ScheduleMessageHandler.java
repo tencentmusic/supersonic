@@ -1,5 +1,6 @@
 package com.tencent.supersonic.feishu.server.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.common.pojo.User;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -105,6 +107,13 @@ public class ScheduleMessageHandler implements MessageHandler {
                 return;
             }
 
+            // 1.5. Build queryConfig from session SQL
+            String queryConfig = buildQueryConfigFromSession(session);
+            if (queryConfig == null) {
+                messageSender.replyText(msg.getMessageId(), "该查询没有可用的 SQL 记录，请先重新发起一次查询再创建定时任务");
+                return;
+            }
+
             // 2. Parse cron expression from text (simple patterns)
             String cron = parseCron(text);
             if (cron == null) {
@@ -122,13 +131,14 @@ public class ScheduleMessageHandler implements MessageHandler {
             // 4. Create schedule — ownerId / tenantId / createdBy are owned by the impl
             // (see ReportScheduleServiceImpl.createSchedule, which reads them from `user`)
             ReportScheduleReq schedule = new ReportScheduleReq();
-            schedule.setName("定时报表-" + session.getQueryText());
+            schedule.setName(StringUtils.left("定时报表-" + session.getQueryText(), 200));
             schedule.setDatasetId(session.getDatasetId());
             schedule.setCronExpression(cron);
             schedule.setOutputFormat("EXCEL");
             schedule.setDeliveryConfigIds(deliveryConfigIds);
             schedule.setEnabled(true);
             schedule.setRetryCount(3);
+            schedule.setQueryConfig(queryConfig);
 
             ReportScheduleResp created = reportScheduleService.createSchedule(schedule, user);
 
@@ -184,6 +194,16 @@ public class ScheduleMessageHandler implements MessageHandler {
             log.error("Failed to delete schedule id={}", id, e);
             messageSender.replyText(msg.getMessageId(), "删除失败: " + e.getMessage());
         }
+    }
+
+    private String buildQueryConfigFromSession(FeishuQuerySessionDO session) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(session.getSqlText())) {
+            return null;
+        }
+        Map<String, Object> sqlReq = new HashMap<>();
+        sqlReq.put("sql", session.getSqlText());
+        sqlReq.put("dataSetId", session.getDatasetId());
+        return JSON.toJSONString(sqlReq);
     }
 
     private String parseCron(String text) {
