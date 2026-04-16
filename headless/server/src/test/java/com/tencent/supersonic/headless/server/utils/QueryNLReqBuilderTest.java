@@ -25,46 +25,47 @@ class QueryNLReqBuilderTest {
 
     @Test
     void buildS2SQLReq() {
-        init();
-        QueryStructReq queryStructReq = new QueryStructReq();
-        queryStructReq.setDataSetId(1L);
-        queryStructReq.setDataSetName("内容库");
-        queryStructReq.setQueryType(QueryType.AGGREGATE);
+        try (MockedStatic<ContextUtils> mockContextUtils = init()) {
+            QueryStructReq queryStructReq = new QueryStructReq();
+            queryStructReq.setDataSetId(1L);
+            queryStructReq.setDataSetName("内容库");
+            queryStructReq.setQueryType(QueryType.AGGREGATE);
 
-        Aggregator aggregator = new Aggregator();
-        aggregator.setFunc(AggOperatorEnum.UNKNOWN);
-        aggregator.setColumn("pv");
-        queryStructReq.setAggregators(List.of(aggregator));
+            Aggregator aggregator = new Aggregator();
+            aggregator.setFunc(AggOperatorEnum.UNKNOWN);
+            aggregator.setColumn("pv");
+            queryStructReq.setAggregators(List.of(aggregator));
 
-        queryStructReq.setGroups(List.of("department"));
+            queryStructReq.setGroups(List.of("department"));
 
-        DateConf dateConf = new DateConf();
-        dateConf.setDateMode(DateMode.LIST);
-        dateConf.setDateField("sys_imp_date");
-        dateConf.setDateList(List.of("2023-08-01"));
-        queryStructReq.setDateInfo(dateConf);
+            DateConf dateConf = new DateConf();
+            dateConf.setDateMode(DateMode.LIST);
+            dateConf.setDateField("sys_imp_date");
+            dateConf.setDateList(List.of("2023-08-01"));
+            queryStructReq.setDateInfo(dateConf);
 
-        List<Order> orders = new ArrayList<>();
-        Order order = new Order();
-        order.setColumn("uv");
-        orders.add(order);
-        queryStructReq.setOrders(orders);
+            List<Order> orders = new ArrayList<>();
+            Order order = new Order();
+            order.setColumn("uv");
+            orders.add(order);
+            queryStructReq.setOrders(orders);
 
-        QuerySqlReq querySQLReq = queryStructReq.convert();
-        // queryStructReq.setQueryType(QueryType.AGGREGATE);
-        Assert.assertEquals("SELECT department, SUM(pv) FROM `内容库` "
-                + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
-                + "BY department ORDER BY uv LIMIT 500 OFFSET 0", querySQLReq.getSql());
+            QuerySqlReq querySQLReq = queryStructReq.convert();
+            // queryStructReq.setQueryType(QueryType.AGGREGATE);
+            Assert.assertEquals("SELECT department, SUM(pv) FROM `内容库` "
+                    + "WHERE (sys_imp_date IN ('2023-08-01')) GROUP "
+                    + "BY department ORDER BY uv LIMIT 500 OFFSET 0", querySQLReq.getSql());
 
-        // queryStructReq.setQueryType(QueryType.DETAIL);
-        // querySQLReq = queryStructReq.convert();
-        // Assert.assertEquals(
-        // "SELECT department, pv FROM `内容库` WHERE (sys_imp_date IN ('2023-08-01')) "
-        // + "ORDER BY uv LIMIT 500 OFFSET 0",
-        // querySQLReq.getSql());
+            // queryStructReq.setQueryType(QueryType.DETAIL);
+            // querySQLReq = queryStructReq.convert();
+            // Assert.assertEquals(
+            // "SELECT department, pv FROM `内容库` WHERE (sys_imp_date IN ('2023-08-01')) "
+            // + "ORDER BY uv LIMIT 500 OFFSET 0",
+            // querySQLReq.getSql());
+        }
     }
 
-    private void init() {
+    private MockedStatic<ContextUtils> init() {
         MockedStatic<ContextUtils> mockContextUtils = Mockito.mockStatic(ContextUtils.class);
         SqlFilterUtils sqlFilterUtils = new SqlFilterUtils();
         mockContextUtils.when(() -> ContextUtils.getBean(SqlFilterUtils.class))
@@ -72,5 +73,6 @@ class QueryNLReqBuilderTest {
         DateModeUtils dateModeUtils = new DateModeUtils();
         mockContextUtils.when(() -> ContextUtils.getBean(DateModeUtils.class))
                 .thenReturn(dateModeUtils);
+        return mockContextUtils;
     }
 }

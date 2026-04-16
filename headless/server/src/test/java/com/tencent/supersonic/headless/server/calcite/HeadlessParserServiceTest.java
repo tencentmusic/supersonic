@@ -30,27 +30,27 @@ class HeadlessParserServiceTest {
     //
     // public void test() throws Exception {
     //
-    // DataModelYamlTpl datasource = new DataModelYamlTpl();
+    // DataModelSchema datasource = new DataModelSchema();
     // datasource.setName("s2_pv_uv_statis");
     // datasource.setSourceId(1L);
     // datasource.setSqlQuery(
     // "SELECT imp_date, user_name,page,1 as pv, user_name as uv FROM s2_pv_uv_statis");
     //
-    // MeasureYamlTpl measure = new MeasureYamlTpl();
+    // MeasureSchema measure = new MeasureSchema();
     // measure.setAgg("sum");
     // measure.setName("s2_pv_uv_statis_pv");
     // measure.setExpr("pv");
-    // List<MeasureYamlTpl> measures = new ArrayList<>();
+    // List<MeasureSchema> measures = new ArrayList<>();
     // measures.add(measure);
     //
-    // MeasureYamlTpl measure2 = new MeasureYamlTpl();
+    // MeasureSchema measure2 = new MeasureSchema();
     // measure2.setAgg("count");
     // measure2.setName("s2_pv_uv_statis_internal_cnt");
     // measure2.setExpr("1");
     // measure2.setCreateMetric("true");
     // measures.add(measure2);
     //
-    // MeasureYamlTpl measure3 = new MeasureYamlTpl();
+    // MeasureSchema measure3 = new MeasureSchema();
     // measure3.setAgg("count");
     // measure3.setName("s2_pv_uv_statis_uv");
     // measure3.setExpr("uv");
@@ -59,7 +59,7 @@ class HeadlessParserServiceTest {
     //
     // datasource.setMeasures(measures);
     //
-    // DimensionYamlTpl dimension = new DimensionYamlTpl();
+    // DimensionSchema dimension = new DimensionSchema();
     // dimension.setName("imp_date");
     // dimension.setExpr("imp_date");
     // dimension.setType("time");
@@ -67,10 +67,10 @@ class HeadlessParserServiceTest {
     // dimensionTimeTypeParams.setIsPrimary("true");
     // dimensionTimeTypeParams.setTimeGranularity("day");
     // dimension.setTypeParams(dimensionTimeTypeParams);
-    // List<DimensionYamlTpl> dimensions = new ArrayList<>();
+    // List<DimensionSchema> dimensions = new ArrayList<>();
     // dimensions.add(dimension);
     //
-    // DimensionYamlTpl dimension2 = new DimensionYamlTpl();
+    // DimensionSchema dimension2 = new DimensionSchema();
     // dimension2.setName("sys_imp_date");
     // dimension2.setExpr("imp_date");
     // dimension2.setType("time");
@@ -80,7 +80,7 @@ class HeadlessParserServiceTest {
     // dimension2.setTypeParams(dimensionTimeTypeParams2);
     // dimensions.add(dimension2);
     //
-    // DimensionYamlTpl dimension3 = new DimensionYamlTpl();
+    // DimensionSchema dimension3 = new DimensionSchema();
     // dimension3.setName("sys_imp_week");
     // dimension3.setExpr("to_monday(from_unixtime(unix_timestamp(imp_date), 'yyyy-MM-dd'))");
     // dimension3.setType("time");
@@ -92,8 +92,8 @@ class HeadlessParserServiceTest {
     //
     // datasource.setDimensions(dimensions);
     //
-    // List<IdentifyYamlTpl> identifies = new ArrayList<>();
-    // IdentifyYamlTpl identify = new IdentifyYamlTpl();
+    // List<IdentifierSchema> identifies = new ArrayList<>();
+    // IdentifierSchema identify = new IdentifierSchema();
     // identify.setName("user_name");
     // identify.setType("primary");
     // identifies.add(identify);
@@ -103,36 +103,36 @@ class HeadlessParserServiceTest {
     // SemanticSchemaManager.update(semanticSchema,
     // SemanticSchemaManager.getDataModel(datasource));
     //
-    // DimensionYamlTpl dimension1 = new DimensionYamlTpl();
+    // DimensionSchema dimension1 = new DimensionSchema();
     // dimension1.setExpr("page");
     // dimension1.setName("page");
     // dimension1.setType("categorical");
-    // List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
-    // dimensionYamlTpls.add(dimension1);
+    // List<DimensionSchema> dimensionSchemas = new ArrayList<>();
+    // dimensionSchemas.add(dimension1);
     //
     // SemanticSchemaManager.update(semanticSchema, "s2_pv_uv_statis",
-    // SemanticSchemaManager.getDimensions(dimensionYamlTpls));
+    // SemanticSchemaManager.getDimensions(dimensionSchemas));
     //
-    // MetricYamlTpl metric1 = new MetricYamlTpl();
+    // MetricSchema metric1 = new MetricSchema();
     // metric1.setName("pv");
     // metric1.setType("expr");
-    // MetricTypeParamsYamlTpl metricTypeParams = new MetricTypeParamsYamlTpl();
-    // List<MeasureYamlTpl> measures1 = new ArrayList<>();
-    // MeasureYamlTpl measure1 = new MeasureYamlTpl();
+    // MetricTypeParamsSchema metricTypeParams = new MetricTypeParamsSchema();
+    // List<MeasureSchema> measures1 = new ArrayList<>();
+    // MeasureSchema measure1 = new MeasureSchema();
     // measure1.setName("s2_pv_uv_statis_pv");
     // measures1.add(measure1);
     // metricTypeParams.setMeasures(measures1);
     // metricTypeParams.setExpr("s2_pv_uv_statis_pv");
     // metric1.setTypeParams(metricTypeParams);
-    // List<MetricYamlTpl> metric = new ArrayList<>();
+    // List<MetricSchema> metric = new ArrayList<>();
     // metric.add(metric1);
     //
-    // MetricYamlTpl metric2 = new MetricYamlTpl();
+    // MetricSchema metric2 = new MetricSchema();
     // metric2.setName("uv");
     // metric2.setType("expr");
-    // MetricTypeParamsYamlTpl metricTypeParams1 = new MetricTypeParamsYamlTpl();
-    // List<MeasureYamlTpl> measures2 = new ArrayList<>();
-    // MeasureYamlTpl measure4 = new MeasureYamlTpl();
+    // MetricTypeParamsSchema metricTypeParams1 = new MetricTypeParamsSchema();
+    // List<MeasureSchema> measures2 = new ArrayList<>();
+    // MeasureSchema measure4 = new MeasureSchema();
     // measure4.setName("s2_pv_uv_statis_uv");
     // measures2.add(measure4);
     // metricTypeParams1.setMeasures(measures2);
@@ -169,22 +169,22 @@ class HeadlessParserServiceTest {
     // }
     //
     // private static void addDepartment(S2CalciteSchema semanticSchema) {
-    // DataModelYamlTpl datasource = new DataModelYamlTpl();
+    // DataModelSchema datasource = new DataModelSchema();
     // datasource.setName("user_department");
     // datasource.setSourceId(1L);
     // datasource.setSqlQuery("SELECT imp_date,user_name,department FROM s2_user_department");
     //
-    // MeasureYamlTpl measure = new MeasureYamlTpl();
+    // MeasureSchema measure = new MeasureSchema();
     // measure.setAgg("count");
     // measure.setName("user_department_internal_cnt");
     // measure.setCreateMetric("true");
     // measure.setExpr("1");
-    // List<MeasureYamlTpl> measures = new ArrayList<>();
+    // List<MeasureSchema> measures = new ArrayList<>();
     // measures.add(measure);
     //
     // datasource.setMeasures(measures);
     //
-    // DimensionYamlTpl dimension = new DimensionYamlTpl();
+    // DimensionSchema dimension = new DimensionSchema();
     // dimension.setName("sys_imp_date");
     // dimension.setExpr("imp_date");
     // dimension.setType("time");
@@ -192,10 +192,10 @@ class HeadlessParserServiceTest {
     // dimensionTimeTypeParams.setIsPrimary("true");
     // dimensionTimeTypeParams.setTimeGranularity("day");
     // dimension.setTypeParams(dimensionTimeTypeParams);
-    // List<DimensionYamlTpl> dimensions = new ArrayList<>();
+    // List<DimensionSchema> dimensions = new ArrayList<>();
     // dimensions.add(dimension);
     //
-    // DimensionYamlTpl dimension3 = new DimensionYamlTpl();
+    // DimensionSchema dimension3 = new DimensionSchema();
     // dimension3.setName("sys_imp_week");
     // dimension3.setExpr("to_monday(from_unixtime(unix_timestamp(imp_date), 'yyyy-MM-dd'))");
     // dimension3.setType("time");
@@ -207,8 +207,8 @@ class HeadlessParserServiceTest {
     //
     // datasource.setDimensions(dimensions);
     //
-    // List<IdentifyYamlTpl> identifies = new ArrayList<>();
-    // IdentifyYamlTpl identify = new IdentifyYamlTpl();
+    // List<IdentifierSchema> identifies = new ArrayList<>();
+    // IdentifierSchema identify = new IdentifierSchema();
     // identify.setName("user_name");
     // identify.setType("primary");
     // identifies.add(identify);
@@ -217,14 +217,14 @@ class HeadlessParserServiceTest {
     // semanticSchema.getDataModels().put("user_department",
     // SemanticSchemaManager.getDataModel(datasource));
     //
-    // DimensionYamlTpl dimension1 = new DimensionYamlTpl();
+    // DimensionSchema dimension1 = new DimensionSchema();
     // dimension1.setExpr("department");
     // dimension1.setName("department");
     // dimension1.setType("categorical");
-    // List<DimensionYamlTpl> dimensionYamlTpls = new ArrayList<>();
-    // dimensionYamlTpls.add(dimension1);
+    // List<DimensionSchema> dimensionSchemas = new ArrayList<>();
+    // dimensionSchemas.add(dimension1);
     //
     // semanticSchema.getDimensions().put("user_department",
-    // SemanticSchemaManager.getDimensions(dimensionYamlTpls));
+    // SemanticSchemaManager.getDimensions(dimensionSchemas));
     // }
 }

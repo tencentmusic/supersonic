@@ -17,14 +17,14 @@ import com.tencent.supersonic.headless.api.pojo.request.DataSetFilterReq;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.*;
-import com.tencent.supersonic.headless.api.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.api.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.api.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.schema.DataModelSchema;
+import com.tencent.supersonic.headless.api.pojo.schema.DimensionSchema;
+import com.tencent.supersonic.headless.api.pojo.schema.MetricSchema;
 import com.tencent.supersonic.headless.api.service.DataSetService;
 import com.tencent.supersonic.headless.api.service.SchemaService;
-import com.tencent.supersonic.headless.server.manager.DimensionYamlManager;
-import com.tencent.supersonic.headless.server.manager.MetricYamlManager;
-import com.tencent.supersonic.headless.server.manager.ModelYamlManager;
+import com.tencent.supersonic.headless.server.manager.DataModelSchemaManager;
+import com.tencent.supersonic.headless.server.manager.DimensionSchemaManager;
+import com.tencent.supersonic.headless.server.manager.MetricSchemaManager;
 import com.tencent.supersonic.headless.server.pojo.ModelFilter;
 import com.tencent.supersonic.headless.server.pojo.TagFilter;
 import com.tencent.supersonic.headless.server.service.*;
@@ -469,9 +469,9 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
-            Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
+    public void buildSchemaDocuments(SemanticSchemaResp semanticSchemaResp,
+            Map<String, List<DimensionSchema>> dimensionSchemaMap,
+            List<DataModelSchema> dataModelSchemas, List<MetricSchema> metricSchemas,
             Map<Long, String> modelIdName) {
 
         List<ModelResp> modelResps = semanticSchemaResp.getModelResps();
@@ -483,18 +483,18 @@ public class SchemaServiceImpl implements SchemaService {
         DatabaseResp databaseResp = databaseService.getDatabase(databaseId);
         for (ModelResp modelResp : modelResps) {
             modelIdName.put(modelResp.getId(), modelResp.getBizName());
-            dataModelYamlTplList.add(ModelYamlManager.convert2YamlObj(modelResp, databaseResp));
-            if (!dimensionYamlMap.containsKey(modelResp.getBizName())) {
-                dimensionYamlMap.put(modelResp.getBizName(), new ArrayList<>());
+            dataModelSchemas.add(DataModelSchemaManager.convertToSchema(modelResp, databaseResp));
+            if (!dimensionSchemaMap.containsKey(modelResp.getBizName())) {
+                dimensionSchemaMap.put(modelResp.getBizName(), new ArrayList<>());
             }
             List<DimensionResp> dimensionRespList = dimensionResps.stream()
                     .filter(d -> d.getModelBizName().equalsIgnoreCase(modelResp.getBizName()))
                     .collect(Collectors.toList());
-            dimensionYamlMap.get(modelResp.getBizName())
-                    .addAll(DimensionYamlManager.convert2DimensionYaml(dimensionRespList));
+            dimensionSchemaMap.get(modelResp.getBizName())
+                    .addAll(DimensionSchemaManager.convertToSchemas(dimensionRespList));
         }
         List<MetricResp> metricResps = new ArrayList<>(semanticSchemaResp.getMetrics());
-        metricYamlTplList.addAll(MetricYamlManager.convert2YamlObj(metricResps));
+        metricSchemas.addAll(MetricSchemaManager.convertToSchema(metricResps));
     }
 
     @Override

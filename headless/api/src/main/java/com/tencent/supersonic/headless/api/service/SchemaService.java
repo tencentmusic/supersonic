@@ -10,9 +10,9 @@ import com.tencent.supersonic.headless.api.pojo.SemanticSchema;
 import com.tencent.supersonic.headless.api.pojo.request.ItemUseReq;
 import com.tencent.supersonic.headless.api.pojo.request.SchemaFilterReq;
 import com.tencent.supersonic.headless.api.pojo.response.*;
-import com.tencent.supersonic.headless.api.pojo.yaml.DataModelYamlTpl;
-import com.tencent.supersonic.headless.api.pojo.yaml.DimensionYamlTpl;
-import com.tencent.supersonic.headless.api.pojo.yaml.MetricYamlTpl;
+import com.tencent.supersonic.headless.api.pojo.schema.DataModelSchema;
+import com.tencent.supersonic.headless.api.pojo.schema.DimensionSchema;
+import com.tencent.supersonic.headless.api.pojo.schema.MetricSchema;
 
 import java.util.List;
 import java.util.Map;
@@ -49,9 +49,9 @@ public interface SchemaService {
 
     List<ItemResp> getDomainDataSetTree();
 
-    void getSchemaYamlTpl(SemanticSchemaResp semanticSchemaResp,
-            Map<String, List<DimensionYamlTpl>> dimensionYamlMap,
-            List<DataModelYamlTpl> dataModelYamlTplList, List<MetricYamlTpl> metricYamlTplList,
+    void buildSchemaDocuments(SemanticSchemaResp semanticSchemaResp,
+            Map<String, List<DimensionSchema>> dimensionSchemaMap,
+            List<DataModelSchema> dataModelSchemas, List<MetricSchema> metricSchemas,
             Map<Long, String> modelIdName);
 
     ItemDateResp getItemDate(ItemDateFilter dimension, ItemDateFilter metric);
