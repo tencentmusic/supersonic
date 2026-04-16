@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.api.pojo.yaml;
+package com.tencent.supersonic.headless.api.pojo.schema;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MeasureYamlTpl {
+public class MeasureSchema {
 
     private String name;
 

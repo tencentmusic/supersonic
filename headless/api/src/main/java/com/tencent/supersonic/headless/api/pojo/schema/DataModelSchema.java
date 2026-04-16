@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.api.pojo.yaml;
+package com.tencent.supersonic.headless.api.pojo.schema;
 
 import com.tencent.supersonic.headless.api.pojo.Field;
 import com.tencent.supersonic.headless.api.pojo.SqlVariable;
@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class DataModelYamlTpl {
+public class DataModelSchema {
 
     private Long id;
 
@@ -24,11 +24,11 @@ public class DataModelYamlTpl {
 
     private String filterSql;
 
-    private List<IdentifyYamlTpl> identifiers;
+    private List<IdentifierSchema> identifiers;
 
-    private List<DimensionYamlTpl> dimensions;
+    private List<DimensionSchema> dimensions;
 
-    private List<MeasureYamlTpl> measures;
+    private List<MeasureSchema> measures;
 
     private List<Field> fields;
 

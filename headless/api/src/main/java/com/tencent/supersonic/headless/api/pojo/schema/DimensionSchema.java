@@ -1,4 +1,4 @@
-package com.tencent.supersonic.headless.api.pojo.yaml;
+package com.tencent.supersonic.headless.api.pojo.schema;
 
 import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.headless.api.pojo.DimensionTimeTypeParams;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class DimensionYamlTpl {
+public class DimensionSchema {
 
     private String name;
 

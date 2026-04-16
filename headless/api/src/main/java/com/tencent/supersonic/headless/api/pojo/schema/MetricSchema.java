@@ -1,11 +1,11 @@
-package com.tencent.supersonic.headless.api.pojo.yaml;
+package com.tencent.supersonic.headless.api.pojo.schema;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class MetricYamlTpl {
+public class MetricSchema {
 
     private String name;
 
@@ -13,5 +13,5 @@ public class MetricYamlTpl {
 
     private String type;
 
-    private MetricTypeParamsYamlTpl typeParams;
+    private MetricTypeParamsSchema typeParams;
 }
