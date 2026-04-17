@@ -5,6 +5,7 @@ import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.SensitiveLevelEnum;
 import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Returns a map of {@code bizName → sensitiveLevel code} (see {@link SensitiveLevelEnum}). Only
  * HIGH (2) and MID (1) entries are stored; LOW fields are omitted.
  */
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Component
 @Slf4j
 public class SensitiveFieldService {

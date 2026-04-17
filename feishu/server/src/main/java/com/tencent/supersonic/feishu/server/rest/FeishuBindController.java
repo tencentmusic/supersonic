@@ -12,6 +12,7 @@ import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @RestController
 @RequestMapping("/api/feishu")
 @RequiredArgsConstructor

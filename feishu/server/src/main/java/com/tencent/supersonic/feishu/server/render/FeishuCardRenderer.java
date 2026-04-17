@@ -10,6 +10,7 @@ import com.tencent.supersonic.headless.api.pojo.SqlInfo;
 import com.tencent.supersonic.headless.api.pojo.response.QueryState;
 import com.tencent.supersonic.headless.api.pojo.response.ReportScheduleResp;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Component
 @RequiredArgsConstructor
 public class FeishuCardRenderer {

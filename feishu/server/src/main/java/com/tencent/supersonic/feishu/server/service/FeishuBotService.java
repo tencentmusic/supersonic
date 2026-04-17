@@ -14,6 +14,7 @@ import com.tencent.supersonic.feishu.server.persistence.dataobject.FeishuUserMap
 import com.tencent.supersonic.feishu.server.render.FeishuCardRenderer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 public class FeishuBotService {
 
     private static final String RATE_LIMIT_PREFIX = "rateLimit:";

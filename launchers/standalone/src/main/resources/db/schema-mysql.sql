@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS `s2_role` (
     `code` varchar(50) NOT NULL COMMENT '角色编码',
     `description` varchar(500) DEFAULT NULL COMMENT '角色描述',
     `scope` varchar(20) DEFAULT 'TENANT' COMMENT '作用域: PLATFORM=平台级, TENANT=租户级',
-    `tenant_id` bigint(20) NOT NULL DEFAULT 1 COMMENT '租户ID',
+    `tenant_id` bigint(20) DEFAULT NULL COMMENT '租户ID (NULL表示平台级角色)',
     `is_system` tinyint DEFAULT 0 COMMENT '是否系统内置角色',
     `status` tinyint DEFAULT 1 COMMENT '状态: 1=启用, 0=禁用',
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,

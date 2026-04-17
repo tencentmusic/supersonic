@@ -51,7 +51,9 @@ spring:
       org.quartz.scheduler.instanceName: SuperSonicScheduler
       org.quartz.scheduler.instanceId: AUTO
       org.quartz.scheduler.batchTriggerAcquisitionMaxCount: 1
-      org.quartz.jobStore.class: org.quartz.impl.jdbcjobstore.JobStoreTX
+      # Do NOT set org.quartz.jobStore.class here — Spring's SchedulerFactoryBean injects
+      # LocalDataSourceJobStore (a JobStoreCMT subclass) via putIfAbsent when dataSource is set.
+      # Explicitly setting JobStoreTX bypasses Spring's datasource injection and causes startup failure.
       org.quartz.jobStore.isClustered: true
       org.quartz.jobStore.clusterCheckinInterval: 20000
       org.quartz.jobStore.misfireThreshold: 60000
@@ -224,7 +226,7 @@ s2:
   feishu:
     enabled: ${FEISHU_ENABLED:false}
     # Connection mode: "webhook" (HTTP callback, requires public URL) or "ws" (WebSocket long connection, recommended)
-    connection-mode: ${FEISHU_CONNECTION_MODE:ws}
+    connection-mode: ${FEISHU_CONNECTION_MODE:webhook}
     # SuperSonic API base URL for internal HTTP calls (standalone mode uses localhost)
     api-base-url: ${FEISHU_API_BASE_URL:http://localhost:${server.port:9080}}
     # Feishu app credentials — defined in profile-specific yaml (application-dev.yaml, application-prd.yaml)

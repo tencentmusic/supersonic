@@ -11,6 +11,7 @@ import com.tencent.supersonic.feishu.server.service.SuperSonicApiClient;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
@@ -21,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Component
 @Slf4j
 @RequiredArgsConstructor

@@ -11,6 +11,7 @@ import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.headless.api.pojo.request.QuerySqlReq;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import java.util.Map;
  * loopback (localhost). Active only in microservice deployments where chat-server is NOT on the
  * classpath.
  */
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Component
 @Slf4j
 public class HttpSuperSonicApiClient implements SuperSonicApiClient {

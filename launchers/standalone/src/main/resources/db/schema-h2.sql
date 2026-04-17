@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `s2_role` (
     `code` VARCHAR(50) NOT NULL,
     `description` VARCHAR(500) DEFAULT NULL,
     `scope` VARCHAR(20) DEFAULT 'TENANT',
-    `tenant_id` BIGINT NOT NULL DEFAULT 1,
+    `tenant_id` BIGINT DEFAULT NULL,
     `is_system` TINYINT DEFAULT 0,
     `status` TINYINT DEFAULT 1,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

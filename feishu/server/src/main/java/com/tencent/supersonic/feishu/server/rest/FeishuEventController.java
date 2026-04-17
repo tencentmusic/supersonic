@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,7 @@ import java.util.Map;
 @RequestMapping("/api/feishu/webhook")
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 public class FeishuEventController {
 
     private final FeishuProperties properties;
