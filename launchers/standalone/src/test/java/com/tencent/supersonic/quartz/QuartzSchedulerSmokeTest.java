@@ -5,9 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.LocalDataSourceJobStore;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,19 +39,19 @@ public class QuartzSchedulerSmokeTest extends BaseApplication {
     @Autowired
     private Scheduler scheduler;
 
-    @Autowired
-    private Environment environment;
-
     @Test
-    void base_application_yaml_declares_isClustered_true_for_production() {
+    void base_application_yaml_declares_isClustered_true_for_production() throws Exception {
         // application.yaml base config must have isClustered=true so that MySQL/Postgres
         // production profiles get cluster-safe job execution. The H2 profile overrides this
-        // to false — verifying it here ensures someone doesn't accidentally delete the property.
-        String isClustered =
-                environment.getProperty("spring.quartz.properties.org.quartz.jobStore.isClustered");
-        assertFalse(isClustered == null || isClustered.isBlank(),
-                "application.yaml must define org.quartz.jobStore.isClustered "
-                        + "(production value: true; H2 profile overrides to false)");
+        // to false, so read the base resource directly instead of the merged Environment.
+        YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
+        List<PropertySource<?>> sources =
+                loader.load("application.yaml", new ClassPathResource("application.yaml"));
+        Object isClustered = sources.stream()
+                .map(s -> s.getProperty("spring.quartz.properties.org.quartz.jobStore.isClustered"))
+                .filter(v -> v != null).findFirst().orElse(null);
+        assertEquals("true", String.valueOf(isClustered),
+                "base application.yaml must keep production Quartz clustering enabled");
     }
 
     @Test

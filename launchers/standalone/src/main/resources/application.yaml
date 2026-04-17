@@ -226,7 +226,7 @@ s2:
   feishu:
     enabled: ${FEISHU_ENABLED:false}
     # Connection mode: "webhook" (HTTP callback, requires public URL) or "ws" (WebSocket long connection, recommended)
-    connection-mode: ${FEISHU_CONNECTION_MODE:webhook}
+    connection-mode: ${FEISHU_CONNECTION_MODE:ws}
     # SuperSonic API base URL for internal HTTP calls (standalone mode uses localhost)
     api-base-url: ${FEISHU_API_BASE_URL:http://localhost:${server.port:9080}}
     # Feishu app credentials — defined in profile-specific yaml (application-dev.yaml, application-prd.yaml)

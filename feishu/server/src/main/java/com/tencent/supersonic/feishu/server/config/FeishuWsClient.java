@@ -10,7 +10,7 @@ import com.tencent.supersonic.feishu.api.config.FeishuProperties;
 import com.tencent.supersonic.feishu.server.service.FeishuBotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,8 @@ import java.util.Map;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "s2.feishu", name = "connection-mode", havingValue = "ws")
+@ConditionalOnExpression("'${s2.feishu.enabled:false}' == 'true' "
+        + "&& '${s2.feishu.connection-mode:webhook}' == 'ws'")
 public class FeishuWsClient implements SmartLifecycle {
 
     private final FeishuProperties properties;
