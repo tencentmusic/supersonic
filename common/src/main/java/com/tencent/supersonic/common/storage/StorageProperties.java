@@ -35,5 +35,7 @@ public class StorageProperties {
         private String accessKey;
         private String secretKey;
         private boolean pathStyle = false;
+        /** When true, bypass HTTP_PROXY/HTTPS_PROXY for requests to the S3 endpoint. */
+        private boolean noProxy = false;
     }
 }

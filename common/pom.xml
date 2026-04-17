@@ -252,6 +252,46 @@
             <version>${mockito-inline.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- FileStorage: Aliyun OSS (optional) -->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.17.4</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- FileStorage: AWS SDK v2 S3 (optional) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.28.29</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- FileStorage: MinIO Testcontainers for OSS/S3 contract tests -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.20.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.20.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>minio</artifactId>
+            <version>1.20.4</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- FileStorage: AWS SDK v2 URL-connection HTTP client (optional, enables noProxy config) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+            <version>2.28.29</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>
