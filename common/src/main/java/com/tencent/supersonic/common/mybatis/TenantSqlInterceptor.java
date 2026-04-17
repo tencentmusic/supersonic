@@ -220,6 +220,15 @@ public class TenantSqlInterceptor implements Interceptor {
         // Clean table name (remove backticks, schema prefix, etc.)
         String cleanName = cleanTableName(tableName);
 
+        // Quartz system tables (QRTZ_*) have no tenant_id column — must never
+        // be rewritten by this interceptor, otherwise the clustered scheduler
+        // breaks on every acquire/fire/checkin query.
+        if (cleanName != null && cleanName.length() >= 5
+                && cleanName.regionMatches(true, 0, "QRTZ_", 0, 5)) {
+            log.debug("Table '{}' is a Quartz system table, excluded", cleanName);
+            return true;
+        }
+
         // First check default excluded tables (always applied as safety net)
         if (cleanName != null
                 && DEFAULT_EXCLUDED_TABLES.stream().anyMatch(cleanName::equalsIgnoreCase)) {
