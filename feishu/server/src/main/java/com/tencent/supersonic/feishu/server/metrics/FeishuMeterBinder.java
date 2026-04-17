@@ -8,12 +8,14 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
  * Feishu module MeterBinder: registers Gauge for pending user mappings and pre-creates manual
  * counters for rate limiting and executor rejection. Called by FeishuBotService.
  */
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Component
 public class FeishuMeterBinder extends AbstractMeterBinder {
 

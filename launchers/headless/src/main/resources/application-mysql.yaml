@@ -20,3 +20,8 @@ spring:
     table: flyway_schema_history
     out-of-order: false
     validate-on-migrate: false
+  quartz:
+    properties:
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+      org.quartz.jobStore.tablePrefix: QRTZ_
+      org.quartz.jobStore.selectWithLockSQL: "SELECT * FROM {0}LOCKS WHERE SCHED_NAME = {1} AND LOCK_NAME = ? FOR UPDATE"

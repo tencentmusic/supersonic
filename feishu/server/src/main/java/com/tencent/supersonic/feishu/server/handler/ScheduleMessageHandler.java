@@ -16,6 +16,8 @@ import com.tencent.supersonic.headless.api.service.ReportDeliveryService;
 import com.tencent.supersonic.headless.api.service.ReportScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import java.util.regex.Pattern;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 public class ScheduleMessageHandler implements MessageHandler {
 
     private final FeishuQuerySessionMapper sessionMapper;

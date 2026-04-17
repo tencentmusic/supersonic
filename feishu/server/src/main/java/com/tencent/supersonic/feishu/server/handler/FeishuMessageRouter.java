@@ -1,8 +1,10 @@
 package com.tencent.supersonic.feishu.server.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Component
 @RequiredArgsConstructor
 public class FeishuMessageRouter {

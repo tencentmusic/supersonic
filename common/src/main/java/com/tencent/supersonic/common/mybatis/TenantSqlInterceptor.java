@@ -62,7 +62,7 @@ public class TenantSqlInterceptor implements Interceptor {
      */
     private static final Set<String> DEFAULT_EXCLUDED_TABLES =
             new HashSet<>(Arrays.asList("s2_tenant", "s2_subscription_plan", "s2_permission",
-                    "s2_role_permission", "s2_user_role"));
+                    "s2_role_permission", "s2_user_role", "s2_role"));
 
     private TenantConfig tenantConfig;
 
@@ -219,6 +219,15 @@ public class TenantSqlInterceptor implements Interceptor {
     private boolean shouldExcludeTable(String tableName) {
         // Clean table name (remove backticks, schema prefix, etc.)
         String cleanName = cleanTableName(tableName);
+
+        // Quartz system tables (QRTZ_*) have no tenant_id column — must never
+        // be rewritten by this interceptor, otherwise the clustered scheduler
+        // breaks on every acquire/fire/checkin query.
+        if (cleanName != null && cleanName.length() >= 5
+                && cleanName.regionMatches(true, 0, "QRTZ_", 0, 5)) {
+            log.debug("Table '{}' is a Quartz system table, excluded", cleanName);
+            return true;
+        }
 
         // First check default excluded tables (always applied as safety net)
         if (cleanName != null

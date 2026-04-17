@@ -2,6 +2,7 @@ package com.tencent.supersonic.feishu.server.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -11,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Service
 @Slf4j
 @RequiredArgsConstructor

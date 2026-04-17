@@ -7,7 +7,7 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:db/schema-h2-common.sql,classpath:db/schema-h2.sql,classpath:db/schema-h2-demo.sql
+      schema-locations: classpath:db/schema-h2-common.sql,classpath:db/schema-h2.sql,classpath:db/schema-h2-demo.sql,classpath:db/schema-quartz-h2.sql
       data-locations: classpath:db/data-h2-common.sql,classpath:db/data-h2.sql,classpath:db/data-h2-demo.sql
   h2:
     console:
@@ -15,3 +15,10 @@ spring:
       enabled: true
   flyway:
     enabled: false
+  quartz:
+    # H2 is single-process; disable clustering to avoid 20s check-in polling on dev boxes.
+    # Production profiles (mysql/postgres) keep isClustered=true via application.yaml.
+    properties:
+      org.quartz.jobStore.isClustered: false
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+      org.quartz.jobStore.tablePrefix: QRTZ_

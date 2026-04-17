@@ -15,6 +15,7 @@ import com.tencent.supersonic.feishu.server.service.FeishuContactService.FeishuC
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Service
 @Slf4j
 @RequiredArgsConstructor

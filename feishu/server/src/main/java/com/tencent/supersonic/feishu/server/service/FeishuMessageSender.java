@@ -6,6 +6,7 @@ import com.tencent.supersonic.feishu.server.service.FeishuApiRateLimiter.ApiType
 import com.tencent.supersonic.feishu.server.service.FeishuApiRateLimiter.FeishuApiRateLimitedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.util.Map;
 
+@ConditionalOnProperty(name = "s2.feishu.enabled", havingValue = "true")
 @Service
 @Slf4j
 @RequiredArgsConstructor

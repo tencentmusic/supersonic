@@ -37,7 +37,10 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    public Role getRoleById(@PathVariable Long id) {
+    public Role getRoleById(@PathVariable Long id, HttpServletRequest request,
+            HttpServletResponse response) throws IllegalAccessException {
+        User user = userService.getCurrentUser(request, response);
+        checkAdminPermission(user);
         return roleService.getRoleById(id);
     }
 
@@ -72,12 +75,20 @@ public class RoleController {
     }
 
     @GetMapping("/{roleId}/permissions")
-    public List<String> getPermissionCodesByRoleId(@PathVariable Long roleId) {
+    public List<String> getPermissionCodesByRoleId(@PathVariable Long roleId,
+            HttpServletRequest request, HttpServletResponse response)
+            throws IllegalAccessException {
+        User user = userService.getCurrentUser(request, response);
+        checkAdminPermission(user);
         return roleService.getPermissionCodesByRoleId(roleId);
     }
 
     @GetMapping("/{roleId}/permission-ids")
-    public List<Long> getPermissionIdsByRoleId(@PathVariable Long roleId) {
+    public List<Long> getPermissionIdsByRoleId(@PathVariable Long roleId,
+            HttpServletRequest request, HttpServletResponse response)
+            throws IllegalAccessException {
+        User user = userService.getCurrentUser(request, response);
+        checkAdminPermission(user);
         return roleService.getPermissionIdsByRoleId(roleId);
     }
 
