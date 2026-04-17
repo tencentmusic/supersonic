@@ -46,18 +46,34 @@ function parseFilenameFromContentDisposition(contentDisposition?: string | null,
 }
 
 export async function downloadExportFile(id: number, fallbackName?: string) {
-  const res = await request(`${BASE}/${id}:download`, {
+  const probeUrl = `${BASE}/${id}:download`;
+
+  // Use `redirect: 'manual'` so we can detect a 302 without following it.
+  // This lets us navigate the browser directly to the presigned OSS/S3 URL.
+  const probeResponse = await fetch(probeUrl, {
     method: 'GET',
-    responseType: 'blob',
-    getResponse: true,
+    credentials: 'include',
+    redirect: 'manual',
   });
-  const blob = res?.data as Blob;
-  const contentDisposition = res?.response?.headers?.get?.('content-disposition');
+
+  // type === 'opaqueredirect' is what browsers report for a manually-intercepted 302.
+  if (probeResponse.type === 'opaqueredirect' || (probeResponse.status >= 300 && probeResponse.status < 400)) {
+    window.location.href = probeUrl;
+    return;
+  }
+
+  if (!probeResponse.ok) {
+    throw new Error(`Download failed: ${probeResponse.status}`);
+  }
+
+  // Local backend: stream bytes as blob and save via <a> click.
+  const blob = await probeResponse.blob();
+  const contentDisposition = probeResponse.headers.get('content-disposition');
   const fileName = parseFilenameFromContentDisposition(contentDisposition, fallbackName);
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = fileName;
+  a.download = fileName ?? `export_${id}.xlsx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
