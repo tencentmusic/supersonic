@@ -3,6 +3,22 @@
 - All notable changes to this project will be documented in this file.
 - "Breaking Changes" describes any changes that may break existing functionality or cause
   compatibility issues with previous versions.
+## SuperSonic [1.0.1] - 2026-04-18
+
+### 导出文件存储 / Export File Storage SPI
+
+#### 可插拔文件存储后端 / Pluggable FileStorage Backend
+- **FileStorage SPI**: 新增 `FileStorage` 接口，支持本地磁盘、阿里云 OSS、AWS S3 / MinIO 三种后端，通过 `s2.storage.type` 配置切换，无需修改代码
+- **自动配置**: `FileStorageAutoConfiguration` 通过 `@ConditionalOnProperty` 自动装配对应实现，default 为本地存储
+- **租户隔离路径**: `StoragePath.forTenant()` 生成 `{prefix}/{tenantId}/{date}/{taskId}/{filename}` 格式的 key，确保多租户文件隔离
+- **异步导出迁移**: `ExportTaskServiceImpl` 将导出产物写入 FileStorage，`ExportFileCleanupTask` 通过 SPI 删除过期文件
+- **下载端点**: `ExportTaskController` 对云存储返回 302 预签名重定向，对本地存储流式返回；修复了租户隔离校验空指针绕过、Content-Disposition 注入和预签名前未校验文件存在等安全问题
+- **前端适配**: `downloadExportFile` 通过 `redirect: 'manual'` 探测 302，自动跳转至预签名 URL 或降级为 blob 下载
+- **契约测试**: `AbstractFileStorageContractTest` 覆盖上传/下载/删除/presign 完整契约；S3FileStorageTest 使用 MinIO Testcontainer
+
+#### 操作手册 / Runbook
+- 新增 `docs/runbook/file-storage-migration.md`，包含迁移步骤、环境变量参考和回滚流程
+
 ## SuperSonic [1.0.0] - 2025-08-05
 
 ### 重大特性变更 / Major Features
