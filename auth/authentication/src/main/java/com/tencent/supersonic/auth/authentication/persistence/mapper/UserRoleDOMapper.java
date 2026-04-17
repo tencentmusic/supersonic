@@ -40,7 +40,7 @@ public interface UserRoleDOMapper {
      * 只删除用户的租户级角色，保留平台级角色
      */
     @Delete("DELETE FROM s2_user_role WHERE user_id = #{userId} AND role_id IN "
-            + "(SELECT id FROM s2_role WHERE scope = 'TENANT' OR scope IS NULL)")
+            + "(SELECT id FROM s2_role WHERE scope = 'TENANT')")
     int deleteTenantRolesByUserId(@Param("userId") Long userId);
 
     /**

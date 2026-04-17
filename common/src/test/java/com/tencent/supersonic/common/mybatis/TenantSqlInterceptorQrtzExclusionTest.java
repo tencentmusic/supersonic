@@ -41,6 +41,16 @@ class TenantSqlInterceptorQrtzExclusionTest {
     }
 
     @Test
+    void excludes_rbac_tables() throws Exception {
+        TenantSqlInterceptor interceptor = new TenantSqlInterceptor(new TenantConfig());
+        // s2_role is excluded because its queries are scope-aware (PLATFORM roles have null
+        // tenant_id) and the service layer enforces cross-tenant write protection explicitly.
+        assertTrue(shouldExclude(interceptor, "s2_role"), "s2_role should be excluded");
+        assertTrue(shouldExclude(interceptor, "S2_ROLE"),
+                "s2_role exclusion must be case-insensitive");
+    }
+
+    @Test
     void does_not_exclude_other_tables_by_accident() throws Exception {
         TenantSqlInterceptor interceptor = new TenantSqlInterceptor(new TenantConfig());
         assertFalse(shouldExclude(interceptor, "s2_report_schedule"));

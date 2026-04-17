@@ -15,14 +15,15 @@ public interface RoleDOMapper extends BaseMapper<RoleDO> {
      * 根据租户ID查询角色列表
      */
     @Select("SELECT id, name, code, description, scope, tenant_id, is_system, status, created_at, created_by, updated_at, updated_by "
-            + "FROM s2_role WHERE tenant_id = #{tenantId} AND status = 1 ORDER BY id")
+            + "FROM s2_role WHERE (tenant_id = #{tenantId} OR (scope = 'PLATFORM' AND tenant_id IS NULL)) AND status = 1 ORDER BY id")
     List<RoleDO> selectByTenantId(@Param("tenantId") Long tenantId);
 
     /**
      * 根据角色code和租户ID查询
      */
     @Select("SELECT id, name, code, description, scope, tenant_id, is_system, status, created_at, created_by, updated_at, updated_by "
-            + "FROM s2_role WHERE code = #{code} AND tenant_id = #{tenantId}")
+            + "FROM s2_role WHERE code = #{code}"
+            + " AND (tenant_id = #{tenantId} OR (scope = 'PLATFORM' AND tenant_id IS NULL))")
     RoleDO selectByCodeAndTenantId(@Param("code") String code, @Param("tenantId") Long tenantId);
 
     /**

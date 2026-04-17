@@ -9,6 +9,7 @@ import com.tencent.supersonic.auth.authentication.persistence.dataobject.RolePer
 import com.tencent.supersonic.auth.authentication.persistence.mapper.PermissionDOMapper;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.RoleDOMapper;
 import com.tencent.supersonic.auth.authentication.persistence.mapper.RolePermissionDOMapper;
+import com.tencent.supersonic.common.context.TenantContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,6 +93,16 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public Role updateRole(Role role, String operator) {
         RoleDO roleDO = convertToRoleDO(role);
+        // Guard: prevent cross-tenant mutation of TENANT-scope roles.
+        // s2_role is excluded from TenantSqlInterceptor so we enforce the boundary here.
+        if (roleDO.getId() != null) {
+            RoleDO existing = roleDOMapper.selectById(roleDO.getId());
+            Long currentTenant = TenantContext.getTenantId();
+            if (existing != null && "TENANT".equals(existing.getScope()) && currentTenant != null
+                    && !currentTenant.equals(existing.getTenantId())) {
+                throw new RuntimeException("无权修改其他租户的角色");
+            }
+        }
         roleDO.setUpdatedAt(new Date());
         roleDO.setUpdatedBy(operator);
         roleDOMapper.updateById(roleDO);
@@ -111,6 +122,12 @@ public class RoleServiceImpl implements RoleService {
         RoleDO roleDO = roleDOMapper.selectById(id);
         if (roleDO != null && roleDO.getIsSystem() != null && roleDO.getIsSystem() == 1) {
             throw new RuntimeException("系统内置角色不能删除");
+        }
+        // Guard: prevent cross-tenant deletion of TENANT-scope roles.
+        Long currentTenant = TenantContext.getTenantId();
+        if (roleDO != null && "TENANT".equals(roleDO.getScope()) && currentTenant != null
+                && !currentTenant.equals(roleDO.getTenantId())) {
+            throw new RuntimeException("无权删除其他租户的角色");
         }
 
         // 删除角色权限关联
