@@ -41,15 +41,25 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
   quartz:
     job-store-type: jdbc
+    # Quartz DDL is provisioned by Flyway (V29) for MySQL/Postgres and by
+    # schema-quartz-h2.sql for H2; keep autoconfig from trying to initialise.
     jdbc:
-      initialize-schema: embedded
+      initialize-schema: never
+    overwrite-existing-jobs: false
+    wait-for-jobs-to-complete-on-shutdown: true
     properties:
       org.quartz.scheduler.instanceName: SuperSonicScheduler
       org.quartz.scheduler.instanceId: AUTO
+      org.quartz.scheduler.batchTriggerAcquisitionMaxCount: 1
+      org.quartz.jobStore.class: org.quartz.impl.jdbcjobstore.JobStoreTX
       org.quartz.jobStore.isClustered: true
-      org.quartz.jobStore.clusterCheckinInterval: 15000
+      org.quartz.jobStore.clusterCheckinInterval: 20000
       org.quartz.jobStore.misfireThreshold: 60000
+      org.quartz.jobStore.useProperties: false
+      org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool
       org.quartz.threadPool.threadCount: 5
+      org.quartz.threadPool.threadPriority: 5
+      org.quartz.threadPool.makeThreadsDaemons: true
 
   mail:
     host: ${EMAIL_HOST}

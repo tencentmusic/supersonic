@@ -25,3 +25,8 @@ spring:
     out-of-order: false
     # 验证迁移脚本（关闭以允许修复已有脚本的 display width deprecation warning）
     validate-on-migrate: false
+  quartz:
+    properties:
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+      org.quartz.jobStore.tablePrefix: QRTZ_
+      org.quartz.jobStore.selectWithLockSQL: "SELECT * FROM {0}LOCKS WHERE SCHED_NAME = {1} AND LOCK_NAME = ? FOR UPDATE"
