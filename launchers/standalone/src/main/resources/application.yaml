@@ -252,6 +252,24 @@ s2:
     file-expire-days: 7
     storage-type: local
     local-dir: ${java.io.tmpdir}/supersonic-export
+  # Pluggable FileStorage backend (see docs/runbook/file-storage-migration.md)
+  storage:
+    type: ${S2_STORAGE_TYPE:local}
+    prefix: exports
+    local:
+      root-dir: ${S2_STORAGE_LOCAL_DIR:${java.io.tmpdir}/supersonic-export}
+    oss:
+      endpoint: ${S2_STORAGE_OSS_ENDPOINT:}
+      bucket: ${S2_STORAGE_OSS_BUCKET:}
+      access-key-id: ${S2_STORAGE_OSS_AK:}
+      access-key-secret: ${S2_STORAGE_OSS_SK:}
+    s3:
+      endpoint: ${S2_STORAGE_S3_ENDPOINT:}
+      region: ${S2_STORAGE_S3_REGION:us-east-1}
+      bucket: ${S2_STORAGE_S3_BUCKET:}
+      access-key: ${S2_STORAGE_S3_AK:}
+      secret-key: ${S2_STORAGE_S3_SK:}
+      path-style: ${S2_STORAGE_S3_PATH_STYLE:false}
   # Report execution configuration
   report:
     max-concurrent-per-tenant: 3

@@ -1,0 +1,3 @@
+# FileStorage auto-configuration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.tencent.supersonic.common.storage.FileStorageAutoConfiguration
