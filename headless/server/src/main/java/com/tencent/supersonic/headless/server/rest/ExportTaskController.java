@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.supersonic.auth.api.authentication.utils.UserHolder;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.storage.FileStorage;
-import com.tencent.supersonic.common.storage.StoragePath;
 import com.tencent.supersonic.headless.server.persistence.dataobject.ExportTaskDO;
+import com.tencent.supersonic.headless.server.pojo.ExportTaskStatus;
 import com.tencent.supersonic.headless.server.service.ExportTaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,13 +65,24 @@ public class ExportTaskController {
     public ResponseEntity<Resource> downloadFile(@PathVariable Long id, HttpServletRequest request,
             HttpServletResponse response) {
         User currentUser = UserHolder.findUser(request, response);
-        String key = exportTaskService.getDownloadPath(id);
 
-        // Tenant guard: ensure the file belongs to the caller's tenant
-        Long fileTenantId = StoragePath.extractTenantId(key);
-        if (fileTenantId != null && currentUser.getTenantId() != null
-                && !fileTenantId.equals(currentUser.getTenantId())) {
+        // Fix A: use DB-authoritative tenantId — avoids null bypass for legacy absolute-path keys
+        ExportTaskDO taskMeta = exportTaskService.getTaskById(id);
+        if (taskMeta == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (currentUser.getTenantId() != null && taskMeta.getTenantId() != null
+                && !currentUser.getTenantId().equals(taskMeta.getTenantId())) {
             return ResponseEntity.status(403).build();
+        }
+        if (!ExportTaskStatus.SUCCESS.name().equals(taskMeta.getStatus())) {
+            return ResponseEntity.status(409).build();
+        }
+        String key = taskMeta.getFileLocation();
+
+        // Fix B: check existence before generating presigned URL so callers get a clean 404
+        if (!fileStorage.exists(key)) {
+            return ResponseEntity.notFound().build();
         }
 
         // Prefer a presigned redirect for cloud storage (OSS/S3)
@@ -81,10 +92,9 @@ public class ExportTaskController {
         }
 
         // Fall back to streaming (local storage)
-        if (!fileStorage.exists(key)) {
-            return ResponseEntity.notFound().build();
-        }
-        String fileName = key.substring(key.lastIndexOf('/') + 1);
+        // Fix C: sanitize filename to prevent Content-Disposition header injection
+        String rawName = key.substring(key.lastIndexOf('/') + 1);
+        String fileName = rawName.replaceAll("[^A-Za-z0-9._\\-]", "_");
         InputStream stream = fileStorage.download(key);
         Resource resource = new InputStreamResource(stream);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)

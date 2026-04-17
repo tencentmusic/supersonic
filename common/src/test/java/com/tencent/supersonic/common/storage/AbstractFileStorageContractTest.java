@@ -7,10 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AbstractFileStorageContractTest {
+
+    private static final String TODAY =
+            LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
     protected abstract FileStorage createStorage();
 
@@ -19,7 +24,7 @@ public abstract class AbstractFileStorageContractTest {
     @Test
     void uploadThenDownloadRoundtrip() throws IOException {
         FileStorage storage = createStorage();
-        String key = "exports/7/20260417/42/hello.txt";
+        String key = "exports/7/" + TODAY + "/42/hello.txt";
         byte[] payload = "hello supersonic".getBytes(StandardCharsets.UTF_8);
         storage.upload(key, new ByteArrayInputStream(payload), payload.length);
         assertTrue(storage.exists(key));
@@ -31,7 +36,7 @@ public abstract class AbstractFileStorageContractTest {
     @Test
     void deleteRemovesObject() {
         FileStorage storage = createStorage();
-        String key = "exports/7/20260417/42/to-delete.txt";
+        String key = "exports/7/" + TODAY + "/42/to-delete.txt";
         byte[] payload = "bye".getBytes(StandardCharsets.UTF_8);
         storage.upload(key, new ByteArrayInputStream(payload), payload.length);
         assertTrue(storage.exists(key));
@@ -42,27 +47,27 @@ public abstract class AbstractFileStorageContractTest {
     @Test
     void deleteMissingIsNoOp() {
         FileStorage storage = createStorage();
-        storage.delete("exports/7/20260417/999/does-not-exist.txt");
+        storage.delete("exports/7/" + TODAY + "/999/does-not-exist.txt");
     }
 
     @Test
     void downloadMissingThrows() {
         FileStorage storage = createStorage();
         assertThrows(FileStorageException.class,
-                () -> storage.download("exports/7/20260417/999/missing.txt"));
+                () -> storage.download("exports/7/" + TODAY + "/999/missing.txt"));
     }
 
     @Test
     void existsFalseForMissing() {
         FileStorage storage = createStorage();
-        assertFalse(storage.exists("exports/7/20260417/999/missing.txt"));
+        assertFalse(storage.exists("exports/7/" + TODAY + "/999/missing.txt"));
     }
 
     @Test
     void tenantPrefixesAreIsolated() throws IOException {
         FileStorage storage = createStorage();
-        String keyTenant7 = "exports/7/20260417/1/file.txt";
-        String keyTenant9 = "exports/9/20260417/1/file.txt";
+        String keyTenant7 = "exports/7/" + TODAY + "/1/file.txt";
+        String keyTenant9 = "exports/9/" + TODAY + "/1/file.txt";
         byte[] payload7 = "tenant-7-data".getBytes(StandardCharsets.UTF_8);
         byte[] payload9 = "tenant-9-data".getBytes(StandardCharsets.UTF_8);
         storage.upload(keyTenant7, new ByteArrayInputStream(payload7), payload7.length);
@@ -80,7 +85,7 @@ public abstract class AbstractFileStorageContractTest {
     @Test
     void presignedUrlReturnsOrNullBasedOnSupport() {
         FileStorage storage = createStorage();
-        String key = "exports/7/20260417/42/presign.txt";
+        String key = "exports/7/" + TODAY + "/42/presign.txt";
         byte[] payload = "presigned".getBytes(StandardCharsets.UTF_8);
         storage.upload(key, new ByteArrayInputStream(payload), payload.length);
         String url = storage.presignedUrl(key, Duration.ofMinutes(5));

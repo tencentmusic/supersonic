@@ -152,11 +152,8 @@ class ExportTaskServiceImplTest {
         when(semanticLayerService.queryByReq(any(), any())).thenReturn(resp);
 
         ExportTaskMapper mapper = mock(ExportTaskMapper.class);
-        FileStorage fileStorage = mock(FileStorage.class);
-        StorageProperties storageProperties = new StorageProperties();
-        ExportTaskServiceImpl service = new ExportTaskServiceImpl(executor, semanticLayerService,
-                mock(RowCountEstimator.class), mock(UserService.class), mock(DataSetService.class),
-                fileStorage, storageProperties);
+        ExportTaskServiceImpl service = buildService(executor, semanticLayerService,
+                mock(RowCountEstimator.class), mock(UserService.class), mock(DataSetService.class));
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
         List<ExportTaskDO> updateSnapshots = new ArrayList<>();
         org.mockito.Mockito.doAnswer(invocation -> {

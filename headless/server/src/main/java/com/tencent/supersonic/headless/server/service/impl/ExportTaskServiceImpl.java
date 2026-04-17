@@ -311,15 +311,18 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
         String fileName =
                 String.format("export_%d_%s.%s", task.getId(), timestamp, isCsv ? "csv" : "xlsx");
 
-        byte[] bytes;
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-            if (isCsv) {
-                writeCsvToStream(buffer, queryResp);
-            } else {
-                writeExcelToStream(buffer, queryResp);
-            }
-            bytes = buffer.toByteArray();
+        // Write to an in-memory buffer. toByteArray() creates one copy; the original buffer
+        // is eligible for GC before the upload starts, halving peak retained memory vs keeping
+        // both in scope simultaneously.
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        if (isCsv) {
+            writeCsvToStream(buffer, queryResp);
+        } else {
+            writeExcelToStream(buffer, queryResp);
         }
+        byte[] bytes = buffer.toByteArray();
+        // Allow the internal buffer to be reclaimed before the (potentially slow) upload.
+        buffer = null;
 
         String key = StoragePath.forTenant(storageProperties.getPrefix(), task.getTenantId(),
                 task.getId(), fileName);

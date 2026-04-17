@@ -2,6 +2,7 @@ package com.tencent.supersonic.common.storage.oss;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.tencent.supersonic.common.storage.FileStorage;
@@ -47,12 +48,12 @@ public class OssFileStorage implements FileStorage {
     @Override
     public InputStream download(String key) {
         try {
-            if (!client.doesObjectExist(bucket, key)) {
-                throw new FileStorageException("File not found: " + key);
-            }
             return client.getObject(bucket, key).getObjectContent();
-        } catch (FileStorageException e) {
-            throw e;
+        } catch (OSSException e) {
+            if ("NoSuchKey".equals(e.getErrorCode())) {
+                throw new FileStorageException("File not found: " + key, e);
+            }
+            throw new FileStorageException("Failed to download from OSS: " + key, e);
         } catch (Exception e) {
             throw new FileStorageException("Failed to download from OSS: " + key, e);
         }
