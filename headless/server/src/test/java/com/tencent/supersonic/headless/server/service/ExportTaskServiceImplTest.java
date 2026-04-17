@@ -2,6 +2,8 @@ package com.tencent.supersonic.headless.server.service;
 
 import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.pojo.QueryColumn;
+import com.tencent.supersonic.common.storage.FileStorage;
+import com.tencent.supersonic.common.storage.StorageProperties;
 import com.tencent.supersonic.headless.api.facade.service.SemanticLayerService;
 import com.tencent.supersonic.headless.api.pojo.response.DataSetResp;
 import com.tencent.supersonic.headless.api.pojo.response.SemanticQueryResp;
@@ -11,10 +13,8 @@ import com.tencent.supersonic.headless.server.persistence.mapper.ExportTaskMappe
 import com.tencent.supersonic.headless.server.pojo.ExportTaskStatus;
 import com.tencent.supersonic.headless.server.service.impl.ExportTaskServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,20 +27,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ExportTaskServiceImplTest {
 
+    private static ExportTaskServiceImpl buildService(ThreadPoolExecutor executor,
+            SemanticLayerService semanticLayerService, RowCountEstimator rowCountEstimator,
+            UserService userService, DataSetService dataSetService) {
+        FileStorage fileStorage = mock(FileStorage.class);
+        StorageProperties storageProperties = new StorageProperties();
+        return new ExportTaskServiceImpl(executor, semanticLayerService, rowCountEstimator,
+                userService, dataSetService, fileStorage, storageProperties);
+    }
+
     @Test
     void submitExportTaskShouldRejectBlankQueryConfig() {
         ThreadPoolExecutor executor = mock(ThreadPoolExecutor.class);
         ExportTaskMapper mapper = mock(ExportTaskMapper.class);
-        UserService userService = mock(UserService.class);
-        DataSetService dataSetService = mock(DataSetService.class);
-        ExportTaskServiceImpl service =
-                new ExportTaskServiceImpl(executor, null, null, userService, dataSetService);
+        ExportTaskServiceImpl service = buildService(executor, null, null, mock(UserService.class),
+                mock(DataSetService.class));
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
 
         ExportTaskDO task = new ExportTaskDO();
@@ -54,14 +63,13 @@ class ExportTaskServiceImplTest {
     void submitExportTaskShouldFillDefaultTaskNameWhenMissing() {
         ThreadPoolExecutor executor = mock(ThreadPoolExecutor.class);
         ExportTaskMapper mapper = mock(ExportTaskMapper.class);
-        UserService userService = mock(UserService.class);
         DataSetService dataSetService = mock(DataSetService.class);
         DataSetResp ds = new DataSetResp();
         ds.setId(8L);
         ds.setName("示例数据集");
         when(dataSetService.getDataSet(8L)).thenReturn(ds);
         ExportTaskServiceImpl service =
-                new ExportTaskServiceImpl(executor, null, null, userService, dataSetService);
+                buildService(executor, null, null, mock(UserService.class), dataSetService);
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
 
         ExportTaskDO task = new ExportTaskDO();
@@ -83,27 +91,23 @@ class ExportTaskServiceImplTest {
         SemanticLayerService semanticLayerService = mock(SemanticLayerService.class);
         RowCountEstimator rowCountEstimator = mock(RowCountEstimator.class);
         when(rowCountEstimator.estimate(1L, "SELECT 1")).thenReturn(50_001L);
-        ExportTaskServiceImpl service = new ExportTaskServiceImpl(executor, semanticLayerService,
+        ExportTaskServiceImpl service = buildService(executor, semanticLayerService,
                 rowCountEstimator, mock(UserService.class), mock(DataSetService.class));
         ReflectionTestUtils.setField(service, "asyncThreshold", 50_000L);
         assertTrue(service.shouldExecuteAsync(1L, "SELECT 1"));
     }
 
     @Test
-    void executeExportShouldSetFailedAndErrorMessageWhenQueryThrows(@TempDir Path exportDir)
-            throws Exception {
+    void executeExportShouldSetFailedAndErrorMessageWhenQueryThrows() throws Exception {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>());
         SemanticLayerService semanticLayerService = mock(SemanticLayerService.class);
         when(semanticLayerService.queryByReq(any(), any())).thenThrow(new SQLException("模拟数据源不可用"));
 
         ExportTaskMapper mapper = mock(ExportTaskMapper.class);
-        UserService userService = mock(UserService.class);
-        DataSetService dataSetService = mock(DataSetService.class);
-        ExportTaskServiceImpl service = new ExportTaskServiceImpl(executor, semanticLayerService,
-                mock(RowCountEstimator.class), userService, dataSetService);
+        ExportTaskServiceImpl service = buildService(executor, semanticLayerService,
+                mock(RowCountEstimator.class), mock(UserService.class), mock(DataSetService.class));
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
-        ReflectionTestUtils.setField(service, "exportDir", exportDir.toString());
         List<ExportTaskDO> updateSnapshots = new ArrayList<>();
         org.mockito.Mockito.doAnswer(invocation -> {
             ExportTaskDO updated = invocation.getArgument(0);
@@ -138,8 +142,7 @@ class ExportTaskServiceImplTest {
     }
 
     @Test
-    void submitExportTaskShouldTransitionPendingRunningSuccessWhenQuerySucceeds(
-            @TempDir Path exportDir) throws Exception {
+    void submitExportTaskShouldTransitionPendingRunningSuccessWhenQuerySucceeds() throws Exception {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>());
         SemanticLayerService semanticLayerService = mock(SemanticLayerService.class);
@@ -149,10 +152,12 @@ class ExportTaskServiceImplTest {
         when(semanticLayerService.queryByReq(any(), any())).thenReturn(resp);
 
         ExportTaskMapper mapper = mock(ExportTaskMapper.class);
+        FileStorage fileStorage = mock(FileStorage.class);
+        StorageProperties storageProperties = new StorageProperties();
         ExportTaskServiceImpl service = new ExportTaskServiceImpl(executor, semanticLayerService,
-                mock(RowCountEstimator.class), mock(UserService.class), mock(DataSetService.class));
+                mock(RowCountEstimator.class), mock(UserService.class), mock(DataSetService.class),
+                fileStorage, storageProperties);
         ReflectionTestUtils.setField(service, "baseMapper", mapper);
-        ReflectionTestUtils.setField(service, "exportDir", exportDir.toString());
         List<ExportTaskDO> updateSnapshots = new ArrayList<>();
         org.mockito.Mockito.doAnswer(invocation -> {
             ExportTaskDO updated = invocation.getArgument(0);
@@ -185,6 +190,6 @@ class ExportTaskServiceImplTest {
                 .anyMatch(t -> ExportTaskStatus.SUCCESS.name().equals(t.getStatus())
                         && t.getRowCount() != null && t.getRowCount() == 0L
                         && t.getFileLocation() != null
-                        && java.nio.file.Files.exists(java.nio.file.Path.of(t.getFileLocation()))));
+                        && t.getFileLocation().startsWith("exports/")));
     }
 }

@@ -8,6 +8,9 @@ import com.tencent.supersonic.auth.api.authentication.service.UserService;
 import com.tencent.supersonic.common.context.TenantContext;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.storage.FileStorage;
+import com.tencent.supersonic.common.storage.StoragePath;
+import com.tencent.supersonic.common.storage.StorageProperties;
 import com.tencent.supersonic.common.util.DateUtils;
 import com.tencent.supersonic.common.util.JsonUtil;
 import com.tencent.supersonic.headless.api.facade.service.SemanticLayerService;
@@ -30,9 +33,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -52,23 +56,25 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
     private final RowCountEstimator rowCountEstimator;
     private final UserService userService;
     private final DataSetService dataSetService;
+    private final FileStorage fileStorage;
+    private final StorageProperties storageProperties;
     @Autowired(required = false)
     private TemplateReportMetrics reportMetrics;
-
-    @Value("${supersonic.export.local-dir:${java.io.tmpdir}/supersonic-export}")
-    private String exportDir;
 
     @Value("${supersonic.export.async-threshold:10000}")
     private long asyncThreshold;
 
     public ExportTaskServiceImpl(@Qualifier("exportExecutor") ThreadPoolExecutor exportExecutor,
             SemanticLayerService semanticLayerService, RowCountEstimator rowCountEstimator,
-            UserService userService, DataSetService dataSetService) {
+            UserService userService, DataSetService dataSetService, FileStorage fileStorage,
+            StorageProperties storageProperties) {
         this.exportExecutor = exportExecutor;
         this.semanticLayerService = semanticLayerService;
         this.rowCountEstimator = rowCountEstimator;
         this.userService = userService;
         this.dataSetService = dataSetService;
+        this.fileStorage = fileStorage;
+        this.storageProperties = storageProperties;
     }
 
     /**
@@ -213,16 +219,15 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
                     task.getOutputFormat());
             SemanticQueryResp queryResp = semanticLayerService.queryByReq(queryReq, user);
 
-            // 4. Write to file
-            File outputFile = writeOutputFile(task, queryResp);
+            // 4. Write to storage
+            String storageKey = writeOutputToStorage(task, queryResp);
 
             // 5. Update task with result
             task.setStatus(ExportTaskStatus.SUCCESS.name());
             task.setRowCount(
                     queryResp.getResultList() != null ? (long) queryResp.getResultList().size()
                             : 0L);
-            task.setFileSize(outputFile.length());
-            task.setFileLocation(outputFile.getAbsolutePath());
+            task.setFileLocation(storageKey);
             baseMapper.updateById(task);
             if (reportMetrics != null) {
                 reportMetrics.recordExport("success", normalizeFormat(task.getOutputFormat()),
@@ -299,49 +304,50 @@ public class ExportTaskServiceImpl extends ServiceImpl<ExportTaskMapper, ExportT
         throw new IllegalArgumentException("Unable to parse queryConfig");
     }
 
-    private File writeOutputFile(ExportTaskDO task, SemanticQueryResp queryResp) throws Exception {
+    private String writeOutputToStorage(ExportTaskDO task, SemanticQueryResp queryResp)
+            throws Exception {
         String timestamp = DateUtils.format(new Date(), "yyyyMMddHHmmss");
         boolean isCsv = "CSV".equalsIgnoreCase(task.getOutputFormat());
         String fileName =
                 String.format("export_%d_%s.%s", task.getId(), timestamp, isCsv ? "csv" : "xlsx");
 
-        File dir = new File(exportDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        File outputFile = new File(dir, fileName);
-
-        if (isCsv) {
-            writeCsv(outputFile, queryResp);
-        } else {
-            writeExcel(outputFile, queryResp);
+        byte[] bytes;
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            if (isCsv) {
+                writeCsvToStream(buffer, queryResp);
+            } else {
+                writeExcelToStream(buffer, queryResp);
+            }
+            bytes = buffer.toByteArray();
         }
 
-        return outputFile;
+        String key = StoragePath.forTenant(storageProperties.getPrefix(), task.getTenantId(),
+                task.getId(), fileName);
+        try (ByteArrayInputStream in = new ByteArrayInputStream(bytes)) {
+            fileStorage.upload(key, in, bytes.length);
+        }
+        task.setFileSize((long) bytes.length);
+        return key;
     }
 
-    private void writeExcel(File file, SemanticQueryResp queryResp) {
+    private void writeExcelToStream(ByteArrayOutputStream out, SemanticQueryResp queryResp) {
         List<List<String>> headers = buildHeaders(queryResp.getColumns());
         List<List<String>> data = buildData(queryResp);
-        EasyExcel.write(file).sheet("Sheet1").head(headers).doWrite(data);
+        EasyExcel.write(out).sheet("Sheet1").head(headers).doWrite(data);
     }
 
-    private void writeCsv(File file, SemanticQueryResp queryResp) throws Exception {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+    private void writeCsvToStream(ByteArrayOutputStream out, SemanticQueryResp queryResp)
+            throws Exception {
+        try (OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
             List<QueryColumn> columns = queryResp.getColumns();
-            // Write header
-            String header =
-                    columns.stream().map(QueryColumn::getName).collect(Collectors.joining(","));
-            writer.write(header);
-            writer.newLine();
-
-            // Write data
+            writer.write(
+                    columns.stream().map(QueryColumn::getName).collect(Collectors.joining(",")));
+            writer.write("\n");
             if (queryResp.getResultList() != null) {
                 for (Map<String, Object> row : queryResp.getResultList()) {
-                    String line = columns.stream().map(col -> escapeCsv(row.get(col.getBizName())))
-                            .collect(Collectors.joining(","));
-                    writer.write(line);
-                    writer.newLine();
+                    writer.write(columns.stream().map(col -> escapeCsv(row.get(col.getBizName())))
+                            .collect(Collectors.joining(",")));
+                    writer.write("\n");
                 }
             }
         }
