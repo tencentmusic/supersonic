@@ -10,3 +10,9 @@ ALTER TABLE s2_role
 UPDATE s2_role
 SET tenant_id = NULL
 WHERE scope = 'PLATFORM';
+
+-- PostgreSQL supports partial unique indexes natively.
+-- Enforce one platform role per code where tenant_id IS NULL.
+CREATE UNIQUE INDEX uk_platform_role_code
+    ON s2_role (code)
+    WHERE tenant_id IS NULL;
