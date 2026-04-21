@@ -244,4 +244,13 @@ public class ChatManageServiceImpl implements ChatManageService {
             return JSONObject.parseObject(chatParseDO.getParseInfo(), SemanticParseInfo.class);
         }
     }
+
+    @Override
+    public List<SemanticParseInfo> getParseInfos(Long questionId) {
+        List<ChatParseDO> chatParseDOs =
+                chatQueryRepository.getParseInfoList(Collections.singletonList(questionId));
+        return chatParseDOs.stream().map(chatParseDO -> JSONObject
+                .parseObject(chatParseDO.getParseInfo(), SemanticParseInfo.class))
+                .collect(Collectors.toList());
+    }
 }

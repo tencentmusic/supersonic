@@ -194,7 +194,8 @@ public class SqlReplaceHelper {
                     setOperationList.getSelects().forEach(subSelectBody -> {
                         if (subSelectBody instanceof PlainSelect) {
                             PlainSelect subPlainSelect = (PlainSelect) subSelectBody;
-                            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace, subPlainSelect);
+                            replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace,
+                                    subPlainSelect);
                         } else if (subSelectBody instanceof ParenthesedSelect) {
                             replaceFieldsInPlainOneSelect(fieldNameMap, exactReplace,
                                     ((ParenthesedSelect) subSelectBody).getPlainSelect());
