@@ -52,4 +52,9 @@
         where chat_id = #{chatId}  order by question_id desc  limit 10
     </select>
 
+    <delete id="deleteByQuestionId">
+        delete from s2_chat_parse
+        where question_id = #{questionId}
+    </delete>
+
 </mapper>
