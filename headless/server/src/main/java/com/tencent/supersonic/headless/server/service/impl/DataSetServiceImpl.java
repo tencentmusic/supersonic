@@ -53,9 +53,6 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
     @Autowired
     private MetricService metricService;
 
-    @Autowired
-    private ModelService modelService;
-
     @Override
     public DataSetResp save(DataSetReq dataSetReq, User user) {
         dataSetReq.createdBy(user.getName());
