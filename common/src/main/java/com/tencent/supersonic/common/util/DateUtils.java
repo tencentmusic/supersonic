@@ -181,6 +181,11 @@ public class DateUtils {
             LocalDate startDate = parseDate(startDateStr);
             LocalDate endDate = parseDate(endDateStr);
             List<String> datesInRange = new ArrayList<>();
+
+            if (startDate == null || endDate == null) {
+                return datesInRange;
+            }
+
             LocalDate currentDate = startDate;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
             while (!currentDate.isAfter(endDate)) {
