@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.DimensionConstants;
 import com.tencent.supersonic.common.pojo.User;
+import com.tencent.supersonic.common.pojo.enums.DataTypeEnums;
 import com.tencent.supersonic.common.pojo.enums.StatusEnum;
 import com.tencent.supersonic.common.util.BeanMapper;
 import com.tencent.supersonic.common.util.JsonUtil;
@@ -109,6 +110,7 @@ public class ModelConverter {
         dimensionReq.setModelId(modelDO.getId());
         dimensionReq.setExpr(dim.getExpr());
         dimensionReq.setType(dim.getType().name());
+        dimensionReq.setDataType(DataTypeEnums.of(dim.getDataType()));
         dimensionReq
                 .setDescription(Objects.isNull(dim.getDescription()) ? dimensionReq.getDescription()
                         : dim.getDescription());
@@ -193,7 +195,8 @@ public class ModelConverter {
                 if (optional.isEmpty()) {
                     Dimension dim = new Dimension(semanticColumn.getName(),
                             semanticColumn.getColumnName(), semanticColumn.getExpr(),
-                            DimensionType.valueOf(semanticColumn.getFiledType().name()), 1);
+                            DimensionType.valueOf(semanticColumn.getFiledType().name()),
+                            semanticColumn.getDataType(), 1);
                     modelDetail.getDimensions().add(dim);
                 }
             }

@@ -73,6 +73,9 @@ public class DimensionConverter {
         if (dimensionReq.getTypeParams() != null) {
             dimensionDO.setTypeParams(JSONObject.toJSONString(dimensionReq.getTypeParams()));
         }
+        if (dimensionReq.getDataType() != null) {
+            dimensionDO.setDataType(dimensionReq.getDataType().getType());
+        }
         dimensionDO.setStatus(StatusEnum.ONLINE.getCode());
         return dimensionDO;
     }

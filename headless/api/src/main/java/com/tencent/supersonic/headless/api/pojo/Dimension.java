@@ -21,6 +21,8 @@ public class Dimension {
 
     private String dateFormat = Constants.DAY_FORMAT;
 
+    private String dataType;
+
     private DimensionTimeTypeParams typeParams;
 
     private Integer isCreateDimension = 0;
@@ -37,13 +39,14 @@ public class Dimension {
         this.expr = bizName;
     }
 
-    public Dimension(String name, String bizName, String expr, DimensionType type,
+    public Dimension(String name, String bizName, String expr, DimensionType type, String dataType,
             Integer isCreateDimension) {
         this.name = name;
         this.type = type;
         this.isCreateDimension = isCreateDimension;
         this.bizName = bizName;
         this.expr = expr;
+        this.dataType = dataType;
     }
 
     public Dimension(String name, String bizName, DimensionType type, Integer isCreateDimension,
