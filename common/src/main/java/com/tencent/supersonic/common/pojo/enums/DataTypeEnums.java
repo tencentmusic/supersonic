@@ -11,6 +11,8 @@ public enum DataTypeEnums {
 
     DATE("DATE"),
 
+    TIMESTAMP("TIMESTAMP"),
+
     BIGINT("BIGINT"),
 
     INT("INT"),
@@ -38,6 +40,9 @@ public enum DataTypeEnums {
             if (typeEnum.getType().equalsIgnoreCase(type)) {
                 return typeEnum;
             }
+        }
+        if (type != null && type.toUpperCase().contains("INT")) {
+            return DataTypeEnums.INT;
         }
         return DataTypeEnums.UNKNOWN;
     }

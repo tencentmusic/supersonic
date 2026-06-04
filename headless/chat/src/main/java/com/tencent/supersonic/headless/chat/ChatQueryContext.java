@@ -56,7 +56,8 @@ public class ChatQueryContext implements Serializable {
         candidateQueries = candidateQueries.stream()
                 .sorted(Comparator.comparing(
                         semanticQuery -> semanticQuery.getParseInfo().getScore(),
-                        Comparator.reverseOrder())).collect(Collectors.toList());
+                        Comparator.reverseOrder()))
+                .collect(Collectors.toList());
         return candidateQueries;
     }
 

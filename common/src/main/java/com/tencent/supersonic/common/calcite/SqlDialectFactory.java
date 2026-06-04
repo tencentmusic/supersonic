@@ -26,12 +26,10 @@ public class SqlDialectFactory {
                     .withLiteralQuoteString("'").withIdentifierQuoteString("\"")
                     .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
                     .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(true);
-    public static final Context PRESTO_CONTEXT =
-            SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.PRESTO)
-                    .withLiteralQuoteString("'")
-                    .withLiteralEscapedQuoteString("''")
-                    .withUnquotedCasing(Casing.UNCHANGED)
-                    .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(true);
+    public static final Context PRESTO_CONTEXT = SqlDialect.EMPTY_CONTEXT
+            .withDatabaseProduct(DatabaseProduct.PRESTO).withLiteralQuoteString("'")
+            .withLiteralEscapedQuoteString("''").withUnquotedCasing(Casing.UNCHANGED)
+            .withQuotedCasing(Casing.UNCHANGED).withCaseSensitive(true);
     public static final Context KYUUBI_CONTEXT =
             SqlDialect.EMPTY_CONTEXT.withDatabaseProduct(DatabaseProduct.BIG_QUERY)
                     .withLiteralQuoteString("'").withIdentifierQuoteString("`")
