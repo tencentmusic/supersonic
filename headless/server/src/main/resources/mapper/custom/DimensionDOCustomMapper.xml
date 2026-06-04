@@ -11,6 +11,7 @@
         <result column="status" jdbcType="INTEGER" property="status"/>
         <result column="sensitive_level" jdbcType="INTEGER" property="sensitiveLevel"/>
         <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="data_type" jdbcType="VARCHAR" property="dataType"/>
         <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
         <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
         <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
@@ -67,14 +68,16 @@
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into s2_dimension (name, biz_name,
         description, status, model_id,
-        type, type_params, expr,created_at, created_by,
+        type, data_type, type_params, expr,created_at, created_by,
         updated_by, updated_at, semantic_type,sensitive_level, is_tag, ext)
         values
         <foreach collection="list" item="dimension" separator=",">
             (#{dimension.name,jdbcType=VARCHAR}, #{dimension.bizName,jdbcType=VARCHAR},
             #{dimension.description,jdbcType=VARCHAR}, #{dimension.status,jdbcType=INTEGER},
             #{dimension.modelId,jdbcType=BIGINT},
-            #{dimension.type,jdbcType=VARCHAR}, #{dimension.typeParams,jdbcType=VARCHAR},
+            #{dimension.type,jdbcType=VARCHAR},
+            #{dimension.dataType,jdbcType=VARCHAR},
+            #{dimension.typeParams,jdbcType=VARCHAR},
             #{dimension.expr,jdbcType=VARCHAR}, #{dimension.createdAt,jdbcType=TIMESTAMP},
             #{dimension.createdBy,jdbcType=VARCHAR},
             #{dimension.updatedBy,jdbcType=VARCHAR}, #{dimension.updatedAt,jdbcType=TIMESTAMP},
@@ -98,6 +101,9 @@
             <if test="dimension.status != null">status = #{dimension.status,jdbcType=INTEGER},</if>
             <if test="dimension.modelId != null">model_id = #{dimension.modelId,jdbcType=BIGINT},</if>
             <if test="dimension.type != null and dimension.type !=''">type = #{dimension.type,jdbcType=VARCHAR},</if>
+            <if test="dimension.dataType != null and dimension.dataType !=''">data_type =
+                #{dimension.dataType,jdbcType=VARCHAR},
+            </if>
             <if test="dimension.typeParams != null and dimension.typeParams !=''">type_params =
                 #{dimension.typeParams,jdbcType=VARCHAR},
             </if>
