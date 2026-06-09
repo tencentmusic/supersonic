@@ -123,15 +123,9 @@ public class MapFilter {
                     .filter(SchemaElementMatch::isFullMatched).collect(Collectors.toList());
 
             if (!fullMatches.isEmpty()) {
-                // If there are objects with similarity=1.0, choose the one with the longest
-                // detectWord and smallest offset
-                SchemaElementMatch bestMatch = fullMatches.stream()
-                        .max(Comparator.comparing(
-                                (SchemaElementMatch match) -> match.getDetectWord().length()))
-                        .orElse(null);
-                if (bestMatch != null) {
-                    result.add(bestMatch);
-                }
+                // Keep all records with similarity=1.0, as they may correspond to different
+                // elementIds with the same detectWord
+                result.addAll(fullMatches);
             } else {
                 // If there are no objects with similarity=1.0, keep all objects with similarity<1.0
                 result.addAll(group);

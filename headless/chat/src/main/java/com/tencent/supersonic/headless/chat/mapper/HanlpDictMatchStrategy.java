@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,8 +51,11 @@ public class HanlpDictMatchStrategy extends SingleMatchStrategy<HanlpMapResult> 
             return new ArrayList<>();
         }
         // step3. merge pre/suffix result
+        // sort by similarity (desc) first, then name length (desc), so that
+        // higher-similarity records are inserted first and survive LinkedHashSet dedup
         hanlpMapResults = hanlpMapResults.stream()
-                .sorted((a, b) -> -(b.getName().length() - a.getName().length()))
+                .sorted(Comparator.comparingDouble(HanlpMapResult::getSimilarity).reversed()
+                        .thenComparing((a, b) -> Integer.compare(b.getName().length(), a.getName().length())))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         // step4. filter by similarity
