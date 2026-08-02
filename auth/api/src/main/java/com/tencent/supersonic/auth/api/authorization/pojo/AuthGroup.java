@@ -19,4 +19,6 @@ public class AuthGroup {
     private List<String> authorizedUsers;
     /** authorization Department Id */
     private List<String> authorizedDepartmentIds;
+    /** authorization Organization Id (org-level centralized authorization) */
+    private List<String> authorizedOrgIds;
 }
