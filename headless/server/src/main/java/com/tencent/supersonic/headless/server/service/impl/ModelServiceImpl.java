@@ -167,11 +167,29 @@ public class ModelServiceImpl implements ModelService {
         if (datasourceDO == null) {
             return;
         }
-        checkDelete(id);
+        // cascade delete metrics and dimensions under the model
+        deleteModelItems(id, user);
         datasourceDO.setStatus(StatusEnum.DELETED.getCode());
         datasourceDO.setUpdatedAt(new Date());
         datasourceDO.setUpdatedBy(user.getName());
         modelRepository.updateModel(datasourceDO);
+    }
+
+    private void deleteModelItems(Long modelId, User user) {
+        MetaFilter metaFilter = new MetaFilter();
+        metaFilter.setModelIds(Lists.newArrayList(modelId));
+        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
+        List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
+        List<Long> metricIds = metricResps.stream().map(MetricResp::getId)
+                .collect(Collectors.toList());
+        List<Long> dimensionIds = dimensionResps.stream().map(DimensionResp::getId)
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(metricIds)) {
+            metricService.deleteMetricBatch(metricIds, user);
+        }
+        if (!CollectionUtils.isEmpty(dimensionIds)) {
+            dimensionService.deleteDimensionBatch(dimensionIds, user);
+        }
     }
 
     @Override
@@ -328,20 +346,6 @@ public class ModelServiceImpl implements ModelService {
             if (!modelIdentifiers.contains(rela)) {
                 throw new InvalidArgumentException(String.format("模型关联中主键/外键(%s)不存在, 请检查", rela));
             }
-        }
-    }
-
-    private void checkDelete(Long modelId) {
-        MetaFilter metaFilter = new MetaFilter();
-        metaFilter.setModelIds(Lists.newArrayList(modelId));
-        List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
-        List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-        boolean validMetric = metricResps.stream().anyMatch(
-                metricResp -> Objects.equals(metricResp.getStatus(), StatusEnum.ONLINE.getCode()));
-        boolean validDimension = dimensionResps.stream().anyMatch(dimensionResp -> Objects
-                .equals(dimensionResp.getStatus(), StatusEnum.ONLINE.getCode()));
-        if (validMetric || validDimension) {
-            throw new RuntimeException("存在基于该模型创建的指标和维度, 暂不能删除, 请确认");
         }
     }
 
