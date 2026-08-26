@@ -317,6 +317,9 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     private void checkPermission(DatabaseResp databaseResp, User user) {
+        if (databaseResp.isPublic()) {
+            return;
+        }
         List<String> admins = databaseResp.getAdmins();
         List<String> viewers = databaseResp.getViewers();
         if (!admins.contains(user.getName()) && !viewers.contains(user.getName())
