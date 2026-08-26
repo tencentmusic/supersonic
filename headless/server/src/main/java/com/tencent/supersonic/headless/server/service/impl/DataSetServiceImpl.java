@@ -111,6 +111,12 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
 
     @Override
     public List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList) {
+        return getDataSetList(domainId, statuCodesList, null);
+    }
+
+    @Override
+    public List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList,
+            String name) {
         if (domainId == null || CollectionUtils.isEmpty(statuCodesList)) {
             return List.of();
         }
@@ -118,6 +124,12 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         wrapper.lambda().eq(DataSetDO::getDomainId, domainId);
         wrapper.lambda().in(DataSetDO::getStatus, statuCodesList);
         wrapper.lambda().ne(DataSetDO::getStatus, StatusEnum.DELETED.getCode());
+        // 名称模糊搜索：对 name 与 bizName 做 LIKE 匹配（name 为空时不限）
+        if (StringUtils.isNotBlank(name)) {
+            String likePattern = "%" + name.trim() + "%";
+            wrapper.lambda().and(w -> w.like(DataSetDO::getName, likePattern)
+                    .or().like(DataSetDO::getBizName, likePattern));
+        }
 
         return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
 
