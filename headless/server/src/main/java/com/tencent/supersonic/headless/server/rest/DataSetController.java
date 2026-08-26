@@ -50,10 +50,11 @@ public class DataSetController {
     }
 
     @GetMapping("/getDataSetList")
-    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId) {
+    public List<DataSetResp> getDataSetList(@RequestParam("domainId") Long domainId,
+            @RequestParam(value = "name", required = false) String name) {
         List<Integer> statuCodeList =
                 Arrays.asList(StatusEnum.ONLINE.getCode(), StatusEnum.OFFLINE.getCode());
-        return dataSetService.getDataSetList(domainId, statuCodeList);
+        return dataSetService.getDataSetList(domainId, statuCodeList, name);
     }
 
     @DeleteMapping("/{id}")

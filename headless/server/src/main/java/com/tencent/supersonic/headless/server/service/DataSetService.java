@@ -22,6 +22,8 @@ public interface DataSetService {
 
     List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList);
 
+    List<DataSetResp> getDataSetList(Long domainId, List<Integer> statuCodesList, String name);
+
     void delete(Long id, User user);
 
     Map<Long, List<Long>> getModelIdToDataSetIds(List<Long> dataSetIds, User user);
