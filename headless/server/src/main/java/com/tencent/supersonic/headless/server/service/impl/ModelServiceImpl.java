@@ -180,10 +180,10 @@ public class ModelServiceImpl implements ModelService {
         metaFilter.setModelIds(Lists.newArrayList(modelId));
         List<MetricResp> metricResps = metricService.getMetrics(metaFilter);
         List<DimensionResp> dimensionResps = dimensionService.getDimensions(metaFilter);
-        List<Long> metricIds = metricResps.stream().map(MetricResp::getId)
-                .collect(Collectors.toList());
-        List<Long> dimensionIds = dimensionResps.stream().map(DimensionResp::getId)
-                .collect(Collectors.toList());
+        List<Long> metricIds =
+                metricResps.stream().map(MetricResp::getId).collect(Collectors.toList());
+        List<Long> dimensionIds =
+                dimensionResps.stream().map(DimensionResp::getId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(metricIds)) {
             metricService.deleteMetricBatch(metricIds, user);
         }

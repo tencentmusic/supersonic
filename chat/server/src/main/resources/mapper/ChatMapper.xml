@@ -44,8 +44,10 @@
 
     <update id="updateLastQuestion">
         update s2_chat
-        set last_question = #{lastQuestion},
-            last_time = #{lastTime}
+        set last_time = #{lastTime}
+        <if test="lastQuestion != null">
+            , last_question = #{lastQuestion}
+        </if>
         where chat_id = #{chatId}
     </update>
 

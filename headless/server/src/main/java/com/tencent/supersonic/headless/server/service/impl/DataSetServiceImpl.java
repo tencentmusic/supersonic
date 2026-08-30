@@ -127,8 +127,8 @@ public class DataSetServiceImpl extends ServiceImpl<DataSetDOMapper, DataSetDO>
         // 名称模糊搜索：对 name 与 bizName 做 LIKE 匹配（name 为空时不限）
         if (StringUtils.isNotBlank(name)) {
             String likePattern = "%" + name.trim() + "%";
-            wrapper.lambda().and(w -> w.like(DataSetDO::getName, likePattern)
-                    .or().like(DataSetDO::getBizName, likePattern));
+            wrapper.lambda().and(w -> w.like(DataSetDO::getName, likePattern).or()
+                    .like(DataSetDO::getBizName, likePattern));
         }
 
         return list(wrapper).stream().map(this::convert).collect(Collectors.toList());
