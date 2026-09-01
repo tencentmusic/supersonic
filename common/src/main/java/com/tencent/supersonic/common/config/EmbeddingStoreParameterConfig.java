@@ -19,7 +19,7 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
 
     public static final Parameter EMBEDDING_STORE_PROVIDER =
             new Parameter("s2.embedding.store.provider", EmbeddingStoreType.IN_MEMORY.name(),
-                    "向量库类型", "目前支持四种类型：IN_MEMORY、MILVUS、CHROMA、PGVECTOR、OPENSEARCH", "list",
+                    "向量库类型", "目前支持六种类型：IN_MEMORY、MILVUS、CHROMA、PGVECTOR、OPENSEARCH、QDRANT", "list",
                     MODULE_NAME, getCandidateValues());
 
     public static final Parameter EMBEDDING_STORE_BASE_URL =
@@ -48,6 +48,10 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     public static final Parameter EMBEDDING_STORE_POST = new Parameter("s2.embedding.store.port",
             "", "端口", "", "number", MODULE_NAME, null, getPortDependency());
 
+    public static final Parameter EMBEDDING_STORE_USE_TLS =
+            new Parameter("s2.embedding.store.useTls", "false", "使用TLS", "", "bool", MODULE_NAME,
+                    null, getUseTlsDependency());
+
     public static final Parameter EMBEDDING_STORE_USER = new Parameter("s2.embedding.store.user",
             "", "用户名", "", "string", MODULE_NAME, null, getUserDependency());
 
@@ -58,8 +62,8 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     @Override
     public List<Parameter> getSysParameters() {
         return Lists.newArrayList(EMBEDDING_STORE_PROVIDER, EMBEDDING_STORE_BASE_URL,
-                EMBEDDING_STORE_POST, EMBEDDING_STORE_USER, EMBEDDING_STORE_PASSWORD,
-                EMBEDDING_STORE_API_KEY, EMBEDDING_STORE_DATABASE_NAME,
+                EMBEDDING_STORE_POST, EMBEDDING_STORE_USE_TLS, EMBEDDING_STORE_USER,
+                EMBEDDING_STORE_PASSWORD, EMBEDDING_STORE_API_KEY, EMBEDDING_STORE_DATABASE_NAME,
                 EMBEDDING_STORE_PERSIST_PATH, EMBEDDING_STORE_TIMEOUT, EMBEDDING_STORE_DIMENSION);
     }
 
@@ -80,32 +84,38 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
         }
         String user = getParameterValue(EMBEDDING_STORE_USER);
         String password = getParameterValue(EMBEDDING_STORE_PASSWORD);
+        Boolean useTls = Boolean.valueOf(getParameterValue(EMBEDDING_STORE_USE_TLS));
         return EmbeddingStoreConfig.builder().provider(provider).baseUrl(baseUrl).apiKey(apiKey)
                 .persistPath(persistPath).databaseName(databaseName).timeOut(Long.valueOf(timeOut))
-                .dimension(dimension).post(port).user(user).password(password).build();
+                .dimension(dimension).post(port).user(user).password(password).useTls(useTls)
+                .build();
     }
 
     private static ArrayList<String> getCandidateValues() {
         return Lists.newArrayList(EmbeddingStoreType.IN_MEMORY.name(),
                 EmbeddingStoreType.MILVUS.name(), EmbeddingStoreType.CHROMA.name(),
-                EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name());
+                EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name(),
+                EmbeddingStoreType.QDRANT.name());
     }
 
     private static List<Parameter.Dependency> getBaseUrlDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
                         EmbeddingStoreType.CHROMA.name(), EmbeddingStoreType.PGVECTOR.name(),
-                        EmbeddingStoreType.OPENSEARCH.name()),
+                        EmbeddingStoreType.OPENSEARCH.name(), EmbeddingStoreType.QDRANT.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "http://localhost:19530",
                         EmbeddingStoreType.CHROMA.name(), "http://localhost:8000",
                         EmbeddingStoreType.PGVECTOR.name(), "127.0.0.1",
-                        EmbeddingStoreType.OPENSEARCH.name(), "http://localhost:9200"));
+                        EmbeddingStoreType.OPENSEARCH.name(), "http://localhost:9200",
+                        EmbeddingStoreType.QDRANT.name(), "localhost"));
     }
 
     private static List<Parameter.Dependency> getApiKeyDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
-                Lists.newArrayList(EmbeddingStoreType.MILVUS.name()),
-                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), DEMO));
+                Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
+                        EmbeddingStoreType.QDRANT.name()),
+                ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), DEMO,
+                        EmbeddingStoreType.QDRANT.name(), ""));
     }
 
     private static List<Parameter.Dependency> getPathDependency() {
@@ -117,10 +127,12 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
     private static List<Parameter.Dependency> getDimensionDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
                 Lists.newArrayList(EmbeddingStoreType.MILVUS.name(),
-                        EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name()),
+                        EmbeddingStoreType.PGVECTOR.name(), EmbeddingStoreType.OPENSEARCH.name(),
+                        EmbeddingStoreType.QDRANT.name()),
                 ImmutableMap.of(EmbeddingStoreType.MILVUS.name(), "384",
                         EmbeddingStoreType.PGVECTOR.name(), "512",
-                        EmbeddingStoreType.OPENSEARCH.name(), "512"));
+                        EmbeddingStoreType.OPENSEARCH.name(), "512",
+                        EmbeddingStoreType.QDRANT.name(), "384"));
     }
 
     private static List<Parameter.Dependency> getDatabaseNameDependency() {
@@ -134,8 +146,16 @@ public class EmbeddingStoreParameterConfig extends ParameterConfig {
 
     private static List<Parameter.Dependency> getPortDependency() {
         return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
-                Lists.newArrayList(EmbeddingStoreType.PGVECTOR.name()),
-                ImmutableMap.of(EmbeddingStoreType.PGVECTOR.name(), "54333"));
+                Lists.newArrayList(EmbeddingStoreType.PGVECTOR.name(),
+                        EmbeddingStoreType.QDRANT.name()),
+                ImmutableMap.of(EmbeddingStoreType.PGVECTOR.name(), "54333",
+                        EmbeddingStoreType.QDRANT.name(), "6334"));
+    }
+
+    private static List<Parameter.Dependency> getUseTlsDependency() {
+        return getDependency(EMBEDDING_STORE_PROVIDER.getName(),
+                Lists.newArrayList(EmbeddingStoreType.QDRANT.name()),
+                ImmutableMap.of(EmbeddingStoreType.QDRANT.name(), "false"));
     }
 
     private static List<Parameter.Dependency> getUserDependency() {

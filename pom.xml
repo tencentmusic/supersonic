@@ -83,6 +83,9 @@
         <stax2.version>4.2.2</stax2.version>
         <aws-java-sdk.version>1.12.780</aws-java-sdk.version>
         <jgrapht.version>1.5.2</jgrapht.version>
+        <grpc.version>1.83.0</grpc.version>
+        <protobuf.version>3.25.9</protobuf.version>
+        <qdrant.client.version>1.19.0</qdrant.client.version>
     </properties>
 
     <dependencyManagement>
@@ -169,6 +172,11 @@
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-qdrant</artifactId>
+                <version>${langchain4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-ollama</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
@@ -221,6 +229,24 @@
                 <groupId>org.jgrapht</groupId>
                 <artifactId>jgrapht-core</artifactId>
                 <version>${jgrapht.version}</version>
+            </dependency>
+            <!--grpc (align across milvus and qdrant client versions)-->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>${grpc.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.qdrant</groupId>
+                <artifactId>client</artifactId>
+                <version>${qdrant.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -8,6 +8,7 @@ import dev.langchain4j.inmemory.spring.InMemoryEmbeddingStoreFactory;
 import dev.langchain4j.milvus.spring.MilvusEmbeddingStoreFactory;
 import dev.langchain4j.opensearch.spring.OpenSearchEmbeddingStoreFactory;
 import dev.langchain4j.pgvector.spring.PgvectorEmbeddingStoreFactory;
+import dev.langchain4j.qdrant.spring.QdrantEmbeddingStoreFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -50,6 +51,10 @@ public class EmbeddingStoreFactoryProvider {
                 .equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
             return factoryMap.computeIfAbsent(embeddingStoreConfig,
                     storeConfig -> new OpenSearchEmbeddingStoreFactory(storeConfig));
+        }
+        if (EmbeddingStoreType.QDRANT.name().equalsIgnoreCase(embeddingStoreConfig.getProvider())) {
+            return factoryMap.computeIfAbsent(embeddingStoreConfig,
+                    storeConfig -> new QdrantEmbeddingStoreFactory(storeConfig));
         }
         throw new RuntimeException("Unsupported EmbeddingStoreFactory provider: "
                 + embeddingStoreConfig.getProvider());
