@@ -25,4 +25,5 @@ public class EmbeddingStoreConfig implements Serializable {
     private Integer post;
     private String user;
     private String password;
+    private Boolean useTls = false;
 }
