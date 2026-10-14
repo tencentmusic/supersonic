@@ -31,6 +31,7 @@ services:
     container_name: supersonic_standalone
     environment:
       S2_DB_TYPE: postgres
+      SUPERSONIC_JWT_SECRET: ${SUPERSONIC_JWT_SECRET:?Set SUPERSONIC_JWT_SECRET to a unique secret generated with openssl rand -hex 64}
       S2_DB_HOST: supersonic_postgres
       S2_DB_PORT: 5432
       S2_DB_DATABASE: postgres
