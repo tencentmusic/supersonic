@@ -44,6 +44,9 @@ public enum DataTypeEnums {
         if (type != null && type.toUpperCase().contains("INT")) {
             return DataTypeEnums.INT;
         }
+        if (type != null && type.toUpperCase().contains("STRING")) {
+            return DataTypeEnums.VARCHAR;
+        }
         return DataTypeEnums.UNKNOWN;
     }
 }
