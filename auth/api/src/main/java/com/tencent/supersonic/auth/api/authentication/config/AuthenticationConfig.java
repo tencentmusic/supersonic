@@ -1,9 +1,11 @@
 package com.tencent.supersonic.auth.api.authentication.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,8 +29,7 @@ public class AuthenticationConfig {
     @Value("${s2.authentication.token.default.appKey:supersonic}")
     private String tokenDefaultAppKey;
 
-    @Value("${s2.authentication.token.appSecret:supersonic:WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk"
-            + "783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==}")
+    @Value("${s2.authentication.token.appSecret}")
     private String tokenAppSecret;
 
     @Value("${s2.authentication.token.http.header.key:Authorization}")
@@ -48,6 +49,30 @@ public class AuthenticationConfig {
 
     @Value("${s2.authentication.token.timeout:72000000}")
     private Long tokenTimeout;
+
+    @PostConstruct
+    public void validateTokenAppSecret() {
+        Map<String, String> secrets;
+        try {
+            secrets = getAppKeyToSecretMap();
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException(
+                    "s2.authentication.token.appSecret must contain comma-separated appKey:secret mappings");
+        }
+        if (secrets.isEmpty()) {
+            throw new IllegalArgumentException("s2.authentication.token.appSecret must not be empty");
+        }
+        for (Map.Entry<String, String> entry : secrets.entrySet()) {
+            String secret = entry.getValue();
+            if (entry.getKey().isBlank() || secret.getBytes(StandardCharsets.UTF_8).length < 64
+                    || secret.equals("WIaO9YRRVt+7QtpPvyWsARFngnEcbaKBk"
+                            + "783uGFwMrbJBaochsqCH62L4Kijcb0sZCYoSsiKGV/zPml5MnZ3uQ==")) {
+                throw new IllegalArgumentException(
+                        "JWT signing secrets must be unique random values of at least 64 bytes, "
+                                + "not the published default; generate one with openssl rand -hex 64");
+            }
+        }
+    }
 
     public Map<String, String> getAppKeyToSecretMap() {
         return Arrays.stream(this.tokenAppSecret.split(",")).map(s -> s.split(":"))

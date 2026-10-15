@@ -28,6 +28,7 @@ s2:
     exclude:
       path: /api/auth/user/register,/api/auth/user/login
     token:
+      appSecret: "supersonic:${SUPERSONIC_JWT_SECRET}"
       http:
         header:
           key: Authorization

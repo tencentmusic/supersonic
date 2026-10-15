@@ -57,6 +57,17 @@ The high-level architecture and main process flow is as follows:
 - **Chat Memory:** encapsulates a collection of historical query trajectories that can be recalled to facilitate few-shot prompting.
 
 ## Quick Demo
+
+Configure a deployment-specific JWT signing secret before starting the application:
+
+```bash
+export SUPERSONIC_JWT_SECRET="$(openssl rand -hex 64)"
+```
+
+Generate it once, store it privately, and reuse the same value across restarts and instances.
+The startup check rejects missing, malformed, short, or published default secrets.
+Custom configurations can set `s2.authentication.token.appSecret` as `appKey:secret` mappings.
+
 ### Online playground
 Visit http://117.72.46.148:9080 to register and experience as a new user. Please do not modify system configurations. We will restart to reset configurations regularly every weekend.
 

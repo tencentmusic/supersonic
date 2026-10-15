@@ -56,6 +56,16 @@ SuperSonic的整体架构和主流程如下图所示：
 
 ## 快速体验
 
+启动前需配置当前部署独立的 JWT 签名密钥：
+
+```bash
+export SUPERSONIC_JWT_SECRET="$(openssl rand -hex 64)"
+```
+
+只生成一次，私下保存，并在重启和同一部署的多个实例间复用。
+缺失、格式错误、过短或仍使用公开默认值的密钥会被启动校验拒绝。
+自定义配置可通过 `s2.authentication.token.appSecret` 设置 `appKey:secret` 映射。
+
 ### 线上环境体验
 访问http://117.72.46.148:9080 注册新用户体验. 请勿修改系统配置。我们每周末定期重启重置配置。
 
