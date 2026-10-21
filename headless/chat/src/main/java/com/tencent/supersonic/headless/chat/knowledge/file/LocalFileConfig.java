@@ -33,6 +33,6 @@ public class LocalFileConfig {
         } catch (FileNotFoundException e) {
             log.error("getDictDirectoryPrefixDir error: ", e);
         }
-        return "";
+        return ".";
     }
 }
