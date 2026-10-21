@@ -16,7 +16,7 @@ public class LocalFileConfig {
     @Value("${s2.dict.directory.latest:/data/dictionary/custom}")
     private String dictDirectoryLatest;
 
-    @Value("${s2.dict.directory.backup:./data/dictionary/backup}")
+    @Value("${s2.dict.directory.backup:/data/dictionary/backup}")
     private String dictDirectoryBackup;
 
     public String getDictDirectoryLatest() {
@@ -33,6 +33,6 @@ public class LocalFileConfig {
         } catch (FileNotFoundException e) {
             log.error("getDictDirectoryPrefixDir error: ", e);
         }
-        return "";
+        return ".";
     }
 }
